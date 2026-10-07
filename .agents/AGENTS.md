@@ -45,6 +45,7 @@ When implementing specific layers, consult the corresponding skill inside `.agen
 | **Linting & Code Quality** | `.agents/skills/eslint-standards.md` | Single quotes; clean hook dependencies; zero `console.log` in final code. |
 | **Code Formatting** | `.agents/skills/prettier-standards.md` | 80 print width; `singleQuote: true`; `singleAttributePerLine: true`. |
 | **Testing & Quality Assurance** | `.agents/skills/unit-testing-standards.md` | Page Object Model (POM); React Native Testing Library; mocked Supabase. |
+| **Page Object Model (POM)** | `.agents/skills/page-object-model.md` | Dedicated `.po.ts` classes, fluent method chaining, selector decoupling. |
 | **Changelog & Jira Tracking** | `.agents/skills/changelog-standards.md` | Automatic root `CHANGELOG.md` maintenance linked to Jira issues. |
 
 ---
