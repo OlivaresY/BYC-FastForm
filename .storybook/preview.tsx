@@ -1,3 +1,4 @@
+import "../global.css";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import type { Preview } from "@storybook/react-native";
@@ -23,7 +24,10 @@ const preview: Preview = {
   },
   decorators: [
     (Story: React.ComponentType): React.JSX.Element => (
-      <View style={styles.container}>
+      <View
+        className="flex-1 items-center justify-center bg-brand-bg p-6"
+        style={styles.container}
+      >
         <Story />
       </View>
     ),
