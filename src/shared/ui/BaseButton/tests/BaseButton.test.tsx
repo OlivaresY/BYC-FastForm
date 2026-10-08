@@ -67,7 +67,7 @@ describe("BaseButton Component", () => {
     expect(handlePress).not.toHaveBeenCalled();
   });
 
-  it("applies secondary and outline variant classes correctly", () => {
+  it("applies secondary, outline, and ghost variant classes correctly", () => {
     // Arrange & Assert Secondary
     const secondaryPage = BaseButtonPageObject.render({
       label: "Cancelar",
@@ -81,5 +81,14 @@ describe("BaseButton Component", () => {
       variant: BASE_BUTTON_VARIANTS.OUTLINE,
     });
     expect(outlinePage.button.props.className).toContain("border-brand-red");
+
+    // Arrange & Assert Ghost
+    const ghostPage = BaseButtonPageObject.render({
+      label: "Descartar",
+      variant: BASE_BUTTON_VARIANTS.GHOST,
+    });
+    expect(ghostPage.button.props.className).toContain("bg-transparent");
+    expect(ghostPage.button.props.className).not.toContain("border-2");
+    expect(ghostPage.label?.props.className).toContain("text-brand-red");
   });
 });
