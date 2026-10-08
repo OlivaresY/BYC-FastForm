@@ -1,32 +1,15 @@
 const { getDefaultConfig } = require("expo/metro-config");
 const { withNativeWind } = require("nativewind/metro");
+const withStorybook =
+  require("@storybook/react-native/metro/withStorybook").withStorybook ||
+  require("@storybook/react-native/metro/withStorybook");
+const path = require("path");
 
-let config = getDefaultConfig(__dirname);
+const config = getDefaultConfig(__dirname);
 
-// Enable modern package exports resolution
-config.resolver.unstable_enablePackageExports = true;
-
-// Custom resolver to map Storybook internal packages reliably in Metro
-const originalResolveRequest = config.resolver.resolveRequest;
-
-config.resolver.resolveRequest = (context, moduleName, platform) => {
-  if (moduleName.startsWith("storybook/internal/")) {
-    try {
-      const resolvedPath = require.resolve(moduleName);
-      return {
-        filePath: resolvedPath,
-        type: "sourceFile",
-      };
-    } catch {
-      // Fallback to default resolver
-    }
-  }
-
-  if (originalResolveRequest) {
-    return originalResolveRequest(context, moduleName, platform);
-  }
-
-  return context.resolveRequest(context, moduleName, platform);
-};
-
-module.exports = withNativeWind(config, { input: "./global.css" });
+module.exports = withStorybook(
+  withNativeWind(config, { input: "./global.css" }),
+  {
+    configPath: path.resolve(__dirname, "./.storybook"),
+  },
+);
