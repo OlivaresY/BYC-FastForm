@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 const Index = (): React.JSX.Element => {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>BYC FastForm - Home</Text>
+      <Text style={styles.text}>Bienvenido a BYC FastForm</Text>
     </View>
   );
 };

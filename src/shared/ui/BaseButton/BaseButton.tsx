@@ -51,7 +51,7 @@ export const BaseButton = ({
 
   const containerClasses = [
     "min-h-[48px]",
-    "min-w-[44px]",
+    "min-w-[48px]",
     "flex-row",
     "items-center",
     "justify-center",
@@ -83,7 +83,10 @@ export const BaseButton = ({
           testID={BASE_BUTTON_TEST_IDS.LOADER}
         />
       ) : (
-        <Text className={text} testID={BASE_BUTTON_TEST_IDS.LABEL}>
+        <Text
+          className={`${text} text-center flex-shrink`}
+          testID={BASE_BUTTON_TEST_IDS.LABEL}
+        >
           {label}
         </Text>
       )}
