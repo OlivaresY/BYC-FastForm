@@ -50,11 +50,14 @@
 
 ## 4. Sistema de Componentes y Ergonomía
 
--   **Botones (CTAs):** Radio de borde (border-radius) de `8px` para Web y `xl` para Móvil. Altura mínima de `48px`. Texto de alto contraste (blanco sobre rojo). Opacidad en estado deshabilitado `40%`.
+-   **Botones (CTAs):** Radio de borde (border-radius) de `8px` para Web y `xl` para Móvil. Altura mínima de `48px` y ancho mínimo de `48px` (`min-h-[48px] min-w-[48px]`). Texto de alto contraste (blanco sobre rojo). Opacidad en estado deshabilitado `40%`.
+-   **Prevención de Desbordamiento (Text Overflow):** Todos los botones y contenedores interactivos con texto deben incluir `text-center` y `flex-shrink` (o `numberOfLines`) para prevenir saltos de línea irregulares o desbordamiento horizontal en pantallas pequeñas.
 -   **Inputs y Selectores:** Fondo `#FFFFFF`, Borde base `#A39F97`. Borde en estado activo/focus `#5A6B80`. Radio de borde `8px`.
+-   **Accesibilidad (a11y) en Inputs:** Todos los componentes de entrada deben exponer su estado de error a lectores de pantalla (ej. `aria-invalid={true}` o `accessibilityState={{ invalid: true }}`).
 -   **Tarjetas (Cards):** Sombra suave paralela (drop shadow). Radio de borde `16px` para contenedores principales y `2rem` para contenedores maestros en vistas móviles.
 -   **Espaciado y Layout:** Cumplimiento estricto de la cuadrícula de 8 puntos (8px, 16px, 24px) para márgenes y paddings. 
--   **Accesibilidad Móvil:** Área mínima de toque (Touch Target) para cualquier ícono o botón es de 44x44px.
+-   **Accesibilidad Móvil (Touch Targets):** Área mínima de toque (Touch Target) para cualquier elemento interactivo (botones, íconos, links) es estrictamente de `48x48px` (ej. `min-h-[48px] min-w-[48px]` o uso de `hitSlop`).
+-   **Idioma de Interfaz (100% Español):** TODO el texto visible para el usuario, placeholders, etiquetas, feedback de validación y mensajes de error DEBEN estar en español.
 
 ---
 

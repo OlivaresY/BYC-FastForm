@@ -65,6 +65,7 @@ export const CustomTextInput = ({
 
       <TextInput
         accessibilityLabel={label}
+        aria-invalid={!!error}
         className={inputClasses}
         onBlur={handleBlur}
         onFocus={handleFocus}

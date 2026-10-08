@@ -46,6 +46,7 @@ When implementing specific layers, consult the corresponding skill inside `.agen
 | **Code Formatting** | `.agents/skills/prettier-standards.md` | 80 print width; `singleQuote: true`; `singleAttributePerLine: true`. |
 | **Testing & Quality Assurance** | `.agents/skills/unit-testing-standards.md` | Page Object Model (POM); React Native Testing Library; mocked Supabase. |
 | **Page Object Model (POM)** | `.agents/skills/page-object-model.md` | Dedicated `.po.ts` classes, fluent method chaining, selector decoupling. |
+| **Storybook Architecture** | `.agents/skills/storybook-standards.md` | Metro bundler integration (`withStorybook`), zero Webpack, lazy entry injection. |
 | **Changelog & Jira Tracking** | `.agents/skills/changelog-standards.md` | Automatic root `CHANGELOG.md` maintenance linked to Jira issues. |
 
 ---
@@ -82,7 +83,7 @@ src/
 
 1. **Search Before Create (No Duplicate UI):** Scan `src/shared/components/` and feature directories. If a component (like a card, button, layout, or header) already exists, you MUST reuse and compose it. Never reinvent existing elements.
 2. **Zero Hardcoded Strings & Magic Numbers:** Never use raw literals in code or UI (e.g., status strings, route paths, hardcoded timeouts). All values must pull from `@/shared/constants` or feature-specific constants.
-3. **Arrow Functions Only:** Declare all React Native components and ViewModels (custom hooks) using `const` and arrow functions. The `function` keyword is strictly prohibited.
+3. **Arrow Functions Only:** Declare all React Native components and ViewModels (custom hooks) using `const` and arrow functions. The `function` keyword is strictly prohibited for React components. You must use `const Component = (): React.JSX.Element => { ... }`.
 4. **Strict Formatting & Linting:** Enforce Prettier standards (80 columns, single quotes, single attribute per line for JSX) and zero ESLint errors via `npx expo lint`.
 5. **Architecture & Hooks Placement:** All stateful orchestration belongs in `src/features/<feature>/hooks/use<Feature>ViewModel.ts`. Views must only bind state and actions.
 
