@@ -34,6 +34,15 @@ export const Step2Of4: Story = {
   },
 };
 
+export const Step3Of4: Story = {
+  args: {
+    currentStep: 3,
+    subtitle: "Registre ingresos y condición laboral del solicitante.",
+    title: "Información Laboral",
+    totalSteps: 4,
+  },
+};
+
 export const FullProgress: Story = {
   args: {
     currentStep: 4,
