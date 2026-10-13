@@ -8,6 +8,7 @@ import type { BaseButtonProps } from "./BaseButton.types";
 
 export const BaseButton = ({
   disabled = false,
+  icon,
   label,
   loading = false,
   onPress,
@@ -29,6 +30,12 @@ export const BaseButton = ({
           container: "bg-primary-dark active:opacity-90",
           loaderColor: "#FFFFFF",
           text: "text-surface font-semibold text-base",
+        };
+      case BASE_BUTTON_VARIANTS.GHOST:
+        return {
+          container: "bg-transparent active:bg-brand-red/10",
+          loaderColor: "#B91C1C",
+          text: "text-brand-red font-semibold text-base",
         };
       case BASE_BUTTON_VARIANTS.OUTLINE:
         return {
@@ -55,6 +62,7 @@ export const BaseButton = ({
     "flex-row",
     "items-center",
     "justify-center",
+    "gap-2",
     "rounded-xl",
     "px-4",
     "py-3",
@@ -83,12 +91,15 @@ export const BaseButton = ({
           testID={BASE_BUTTON_TEST_IDS.LOADER}
         />
       ) : (
-        <Text
-          className={`${text} text-center flex-shrink`}
-          testID={BASE_BUTTON_TEST_IDS.LABEL}
-        >
-          {label}
-        </Text>
+        <>
+          {icon ?? null}
+          <Text
+            className={`${text} text-center flex-shrink`}
+            testID={BASE_BUTTON_TEST_IDS.LABEL}
+          >
+            {label}
+          </Text>
+        </>
       )}
     </Pressable>
   );

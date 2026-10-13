@@ -35,6 +35,13 @@ export const Outline: Story = {
   },
 };
 
+export const Ghost: Story = {
+  args: {
+    label: "Descartar",
+    variant: BASE_BUTTON_VARIANTS.GHOST,
+  },
+};
+
 export const Disabled: Story = {
   args: {
     disabled: true,

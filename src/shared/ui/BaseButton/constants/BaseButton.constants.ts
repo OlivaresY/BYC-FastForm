@@ -5,6 +5,7 @@ export const BASE_BUTTON_TEST_IDS = {
 } as const;
 
 export const BASE_BUTTON_VARIANTS = {
+  GHOST: "ghost",
   OUTLINE: "outline",
   PRIMARY: "primary",
   SECONDARY: "secondary",
