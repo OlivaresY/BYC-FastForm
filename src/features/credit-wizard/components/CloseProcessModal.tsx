@@ -70,6 +70,16 @@ const SaveIcon = ({ color, size }: IconProps): React.JSX.Element => (
   </Svg>
 );
 
+/**
+ * CloseProcessModal presents a confirmation dialog when the user attempts
+ * to exit the credit application wizard.
+ *
+ * UX Behavior:
+ * - Tapping the semi-transparent backdrop or the top-right close button triggers
+ *   `onClose` (safe dismissal returning to the form).
+ * - Tapping inside the white modal card does not propagate the press event to the backdrop.
+ * - `onSaveDraft` and `onDiscard` require explicit button confirmation.
+ */
 export const CloseProcessModal = ({
   onClose,
   onDiscard,
@@ -83,13 +93,17 @@ export const CloseProcessModal = ({
     transparent
     visible={visible}
   >
-    <View
+    <Pressable
+      accessibilityLabel={CLOSE_PROCESS_MODAL_COPY.CLOSE_ACCESSIBILITY_LABEL}
+      accessibilityRole="button"
       className="flex-1 items-center justify-center bg-black/50 px-6"
+      onPress={onClose}
       testID={CLOSE_PROCESS_MODAL_TEST_IDS.BACKDROP}
     >
-      <View
+      <Pressable
         accessibilityViewIsModal
         className="w-[90%] max-w-[340px] items-center rounded-3xl bg-white px-6 py-8"
+        onPress={(event) => event?.stopPropagation?.()}
         testID={CLOSE_PROCESS_MODAL_TEST_IDS.CONTAINER}
       >
         <Pressable
@@ -150,7 +164,7 @@ export const CloseProcessModal = ({
             variant={BASE_BUTTON_VARIANTS.GHOST}
           />
         </View>
-      </View>
-    </View>
+      </Pressable>
+    </Pressable>
   </Modal>
 );

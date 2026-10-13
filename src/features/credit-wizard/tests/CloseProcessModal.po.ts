@@ -32,6 +32,18 @@ export class CloseProcessModalPageObject {
     return screen.queryByTestId(CLOSE_PROCESS_MODAL_TEST_IDS.CONTAINER);
   }
 
+  public get modalCard(): ReactTestInstance | null {
+    return screen.queryByTestId(CLOSE_PROCESS_MODAL_TEST_IDS.CONTAINER);
+  }
+
+  public queryModalCard(): ReactTestInstance | null {
+    return screen.queryByTestId(CLOSE_PROCESS_MODAL_TEST_IDS.CONTAINER);
+  }
+
+  public queryContainer(): ReactTestInstance | null {
+    return screen.queryByTestId(CLOSE_PROCESS_MODAL_TEST_IDS.CONTAINER);
+  }
+
   public get closeButton(): ReactTestInstance {
     return screen.getByTestId(CLOSE_PROCESS_MODAL_TEST_IDS.CLOSE_BUTTON);
   }
@@ -55,6 +67,16 @@ export class CloseProcessModalPageObject {
   // =========================================================================
   // Fluent Action Helpers
   // =========================================================================
+
+  public pressBackdrop(): this {
+    fireEvent.press(screen.getByTestId(CLOSE_PROCESS_MODAL_TEST_IDS.BACKDROP));
+    return this;
+  }
+
+  public pressModalCard(): this {
+    fireEvent.press(screen.getByTestId(CLOSE_PROCESS_MODAL_TEST_IDS.CONTAINER));
+    return this;
+  }
 
   public pressClose(): this {
     fireEvent.press(this.closeButton);

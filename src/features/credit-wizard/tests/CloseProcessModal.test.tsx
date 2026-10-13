@@ -91,4 +91,66 @@ describe("CloseProcessModal Component", () => {
     expect(handleClose).not.toHaveBeenCalled();
     expect(handleSaveDraft).not.toHaveBeenCalled();
   });
+
+  it("does not render modal content when visible is false", () => {
+    // Arrange
+    const handleClose = jest.fn();
+    const handleDiscard = jest.fn();
+    const handleSaveDraft = jest.fn();
+
+    const page = CloseProcessModalPageObject.render({
+      onClose: handleClose,
+      onDiscard: handleDiscard,
+      onSaveDraft: handleSaveDraft,
+      visible: false,
+    });
+
+    // Assert
+    expect(page.queryModalCard()).toBeNull();
+    expect(page.backdrop).toBeNull();
+  });
+
+  it("triggers onClose callback when backdrop is pressed", () => {
+    // Arrange
+    const handleClose = jest.fn();
+    const handleDiscard = jest.fn();
+    const handleSaveDraft = jest.fn();
+
+    const page = CloseProcessModalPageObject.render({
+      onClose: handleClose,
+      onDiscard: handleDiscard,
+      onSaveDraft: handleSaveDraft,
+      visible: true,
+    });
+
+    // Act
+    page.pressBackdrop();
+
+    // Assert
+    expect(handleClose).toHaveBeenCalledTimes(1);
+    expect(handleDiscard).not.toHaveBeenCalled();
+    expect(handleSaveDraft).not.toHaveBeenCalled();
+  });
+
+  it("does not trigger onClose when modal card is pressed", () => {
+    // Arrange
+    const handleClose = jest.fn();
+    const handleDiscard = jest.fn();
+    const handleSaveDraft = jest.fn();
+
+    const page = CloseProcessModalPageObject.render({
+      onClose: handleClose,
+      onDiscard: handleDiscard,
+      onSaveDraft: handleSaveDraft,
+      visible: true,
+    });
+
+    // Act
+    page.pressModalCard();
+
+    // Assert
+    expect(handleClose).not.toHaveBeenCalled();
+    expect(handleDiscard).not.toHaveBeenCalled();
+    expect(handleSaveDraft).not.toHaveBeenCalled();
+  });
 });
