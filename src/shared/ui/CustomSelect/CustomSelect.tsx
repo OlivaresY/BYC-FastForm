@@ -142,6 +142,25 @@ export const CustomSelect = ({
   const resolvedModalTitle =
     modalTitle ?? label ?? CUSTOM_SELECT_COPY.DEFAULT_MODAL_TITLE;
 
+  const labelTestId = testID
+    ? `${testID}-${CUSTOM_SELECT_TEST_IDS.LABEL}`
+    : CUSTOM_SELECT_TEST_IDS.LABEL;
+  const requiredAsteriskTestId = testID
+    ? `${testID}-${CUSTOM_SELECT_TEST_IDS.REQUIRED_ASTERISK}`
+    : CUSTOM_SELECT_TEST_IDS.REQUIRED_ASTERISK;
+  const triggerTestId = testID
+    ? `${testID}-trigger`
+    : CUSTOM_SELECT_TEST_IDS.TRIGGER;
+  const triggerTextTestId = testID
+    ? `${testID}-trigger-text`
+    : CUSTOM_SELECT_TEST_IDS.TRIGGER_TEXT;
+  const errorTestId = testID
+    ? `${testID}-error`
+    : CUSTOM_SELECT_TEST_IDS.ERROR_MESSAGE;
+  const helperTestId = testID
+    ? `${testID}-helper-text`
+    : CUSTOM_SELECT_TEST_IDS.HELPER_TEXT;
+
   return (
     <View
       className={CUSTOM_SELECT_STYLES.CONTAINER}
@@ -152,14 +171,14 @@ export const CustomSelect = ({
         <View className={CUSTOM_SELECT_STYLES.LABEL_ROW}>
           <Text
             className={CUSTOM_SELECT_STYLES.LABEL_TEXT}
-            testID={CUSTOM_SELECT_TEST_IDS.LABEL}
+            testID={labelTestId}
           >
             {label}
           </Text>
           {required ? (
             <Text
               className={CUSTOM_SELECT_STYLES.REQUIRED_ASTERISK}
-              testID={CUSTOM_SELECT_TEST_IDS.REQUIRED_ASTERISK}
+              testID={requiredAsteriskTestId}
             >
               {CUSTOM_SELECT_COPY.REQUIRED_ASTERISK}
             </Text>
@@ -175,7 +194,7 @@ export const CustomSelect = ({
         className={`${CUSTOM_SELECT_STYLES.TRIGGER_BASE} ${borderClass}${disabledClass}`}
         disabled={disabled}
         onPress={openModal}
-        testID={CUSTOM_SELECT_TEST_IDS.TRIGGER}
+        testID={triggerTestId}
       >
         {leftIcon === "globe" ? <GlobeIcon /> : null}
 
@@ -187,7 +206,7 @@ export const CustomSelect = ({
           }
           ellipsizeMode="tail"
           numberOfLines={1}
-          testID={CUSTOM_SELECT_TEST_IDS.TRIGGER_TEXT}
+          testID={triggerTextTestId}
         >
           {displayText}
         </Text>
@@ -199,14 +218,14 @@ export const CustomSelect = ({
       {errorMessage ? (
         <Text
           className={CUSTOM_SELECT_STYLES.ERROR_TEXT}
-          testID={CUSTOM_SELECT_TEST_IDS.ERROR_MESSAGE}
+          testID={errorTestId}
         >
           {errorMessage}
         </Text>
       ) : helperText ? (
         <Text
           className={CUSTOM_SELECT_STYLES.HELPER_TEXT}
-          testID={CUSTOM_SELECT_TEST_IDS.HELPER_TEXT}
+          testID={helperTestId}
         >
           {helperText}
         </Text>

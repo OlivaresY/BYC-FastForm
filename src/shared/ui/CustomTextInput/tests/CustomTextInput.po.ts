@@ -7,17 +7,19 @@ import { CUSTOM_TEXT_INPUT_TEST_IDS } from "../constants/CustomTextInput.constan
 import type { CustomTextInputProps } from "../CustomTextInput.types";
 
 export class CustomTextInputPageObject {
+  private readonly customTestId?: string;
   private readonly renderApi: RenderAPI;
 
-  public constructor(renderApi: RenderAPI) {
+  public constructor(renderApi: RenderAPI, customTestId?: string) {
     this.renderApi = renderApi;
+    this.customTestId = customTestId;
   }
 
   public static render(
     props: CustomTextInputProps = {},
   ): CustomTextInputPageObject {
     const renderApi = render(React.createElement(CustomTextInput, props));
-    return new CustomTextInputPageObject(renderApi);
+    return new CustomTextInputPageObject(renderApi, props.testID);
   }
 
   // =========================================================================
@@ -25,19 +27,64 @@ export class CustomTextInputPageObject {
   // =========================================================================
 
   public get container(): ReactTestInstance {
-    return screen.getByTestId(CUSTOM_TEXT_INPUT_TEST_IDS.CONTAINER);
+    const id = this.customTestId
+      ? `${this.customTestId}-container`
+      : CUSTOM_TEXT_INPUT_TEST_IDS.CONTAINER;
+    return screen.getByTestId(id);
   }
 
   public get input(): ReactTestInstance {
-    return screen.getByTestId(CUSTOM_TEXT_INPUT_TEST_IDS.INPUT);
+    const id = this.customTestId ?? CUSTOM_TEXT_INPUT_TEST_IDS.INPUT;
+    return screen.getByTestId(id);
+  }
+
+  public get inputWrapper(): ReactTestInstance {
+    const id = this.customTestId
+      ? `${this.customTestId}-wrapper`
+      : CUSTOM_TEXT_INPUT_TEST_IDS.INPUT_WRAPPER;
+    return screen.getByTestId(id);
   }
 
   public get label(): ReactTestInstance | null {
-    return screen.queryByTestId(CUSTOM_TEXT_INPUT_TEST_IDS.LABEL);
+    const id = this.customTestId
+      ? `${this.customTestId}-label`
+      : CUSTOM_TEXT_INPUT_TEST_IDS.LABEL;
+    return screen.queryByTestId(id);
+  }
+
+  public get requiredAsterisk(): ReactTestInstance | null {
+    const id = this.customTestId
+      ? `${this.customTestId}-required-asterisk`
+      : CUSTOM_TEXT_INPUT_TEST_IDS.REQUIRED_ASTERISK;
+    return screen.queryByTestId(id);
   }
 
   public get error(): ReactTestInstance | null {
-    return screen.queryByTestId(CUSTOM_TEXT_INPUT_TEST_IDS.ERROR);
+    const id = this.customTestId
+      ? `${this.customTestId}-error`
+      : CUSTOM_TEXT_INPUT_TEST_IDS.ERROR;
+    return screen.queryByTestId(id);
+  }
+
+  public get helperText(): ReactTestInstance | null {
+    const id = this.customTestId
+      ? `${this.customTestId}-helper-text`
+      : CUSTOM_TEXT_INPUT_TEST_IDS.HELPER_TEXT;
+    return screen.queryByTestId(id);
+  }
+
+  public get leftIcon(): ReactTestInstance | null {
+    const id = this.customTestId
+      ? `${this.customTestId}-left-icon`
+      : CUSTOM_TEXT_INPUT_TEST_IDS.LEFT_ICON;
+    return screen.queryByTestId(id);
+  }
+
+  public get validIcon(): ReactTestInstance | null {
+    const id = this.customTestId
+      ? `${this.customTestId}-valid-icon`
+      : CUSTOM_TEXT_INPUT_TEST_IDS.VALID_ICON;
+    return screen.queryByTestId(id);
   }
 
   // =========================================================================
@@ -62,5 +109,9 @@ export class CustomTextInputPageObject {
   public clear(): this {
     fireEvent.changeText(this.input, "");
     return this;
+  }
+
+  public getWrapperClassName(): string {
+    return String(this.inputWrapper.props.className);
   }
 }

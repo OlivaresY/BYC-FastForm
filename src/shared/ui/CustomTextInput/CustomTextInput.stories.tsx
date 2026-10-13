@@ -29,6 +29,38 @@ export const WithValue: Story = {
   },
 };
 
+export const RequiredWithHelper: Story = {
+  args: {
+    helperText: "Formato oficial costarricense con guiones.",
+    label: "Número de Identificación",
+    leftIcon: "hash",
+    placeholder: "1-1234-0567",
+    required: true,
+  },
+};
+
+export const ValidIdentification: Story = {
+  args: {
+    helperText: "Identificación verificada con éxito.",
+    isValid: true,
+    label: "Número de Identificación",
+    leftIcon: "hash",
+    placeholder: "1-1234-0567",
+    required: true,
+    value: "1-1234-0567",
+  },
+};
+
+export const BirthDateWithCalendar: Story = {
+  args: {
+    helperText: "Debe ser mayor de edad para trámite crediticio.",
+    label: "Fecha de Nacimiento",
+    leftIcon: "calendar",
+    placeholder: "15 / 08 / 1988",
+    required: true,
+  },
+};
+
 export const Password: Story = {
   args: {
     isPassword: true,
