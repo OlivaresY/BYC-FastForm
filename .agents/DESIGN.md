@@ -56,7 +56,7 @@
 -   **Accesibilidad (a11y) en Inputs:** Todos los componentes de entrada deben exponer su estado de error a lectores de pantalla (ej. `aria-invalid={true}` o `accessibilityState={{ invalid: true }}`).
 -   **Tarjetas (Cards):** Sombra suave paralela (drop shadow). Radio de borde `16px` para contenedores principales y `2rem` para contenedores maestros en vistas móviles.
 -   **Espaciado y Layout:** Cumplimiento estricto de la cuadrícula de 8 puntos (8px, 16px, 24px) para márgenes y paddings. 
--   **Accesibilidad Móvil (Touch Targets):** Área mínima de toque (Touch Target) para cualquier elemento interactivo (botones, íconos, links) es estrictamente de `48x48px` (ej. `min-h-[48px] min-w-[48px]` o uso de `hitSlop`).
+-   **Accesibilidad Móvil (Touch Targets):** Área mínima de toque (Touch Target) para cualquier elemento interactivo (botones, íconos, links) es strictly de `48x48px` (ej. `min-h-[48px] min-w-[48px]` o uso de `hitSlop`).
 -   **Idioma de Interfaz (100% Español):** TODO el texto visible para el usuario, placeholders, etiquetas, feedback de validación y mensajes de error DEBEN estar en español.
 
 ---
@@ -99,8 +99,8 @@
 
 ## 8. Definición de Pantallas: Súper Admin (Consola Web)
 
--   **Bandeja de Aprobaciones (Dashboard):** Tarjetas KPI superiores categorizadas (Hoy, Semana Actual, Semana Anterior) mostrando totales de solicitudes Aprobadas, Rechazadas y Pendientes[cite: 20]. Tabla central inferior con la lista de solicitudes y acciones rápidas[cite: 20].
--   **Estado Vacío (Empty State):** Contenedor centralizado limpio con ícono gris circular de confirmación (check) y el texto "Todo al día" seguido de "No hay trámites pendientes de revisión en este momento", ocultando la tabla de datos[cite: 20].
+-   **Bandeja de Aprobaciones (Dashboard):** Tarjetas KPI superiores categorizadas (Hoy, Semana Actual, Semana Anterior) mostrando totales de solicitudes Aprobadas, Rechazadas y Pendientes. Tabla central inferior con la lista de solicitudes y acciones rápidas.
+-   **Estado Vacío (Empty State):** Contenedor centralizado limpio con ícono gris circular de confirmación (check) y el texto "Todo al día" seguido de "No hay trámites pendientes de revisión en este momento", ocultando la tabla de datos.
 -   **Modal Dossier (Ver Detalles):** Vista ancha a 3 columnas cruzando datos críticos (Perfil Solicitante, Vehículo/Asesor, Plan Financiamiento) para auditoría rápida.
 -   **Flujos de Aprobación/Rechazo:** El rechazo exige forzosamente seleccionar un "Motivo". 
 -   **Catálogos y Usuarios:** Modales para creación de sucursales, generación de credenciales de asesores y subida de logotipos bancarios en formato SVG.
@@ -114,7 +114,7 @@
 
 ## 9. Esquema de Datos Base (Estructura JSON / TypeScript)
 
-La UI del "Master Draft" y el "Dossier" debe mapearse contra estas interfaces estrictas:
+La UI del "Master Draft" y el "Dossier" debe mapearse contra estas interfaces strictly:
 
 -   **Tipo de Entidad:** `['Físico', 'Jurídico']`
 -   **Datos Personales:** `nombreCompleto`, `tipoIdentificacion`, `numeroIdentificacion`, `fechaNacimiento`, `nacionalidad`, `estadoCivil`, `genero`.
@@ -123,3 +123,14 @@ La UI del "Master Draft" y el "Dossier" debe mapearse contra estas interfaces es
 -   **Laboral:** `condicionLaboral`, `empresaPatrono`, `ingresoBruto`, `ingresoNeto`.
 -   **Vehículo:** `marca`, `modelo`, `valorTotal`, `montoPrima`, `montoFinanciar`.
 -   **Autorizaciones:** Campos booleanos obligatorios para consulta de Buró de Crédito y directrices SUGEF/CIC.
+
+---
+
+## 10. Directivas Anti-Alucinación de UI/UX y Clarificación Estructural
+
+-   **Anti-Alucinación Estricta de UI/UX (Color Palette Governance):**
+    *   Queda **estrictamente prohibido** extrapolar, adivinar o asumir paletas de colores predeterminadas de Tailwind CSS (ej. `sky-100`, `emerald-100`) para elementos visuales complejos o componentes de marca.
+    *   Si una solicitud o prompt menciona un color de manera informal (ej. "azul claro", "verde pastel") sin proveer un token explícito del sistema de diseño (`tailwind.config.js`) o un código Hexadecimal exacto (`#EAF5FF`), **DEBES PREGUNTAR AL USUARIO EL CÓDIGO HEXADECIMAL EXACTO** antes de escribir o modificar el código del componente.
+-   **Clarificación Estructural Obligatoria:**
+    *   Si se solicita construir un patrón de UI común (ej. "barra de progreso", "modal", "tab selector") cuyas instrucciones estructurales sean ambiguas o no tengan una especificación visual detallada, **NO ASUMAS** la estructura web estándar por defecto.
+    *   Durante la fase de `[SPECIFICATION DRAFT]`, debes solicitar clarificación explícita sobre la estructura visual (ej. "¿Es una barra continua con estilo inline width o un indicador tabulado en segmentos independientes?").
