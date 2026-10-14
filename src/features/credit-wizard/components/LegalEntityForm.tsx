@@ -100,7 +100,10 @@ const SectionHeader = ({
 }: SectionHeaderProps): React.JSX.Element => (
   <View className={LEGAL_ENTITY_FORM_STYLES.SECTION_HEADER_ROW} testID={testID}>
     {icon}
-    <Text className={LEGAL_ENTITY_FORM_STYLES.SECTION_HEADER_TITLE}>
+    <Text
+      accessibilityRole="header"
+      className={LEGAL_ENTITY_FORM_STYLES.SECTION_HEADER_TITLE}
+    >
       {title}
     </Text>
   </View>

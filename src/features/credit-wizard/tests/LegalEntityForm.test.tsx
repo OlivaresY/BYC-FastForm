@@ -226,6 +226,26 @@ describe('LegalEntityForm Component', () => {
         'legal_id',
       );
     });
+
+    it('displays placeholder initially and selected option label when identificationType is set', () => {
+      // Arrange & Assert - Placeholder initially
+      const pageWithEmptyValue = LegalEntityFormPageObject.render({
+        onFieldChange: jest.fn(),
+        values: initialValues,
+      });
+      expect(pageWithEmptyValue.getSelectTriggerText('identificationType')).toBe(
+        LEGAL_ENTITY_FORM_COPY.IDENTIFICATION_TYPE_PLACEHOLDER,
+      );
+
+      // Arrange & Assert - Selected option label
+      const pageWithSelectedValue = LegalEntityFormPageObject.render({
+        onFieldChange: jest.fn(),
+        values: { ...initialValues, identificationType: 'legal_id' },
+      });
+      expect(
+        pageWithSelectedValue.getSelectTriggerText('identificationType'),
+      ).toBe('Cédula Jurídica');
+    });
   });
 
   describe('Validation Errors', () => {
@@ -281,6 +301,24 @@ describe('LegalEntityForm Component', () => {
 
       // Assert - Select
       expect(page.isSelectDisabled('identificationType')).toBe(true);
+    });
+
+    it('leaves all text inputs editable and select enabled by default', () => {
+      // Arrange
+      const handleFieldChange = jest.fn();
+      const page = LegalEntityFormPageObject.render({
+        onFieldChange: handleFieldChange,
+        values: initialValues,
+      });
+
+      // Assert - Text inputs
+      expect(page.isInputEditable('identificationNumber')).toBe(true);
+      expect(page.isInputEditable('legalName')).toBe(true);
+      expect(page.isInputEditable('representativeIdentification')).toBe(true);
+      expect(page.isInputEditable('representativeName')).toBe(true);
+
+      // Assert - Select
+      expect(page.isSelectDisabled('identificationType')).toBe(false);
     });
   });
 
