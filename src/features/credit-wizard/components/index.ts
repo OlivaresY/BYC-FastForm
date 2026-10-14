@@ -1,4 +1,5 @@
 export { CloseProcessModal } from "./CloseProcessModal";
+export { LegalEntityForm } from "./LegalEntityForm";
 export { LegalEntitySelector } from "./LegalEntitySelector";
 export { PhysicalPersonForm } from "./PhysicalPersonForm";
 export { VehicleBeneficiarySection } from "./VehicleBeneficiarySection";
