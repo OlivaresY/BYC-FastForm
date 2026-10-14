@@ -71,7 +71,14 @@ export interface UseApplicantStepViewModelReturn {
 // =============================================================================
 
 export interface ApplicantStepViewProps
-  extends UseApplicantStepViewModelReturn {
+  extends Omit<
+    UseApplicantStepViewModelReturn,
+    'isIdentificationValid' | 'isValid' | 'legalErrors' | 'physicalErrors'
+  > {
   disabled?: boolean;
+  isIdentificationValid?: boolean;
+  isValid?: boolean;
+  legalErrors?: Partial<Record<LegalEntityFormField, string>>;
+  physicalErrors?: Partial<Record<PhysicalPersonFormField, string>>;
   testID?: string;
 }
