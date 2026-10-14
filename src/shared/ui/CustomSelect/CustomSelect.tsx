@@ -244,7 +244,6 @@ export const CustomSelect = ({
           accessibilityLabel={
             CUSTOM_SELECT_COPY.CLOSE_MODAL_ACCESSIBILITY_LABEL
           }
-          accessibilityRole="button"
           className={CUSTOM_SELECT_STYLES.MODAL_BACKDROP}
           onPress={closeModal}
           testID={CUSTOM_SELECT_TEST_IDS.MODAL_BACKDROP}
