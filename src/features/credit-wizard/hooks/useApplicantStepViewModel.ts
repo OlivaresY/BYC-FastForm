@@ -22,25 +22,33 @@ import type {
 export const useApplicantStepViewModel = (
   props?: UseApplicantStepViewModelProps,
 ): UseApplicantStepViewModelReturn => {
+  const {
+    initialLegalValues,
+    initialPhysicalValues,
+    initialRegime,
+    initialVehicleBeneficiary,
+    onSubmit: onSubmitProp,
+  } = props ?? {};
+
   const [regime, setRegime] = useState<LegalEntityType>(
-    props?.initialRegime ?? 'physical',
+    initialRegime ?? 'physical',
   );
 
   const [physicalValues, setPhysicalValues] = useState<PhysicalPersonFormValues>(
     {
       ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.PHYSICAL,
-      ...props?.initialPhysicalValues,
+      ...initialPhysicalValues,
     },
   );
 
   const [legalValues, setLegalValues] = useState<LegalEntityFormValues>({
     ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
-    ...props?.initialLegalValues,
+    ...initialLegalValues,
   });
 
   const [vehicleBeneficiary, setVehicleBeneficiary] =
     useState<VehicleBeneficiaryType>(
-      props?.initialVehicleBeneficiary ?? 'same_holder',
+      initialVehicleBeneficiary ?? 'same_holder',
     );
 
   const [physicalErrors, setPhysicalErrors] = useState<
@@ -192,7 +200,7 @@ export const useApplicantStepViewModel = (
         return;
       }
 
-      props?.onSubmit?.({
+      onSubmitProp?.({
         regime: 'physical',
         values: physicalValues,
         vehicleBeneficiary,
@@ -224,7 +232,7 @@ export const useApplicantStepViewModel = (
         return;
       }
 
-      props?.onSubmit?.({
+      onSubmitProp?.({
         regime: 'legal',
         values: legalValues,
         vehicleBeneficiary,
@@ -234,8 +242,8 @@ export const useApplicantStepViewModel = (
     isLegalIdentificationValid,
     isPhysicalIdentificationValid,
     legalValues,
+    onSubmitProp,
     physicalValues,
-    props,
     regime,
     vehicleBeneficiary,
   ]);

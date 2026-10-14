@@ -55,6 +55,7 @@ export const ApplicantStepView = ({
         {/* 2. Step Title & Description Block */}
         <View className={APPLICANT_STEP_VIEW_STYLES.HEADER_BLOCK}>
           <Text
+            accessibilityRole="header"
             className={APPLICANT_STEP_VIEW_STYLES.TITLE}
             testID={APPLICANT_STEP_VIEW_TEST_IDS.TITLE}
           >
