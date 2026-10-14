@@ -1,3 +1,4 @@
+export { ApplicantStepView } from "./ApplicantStepView";
 export { CloseProcessModal } from "./CloseProcessModal";
 export { LegalEntityForm } from "./LegalEntityForm";
 export { LegalEntitySelector } from "./LegalEntitySelector";
