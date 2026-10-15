@@ -2,8 +2,10 @@ import type { TextInputProps } from "react-native";
 
 export type CustomTextInputPresetIcon = "calendar" | "hash";
 
-export interface CustomTextInputProps
-  extends Omit<TextInputProps, "secureTextEntry"> {
+export interface CustomTextInputProps extends Omit<
+  TextInputProps,
+  "secureTextEntry"
+> {
   error?: string;
   helperText?: string;
   isPassword?: boolean;

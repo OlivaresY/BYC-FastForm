@@ -1,29 +1,24 @@
 import React from "react";
 import { Pressable, Text, View } from "react-native";
-import Svg, { Path } from "react-native-svg";
+import { BuildingIcon, UserIcon } from "@/shared/ui/Icons";
 import {
   LEGAL_ENTITY_SELECTOR_COLORS,
   LEGAL_ENTITY_SELECTOR_COPY,
   LEGAL_ENTITY_SELECTOR_ENTITIES,
   LEGAL_ENTITY_SELECTOR_ICON_DIMENSIONS,
-  LEGAL_ENTITY_SELECTOR_ICONS,
   LEGAL_ENTITY_SELECTOR_STYLES,
-  LEGAL_ENTITY_SELECTOR_SVG_ATTRIBUTES,
   LEGAL_ENTITY_SELECTOR_TEST_IDS,
 } from "../constants/LegalEntitySelector.constants";
-import type { LegalEntitySelectorIconConfig } from "../constants/LegalEntitySelector.constants";
 import type { LegalEntitySelectorProps } from "../types/LegalEntitySelector.types";
 
 interface EntityCardBadgeProps {
-  iconConfig: LegalEntitySelectorIconConfig;
-  iconStroke: string;
+  icon: React.JSX.Element;
   isActive: boolean;
   testID: string;
 }
 
 const EntityCardBadge = ({
-  iconConfig,
-  iconStroke,
+  icon,
   isActive,
   testID,
 }: EntityCardBadgeProps): React.JSX.Element => (
@@ -35,24 +30,7 @@ const EntityCardBadge = ({
     }`}
     testID={testID}
   >
-    <Svg
-      fill={LEGAL_ENTITY_SELECTOR_SVG_ATTRIBUTES.FILL_NONE}
-      height={LEGAL_ENTITY_SELECTOR_ICON_DIMENSIONS.ICON_SIZE_PX}
-      stroke={iconStroke}
-      strokeLinecap={LEGAL_ENTITY_SELECTOR_SVG_ATTRIBUTES.STROKE_LINE_CAP}
-      strokeLinejoin={LEGAL_ENTITY_SELECTOR_SVG_ATTRIBUTES.STROKE_LINE_JOIN}
-      strokeWidth={LEGAL_ENTITY_SELECTOR_ICON_DIMENSIONS.STROKE_WIDTH_PX}
-      viewBox={LEGAL_ENTITY_SELECTOR_ICON_DIMENSIONS.VIEW_BOX}
-      width={LEGAL_ENTITY_SELECTOR_ICON_DIMENSIONS.ICON_SIZE_PX}
-    >
-      {iconConfig.paths.map((pathData, index) => (
-        <Path
-          d={pathData}
-          fill={LEGAL_ENTITY_SELECTOR_SVG_ATTRIBUTES.FILL_NONE}
-          key={`${testID}-path-${index}`}
-        />
-      ))}
-    </Svg>
+    {icon}
   </View>
 );
 
@@ -122,15 +100,18 @@ export const LegalEntitySelector = ({
           testID={LEGAL_ENTITY_SELECTOR_TEST_IDS.PHYSICAL_CARD}
         >
           <EntityCardBadge
-            iconConfig={
-              LEGAL_ENTITY_SELECTOR_ICONS[
-                LEGAL_ENTITY_SELECTOR_ENTITIES.PHYSICAL
-              ]
-            }
-            iconStroke={
-              isPhysicalSelected
-                ? LEGAL_ENTITY_SELECTOR_COLORS.ACTIVE_ICON_STROKE
-                : LEGAL_ENTITY_SELECTOR_COLORS.INACTIVE_ICON_STROKE
+            icon={
+              <UserIcon
+                color={
+                  isPhysicalSelected
+                    ? LEGAL_ENTITY_SELECTOR_COLORS.ACTIVE_ICON_STROKE
+                    : LEGAL_ENTITY_SELECTOR_COLORS.INACTIVE_ICON_STROKE
+                }
+                size={LEGAL_ENTITY_SELECTOR_ICON_DIMENSIONS.ICON_SIZE_PX}
+                strokeWidth={
+                  LEGAL_ENTITY_SELECTOR_ICON_DIMENSIONS.STROKE_WIDTH_PX
+                }
+              />
             }
             isActive={isPhysicalSelected}
             testID={LEGAL_ENTITY_SELECTOR_TEST_IDS.PHYSICAL_BADGE}
@@ -172,13 +153,18 @@ export const LegalEntitySelector = ({
           testID={LEGAL_ENTITY_SELECTOR_TEST_IDS.LEGAL_CARD}
         >
           <EntityCardBadge
-            iconConfig={
-              LEGAL_ENTITY_SELECTOR_ICONS[LEGAL_ENTITY_SELECTOR_ENTITIES.LEGAL]
-            }
-            iconStroke={
-              isLegalSelected
-                ? LEGAL_ENTITY_SELECTOR_COLORS.ACTIVE_ICON_STROKE
-                : LEGAL_ENTITY_SELECTOR_COLORS.INACTIVE_ICON_STROKE
+            icon={
+              <BuildingIcon
+                color={
+                  isLegalSelected
+                    ? LEGAL_ENTITY_SELECTOR_COLORS.ACTIVE_ICON_STROKE
+                    : LEGAL_ENTITY_SELECTOR_COLORS.INACTIVE_ICON_STROKE
+                }
+                size={LEGAL_ENTITY_SELECTOR_ICON_DIMENSIONS.ICON_SIZE_PX}
+                strokeWidth={
+                  LEGAL_ENTITY_SELECTOR_ICON_DIMENSIONS.STROKE_WIDTH_PX
+                }
+              />
             }
             isActive={isLegalSelected}
             testID={LEGAL_ENTITY_SELECTOR_TEST_IDS.LEGAL_BADGE}

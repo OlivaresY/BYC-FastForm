@@ -1,23 +1,23 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from "react";
 import {
   APPLICANT_STEP_VIEW_DEFAULT_VALUES,
   APPLICANT_STEP_VIEW_ERRORS,
   APPLICANT_STEP_VIEW_NUMERICAL,
-} from '../constants/ApplicantStepView.constants';
-import type { LegalEntityType } from '../types/LegalEntitySelector.types';
+} from "../constants/ApplicantStepView.constants";
+import type { LegalEntityType } from "../types/LegalEntitySelector.types";
 import type {
   LegalEntityFormField,
   LegalEntityFormValues,
-} from '../types/LegalEntityForm.types';
+} from "../types/LegalEntityForm.types";
 import type {
   PhysicalPersonFormField,
   PhysicalPersonFormValues,
-} from '../types/PhysicalPersonForm.types';
-import type { VehicleBeneficiaryType } from '../types/VehicleBeneficiarySection.types';
+} from "../types/PhysicalPersonForm.types";
+import type { VehicleBeneficiaryType } from "../types/VehicleBeneficiarySection.types";
 import type {
   UseApplicantStepViewModelProps,
   UseApplicantStepViewModelReturn,
-} from '../types/ApplicantStepView.types';
+} from "../types/ApplicantStepView.types";
 
 export const useApplicantStepViewModel = (
   props?: UseApplicantStepViewModelProps,
@@ -31,15 +31,14 @@ export const useApplicantStepViewModel = (
   } = props ?? {};
 
   const [regime, setRegime] = useState<LegalEntityType>(
-    initialRegime ?? 'physical',
+    initialRegime ?? "physical",
   );
 
-  const [physicalValues, setPhysicalValues] = useState<PhysicalPersonFormValues>(
-    {
+  const [physicalValues, setPhysicalValues] =
+    useState<PhysicalPersonFormValues>({
       ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.PHYSICAL,
       ...initialPhysicalValues,
-    },
-  );
+    });
 
   const [legalValues, setLegalValues] = useState<LegalEntityFormValues>({
     ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
@@ -48,7 +47,7 @@ export const useApplicantStepViewModel = (
 
   const [vehicleBeneficiary, setVehicleBeneficiary] =
     useState<VehicleBeneficiaryType>(
-      initialVehicleBeneficiary ?? 'same_holder',
+      initialVehicleBeneficiary ?? "same_holder",
     );
 
   const [physicalErrors, setPhysicalErrors] = useState<
@@ -64,49 +63,49 @@ export const useApplicantStepViewModel = (
   // ===========================================================================
 
   const isPhysicalIdentificationValid = useMemo<boolean>(() => {
+    const sanitizedId = physicalValues.identificationNumber.replace(/\D/g, "");
     return (
-      physicalValues.identificationNumber.trim().length >=
-      APPLICANT_STEP_VIEW_NUMERICAL.MIN_PHYSICAL_ID_LENGTH
+      sanitizedId.length >= APPLICANT_STEP_VIEW_NUMERICAL.MIN_PHYSICAL_ID_LENGTH
     );
   }, [physicalValues.identificationNumber]);
 
   const isLegalIdentificationValid = useMemo<boolean>(() => {
+    const sanitizedId = legalValues.identificationNumber.replace(/\D/g, "");
     return (
-      legalValues.identificationNumber.trim().length >=
-      APPLICANT_STEP_VIEW_NUMERICAL.MIN_LEGAL_ID_LENGTH
+      sanitizedId.length >= APPLICANT_STEP_VIEW_NUMERICAL.MIN_LEGAL_ID_LENGTH
     );
   }, [legalValues.identificationNumber]);
 
   const isIdentificationValid =
-    regime === 'physical'
+    regime === "physical"
       ? isPhysicalIdentificationValid
       : isLegalIdentificationValid;
 
   const isPhysicalValid = useMemo<boolean>(() => {
     return (
-      physicalValues.identificationType.trim() !== '' &&
+      physicalValues.identificationType.trim() !== "" &&
       isPhysicalIdentificationValid &&
-      physicalValues.firstName.trim() !== '' &&
-      physicalValues.firstLastName.trim() !== '' &&
-      physicalValues.secondLastName.trim() !== '' &&
-      physicalValues.birthDate.trim() !== '' &&
-      physicalValues.nationality.trim() !== '' &&
-      physicalValues.maritalStatus.trim() !== '' &&
-      physicalValues.gender.trim() !== ''
+      physicalValues.firstName.trim() !== "" &&
+      physicalValues.firstLastName.trim() !== "" &&
+      physicalValues.secondLastName.trim() !== "" &&
+      physicalValues.birthDate.trim() !== "" &&
+      physicalValues.nationality.trim() !== "" &&
+      physicalValues.maritalStatus.trim() !== "" &&
+      physicalValues.gender.trim() !== ""
     );
   }, [isPhysicalIdentificationValid, physicalValues]);
 
   const isLegalValid = useMemo<boolean>(() => {
     return (
-      legalValues.identificationType.trim() !== '' &&
+      legalValues.identificationType.trim() !== "" &&
       isLegalIdentificationValid &&
-      legalValues.legalName.trim() !== '' &&
-      legalValues.representativeIdentification.trim() !== '' &&
-      legalValues.representativeName.trim() !== ''
+      legalValues.legalName.trim() !== "" &&
+      legalValues.representativeIdentification.trim() !== "" &&
+      legalValues.representativeName.trim() !== ""
     );
   }, [isLegalIdentificationValid, legalValues]);
 
-  const isValid = regime === 'physical' ? isPhysicalValid : isLegalValid;
+  const isValid = regime === "physical" ? isPhysicalValid : isLegalValid;
 
   // ===========================================================================
   // Handlers
@@ -160,7 +159,7 @@ export const useApplicantStepViewModel = (
   );
 
   const onSubmit = useCallback((): void => {
-    if (regime === 'physical') {
+    if (regime === "physical") {
       const errors: Partial<Record<PhysicalPersonFormField, string>> = {};
       if (!physicalValues.identificationType.trim()) {
         errors.identificationType =
@@ -201,7 +200,7 @@ export const useApplicantStepViewModel = (
       }
 
       onSubmitProp?.({
-        regime: 'physical',
+        regime: "physical",
         values: physicalValues,
         vehicleBeneficiary,
       });
@@ -233,7 +232,7 @@ export const useApplicantStepViewModel = (
       }
 
       onSubmitProp?.({
-        regime: 'legal',
+        regime: "legal",
         values: legalValues,
         vehicleBeneficiary,
       });

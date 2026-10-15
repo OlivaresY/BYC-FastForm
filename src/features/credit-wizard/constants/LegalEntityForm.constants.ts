@@ -83,7 +83,8 @@ export const LEGAL_ENTITY_FORM_SVG_ATTRIBUTES = {
 export const LEGAL_ENTITY_FORM_TEST_IDS = {
   CONTAINER: "legal-entity-form-container",
   IDENTIFICATION_NUMBER_INPUT: "legal-entity-identification-number-input",
-  IDENTIFICATION_TYPE_SELECT: "legal-entity-identification-type-select",
+  IDENTIFICATION_TYPE_DROPDOWN: "legal-entity-identification-type-dropdown",
+  IDENTIFICATION_TYPE_SELECT: "legal-entity-identification-type-dropdown",
   LEGAL_NAME_INPUT: "legal-entity-legal-name-input",
   REPRESENTATIVE_IDENTIFICATION_INPUT:
     "legal-entity-representative-identification-input",

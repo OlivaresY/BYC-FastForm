@@ -1,6 +1,10 @@
 import React from "react";
 import { Text, View } from "react-native";
-import Svg, { Circle, Path } from "react-native-svg";
+import {
+  BuildingIcon as SharedBuildingIcon,
+  DocumentIcon as SharedDocumentIcon,
+  UserIcon as SharedUserIcon,
+} from "@/shared/ui/Icons";
 import { CustomSelect } from "@/shared/ui/CustomSelect";
 import { CustomTextInput } from "@/shared/ui/CustomTextInput";
 import {
@@ -8,9 +12,7 @@ import {
   LEGAL_ENTITY_FORM_COPY,
   LEGAL_ENTITY_FORM_DEFAULT_OPTIONS,
   LEGAL_ENTITY_FORM_ICON_DIMENSIONS,
-  LEGAL_ENTITY_FORM_ICONS,
   LEGAL_ENTITY_FORM_STYLES,
-  LEGAL_ENTITY_FORM_SVG_ATTRIBUTES,
   LEGAL_ENTITY_FORM_TEST_IDS,
 } from "../constants/LegalEntityForm.constants";
 import type { LegalEntityFormProps } from "../types/LegalEntityForm.types";
@@ -23,73 +25,31 @@ interface SectionHeaderProps {
 
 const BuildingIcon = (): React.JSX.Element => (
   <View testID={LEGAL_ENTITY_FORM_TEST_IDS.SECTION_1_ICON}>
-    <Svg
-      fill={LEGAL_ENTITY_FORM_SVG_ATTRIBUTES.FILL_NONE}
-      height={LEGAL_ENTITY_FORM_ICON_DIMENSIONS.SIZE_PX}
-      stroke={LEGAL_ENTITY_FORM_COLORS.HEADER_ICON_STROKE}
-      strokeLinecap={LEGAL_ENTITY_FORM_SVG_ATTRIBUTES.STROKE_LINE_CAP}
-      strokeLinejoin={LEGAL_ENTITY_FORM_SVG_ATTRIBUTES.STROKE_LINE_JOIN}
+    <SharedBuildingIcon
+      color={LEGAL_ENTITY_FORM_COLORS.HEADER_ICON_STROKE}
+      size={LEGAL_ENTITY_FORM_ICON_DIMENSIONS.SIZE_PX}
       strokeWidth={LEGAL_ENTITY_FORM_ICON_DIMENSIONS.STROKE_WIDTH_PX}
-      viewBox={LEGAL_ENTITY_FORM_ICON_DIMENSIONS.VIEW_BOX}
-      width={LEGAL_ENTITY_FORM_ICON_DIMENSIONS.SIZE_PX}
-    >
-      {LEGAL_ENTITY_FORM_ICONS.BUILDING.paths.map((pathData, index) => (
-        <Path
-          d={pathData}
-          fill={LEGAL_ENTITY_FORM_SVG_ATTRIBUTES.FILL_NONE}
-          key={`building-path-${index}`}
-        />
-      ))}
-    </Svg>
+    />
   </View>
 );
 
 const DocumentIcon = (): React.JSX.Element => (
   <View testID={LEGAL_ENTITY_FORM_TEST_IDS.SECTION_2_ICON}>
-    <Svg
-      fill={LEGAL_ENTITY_FORM_SVG_ATTRIBUTES.FILL_NONE}
-      height={LEGAL_ENTITY_FORM_ICON_DIMENSIONS.SIZE_PX}
-      stroke={LEGAL_ENTITY_FORM_COLORS.HEADER_ICON_STROKE}
-      strokeLinecap={LEGAL_ENTITY_FORM_SVG_ATTRIBUTES.STROKE_LINE_CAP}
-      strokeLinejoin={LEGAL_ENTITY_FORM_SVG_ATTRIBUTES.STROKE_LINE_JOIN}
+    <SharedDocumentIcon
+      color={LEGAL_ENTITY_FORM_COLORS.HEADER_ICON_STROKE}
+      size={LEGAL_ENTITY_FORM_ICON_DIMENSIONS.SIZE_PX}
       strokeWidth={LEGAL_ENTITY_FORM_ICON_DIMENSIONS.STROKE_WIDTH_PX}
-      viewBox={LEGAL_ENTITY_FORM_ICON_DIMENSIONS.VIEW_BOX}
-      width={LEGAL_ENTITY_FORM_ICON_DIMENSIONS.SIZE_PX}
-    >
-      {LEGAL_ENTITY_FORM_ICONS.DOCUMENT.paths.map((pathData, index) => (
-        <Path
-          d={pathData}
-          fill={LEGAL_ENTITY_FORM_SVG_ATTRIBUTES.FILL_NONE}
-          key={`document-path-${index}`}
-        />
-      ))}
-    </Svg>
+    />
   </View>
 );
 
 const UserIcon = (): React.JSX.Element => (
   <View testID={LEGAL_ENTITY_FORM_TEST_IDS.SECTION_3_ICON}>
-    <Svg
-      fill={LEGAL_ENTITY_FORM_SVG_ATTRIBUTES.FILL_NONE}
-      height={LEGAL_ENTITY_FORM_ICON_DIMENSIONS.SIZE_PX}
-      stroke={LEGAL_ENTITY_FORM_COLORS.HEADER_ICON_STROKE}
-      strokeLinecap={LEGAL_ENTITY_FORM_SVG_ATTRIBUTES.STROKE_LINE_CAP}
-      strokeLinejoin={LEGAL_ENTITY_FORM_SVG_ATTRIBUTES.STROKE_LINE_JOIN}
+    <SharedUserIcon
+      color={LEGAL_ENTITY_FORM_COLORS.HEADER_ICON_STROKE}
+      size={LEGAL_ENTITY_FORM_ICON_DIMENSIONS.SIZE_PX}
       strokeWidth={LEGAL_ENTITY_FORM_ICON_DIMENSIONS.STROKE_WIDTH_PX}
-      viewBox={LEGAL_ENTITY_FORM_ICON_DIMENSIONS.VIEW_BOX}
-      width={LEGAL_ENTITY_FORM_ICON_DIMENSIONS.SIZE_PX}
-    >
-      <Circle
-        cx={LEGAL_ENTITY_FORM_ICONS.USER.circle.cx}
-        cy={LEGAL_ENTITY_FORM_ICONS.USER.circle.cy}
-        fill={LEGAL_ENTITY_FORM_SVG_ATTRIBUTES.FILL_NONE}
-        r={LEGAL_ENTITY_FORM_ICONS.USER.circle.r}
-      />
-      <Path
-        d={LEGAL_ENTITY_FORM_ICONS.USER.path}
-        fill={LEGAL_ENTITY_FORM_SVG_ATTRIBUTES.FILL_NONE}
-      />
-    </Svg>
+    />
   </View>
 );
 
@@ -143,7 +103,7 @@ export const LegalEntityForm = ({
           options={identificationTypeOptions}
           placeholder={LEGAL_ENTITY_FORM_COPY.IDENTIFICATION_TYPE_PLACEHOLDER}
           required
-          testID={LEGAL_ENTITY_FORM_TEST_IDS.IDENTIFICATION_TYPE_SELECT}
+          testID={LEGAL_ENTITY_FORM_TEST_IDS.IDENTIFICATION_TYPE_DROPDOWN}
           value={values.identificationType}
         />
 

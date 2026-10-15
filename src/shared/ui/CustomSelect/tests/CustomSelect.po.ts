@@ -31,35 +31,59 @@ export class CustomSelectPageObject {
   }
 
   public get trigger(): ReactTestInstance {
-    return screen.getByTestId(CUSTOM_SELECT_TEST_IDS.TRIGGER);
+    const id = this.customTestId
+      ? `${this.customTestId}-trigger`
+      : CUSTOM_SELECT_TEST_IDS.TRIGGER;
+    return screen.getByTestId(id);
   }
 
   public get triggerText(): ReactTestInstance {
-    return screen.getByTestId(CUSTOM_SELECT_TEST_IDS.TRIGGER_TEXT);
+    const id = this.customTestId
+      ? `${this.customTestId}-trigger-text`
+      : CUSTOM_SELECT_TEST_IDS.TRIGGER_TEXT;
+    return screen.getByTestId(id);
   }
 
   public get chevronIcon(): ReactTestInstance {
-    return screen.getByTestId(CUSTOM_SELECT_TEST_IDS.CHEVRON_ICON);
+    const id = this.customTestId
+      ? `${this.customTestId}-chevron-icon`
+      : CUSTOM_SELECT_TEST_IDS.CHEVRON_ICON;
+    return screen.getByTestId(id);
   }
 
   public get leftIcon(): ReactTestInstance | null {
-    return screen.queryByTestId(CUSTOM_SELECT_TEST_IDS.LEFT_ICON);
+    const id = this.customTestId
+      ? `${this.customTestId}-left-icon`
+      : CUSTOM_SELECT_TEST_IDS.LEFT_ICON;
+    return screen.queryByTestId(id);
   }
 
   public get label(): ReactTestInstance | null {
-    return screen.queryByTestId(CUSTOM_SELECT_TEST_IDS.LABEL);
+    const id = this.customTestId
+      ? `${this.customTestId}-label`
+      : CUSTOM_SELECT_TEST_IDS.LABEL;
+    return screen.queryByTestId(id);
   }
 
   public get requiredAsterisk(): ReactTestInstance | null {
-    return screen.queryByTestId(CUSTOM_SELECT_TEST_IDS.REQUIRED_ASTERISK);
+    const id = this.customTestId
+      ? `${this.customTestId}-required-asterisk`
+      : CUSTOM_SELECT_TEST_IDS.REQUIRED_ASTERISK;
+    return screen.queryByTestId(id);
   }
 
   public get errorMessage(): ReactTestInstance | null {
-    return screen.queryByTestId(CUSTOM_SELECT_TEST_IDS.ERROR_MESSAGE);
+    const id = this.customTestId
+      ? `${this.customTestId}-error`
+      : CUSTOM_SELECT_TEST_IDS.ERROR_MESSAGE;
+    return screen.queryByTestId(id);
   }
 
   public get helperText(): ReactTestInstance | null {
-    return screen.queryByTestId(CUSTOM_SELECT_TEST_IDS.HELPER_TEXT);
+    const id = this.customTestId
+      ? `${this.customTestId}-helper-text`
+      : CUSTOM_SELECT_TEST_IDS.HELPER_TEXT;
+    return screen.queryByTestId(id);
   }
 
   public get modal(): ReactTestInstance | null {

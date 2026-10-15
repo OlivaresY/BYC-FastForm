@@ -153,4 +153,27 @@ describe("CloseProcessModal Component", () => {
     expect(handleDiscard).not.toHaveBeenCalled();
     expect(handleSaveDraft).not.toHaveBeenCalled();
   });
+
+  it("renders distinct accessibility labels on backdrop and close button with button role", () => {
+    // Arrange
+    const page = CloseProcessModalPageObject.render({
+      onClose: jest.fn(),
+      onDiscard: jest.fn(),
+      onSaveDraft: jest.fn(),
+      visible: true,
+    });
+
+    // Assert
+    expect(page.backdrop?.props.accessibilityRole).toBe("button");
+    expect(page.backdrop?.props.accessibilityLabel).toBe(
+      CLOSE_PROCESS_MODAL_COPY.BACKDROP_ACCESSIBILITY_LABEL,
+    );
+    expect(page.closeButton.props.accessibilityRole).toBe("button");
+    expect(page.closeButton.props.accessibilityLabel).toBe(
+      CLOSE_PROCESS_MODAL_COPY.CLOSE_ACCESSIBILITY_LABEL,
+    );
+    expect(page.backdrop?.props.accessibilityLabel).not.toBe(
+      page.closeButton.props.accessibilityLabel,
+    );
+  });
 });

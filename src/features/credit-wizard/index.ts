@@ -1,15 +1,42 @@
-export * from "./components";
-export * from "./constants/ApplicantStepView.constants";
-export * from "./constants/CloseProcessModal.constants";
-export * from "./constants/LegalEntityForm.constants";
-export * from "./constants/LegalEntitySelector.constants";
-export * from "./constants/PhysicalPersonForm.constants";
-export * from "./constants/VehicleBeneficiarySection.constants";
-export * from "./constants/WizardProgressHeader.constants";
-export * from "./hooks";
-export * from "./types/ApplicantStepView.types";
-export * from "./types/LegalEntityForm.types";
-export * from "./types/LegalEntitySelector.types";
-export * from "./types/PhysicalPersonForm.types";
-export * from "./types/VehicleBeneficiarySection.types";
-export * from "./types/WizardProgressHeader.types";
+export {
+  ApplicantStepView,
+  CloseProcessModal,
+  LegalEntityForm,
+  LegalEntitySelector,
+  PhysicalPersonForm,
+  VehicleBeneficiarySection,
+  WizardProgressHeader,
+} from "./components";
+
+export { useApplicantStepViewModel } from "./hooks";
+
+export type {
+  ApplicantStepData,
+  ApplicantStepViewProps,
+  LegalApplicantStepData,
+  PhysicalApplicantStepData,
+  UseApplicantStepViewModelProps,
+  UseApplicantStepViewModelReturn,
+} from "./types/ApplicantStepView.types";
+export type { CloseProcessModalProps } from "./components";
+export type {
+  LegalEntityFormField,
+  LegalEntityFormOptions,
+  LegalEntityFormProps,
+  LegalEntityFormValues,
+} from "./types/LegalEntityForm.types";
+export type {
+  LegalEntitySelectorProps,
+  LegalEntityType,
+} from "./types/LegalEntitySelector.types";
+export type {
+  PhysicalPersonFormField,
+  PhysicalPersonFormOptions,
+  PhysicalPersonFormProps,
+  PhysicalPersonFormValues,
+} from "./types/PhysicalPersonForm.types";
+export type {
+  VehicleBeneficiarySectionProps,
+  VehicleBeneficiaryType,
+} from "./types/VehicleBeneficiarySection.types";
+export type { WizardProgressHeaderProps } from "./types/WizardProgressHeader.types";

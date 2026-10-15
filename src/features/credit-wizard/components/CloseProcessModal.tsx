@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal, Pressable, Text, View } from "react-native";
-import Svg, { Path } from "react-native-svg";
+import { BookmarkIcon, CloseIcon, SaveIcon } from "@/shared/ui/Icons";
 import { BaseButton } from "../../../shared/ui/BaseButton/BaseButton";
 import { BASE_BUTTON_VARIANTS } from "../../../shared/ui/BaseButton/constants/BaseButton.constants";
 import {
@@ -9,66 +9,12 @@ import {
   CLOSE_PROCESS_MODAL_ICON_SIZES,
   CLOSE_PROCESS_MODAL_TEST_IDS,
 } from "../constants/CloseProcessModal.constants";
-
 export interface CloseProcessModalProps {
   onClose: () => void;
   onDiscard: () => void;
   onSaveDraft: () => void;
   visible: boolean;
 }
-
-interface IconProps {
-  color: string;
-  size: number;
-}
-
-const CloseIcon = ({ color, size }: IconProps): React.JSX.Element => (
-  <Svg
-    fill="none"
-    height={size}
-    stroke={color}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth={CLOSE_PROCESS_MODAL_ICON_SIZES.STROKE_WIDTH}
-    viewBox="0 0 24 24"
-    width={size}
-  >
-    <Path d="M18 6 6 18" />
-    <Path d="M6 6l12 12" />
-  </Svg>
-);
-
-const BookmarkIcon = ({ color, size }: IconProps): React.JSX.Element => (
-  <Svg
-    fill="none"
-    height={size}
-    stroke={color}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth={CLOSE_PROCESS_MODAL_ICON_SIZES.STROKE_WIDTH}
-    viewBox="0 0 24 24"
-    width={size}
-  >
-    <Path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-  </Svg>
-);
-
-const SaveIcon = ({ color, size }: IconProps): React.JSX.Element => (
-  <Svg
-    fill="none"
-    height={size}
-    stroke={color}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth={CLOSE_PROCESS_MODAL_ICON_SIZES.STROKE_WIDTH}
-    viewBox="0 0 24 24"
-    width={size}
-  >
-    <Path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-    <Path d="M17 21v-8H7v8" />
-    <Path d="M7 3v5h8" />
-  </Svg>
-);
 
 /**
  * CloseProcessModal presents a confirmation dialog when the user attempts
@@ -94,7 +40,8 @@ export const CloseProcessModal = ({
     visible={visible}
   >
     <Pressable
-      accessibilityLabel={CLOSE_PROCESS_MODAL_COPY.CLOSE_ACCESSIBILITY_LABEL}
+      accessibilityLabel={CLOSE_PROCESS_MODAL_COPY.BACKDROP_ACCESSIBILITY_LABEL}
+      accessibilityRole="button"
       className="flex-1 items-center justify-center bg-black/50 px-6"
       onPress={onClose}
       testID={CLOSE_PROCESS_MODAL_TEST_IDS.BACKDROP}
