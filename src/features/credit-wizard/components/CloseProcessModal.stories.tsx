@@ -8,7 +8,7 @@ const meta = {
     onClose: () => {},
     onDiscard: () => {},
     onSaveDraft: () => {},
-    visible: false,
+    visible: true,
   },
 } satisfies Meta<typeof CloseProcessModal>;
 
@@ -18,12 +18,12 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    visible: false,
+    visible: true,
   },
 };
 
-export const Visible: Story = {
+export const Hidden: Story = {
   args: {
-    visible: true,
+    visible: false,
   },
 };

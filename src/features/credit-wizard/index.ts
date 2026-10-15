@@ -1,12 +1,31 @@
-export * from "./components";
-export * from "./constants/CloseProcessModal.constants";
-export * from "./constants/LegalEntityForm.constants";
-export * from "./constants/LegalEntitySelector.constants";
-export * from "./constants/PhysicalPersonForm.constants";
-export * from "./constants/VehicleBeneficiarySection.constants";
-export * from "./constants/WizardProgressHeader.constants";
-export * from "./types/LegalEntityForm.types";
-export * from "./types/LegalEntitySelector.types";
-export * from "./types/PhysicalPersonForm.types";
-export * from "./types/VehicleBeneficiarySection.types";
-export * from "./types/WizardProgressHeader.types";
+export {
+  CloseProcessModal,
+  LegalEntityForm,
+  LegalEntitySelector,
+  PhysicalPersonForm,
+  VehicleBeneficiarySection,
+  WizardProgressHeader,
+} from "./components";
+
+export type { CloseProcessModalProps } from "./components";
+export type {
+  LegalEntityFormField,
+  LegalEntityFormOptions,
+  LegalEntityFormProps,
+  LegalEntityFormValues,
+} from "./types/LegalEntityForm.types";
+export type {
+  LegalEntitySelectorProps,
+  LegalEntityType,
+} from "./types/LegalEntitySelector.types";
+export type {
+  PhysicalPersonFormField,
+  PhysicalPersonFormOptions,
+  PhysicalPersonFormProps,
+  PhysicalPersonFormValues,
+} from "./types/PhysicalPersonForm.types";
+export type {
+  VehicleBeneficiarySectionProps,
+  VehicleBeneficiaryType,
+} from "./types/VehicleBeneficiarySection.types";
+export type { WizardProgressHeaderProps } from "./types/WizardProgressHeader.types";

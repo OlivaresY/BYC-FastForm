@@ -95,6 +95,7 @@ export const CloseProcessModal = ({
   >
     <Pressable
       accessibilityLabel={CLOSE_PROCESS_MODAL_COPY.CLOSE_ACCESSIBILITY_LABEL}
+      accessibilityRole="button"
       className="flex-1 items-center justify-center bg-black/50 px-6"
       onPress={onClose}
       testID={CLOSE_PROCESS_MODAL_TEST_IDS.BACKDROP}
