@@ -5,6 +5,7 @@ export const APPLICANT_STEP_VIEW_COLORS = {
   DIVIDER_BG: '#D6D2CA',
   FOOTER_BORDER: '#E5E7EB',
   SCREEN_BG: '#F7F7F6',
+  SUBMIT_ICON: '#FFFFFF',
   TAUPE_CONTAINER_BG: '#E8E6E1',
 } as const;
 
@@ -64,6 +65,11 @@ export const APPLICANT_STEP_VIEW_ERRORS = {
   },
 } as const;
 
+export const APPLICANT_STEP_VIEW_ICON_DIMENSIONS = {
+  SUBMIT_ICON_SIZE: 20,
+  SUBMIT_ICON_STROKE_WIDTH: 2,
+} as const;
+
 export const APPLICANT_STEP_VIEW_NUMERICAL = {
   CURRENT_STEP: 1,
   MIN_LEGAL_ID_LENGTH: 10,
@@ -72,13 +78,15 @@ export const APPLICANT_STEP_VIEW_NUMERICAL = {
 } as const;
 
 export const APPLICANT_STEP_VIEW_STYLES = {
-  BOTTOM_BAR: 'w-full border-t border-[#E5E7EB] bg-[#F7F7F6] px-4 py-3 pb-6',
-  CONTAINER: 'flex-1 bg-[#F7F7F6]',
+  BOTTOM_BAR:
+    'w-full self-stretch border-t border-[#E5E7EB] bg-[#F7F7F6] px-4 py-3 pb-6',
+  CONTAINER: 'w-full flex-1 self-stretch bg-[#F7F7F6]',
   DESCRIPTION: 'text-sm text-[#5A6B80] leading-relaxed',
   DIVIDER: 'h-px w-full bg-[#D6D2CA]',
   HEADER_BLOCK: 'gap-1',
-  SCROLL_CONTENT: 'p-4 gap-6 pb-8',
-  TAUPE_CONTAINER: 'w-full rounded-2xl bg-[#E8E6E1] p-4 gap-6',
+  SCROLL_CONTENT: 'w-full self-stretch px-4 py-4 gap-6 pb-8',
+  SUBMIT_BUTTON: 'w-full self-stretch',
+  TAUPE_CONTAINER: 'w-full self-stretch rounded-2xl bg-[#E8E6E1] p-4 gap-6',
   TITLE: 'text-xl font-bold text-[#111111]',
 } as const;
 
