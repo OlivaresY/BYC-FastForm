@@ -116,7 +116,7 @@ export const PhysicalPersonForm = ({
             PHYSICAL_PERSON_FORM_COPY.IDENTIFICATION_TYPE_PLACEHOLDER
           }
           required
-          testID={PHYSICAL_PERSON_FORM_TEST_IDS.IDENTIFICATION_TYPE_SELECT}
+          testID={PHYSICAL_PERSON_FORM_TEST_IDS.IDENTIFICATION_TYPE_DROPDOWN}
           value={values.identificationType}
         />
 
@@ -236,7 +236,7 @@ export const PhysicalPersonForm = ({
           options={nationalityOptions}
           placeholder={PHYSICAL_PERSON_FORM_COPY.NATIONALITY_PLACEHOLDER}
           required
-          testID={PHYSICAL_PERSON_FORM_TEST_IDS.NATIONALITY_SELECT}
+          testID={PHYSICAL_PERSON_FORM_TEST_IDS.NATIONALITY_DROPDOWN}
           value={values.nationality}
         />
 
@@ -251,7 +251,7 @@ export const PhysicalPersonForm = ({
               options={maritalStatusOptions}
               placeholder={PHYSICAL_PERSON_FORM_COPY.MARITAL_STATUS_PLACEHOLDER}
               required
-              testID={PHYSICAL_PERSON_FORM_TEST_IDS.MARITAL_STATUS_SELECT}
+              testID={PHYSICAL_PERSON_FORM_TEST_IDS.MARITAL_STATUS_DROPDOWN}
               value={values.maritalStatus}
             />
           </View>
@@ -264,7 +264,7 @@ export const PhysicalPersonForm = ({
               options={genderOptions}
               placeholder={PHYSICAL_PERSON_FORM_COPY.GENDER_PLACEHOLDER}
               required
-              testID={PHYSICAL_PERSON_FORM_TEST_IDS.GENDER_SELECT}
+              testID={PHYSICAL_PERSON_FORM_TEST_IDS.GENDER_DROPDOWN}
               value={values.gender}
             />
           </View>

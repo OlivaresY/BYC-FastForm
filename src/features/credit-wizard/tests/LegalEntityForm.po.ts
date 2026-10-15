@@ -32,7 +32,7 @@ const TEXT_FIELD_TEST_ID_MAP: Record<TextInputField, string> = {
 };
 
 const SELECT_FIELD_TEST_ID_MAP: Record<SelectField, string> = {
-  identificationType: LEGAL_ENTITY_FORM_TEST_IDS.IDENTIFICATION_TYPE_SELECT,
+  identificationType: LEGAL_ENTITY_FORM_TEST_IDS.IDENTIFICATION_TYPE_DROPDOWN,
 };
 
 export class LegalEntityFormPageObject {
@@ -119,37 +119,30 @@ export class LegalEntityFormPageObject {
 
   public getFieldLabel(field: LegalEntityFormField): ReactTestInstance | null {
     const container = this.getFieldContainer(field);
-    if (field in TEXT_FIELD_TEST_ID_MAP) {
-      const baseId = TEXT_FIELD_TEST_ID_MAP[field as TextInputField];
-      return within(container).queryByTestId(`${baseId}-label`);
-    }
-    const baseId = SELECT_FIELD_TEST_ID_MAP[field as SelectField];
-    return within(container).queryByTestId(
-      `${baseId}-${CUSTOM_SELECT_TEST_IDS.LABEL}`,
-    );
+    const baseId =
+      field in TEXT_FIELD_TEST_ID_MAP
+        ? TEXT_FIELD_TEST_ID_MAP[field as TextInputField]
+        : SELECT_FIELD_TEST_ID_MAP[field as SelectField];
+    return within(container).queryByTestId(`${baseId}-label`);
   }
 
   public getRequiredAsterisk(
     field: LegalEntityFormField,
   ): ReactTestInstance | null {
     const container = this.getFieldContainer(field);
-    if (field in TEXT_FIELD_TEST_ID_MAP) {
-      const baseId = TEXT_FIELD_TEST_ID_MAP[field as TextInputField];
-      return within(container).queryByTestId(`${baseId}-required-asterisk`);
-    }
-    const baseId = SELECT_FIELD_TEST_ID_MAP[field as SelectField];
-    return within(container).queryByTestId(
-      `${baseId}-${CUSTOM_SELECT_TEST_IDS.REQUIRED_ASTERISK}`,
-    );
+    const baseId =
+      field in TEXT_FIELD_TEST_ID_MAP
+        ? TEXT_FIELD_TEST_ID_MAP[field as TextInputField]
+        : SELECT_FIELD_TEST_ID_MAP[field as SelectField];
+    return within(container).queryByTestId(`${baseId}-required-asterisk`);
   }
 
   public getFieldError(field: LegalEntityFormField): ReactTestInstance | null {
     const container = this.getFieldContainer(field);
-    if (field in TEXT_FIELD_TEST_ID_MAP) {
-      const baseId = TEXT_FIELD_TEST_ID_MAP[field as TextInputField];
-      return within(container).queryByTestId(`${baseId}-error`);
-    }
-    const baseId = SELECT_FIELD_TEST_ID_MAP[field as SelectField];
+    const baseId =
+      field in TEXT_FIELD_TEST_ID_MAP
+        ? TEXT_FIELD_TEST_ID_MAP[field as TextInputField]
+        : SELECT_FIELD_TEST_ID_MAP[field as SelectField];
     return within(container).queryByTestId(`${baseId}-error`);
   }
 

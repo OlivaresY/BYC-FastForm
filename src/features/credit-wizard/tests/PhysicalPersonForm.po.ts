@@ -1,5 +1,10 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react-native";
+import {
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react-native";
 import type { RenderAPI } from "@testing-library/react-native";
 import type { ReactTestInstance } from "react-test-renderer";
 import { CUSTOM_SELECT_TEST_IDS } from "@/shared/ui/CustomSelect/constants/CustomSelect.constants";
@@ -32,10 +37,11 @@ const TEXT_FIELD_TEST_ID_MAP: Record<TextInputField, string> = {
 };
 
 const SELECT_FIELD_TEST_ID_MAP: Record<SelectField, string> = {
-  gender: PHYSICAL_PERSON_FORM_TEST_IDS.GENDER_SELECT,
-  identificationType: PHYSICAL_PERSON_FORM_TEST_IDS.IDENTIFICATION_TYPE_SELECT,
-  maritalStatus: PHYSICAL_PERSON_FORM_TEST_IDS.MARITAL_STATUS_SELECT,
-  nationality: PHYSICAL_PERSON_FORM_TEST_IDS.NATIONALITY_SELECT,
+  gender: PHYSICAL_PERSON_FORM_TEST_IDS.GENDER_DROPDOWN,
+  identificationType:
+    PHYSICAL_PERSON_FORM_TEST_IDS.IDENTIFICATION_TYPE_DROPDOWN,
+  maritalStatus: PHYSICAL_PERSON_FORM_TEST_IDS.MARITAL_STATUS_DROPDOWN,
+  nationality: PHYSICAL_PERSON_FORM_TEST_IDS.NATIONALITY_DROPDOWN,
 };
 
 export class PhysicalPersonFormPageObject {
@@ -88,79 +94,94 @@ export class PhysicalPersonFormPageObject {
   }
 
   // =========================================================================
-  // Field Elements Getters
+  // Field Elements Getters (Scoped with within() to prevent collisions)
   // =========================================================================
 
+  public getFieldContainer(field: PhysicalPersonFormField): ReactTestInstance {
+    if (field in TEXT_FIELD_TEST_ID_MAP) {
+      const baseId = TEXT_FIELD_TEST_ID_MAP[field as TextInputField];
+      return screen.getByTestId(`${baseId}-container`);
+    }
+    const baseId = SELECT_FIELD_TEST_ID_MAP[field as SelectField];
+    return screen.getByTestId(baseId);
+  }
+
   public getTextInput(field: TextInputField): ReactTestInstance {
-    return screen.getByTestId(TEXT_FIELD_TEST_ID_MAP[field]);
+    const container = this.getFieldContainer(field);
+    return within(container).getByTestId(TEXT_FIELD_TEST_ID_MAP[field]);
   }
 
   public getSelectTrigger(field: SelectField): ReactTestInstance {
+    const container = this.getFieldContainer(field);
     const baseId = SELECT_FIELD_TEST_ID_MAP[field];
-    return screen.getByTestId(`${baseId}-trigger`);
+    return within(container).getByTestId(`${baseId}-trigger`);
   }
 
   public getSelectTriggerText(field: SelectField): string {
+    const container = this.getFieldContainer(field);
     const baseId = SELECT_FIELD_TEST_ID_MAP[field];
-    return screen.getByTestId(`${baseId}-trigger-text`).props.children;
+    return within(container).getByTestId(`${baseId}-trigger-text`).props
+      .children;
   }
 
   public getFieldLabel(
     field: PhysicalPersonFormField,
   ): ReactTestInstance | null {
-    if (field in TEXT_FIELD_TEST_ID_MAP) {
-      const baseId = TEXT_FIELD_TEST_ID_MAP[field as TextInputField];
-      return screen.queryByTestId(`${baseId}-label`);
-    }
-    const baseId = SELECT_FIELD_TEST_ID_MAP[field as SelectField];
-    return screen.queryByTestId(`${baseId}-${CUSTOM_SELECT_TEST_IDS.LABEL}`);
+    const container = this.getFieldContainer(field);
+    const baseId =
+      field in TEXT_FIELD_TEST_ID_MAP
+        ? TEXT_FIELD_TEST_ID_MAP[field as TextInputField]
+        : SELECT_FIELD_TEST_ID_MAP[field as SelectField];
+    return within(container).queryByTestId(`${baseId}-label`);
   }
 
   public getRequiredAsterisk(
     field: PhysicalPersonFormField,
   ): ReactTestInstance | null {
-    if (field in TEXT_FIELD_TEST_ID_MAP) {
-      const baseId = TEXT_FIELD_TEST_ID_MAP[field as TextInputField];
-      return screen.queryByTestId(`${baseId}-required-asterisk`);
-    }
-    const baseId = SELECT_FIELD_TEST_ID_MAP[field as SelectField];
-    return screen.queryByTestId(
-      `${baseId}-${CUSTOM_SELECT_TEST_IDS.REQUIRED_ASTERISK}`,
-    );
+    const container = this.getFieldContainer(field);
+    const baseId =
+      field in TEXT_FIELD_TEST_ID_MAP
+        ? TEXT_FIELD_TEST_ID_MAP[field as TextInputField]
+        : SELECT_FIELD_TEST_ID_MAP[field as SelectField];
+    return within(container).queryByTestId(`${baseId}-required-asterisk`);
   }
 
   public getFieldError(
     field: PhysicalPersonFormField,
   ): ReactTestInstance | null {
-    if (field in TEXT_FIELD_TEST_ID_MAP) {
-      const baseId = TEXT_FIELD_TEST_ID_MAP[field as TextInputField];
-      return screen.queryByTestId(`${baseId}-error`);
-    }
-    const baseId = SELECT_FIELD_TEST_ID_MAP[field as SelectField];
-    return screen.queryByTestId(`${baseId}-error`);
+    const container = this.getFieldContainer(field);
+    const baseId =
+      field in TEXT_FIELD_TEST_ID_MAP
+        ? TEXT_FIELD_TEST_ID_MAP[field as TextInputField]
+        : SELECT_FIELD_TEST_ID_MAP[field as SelectField];
+    return within(container).queryByTestId(`${baseId}-error`);
   }
 
   public getFieldHelperText(
     field: "birthDate" | "identificationNumber",
   ): ReactTestInstance | null {
+    const container = this.getFieldContainer(field);
     const baseId = TEXT_FIELD_TEST_ID_MAP[field];
-    return screen.queryByTestId(`${baseId}-helper-text`);
+    return within(container).queryByTestId(`${baseId}-helper-text`);
   }
 
   public get identificationValidIcon(): ReactTestInstance | null {
-    return screen.queryByTestId(
+    const container = this.getFieldContainer("identificationNumber");
+    return within(container).queryByTestId(
       `${PHYSICAL_PERSON_FORM_TEST_IDS.IDENTIFICATION_NUMBER_INPUT}-valid-icon`,
     );
   }
 
   public get identificationLeftIcon(): ReactTestInstance | null {
-    return screen.queryByTestId(
+    const container = this.getFieldContainer("identificationNumber");
+    return within(container).queryByTestId(
       `${PHYSICAL_PERSON_FORM_TEST_IDS.IDENTIFICATION_NUMBER_INPUT}-left-icon`,
     );
   }
 
   public get birthDateLeftIcon(): ReactTestInstance | null {
-    return screen.queryByTestId(
+    const container = this.getFieldContainer("birthDate");
+    return within(container).queryByTestId(
       `${PHYSICAL_PERSON_FORM_TEST_IDS.BIRTH_DATE_INPUT}-left-icon`,
     );
   }

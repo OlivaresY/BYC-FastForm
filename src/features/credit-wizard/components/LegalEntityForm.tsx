@@ -103,7 +103,7 @@ export const LegalEntityForm = ({
           options={identificationTypeOptions}
           placeholder={LEGAL_ENTITY_FORM_COPY.IDENTIFICATION_TYPE_PLACEHOLDER}
           required
-          testID={LEGAL_ENTITY_FORM_TEST_IDS.IDENTIFICATION_TYPE_SELECT}
+          testID={LEGAL_ENTITY_FORM_TEST_IDS.IDENTIFICATION_TYPE_DROPDOWN}
           value={values.identificationType}
         />
 

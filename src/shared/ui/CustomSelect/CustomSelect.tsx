@@ -52,11 +52,9 @@ export const CustomSelect = ({
   const resolvedModalTitle =
     modalTitle ?? label ?? CUSTOM_SELECT_COPY.DEFAULT_MODAL_TITLE;
 
-  const labelTestId = testID
-    ? `${testID}-${CUSTOM_SELECT_TEST_IDS.LABEL}`
-    : CUSTOM_SELECT_TEST_IDS.LABEL;
+  const labelTestId = testID ? `${testID}-label` : CUSTOM_SELECT_TEST_IDS.LABEL;
   const requiredAsteriskTestId = testID
-    ? `${testID}-${CUSTOM_SELECT_TEST_IDS.REQUIRED_ASTERISK}`
+    ? `${testID}-required-asterisk`
     : CUSTOM_SELECT_TEST_IDS.REQUIRED_ASTERISK;
   const triggerTestId = testID
     ? `${testID}-trigger`
@@ -70,6 +68,12 @@ export const CustomSelect = ({
   const helperTestId = testID
     ? `${testID}-helper-text`
     : CUSTOM_SELECT_TEST_IDS.HELPER_TEXT;
+  const leftIconTestId = testID
+    ? `${testID}-left-icon`
+    : CUSTOM_SELECT_TEST_IDS.LEFT_ICON;
+  const chevronIconTestId = testID
+    ? `${testID}-chevron-icon`
+    : CUSTOM_SELECT_TEST_IDS.CHEVRON_ICON;
 
   return (
     <View
@@ -107,7 +111,7 @@ export const CustomSelect = ({
         testID={triggerTestId}
       >
         {leftIcon === "globe" ? (
-          <View testID={CUSTOM_SELECT_TEST_IDS.LEFT_ICON}>
+          <View testID={leftIconTestId}>
             <GlobeIcon
               color={CUSTOM_SELECT_COLORS.GLOBE_STROKE}
               size={CUSTOM_SELECT_ICON_DIMENSIONS.GLOBE_SIZE_PX}
@@ -129,7 +133,7 @@ export const CustomSelect = ({
           {displayText}
         </Text>
 
-        <View testID={CUSTOM_SELECT_TEST_IDS.CHEVRON_ICON}>
+        <View testID={chevronIconTestId}>
           <ChevronDownIcon
             color={CUSTOM_SELECT_COLORS.CHEVRON_STROKE}
             size={CUSTOM_SELECT_ICON_DIMENSIONS.CHEVRON_SIZE_PX}
