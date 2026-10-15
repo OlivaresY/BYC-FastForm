@@ -1,4 +1,5 @@
 export {
+  ApplicantStepView,
   CloseProcessModal,
   LegalEntityForm,
   LegalEntitySelector,
@@ -7,6 +8,16 @@ export {
   WizardProgressHeader,
 } from "./components";
 
+export { useApplicantStepViewModel } from "./hooks";
+
+export type {
+  ApplicantStepData,
+  ApplicantStepViewProps,
+  LegalApplicantStepData,
+  PhysicalApplicantStepData,
+  UseApplicantStepViewModelProps,
+  UseApplicantStepViewModelReturn,
+} from "./types/ApplicantStepView.types";
 export type { CloseProcessModalProps } from "./components";
 export type {
   LegalEntityFormField,

@@ -5,6 +5,7 @@ export const CLOSE_PROCESS_MODAL_COLORS = {
 } as const;
 
 export const CLOSE_PROCESS_MODAL_COPY = {
+  BACKDROP_ACCESSIBILITY_LABEL: "Cerrar diálogo tocando el fondo",
   BODY: "¿Deseas guardar los datos ingresados como borrador para continuar después, o prefieres descartar este trámite?",
   CLOSE_ACCESSIBILITY_LABEL: "Cerrar ventana",
   DISCARD: "Descartar",
