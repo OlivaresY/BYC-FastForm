@@ -19,10 +19,7 @@ export type TextInputField =
   | "secondLastName";
 
 export type SelectField =
-  | "gender"
-  | "identificationType"
-  | "maritalStatus"
-  | "nationality";
+  "gender" | "identificationType" | "maritalStatus" | "nationality";
 
 const TEXT_FIELD_TEST_ID_MAP: Record<TextInputField, string> = {
   birthDate: PHYSICAL_PERSON_FORM_TEST_IDS.BIRTH_DATE_INPUT,
@@ -108,7 +105,9 @@ export class PhysicalPersonFormPageObject {
     return screen.getByTestId(`${baseId}-trigger-text`).props.children;
   }
 
-  public getFieldLabel(field: PhysicalPersonFormField): ReactTestInstance | null {
+  public getFieldLabel(
+    field: PhysicalPersonFormField,
+  ): ReactTestInstance | null {
     if (field in TEXT_FIELD_TEST_ID_MAP) {
       const baseId = TEXT_FIELD_TEST_ID_MAP[field as TextInputField];
       return screen.queryByTestId(`${baseId}-label`);

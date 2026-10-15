@@ -1,14 +1,12 @@
 import React, { useState } from "react";
 import { Text, TextInput, View } from "react-native";
 import type { TextInputProps } from "react-native";
-import Svg, { Path, Rect } from "react-native-svg";
+import { CalendarIcon, CheckmarkIcon, HashIcon } from "../Icons";
 import {
   CUSTOM_TEXT_INPUT_COLORS,
   CUSTOM_TEXT_INPUT_COPY,
   CUSTOM_TEXT_INPUT_ICON_DIMENSIONS,
-  CUSTOM_TEXT_INPUT_ICONS,
   CUSTOM_TEXT_INPUT_STYLES,
-  CUSTOM_TEXT_INPUT_SVG_ATTRIBUTES,
   CUSTOM_TEXT_INPUT_TEST_IDS,
 } from "./constants/CustomTextInput.constants";
 import type {
@@ -27,65 +25,29 @@ interface ValidIconProps {
 
 const LeftIcon = ({ testID, type }: LeftIconProps): React.JSX.Element => (
   <View testID={testID}>
-    <Svg
-      fill={CUSTOM_TEXT_INPUT_SVG_ATTRIBUTES.FILL_NONE}
-      height={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.SIZE_PX}
-      stroke={CUSTOM_TEXT_INPUT_COLORS.ICON_STROKE}
-      strokeLinecap={CUSTOM_TEXT_INPUT_SVG_ATTRIBUTES.STROKE_LINE_CAP}
-      strokeLinejoin={CUSTOM_TEXT_INPUT_SVG_ATTRIBUTES.STROKE_LINE_JOIN}
-      strokeWidth={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
-      viewBox={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.VIEW_BOX}
-      width={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.SIZE_PX}
-    >
-      {type === "calendar" ? (
-        <>
-          <Rect
-            fill={CUSTOM_TEXT_INPUT_SVG_ATTRIBUTES.FILL_NONE}
-            height={CUSTOM_TEXT_INPUT_ICONS.CALENDAR.rect.height}
-            rx={CUSTOM_TEXT_INPUT_ICONS.CALENDAR.rect.rx}
-            ry={CUSTOM_TEXT_INPUT_ICONS.CALENDAR.rect.ry}
-            width={CUSTOM_TEXT_INPUT_ICONS.CALENDAR.rect.width}
-            x={CUSTOM_TEXT_INPUT_ICONS.CALENDAR.rect.x}
-            y={CUSTOM_TEXT_INPUT_ICONS.CALENDAR.rect.y}
-          />
-          {CUSTOM_TEXT_INPUT_ICONS.CALENDAR.paths.map((pathData, index) => (
-            <Path
-              d={pathData}
-              fill={CUSTOM_TEXT_INPUT_SVG_ATTRIBUTES.FILL_NONE}
-              key={`calendar-path-${index}`}
-            />
-          ))}
-        </>
-      ) : (
-        CUSTOM_TEXT_INPUT_ICONS.HASH.paths.map((pathData, index) => (
-          <Path
-            d={pathData}
-            fill={CUSTOM_TEXT_INPUT_SVG_ATTRIBUTES.FILL_NONE}
-            key={`hash-path-${index}`}
-          />
-        ))
-      )}
-    </Svg>
+    {type === "calendar" ? (
+      <CalendarIcon
+        color={CUSTOM_TEXT_INPUT_COLORS.ICON_STROKE}
+        size={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.SIZE_PX}
+        strokeWidth={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
+      />
+    ) : (
+      <HashIcon
+        color={CUSTOM_TEXT_INPUT_COLORS.ICON_STROKE}
+        size={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.SIZE_PX}
+        strokeWidth={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
+      />
+    )}
   </View>
 );
 
 const ValidCheckmarkIcon = ({ testID }: ValidIconProps): React.JSX.Element => (
   <View testID={testID}>
-    <Svg
-      fill={CUSTOM_TEXT_INPUT_SVG_ATTRIBUTES.FILL_NONE}
-      height={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.SIZE_PX}
-      stroke={CUSTOM_TEXT_INPUT_COLORS.VALID_ICON_STROKE}
-      strokeLinecap={CUSTOM_TEXT_INPUT_SVG_ATTRIBUTES.STROKE_LINE_CAP}
-      strokeLinejoin={CUSTOM_TEXT_INPUT_SVG_ATTRIBUTES.STROKE_LINE_JOIN}
+    <CheckmarkIcon
+      color={CUSTOM_TEXT_INPUT_COLORS.VALID_ICON_STROKE}
+      size={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.SIZE_PX}
       strokeWidth={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
-      viewBox={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.VIEW_BOX}
-      width={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.SIZE_PX}
-    >
-      <Path
-        d={CUSTOM_TEXT_INPUT_ICONS.CHECKMARK.path}
-        fill={CUSTOM_TEXT_INPUT_SVG_ATTRIBUTES.FILL_NONE}
-      />
-    </Svg>
+    />
   </View>
 );
 
@@ -152,7 +114,10 @@ export const CustomTextInput = ({
     : CUSTOM_TEXT_INPUT_TEST_IDS.HELPER_TEXT;
 
   return (
-    <View className={CUSTOM_TEXT_INPUT_STYLES.CONTAINER} testID={containerTestId}>
+    <View
+      className={CUSTOM_TEXT_INPUT_STYLES.CONTAINER}
+      testID={containerTestId}
+    >
       {label ? (
         <View className={CUSTOM_TEXT_INPUT_STYLES.LABEL_ROW}>
           <Text

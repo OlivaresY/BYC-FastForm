@@ -1,6 +1,7 @@
 import React from "react";
 import { Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
+import { CheckmarkIcon } from "@/shared/ui/Icons";
 import {
   getWizardProgressBadgeVariant,
   getWizardProgressStepIcon,
@@ -98,18 +99,11 @@ export const WizardProgressHeader = ({
         >
           {badgeVariant.hasCheckIcon ? (
             <View testID={WIZARD_PROGRESS_HEADER_TEST_IDS.CHECK_ICON}>
-              <Svg
-                fill="none"
-                height={WIZARD_PROGRESS_HEADER_CHECK_ICON.SIZE_PX}
-                stroke={badgeVariant.iconColor}
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <CheckmarkIcon
+                color={badgeVariant.iconColor}
+                size={WIZARD_PROGRESS_HEADER_CHECK_ICON.SIZE_PX}
                 strokeWidth={WIZARD_PROGRESS_HEADER_CHECK_ICON.STROKE_WIDTH_PX}
-                viewBox={WIZARD_PROGRESS_HEADER_CHECK_ICON.VIEW_BOX}
-                width={WIZARD_PROGRESS_HEADER_CHECK_ICON.SIZE_PX}
-              >
-                <Path d={WIZARD_PROGRESS_HEADER_CHECK_ICON.PATH} />
-              </Svg>
+              />
             </View>
           ) : null}
           <Text

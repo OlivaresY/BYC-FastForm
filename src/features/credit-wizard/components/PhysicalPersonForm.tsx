@@ -1,6 +1,10 @@
 import React from "react";
 import { Text, View } from "react-native";
-import Svg, { Circle, Path, Rect } from "react-native-svg";
+import {
+  ClockIcon as SharedClockIcon,
+  IdCardIcon as SharedIdCardIcon,
+  UserIcon as SharedUserIcon,
+} from "@/shared/ui/Icons";
 import { CustomSelect } from "@/shared/ui/CustomSelect";
 import { CustomTextInput } from "@/shared/ui/CustomTextInput";
 import {
@@ -8,9 +12,7 @@ import {
   PHYSICAL_PERSON_FORM_COPY,
   PHYSICAL_PERSON_FORM_DEFAULT_OPTIONS,
   PHYSICAL_PERSON_FORM_ICON_DIMENSIONS,
-  PHYSICAL_PERSON_FORM_ICONS,
   PHYSICAL_PERSON_FORM_STYLES,
-  PHYSICAL_PERSON_FORM_SVG_ATTRIBUTES,
   PHYSICAL_PERSON_FORM_TEST_IDS,
 } from "../constants/PhysicalPersonForm.constants";
 import type { PhysicalPersonFormProps } from "../types/PhysicalPersonForm.types";
@@ -23,85 +25,31 @@ interface SectionHeaderProps {
 
 const IdCardIcon = (): React.JSX.Element => (
   <View testID={PHYSICAL_PERSON_FORM_TEST_IDS.SECTION_1_ICON}>
-    <Svg
-      fill={PHYSICAL_PERSON_FORM_SVG_ATTRIBUTES.FILL_NONE}
-      height={PHYSICAL_PERSON_FORM_ICON_DIMENSIONS.SIZE_PX}
-      stroke={PHYSICAL_PERSON_FORM_COLORS.HEADER_ICON_STROKE}
-      strokeLinecap={PHYSICAL_PERSON_FORM_SVG_ATTRIBUTES.STROKE_LINE_CAP}
-      strokeLinejoin={PHYSICAL_PERSON_FORM_SVG_ATTRIBUTES.STROKE_LINE_JOIN}
+    <SharedIdCardIcon
+      color={PHYSICAL_PERSON_FORM_COLORS.HEADER_ICON_STROKE}
+      size={PHYSICAL_PERSON_FORM_ICON_DIMENSIONS.SIZE_PX}
       strokeWidth={PHYSICAL_PERSON_FORM_ICON_DIMENSIONS.STROKE_WIDTH_PX}
-      viewBox={PHYSICAL_PERSON_FORM_ICON_DIMENSIONS.VIEW_BOX}
-      width={PHYSICAL_PERSON_FORM_ICON_DIMENSIONS.SIZE_PX}
-    >
-      <Rect
-        fill={PHYSICAL_PERSON_FORM_SVG_ATTRIBUTES.FILL_NONE}
-        height={PHYSICAL_PERSON_FORM_ICONS.ID_CARD.rect.height}
-        rx={PHYSICAL_PERSON_FORM_ICONS.ID_CARD.rect.rx}
-        ry={PHYSICAL_PERSON_FORM_ICONS.ID_CARD.rect.ry}
-        width={PHYSICAL_PERSON_FORM_ICONS.ID_CARD.rect.width}
-        x={PHYSICAL_PERSON_FORM_ICONS.ID_CARD.rect.x}
-        y={PHYSICAL_PERSON_FORM_ICONS.ID_CARD.rect.y}
-      />
-      {PHYSICAL_PERSON_FORM_ICONS.ID_CARD.paths.map((pathData, index) => (
-        <Path
-          d={pathData}
-          fill={PHYSICAL_PERSON_FORM_SVG_ATTRIBUTES.FILL_NONE}
-          key={`id-card-path-${index}`}
-        />
-      ))}
-    </Svg>
+    />
   </View>
 );
 
 const UserIcon = (): React.JSX.Element => (
   <View testID={PHYSICAL_PERSON_FORM_TEST_IDS.SECTION_2_ICON}>
-    <Svg
-      fill={PHYSICAL_PERSON_FORM_SVG_ATTRIBUTES.FILL_NONE}
-      height={PHYSICAL_PERSON_FORM_ICON_DIMENSIONS.SIZE_PX}
-      stroke={PHYSICAL_PERSON_FORM_COLORS.HEADER_ICON_STROKE}
-      strokeLinecap={PHYSICAL_PERSON_FORM_SVG_ATTRIBUTES.STROKE_LINE_CAP}
-      strokeLinejoin={PHYSICAL_PERSON_FORM_SVG_ATTRIBUTES.STROKE_LINE_JOIN}
+    <SharedUserIcon
+      color={PHYSICAL_PERSON_FORM_COLORS.HEADER_ICON_STROKE}
+      size={PHYSICAL_PERSON_FORM_ICON_DIMENSIONS.SIZE_PX}
       strokeWidth={PHYSICAL_PERSON_FORM_ICON_DIMENSIONS.STROKE_WIDTH_PX}
-      viewBox={PHYSICAL_PERSON_FORM_ICON_DIMENSIONS.VIEW_BOX}
-      width={PHYSICAL_PERSON_FORM_ICON_DIMENSIONS.SIZE_PX}
-    >
-      <Circle
-        cx={PHYSICAL_PERSON_FORM_ICONS.USER.circle.cx}
-        cy={PHYSICAL_PERSON_FORM_ICONS.USER.circle.cy}
-        fill={PHYSICAL_PERSON_FORM_SVG_ATTRIBUTES.FILL_NONE}
-        r={PHYSICAL_PERSON_FORM_ICONS.USER.circle.r}
-      />
-      <Path
-        d={PHYSICAL_PERSON_FORM_ICONS.USER.path}
-        fill={PHYSICAL_PERSON_FORM_SVG_ATTRIBUTES.FILL_NONE}
-      />
-    </Svg>
+    />
   </View>
 );
 
 const ClockIcon = (): React.JSX.Element => (
   <View testID={PHYSICAL_PERSON_FORM_TEST_IDS.SECTION_3_ICON}>
-    <Svg
-      fill={PHYSICAL_PERSON_FORM_SVG_ATTRIBUTES.FILL_NONE}
-      height={PHYSICAL_PERSON_FORM_ICON_DIMENSIONS.SIZE_PX}
-      stroke={PHYSICAL_PERSON_FORM_COLORS.HEADER_ICON_STROKE}
-      strokeLinecap={PHYSICAL_PERSON_FORM_SVG_ATTRIBUTES.STROKE_LINE_CAP}
-      strokeLinejoin={PHYSICAL_PERSON_FORM_SVG_ATTRIBUTES.STROKE_LINE_JOIN}
+    <SharedClockIcon
+      color={PHYSICAL_PERSON_FORM_COLORS.HEADER_ICON_STROKE}
+      size={PHYSICAL_PERSON_FORM_ICON_DIMENSIONS.SIZE_PX}
       strokeWidth={PHYSICAL_PERSON_FORM_ICON_DIMENSIONS.STROKE_WIDTH_PX}
-      viewBox={PHYSICAL_PERSON_FORM_ICON_DIMENSIONS.VIEW_BOX}
-      width={PHYSICAL_PERSON_FORM_ICON_DIMENSIONS.SIZE_PX}
-    >
-      <Circle
-        cx={PHYSICAL_PERSON_FORM_ICONS.CLOCK.circle.cx}
-        cy={PHYSICAL_PERSON_FORM_ICONS.CLOCK.circle.cy}
-        fill={PHYSICAL_PERSON_FORM_SVG_ATTRIBUTES.FILL_NONE}
-        r={PHYSICAL_PERSON_FORM_ICONS.CLOCK.circle.r}
-      />
-      <Path
-        d={PHYSICAL_PERSON_FORM_ICONS.CLOCK.path}
-        fill={PHYSICAL_PERSON_FORM_SVG_ATTRIBUTES.FILL_NONE}
-      />
-    </Svg>
+    />
   </View>
 );
 
@@ -110,7 +58,10 @@ const SectionHeader = ({
   testID,
   title,
 }: SectionHeaderProps): React.JSX.Element => (
-  <View className={PHYSICAL_PERSON_FORM_STYLES.SECTION_HEADER_ROW} testID={testID}>
+  <View
+    className={PHYSICAL_PERSON_FORM_STYLES.SECTION_HEADER_ROW}
+    testID={testID}
+  >
     {icon}
     <Text className={PHYSICAL_PERSON_FORM_STYLES.SECTION_HEADER_TITLE}>
       {title}
@@ -230,7 +181,9 @@ export const PhysicalPersonForm = ({
               error={errors?.firstLastName}
               label={PHYSICAL_PERSON_FORM_COPY.FIRST_LAST_NAME_LABEL}
               onChangeText={(val) => onFieldChange("firstLastName", val)}
-              placeholder={PHYSICAL_PERSON_FORM_COPY.FIRST_LAST_NAME_PLACEHOLDER}
+              placeholder={
+                PHYSICAL_PERSON_FORM_COPY.FIRST_LAST_NAME_PLACEHOLDER
+              }
               required
               testID={PHYSICAL_PERSON_FORM_TEST_IDS.FIRST_LAST_NAME_INPUT}
               value={values.firstLastName}
@@ -242,7 +195,9 @@ export const PhysicalPersonForm = ({
               error={errors?.secondLastName}
               label={PHYSICAL_PERSON_FORM_COPY.SECOND_LAST_NAME_LABEL}
               onChangeText={(val) => onFieldChange("secondLastName", val)}
-              placeholder={PHYSICAL_PERSON_FORM_COPY.SECOND_LAST_NAME_PLACEHOLDER}
+              placeholder={
+                PHYSICAL_PERSON_FORM_COPY.SECOND_LAST_NAME_PLACEHOLDER
+              }
               required
               testID={PHYSICAL_PERSON_FORM_TEST_IDS.SECOND_LAST_NAME_INPUT}
               value={values.secondLastName}
@@ -294,9 +249,7 @@ export const PhysicalPersonForm = ({
               label={PHYSICAL_PERSON_FORM_COPY.MARITAL_STATUS_LABEL}
               onValueChange={(val) => onFieldChange("maritalStatus", val)}
               options={maritalStatusOptions}
-              placeholder={
-                PHYSICAL_PERSON_FORM_COPY.MARITAL_STATUS_PLACEHOLDER
-              }
+              placeholder={PHYSICAL_PERSON_FORM_COPY.MARITAL_STATUS_PLACEHOLDER}
               required
               testID={PHYSICAL_PERSON_FORM_TEST_IDS.MARITAL_STATUS_SELECT}
               value={values.maritalStatus}

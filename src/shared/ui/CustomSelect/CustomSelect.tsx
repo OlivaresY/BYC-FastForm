@@ -1,105 +1,15 @@
 import React from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
-import Svg, { Path } from "react-native-svg";
+import { CheckmarkIcon, ChevronDownIcon, CloseIcon, GlobeIcon } from "../Icons";
 import {
   CUSTOM_SELECT_COLORS,
   CUSTOM_SELECT_COPY,
   CUSTOM_SELECT_ICON_DIMENSIONS,
-  CUSTOM_SELECT_ICONS,
   CUSTOM_SELECT_STYLES,
-  CUSTOM_SELECT_SVG_ATTRIBUTES,
   CUSTOM_SELECT_TEST_IDS,
 } from "./constants/CustomSelect.constants";
 import type { CustomSelectProps } from "./CustomSelect.types";
 import { useCustomSelect } from "./hooks/useCustomSelect";
-
-const ChevronDownIcon = (): React.JSX.Element => (
-  <View testID={CUSTOM_SELECT_TEST_IDS.CHEVRON_ICON}>
-    <Svg
-      fill={CUSTOM_SELECT_SVG_ATTRIBUTES.FILL_NONE}
-      height={CUSTOM_SELECT_ICON_DIMENSIONS.CHEVRON_SIZE_PX}
-      stroke={CUSTOM_SELECT_COLORS.CHEVRON_STROKE}
-      strokeLinecap={CUSTOM_SELECT_SVG_ATTRIBUTES.STROKE_LINE_CAP}
-      strokeLinejoin={CUSTOM_SELECT_SVG_ATTRIBUTES.STROKE_LINE_JOIN}
-      strokeWidth={CUSTOM_SELECT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
-      viewBox={CUSTOM_SELECT_ICON_DIMENSIONS.VIEW_BOX}
-      width={CUSTOM_SELECT_ICON_DIMENSIONS.CHEVRON_SIZE_PX}
-    >
-      {CUSTOM_SELECT_ICONS.CHEVRON_DOWN.paths.map((pathData, index) => (
-        <Path
-          d={pathData}
-          fill={CUSTOM_SELECT_SVG_ATTRIBUTES.FILL_NONE}
-          key={`chevron-path-${index}`}
-        />
-      ))}
-    </Svg>
-  </View>
-);
-
-const GlobeIcon = (): React.JSX.Element => (
-  <View testID={CUSTOM_SELECT_TEST_IDS.LEFT_ICON}>
-    <Svg
-      fill={CUSTOM_SELECT_SVG_ATTRIBUTES.FILL_NONE}
-      height={CUSTOM_SELECT_ICON_DIMENSIONS.GLOBE_SIZE_PX}
-      stroke={CUSTOM_SELECT_COLORS.GLOBE_STROKE}
-      strokeLinecap={CUSTOM_SELECT_SVG_ATTRIBUTES.STROKE_LINE_CAP}
-      strokeLinejoin={CUSTOM_SELECT_SVG_ATTRIBUTES.STROKE_LINE_JOIN}
-      strokeWidth={CUSTOM_SELECT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
-      viewBox={CUSTOM_SELECT_ICON_DIMENSIONS.VIEW_BOX}
-      width={CUSTOM_SELECT_ICON_DIMENSIONS.GLOBE_SIZE_PX}
-    >
-      {CUSTOM_SELECT_ICONS.GLOBE.paths.map((pathData, index) => (
-        <Path
-          d={pathData}
-          fill={CUSTOM_SELECT_SVG_ATTRIBUTES.FILL_NONE}
-          key={`globe-path-${index}`}
-        />
-      ))}
-    </Svg>
-  </View>
-);
-
-const CheckmarkIcon = (): React.JSX.Element => (
-  <Svg
-    fill={CUSTOM_SELECT_SVG_ATTRIBUTES.FILL_NONE}
-    height={CUSTOM_SELECT_ICON_DIMENSIONS.CHECKMARK_SIZE_PX}
-    stroke={CUSTOM_SELECT_COLORS.CHECKMARK_STROKE}
-    strokeLinecap={CUSTOM_SELECT_SVG_ATTRIBUTES.STROKE_LINE_CAP}
-    strokeLinejoin={CUSTOM_SELECT_SVG_ATTRIBUTES.STROKE_LINE_JOIN}
-    strokeWidth={CUSTOM_SELECT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
-    viewBox={CUSTOM_SELECT_ICON_DIMENSIONS.VIEW_BOX}
-    width={CUSTOM_SELECT_ICON_DIMENSIONS.CHECKMARK_SIZE_PX}
-  >
-    {CUSTOM_SELECT_ICONS.CHECKMARK.paths.map((pathData, index) => (
-      <Path
-        d={pathData}
-        fill={CUSTOM_SELECT_SVG_ATTRIBUTES.FILL_NONE}
-        key={`check-path-${index}`}
-      />
-    ))}
-  </Svg>
-);
-
-const CloseIcon = (): React.JSX.Element => (
-  <Svg
-    fill={CUSTOM_SELECT_SVG_ATTRIBUTES.FILL_NONE}
-    height={CUSTOM_SELECT_ICON_DIMENSIONS.CLOSE_SIZE_PX}
-    stroke={CUSTOM_SELECT_COLORS.CLOSE_STROKE}
-    strokeLinecap={CUSTOM_SELECT_SVG_ATTRIBUTES.STROKE_LINE_CAP}
-    strokeLinejoin={CUSTOM_SELECT_SVG_ATTRIBUTES.STROKE_LINE_JOIN}
-    strokeWidth={CUSTOM_SELECT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
-    viewBox={CUSTOM_SELECT_ICON_DIMENSIONS.VIEW_BOX}
-    width={CUSTOM_SELECT_ICON_DIMENSIONS.CLOSE_SIZE_PX}
-  >
-    {CUSTOM_SELECT_ICONS.CLOSE.paths.map((pathData, index) => (
-      <Path
-        d={pathData}
-        fill={CUSTOM_SELECT_SVG_ATTRIBUTES.FILL_NONE}
-        key={`close-path-${index}`}
-      />
-    ))}
-  </Svg>
-);
 
 export const CustomSelect = ({
   disabled = false,
@@ -196,7 +106,15 @@ export const CustomSelect = ({
         onPress={openModal}
         testID={triggerTestId}
       >
-        {leftIcon === "globe" ? <GlobeIcon /> : null}
+        {leftIcon === "globe" ? (
+          <View testID={CUSTOM_SELECT_TEST_IDS.LEFT_ICON}>
+            <GlobeIcon
+              color={CUSTOM_SELECT_COLORS.GLOBE_STROKE}
+              size={CUSTOM_SELECT_ICON_DIMENSIONS.GLOBE_SIZE_PX}
+              strokeWidth={CUSTOM_SELECT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
+            />
+          </View>
+        ) : null}
 
         <Text
           className={
@@ -211,15 +129,18 @@ export const CustomSelect = ({
           {displayText}
         </Text>
 
-        <ChevronDownIcon />
+        <View testID={CUSTOM_SELECT_TEST_IDS.CHEVRON_ICON}>
+          <ChevronDownIcon
+            color={CUSTOM_SELECT_COLORS.CHEVRON_STROKE}
+            size={CUSTOM_SELECT_ICON_DIMENSIONS.CHEVRON_SIZE_PX}
+            strokeWidth={CUSTOM_SELECT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
+          />
+        </View>
       </Pressable>
 
       {/* Feedback Row: Error takes precedence over Helper text */}
       {errorMessage ? (
-        <Text
-          className={CUSTOM_SELECT_STYLES.ERROR_TEXT}
-          testID={errorTestId}
-        >
+        <Text className={CUSTOM_SELECT_STYLES.ERROR_TEXT} testID={errorTestId}>
           {errorMessage}
         </Text>
       ) : helperText ? (
@@ -244,6 +165,7 @@ export const CustomSelect = ({
           accessibilityLabel={
             CUSTOM_SELECT_COPY.CLOSE_MODAL_ACCESSIBILITY_LABEL
           }
+          accessibilityRole="button"
           className={CUSTOM_SELECT_STYLES.MODAL_BACKDROP}
           onPress={closeModal}
           testID={CUSTOM_SELECT_TEST_IDS.MODAL_BACKDROP}
@@ -251,7 +173,13 @@ export const CustomSelect = ({
           <Pressable
             accessibilityViewIsModal
             className={CUSTOM_SELECT_STYLES.MODAL_CARD}
-            onPress={(event) => event?.stopPropagation?.()}
+            onPress={(event) => {
+              event?.stopPropagation?.();
+            }}
+            onStartShouldSetResponder={() => true}
+            onTouchEnd={(event) => {
+              event?.stopPropagation?.();
+            }}
             testID={CUSTOM_SELECT_TEST_IDS.MODAL_CARD}
           >
             {/* Modal Header */}
@@ -272,7 +200,11 @@ export const CustomSelect = ({
                 onPress={closeModal}
                 testID={CUSTOM_SELECT_TEST_IDS.MODAL_CLOSE_BUTTON}
               >
-                <CloseIcon />
+                <CloseIcon
+                  color={CUSTOM_SELECT_COLORS.CLOSE_STROKE}
+                  size={CUSTOM_SELECT_ICON_DIMENSIONS.CLOSE_SIZE_PX}
+                  strokeWidth={CUSTOM_SELECT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
+                />
               </Pressable>
             </View>
 
@@ -312,7 +244,15 @@ export const CustomSelect = ({
 
                       {isOptionActive ? (
                         <View testID={checkTestId}>
-                          <CheckmarkIcon />
+                          <CheckmarkIcon
+                            color={CUSTOM_SELECT_COLORS.CHECKMARK_STROKE}
+                            size={
+                              CUSTOM_SELECT_ICON_DIMENSIONS.CHECKMARK_SIZE_PX
+                            }
+                            strokeWidth={
+                              CUSTOM_SELECT_ICON_DIMENSIONS.STROKE_WIDTH_PX
+                            }
+                          />
                         </View>
                       ) : null}
                     </Pressable>

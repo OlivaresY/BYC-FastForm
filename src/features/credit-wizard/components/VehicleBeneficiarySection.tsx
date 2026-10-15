@@ -1,14 +1,16 @@
 import React from "react";
 import { Pressable, Text, View } from "react-native";
-import Svg, { Circle, Path } from "react-native-svg";
+import {
+  CarIcon as SharedCarIcon,
+  CheckmarkIcon as SharedCheckmarkIcon,
+  CircleIcon as SharedCircleIcon,
+} from "@/shared/ui/Icons";
 import {
   VEHICLE_BENEFICIARY_SECTION_COLORS,
   VEHICLE_BENEFICIARY_SECTION_COPY,
   VEHICLE_BENEFICIARY_SECTION_ENTITIES,
   VEHICLE_BENEFICIARY_SECTION_ICON_DIMENSIONS,
-  VEHICLE_BENEFICIARY_SECTION_ICONS,
   VEHICLE_BENEFICIARY_SECTION_STYLES,
-  VEHICLE_BENEFICIARY_SECTION_SVG_ATTRIBUTES,
   VEHICLE_BENEFICIARY_SECTION_TEST_IDS,
 } from "../constants/VehicleBeneficiarySection.constants";
 import type { VehicleBeneficiarySectionProps } from "../types/VehicleBeneficiarySection.types";
@@ -20,26 +22,11 @@ interface OptionIconProps {
 
 const CarIcon = (): React.JSX.Element => (
   <View testID={VEHICLE_BENEFICIARY_SECTION_TEST_IDS.CAR_ICON}>
-    <Svg
-      fill={VEHICLE_BENEFICIARY_SECTION_SVG_ATTRIBUTES.FILL_NONE}
-      height={VEHICLE_BENEFICIARY_SECTION_ICON_DIMENSIONS.CAR_ICON_SIZE_PX}
-      stroke={VEHICLE_BENEFICIARY_SECTION_COLORS.CAR_ICON_STROKE}
-      strokeLinecap={VEHICLE_BENEFICIARY_SECTION_SVG_ATTRIBUTES.STROKE_LINE_CAP}
-      strokeLinejoin={
-        VEHICLE_BENEFICIARY_SECTION_SVG_ATTRIBUTES.STROKE_LINE_JOIN
-      }
+    <SharedCarIcon
+      color={VEHICLE_BENEFICIARY_SECTION_COLORS.CAR_ICON_STROKE}
+      size={VEHICLE_BENEFICIARY_SECTION_ICON_DIMENSIONS.CAR_ICON_SIZE_PX}
       strokeWidth={VEHICLE_BENEFICIARY_SECTION_ICON_DIMENSIONS.STROKE_WIDTH_PX}
-      viewBox={VEHICLE_BENEFICIARY_SECTION_ICON_DIMENSIONS.VIEW_BOX}
-      width={VEHICLE_BENEFICIARY_SECTION_ICON_DIMENSIONS.CAR_ICON_SIZE_PX}
-    >
-      {VEHICLE_BENEFICIARY_SECTION_ICONS.CAR.paths.map((pathData, index) => (
-        <Path
-          d={pathData}
-          fill={VEHICLE_BENEFICIARY_SECTION_SVG_ATTRIBUTES.FILL_NONE}
-          key={`${VEHICLE_BENEFICIARY_SECTION_TEST_IDS.CAR_ICON}-path-${index}`}
-        />
-      ))}
-    </Svg>
+    />
   </View>
 );
 
@@ -48,36 +35,23 @@ const OptionIcon = ({
   testID,
 }: OptionIconProps): React.JSX.Element => (
   <View testID={testID}>
-    <Svg
-      fill={VEHICLE_BENEFICIARY_SECTION_SVG_ATTRIBUTES.FILL_NONE}
-      height={VEHICLE_BENEFICIARY_SECTION_ICON_DIMENSIONS.OPTION_ICON_SIZE_PX}
-      stroke={
-        isActive
-          ? VEHICLE_BENEFICIARY_SECTION_COLORS.ACTIVE_ICON_STROKE
-          : VEHICLE_BENEFICIARY_SECTION_COLORS.INACTIVE_ICON_STROKE
-      }
-      strokeLinecap={VEHICLE_BENEFICIARY_SECTION_SVG_ATTRIBUTES.STROKE_LINE_CAP}
-      strokeLinejoin={
-        VEHICLE_BENEFICIARY_SECTION_SVG_ATTRIBUTES.STROKE_LINE_JOIN
-      }
-      strokeWidth={VEHICLE_BENEFICIARY_SECTION_ICON_DIMENSIONS.STROKE_WIDTH_PX}
-      viewBox={VEHICLE_BENEFICIARY_SECTION_ICON_DIMENSIONS.VIEW_BOX}
-      width={VEHICLE_BENEFICIARY_SECTION_ICON_DIMENSIONS.OPTION_ICON_SIZE_PX}
-    >
-      {isActive ? (
-        <Path
-          d={VEHICLE_BENEFICIARY_SECTION_ICONS.CHECKMARK.path}
-          fill={VEHICLE_BENEFICIARY_SECTION_SVG_ATTRIBUTES.FILL_NONE}
-        />
-      ) : (
-        <Circle
-          cx={VEHICLE_BENEFICIARY_SECTION_ICONS.RADIO_CIRCLE.cx}
-          cy={VEHICLE_BENEFICIARY_SECTION_ICONS.RADIO_CIRCLE.cy}
-          fill={VEHICLE_BENEFICIARY_SECTION_SVG_ATTRIBUTES.FILL_NONE}
-          r={VEHICLE_BENEFICIARY_SECTION_ICONS.RADIO_CIRCLE.r}
-        />
-      )}
-    </Svg>
+    {isActive ? (
+      <SharedCheckmarkIcon
+        color={VEHICLE_BENEFICIARY_SECTION_COLORS.ACTIVE_ICON_STROKE}
+        size={VEHICLE_BENEFICIARY_SECTION_ICON_DIMENSIONS.OPTION_ICON_SIZE_PX}
+        strokeWidth={
+          VEHICLE_BENEFICIARY_SECTION_ICON_DIMENSIONS.STROKE_WIDTH_PX
+        }
+      />
+    ) : (
+      <SharedCircleIcon
+        color={VEHICLE_BENEFICIARY_SECTION_COLORS.INACTIVE_ICON_STROKE}
+        size={VEHICLE_BENEFICIARY_SECTION_ICON_DIMENSIONS.OPTION_ICON_SIZE_PX}
+        strokeWidth={
+          VEHICLE_BENEFICIARY_SECTION_ICON_DIMENSIONS.STROKE_WIDTH_PX
+        }
+      />
+    )}
   </View>
 );
 
