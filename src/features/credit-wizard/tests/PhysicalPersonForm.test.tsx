@@ -395,7 +395,9 @@ describe("PhysicalPersonForm Component", () => {
       const customGenderOptions = [
         { label: "No binario", value: "non_binary" },
       ];
-      const customMaritalOptions = [{ label: "Separado(a)", value: "separated" }];
+      const customMaritalOptions = [
+        { label: "Separado(a)", value: "separated" },
+      ];
       const customIdTypeOptions = [{ label: "Cédula", value: "id" }];
 
       const page = PhysicalPersonFormPageObject.render({
