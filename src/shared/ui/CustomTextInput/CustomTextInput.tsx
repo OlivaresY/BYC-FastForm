@@ -79,12 +79,12 @@ export const CustomTextInput = ({
 
   const getBorderClass = (): string => {
     if (error) {
-      return "border-brand-red";
+      return CUSTOM_TEXT_INPUT_STYLES.BORDER_ERROR;
     }
     if (isFocused) {
-      return "border-text-secondary";
+      return CUSTOM_TEXT_INPUT_STYLES.BORDER_FOCUSED;
     }
-    return "border-border-base";
+    return CUSTOM_TEXT_INPUT_STYLES.BORDER_BASE;
   };
 
   const containerTestId = testID

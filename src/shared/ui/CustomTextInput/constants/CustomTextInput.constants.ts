@@ -41,6 +41,9 @@ export const CUSTOM_TEXT_INPUT_ICONS = {
 } as const;
 
 export const CUSTOM_TEXT_INPUT_STYLES = {
+  BORDER_BASE: "border-border-base",
+  BORDER_ERROR: "border-brand-red",
+  BORDER_FOCUSED: "border-text-secondary",
   CONTAINER: "w-full",
   ERROR_TEXT: "mt-1 text-xs text-brand-red",
   HELPER_TEXT: "mt-1 text-xs text-text-secondary",

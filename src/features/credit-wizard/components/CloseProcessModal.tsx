@@ -1,12 +1,12 @@
 import React from "react";
 import { Modal, Pressable, Text, View } from "react-native";
 import { BookmarkIcon, CloseIcon, SaveIcon } from "@/shared/ui/Icons";
-import { BaseButton } from "../../../shared/ui/BaseButton/BaseButton";
-import { BASE_BUTTON_VARIANTS } from "../../../shared/ui/BaseButton/constants/BaseButton.constants";
+import { BaseButton, BASE_BUTTON_VARIANTS } from "@/shared/ui/BaseButton";
 import {
   CLOSE_PROCESS_MODAL_COLORS,
   CLOSE_PROCESS_MODAL_COPY,
   CLOSE_PROCESS_MODAL_ICON_SIZES,
+  CLOSE_PROCESS_MODAL_STYLES,
   CLOSE_PROCESS_MODAL_TEST_IDS,
 } from "../constants/CloseProcessModal.constants";
 export interface CloseProcessModalProps {
@@ -42,13 +42,13 @@ export const CloseProcessModal = ({
     <Pressable
       accessibilityLabel={CLOSE_PROCESS_MODAL_COPY.BACKDROP_ACCESSIBILITY_LABEL}
       accessibilityRole="button"
-      className="flex-1 items-center justify-center bg-black/50 px-6"
+      className={CLOSE_PROCESS_MODAL_STYLES.BACKDROP}
       onPress={onClose}
       testID={CLOSE_PROCESS_MODAL_TEST_IDS.BACKDROP}
     >
       <Pressable
         accessibilityViewIsModal
-        className="w-[90%] max-w-[340px] items-center rounded-3xl bg-white px-6 py-8"
+        className={CLOSE_PROCESS_MODAL_STYLES.CONTAINER}
         onPress={(event) => event?.stopPropagation?.()}
         testID={CLOSE_PROCESS_MODAL_TEST_IDS.CONTAINER}
       >
@@ -57,7 +57,7 @@ export const CloseProcessModal = ({
             CLOSE_PROCESS_MODAL_COPY.CLOSE_ACCESSIBILITY_LABEL
           }
           accessibilityRole="button"
-          className="absolute right-3 top-3 min-h-[48px] min-w-[48px] items-center justify-center rounded-full active:bg-black/5"
+          className={CLOSE_PROCESS_MODAL_STYLES.CLOSE_BUTTON}
           hitSlop={{ bottom: 8, left: 8, right: 8, top: 8 }}
           onPress={onClose}
           testID={CLOSE_PROCESS_MODAL_TEST_IDS.CLOSE_BUTTON}
@@ -68,7 +68,7 @@ export const CloseProcessModal = ({
           />
         </Pressable>
 
-        <View className="h-14 w-14 items-center justify-center rounded-full bg-brand-beige">
+        <View className={CLOSE_PROCESS_MODAL_STYLES.BADGE_WRAPPER}>
           <BookmarkIcon
             color={CLOSE_PROCESS_MODAL_COLORS.BADGE_ICON}
             size={CLOSE_PROCESS_MODAL_ICON_SIZES.BADGE}
@@ -77,20 +77,20 @@ export const CloseProcessModal = ({
 
         <Text
           accessibilityRole="header"
-          className="mt-6 text-center text-xl font-bold text-text-primary"
+          className={CLOSE_PROCESS_MODAL_STYLES.TITLE}
           testID={CLOSE_PROCESS_MODAL_TEST_IDS.TITLE}
         >
           {CLOSE_PROCESS_MODAL_COPY.TITLE}
         </Text>
 
         <Text
-          className="mb-8 mt-3 text-center text-base text-text-secondary"
+          className={CLOSE_PROCESS_MODAL_STYLES.BODY}
           testID={CLOSE_PROCESS_MODAL_TEST_IDS.BODY}
         >
           {CLOSE_PROCESS_MODAL_COPY.BODY}
         </Text>
 
-        <View className="w-full gap-3">
+        <View className={CLOSE_PROCESS_MODAL_STYLES.ACTIONS_WRAPPER}>
           <BaseButton
             icon={
               <SaveIcon

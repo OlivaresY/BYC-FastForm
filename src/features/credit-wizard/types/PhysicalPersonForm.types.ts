@@ -1,4 +1,4 @@
-import type { CustomSelectOption } from "@/shared/ui/CustomSelect/CustomSelect.types";
+import type { CustomSelectOption } from "@/shared/ui/CustomSelect";
 
 export type PhysicalPersonFormField =
   | "birthDate"

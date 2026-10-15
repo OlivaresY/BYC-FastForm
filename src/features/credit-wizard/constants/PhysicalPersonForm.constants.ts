@@ -1,4 +1,4 @@
-import type { CustomSelectOption } from "@/shared/ui/CustomSelect/CustomSelect.types";
+import type { CustomSelectOption } from "@/shared/ui/CustomSelect";
 
 export const PHYSICAL_PERSON_FORM_COLORS = {
   HEADER_ICON_STROKE: "#111111",

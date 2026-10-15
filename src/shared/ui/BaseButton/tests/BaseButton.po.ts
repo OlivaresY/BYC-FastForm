@@ -1,21 +1,14 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react-native";
-import type { RenderAPI } from "@testing-library/react-native";
 import type { ReactTestInstance } from "react-test-renderer";
 import { BaseButton } from "../BaseButton";
 import { BASE_BUTTON_TEST_IDS } from "../constants/BaseButton.constants";
 import type { BaseButtonProps } from "../BaseButton.types";
 
 export class BaseButtonPageObject {
-  private readonly renderApi: RenderAPI;
-
-  public constructor(renderApi: RenderAPI) {
-    this.renderApi = renderApi;
-  }
-
   public static render(props: BaseButtonProps): BaseButtonPageObject {
-    const renderApi = render(React.createElement(BaseButton, props));
-    return new BaseButtonPageObject(renderApi);
+    render(React.createElement(BaseButton, props));
+    return new BaseButtonPageObject();
   }
 
   // =========================================================================

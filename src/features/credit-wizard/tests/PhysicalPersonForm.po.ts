@@ -5,9 +5,8 @@ import {
   screen,
   within,
 } from "@testing-library/react-native";
-import type { RenderAPI } from "@testing-library/react-native";
 import type { ReactTestInstance } from "react-test-renderer";
-import { CUSTOM_SELECT_TEST_IDS } from "@/shared/ui/CustomSelect/constants/CustomSelect.constants";
+import { CUSTOM_SELECT_TEST_IDS } from "@/shared/ui/CustomSelect";
 import { PhysicalPersonForm } from "../components/PhysicalPersonForm";
 import { PHYSICAL_PERSON_FORM_TEST_IDS } from "../constants/PhysicalPersonForm.constants";
 import type {
@@ -46,18 +45,16 @@ const SELECT_FIELD_TEST_ID_MAP: Record<SelectField, string> = {
 
 export class PhysicalPersonFormPageObject {
   private readonly customTestId?: string;
-  private readonly renderApi: RenderAPI;
 
-  public constructor(renderApi: RenderAPI, customTestId?: string) {
-    this.renderApi = renderApi;
+  public constructor(customTestId?: string) {
     this.customTestId = customTestId;
   }
 
   public static render(
     props: PhysicalPersonFormProps,
   ): PhysicalPersonFormPageObject {
-    const renderApi = render(React.createElement(PhysicalPersonForm, props));
-    return new PhysicalPersonFormPageObject(renderApi, props.testID);
+    render(React.createElement(PhysicalPersonForm, props));
+    return new PhysicalPersonFormPageObject(props.testID);
   }
 
   // =========================================================================

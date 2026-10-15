@@ -1,23 +1,16 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react-native";
-import type { RenderAPI } from "@testing-library/react-native";
 import type { ReactTestInstance } from "react-test-renderer";
 import { CloseProcessModal } from "../components/CloseProcessModal";
 import { CLOSE_PROCESS_MODAL_TEST_IDS } from "../constants/CloseProcessModal.constants";
 import type { CloseProcessModalProps } from "../components/CloseProcessModal";
 
 export class CloseProcessModalPageObject {
-  private readonly renderApi: RenderAPI;
-
-  public constructor(renderApi: RenderAPI) {
-    this.renderApi = renderApi;
-  }
-
   public static render(
     props: CloseProcessModalProps,
   ): CloseProcessModalPageObject {
-    const renderApi = render(React.createElement(CloseProcessModal, props));
-    return new CloseProcessModalPageObject(renderApi);
+    render(React.createElement(CloseProcessModal, props));
+    return new CloseProcessModalPageObject();
   }
 
   // =========================================================================

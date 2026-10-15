@@ -5,9 +5,8 @@ import {
   screen,
   within,
 } from "@testing-library/react-native";
-import type { RenderAPI } from "@testing-library/react-native";
 import type { ReactTestInstance } from "react-test-renderer";
-import { CUSTOM_SELECT_TEST_IDS } from "@/shared/ui/CustomSelect/constants/CustomSelect.constants";
+import { CUSTOM_SELECT_TEST_IDS } from "@/shared/ui/CustomSelect";
 import { LegalEntityForm } from "../components/LegalEntityForm";
 import { LEGAL_ENTITY_FORM_TEST_IDS } from "../constants/LegalEntityForm.constants";
 import type {
@@ -37,16 +36,14 @@ const SELECT_FIELD_TEST_ID_MAP: Record<SelectField, string> = {
 
 export class LegalEntityFormPageObject {
   private readonly customTestId?: string;
-  private readonly renderApi: RenderAPI;
 
-  public constructor(renderApi: RenderAPI, customTestId?: string) {
-    this.renderApi = renderApi;
+  public constructor(customTestId?: string) {
     this.customTestId = customTestId;
   }
 
   public static render(props: LegalEntityFormProps): LegalEntityFormPageObject {
-    const renderApi = render(React.createElement(LegalEntityForm, props));
-    return new LegalEntityFormPageObject(renderApi, props.testID);
+    render(React.createElement(LegalEntityForm, props));
+    return new LegalEntityFormPageObject(props.testID);
   }
 
   // =========================================================================

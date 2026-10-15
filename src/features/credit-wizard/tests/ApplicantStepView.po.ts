@@ -7,9 +7,8 @@ import {
   screen,
   within,
 } from '@testing-library/react-native';
-import type { RenderAPI } from '@testing-library/react-native';
 import type { ReactTestInstance } from 'react-test-renderer';
-import { CUSTOM_SELECT_TEST_IDS } from '@/shared/ui/CustomSelect/constants/CustomSelect.constants';
+import { CUSTOM_SELECT_TEST_IDS } from '@/shared/ui/CustomSelect';
 import { ApplicantStepView } from '../components/ApplicantStepView';
 import { APPLICANT_STEP_VIEW_TEST_IDS } from '../constants/ApplicantStepView.constants';
 import { LEGAL_ENTITY_FORM_TEST_IDS } from '../constants/LegalEntityForm.constants';
@@ -91,27 +90,25 @@ const ApplicantStepViewTestContainer = ({
 
 export class ApplicantStepViewPageObject {
   private readonly customTestId?: string;
-  private readonly renderApi: RenderAPI;
 
-  public constructor(renderApi: RenderAPI, customTestId?: string) {
-    this.renderApi = renderApi;
+  public constructor(customTestId?: string) {
     this.customTestId = customTestId;
   }
 
   public static render(
     props?: ApplicantStepViewTestContainerProps,
   ): ApplicantStepViewPageObject {
-    const renderApi = render(
+    render(
       React.createElement(ApplicantStepViewTestContainer, props ?? {}),
     );
-    return new ApplicantStepViewPageObject(renderApi, props?.testID);
+    return new ApplicantStepViewPageObject(props?.testID);
   }
 
   public static renderDirect(
     props: ApplicantStepViewProps,
   ): ApplicantStepViewPageObject {
-    const renderApi = render(React.createElement(ApplicantStepView, props));
-    return new ApplicantStepViewPageObject(renderApi, props.testID);
+    render(React.createElement(ApplicantStepView, props));
+    return new ApplicantStepViewPageObject(props.testID);
   }
 
   public static renderHook(props?: UseApplicantStepViewModelProps) {

@@ -1,6 +1,5 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react-native";
-import type { RenderAPI } from "@testing-library/react-native";
 import type { ReactTestInstance } from "react-test-renderer";
 import { CustomTextInput } from "../CustomTextInput";
 import { CUSTOM_TEXT_INPUT_TEST_IDS } from "../constants/CustomTextInput.constants";
@@ -8,18 +7,16 @@ import type { CustomTextInputProps } from "../CustomTextInput.types";
 
 export class CustomTextInputPageObject {
   private readonly customTestId?: string;
-  private readonly renderApi: RenderAPI;
 
-  public constructor(renderApi: RenderAPI, customTestId?: string) {
-    this.renderApi = renderApi;
+  public constructor(customTestId?: string) {
     this.customTestId = customTestId;
   }
 
   public static render(
     props: CustomTextInputProps = {},
   ): CustomTextInputPageObject {
-    const renderApi = render(React.createElement(CustomTextInput, props));
-    return new CustomTextInputPageObject(renderApi, props.testID);
+    render(React.createElement(CustomTextInput, props));
+    return new CustomTextInputPageObject(props.testID);
   }
 
   // =========================================================================

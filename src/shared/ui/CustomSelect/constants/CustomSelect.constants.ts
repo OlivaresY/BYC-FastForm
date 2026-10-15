@@ -1,5 +1,5 @@
 export const CUSTOM_SELECT_COLORS = {
-  BORDER_BASE: "#E5E7EB",
+  BORDER_BASE: "#A39F97",
   BORDER_ERROR: "#B91C1C",
   BORDER_OPEN: "#5A6B80",
   CHECKMARK_STROKE: "#B91C1C",
@@ -71,8 +71,8 @@ export const CUSTOM_SELECT_STYLES = {
   OPTION_LIST: "gap-1.5",
   REQUIRED_ASTERISK: "text-sm font-bold text-[#B91C1C]",
   TRIGGER_BASE:
-    "min-h-[48px] min-w-[48px] w-full flex-row items-center justify-between rounded-xl border bg-white px-4 py-3 gap-2.5",
-  TRIGGER_BORDER_BASE: "border-[#E5E7EB]",
+    "min-h-[48px] min-w-[48px] w-full flex-row items-center justify-between rounded-lg border bg-white px-4 py-3 gap-2.5",
+  TRIGGER_BORDER_BASE: "border-[#A39F97]",
   TRIGGER_BORDER_ERROR: "border-[#B91C1C]",
   TRIGGER_BORDER_OPEN: "border-[#5A6B80]",
   TRIGGER_DISABLED: "opacity-40",
