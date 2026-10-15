@@ -13,10 +13,14 @@ describe("CustomTextInput Component", () => {
     expect(page.label?.props.children).toBe("Cédula de Identidad");
     expect(page.input.props.placeholder).toBe("Ej: 1-1152-0491");
     expect(page.error).toBeNull();
-    expect(page.input.props.className).toContain("border-border-base");
+    expect(page.getWrapperClassName()).toContain("border-border-base");
+    expect(page.requiredAsterisk).toBeNull();
+    expect(page.helperText).toBeNull();
+    expect(page.leftIcon).toBeNull();
+    expect(page.validIcon).toBeNull();
   });
 
-  it("updates text and dispatches onChangeText handler upon filling", () => {
+  it("updates text and dispatches onChangeText handler upon filling and clears text", () => {
     // Arrange
     const handleChangeText = jest.fn();
     const page = CustomTextInputPageObject.render({
@@ -30,6 +34,11 @@ describe("CustomTextInput Component", () => {
     // Assert
     expect(handleChangeText).toHaveBeenCalledTimes(1);
     expect(handleChangeText).toHaveBeenCalledWith("Carlos Alvarado");
+
+    // Act - clear
+    page.clear();
+    expect(handleChangeText).toHaveBeenCalledTimes(2);
+    expect(handleChangeText).toHaveBeenCalledWith("");
   });
 
   it("updates border to active focus color on focus and restores on blur", () => {
@@ -46,14 +55,14 @@ describe("CustomTextInput Component", () => {
 
     // Assert - Focus
     expect(handleFocus).toHaveBeenCalledTimes(1);
-    expect(page.input.props.className).toContain("border-text-secondary");
+    expect(page.getWrapperClassName()).toContain("border-text-secondary");
 
     // Act - Blur
     page.blur();
 
     // Assert - Blur
     expect(handleBlur).toHaveBeenCalledTimes(1);
-    expect(page.input.props.className).toContain("border-border-base");
+    expect(page.getWrapperClassName()).toContain("border-border-base");
   });
 
   it("renders error validation feedback and applies error border", () => {
@@ -66,7 +75,7 @@ describe("CustomTextInput Component", () => {
     // Assert
     expect(page.error).toBeTruthy();
     expect(page.error?.props.children).toBe("Formato de cédula inválido");
-    expect(page.input.props.className).toContain("border-brand-red");
+    expect(page.getWrapperClassName()).toContain("border-brand-red");
   });
 
   it("enables secureTextEntry when isPassword is true", () => {
@@ -78,5 +87,99 @@ describe("CustomTextInput Component", () => {
 
     // Assert
     expect(page.input.props.secureTextEntry).toBe(true);
+  });
+
+  it("renders red required asterisk when required is true", () => {
+    // Arrange
+    const page = CustomTextInputPageObject.render({
+      label: "Primer Nombre",
+      required: true,
+    });
+
+    // Assert
+    expect(page.requiredAsterisk).toBeTruthy();
+    expect(page.requiredAsterisk?.props.children).toBe("*");
+  });
+
+  it("renders helperText when error is absent", () => {
+    // Arrange
+    const page = CustomTextInputPageObject.render({
+      helperText: "Formato oficial costarricense con guiones.",
+      label: "Identificación",
+    });
+
+    // Assert
+    expect(page.helperText).toBeTruthy();
+    expect(page.helperText?.props.children).toBe(
+      "Formato oficial costarricense con guiones.",
+    );
+  });
+
+  it("prioritizes error over helperText when both are provided", () => {
+    // Arrange
+    const page = CustomTextInputPageObject.render({
+      error: "Campo requerido",
+      helperText: "Formato oficial costarricense con guiones.",
+      label: "Identificación",
+    });
+
+    // Assert
+    expect(page.error).toBeTruthy();
+    expect(page.error?.props.children).toBe("Campo requerido");
+    expect(page.helperText).toBeNull();
+  });
+
+  it("renders hash left icon when leftIcon is hash", () => {
+    // Arrange
+    const page = CustomTextInputPageObject.render({
+      leftIcon: "hash",
+    });
+
+    // Assert
+    expect(page.leftIcon).toBeTruthy();
+  });
+
+  it("renders calendar left icon when leftIcon is calendar", () => {
+    // Arrange
+    const page = CustomTextInputPageObject.render({
+      leftIcon: "calendar",
+    });
+
+    // Assert
+    expect(page.leftIcon).toBeTruthy();
+  });
+
+  it("renders valid checkmark icon when isValid is true", () => {
+    // Arrange
+    const page = CustomTextInputPageObject.render({
+      isValid: true,
+    });
+
+    // Assert
+    expect(page.validIcon).toBeTruthy();
+  });
+
+  it("propagates custom testID to all child elements deterministically", () => {
+    // Arrange
+    const page = CustomTextInputPageObject.render({
+      error: "Error message",
+      isValid: true,
+      label: "Número de Cédula",
+      leftIcon: "hash",
+      required: true,
+      testID: "custom-id",
+    });
+
+    // Assert
+    expect(page.container.props.testID).toBe("custom-id-container");
+    expect(page.label?.props.testID).toBe("custom-id-label");
+    expect(page.requiredAsterisk?.props.testID).toBe(
+      "custom-id-required-asterisk",
+    );
+    expect(page.inputWrapper.props.testID).toBe("custom-id-wrapper");
+    expect(page.input.props.testID).toBe("custom-id");
+    expect(page.leftIcon?.props.testID).toBe("custom-id-left-icon");
+    expect(page.validIcon?.props.testID).toBe("custom-id-valid-icon");
+    expect(page.error?.props.testID).toBe("custom-id-error");
   });
 });
