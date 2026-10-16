@@ -1,6 +1,7 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, Text } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import {
+  BASE_BUTTON_STYLES,
   BASE_BUTTON_TEST_IDS,
   BASE_BUTTON_VARIANTS,
 } from './constants/BaseButton.constants';
@@ -79,6 +80,7 @@ export const BaseButton = ({
 
   return (
     <Pressable
+      {...rest}
       accessibilityRole="button"
       accessibilityState={{ disabled: isInteractionDisabled }}
       className={containerClasses}
@@ -87,7 +89,6 @@ export const BaseButton = ({
       onPress={onPress}
       style={style}
       testID={testID ?? BASE_BUTTON_TEST_IDS.BUTTON}
-      {...rest}
     >
       {loading ? (
         <ActivityIndicator
@@ -96,7 +97,7 @@ export const BaseButton = ({
           testID={BASE_BUTTON_TEST_IDS.LOADER}
         />
       ) : (
-        <>
+        <View className={BASE_BUTTON_STYLES.CONTENT_CONTAINER}>
           {icon ?? null}
           <Text
             className={`${text} text-center flex-shrink`}
@@ -105,7 +106,7 @@ export const BaseButton = ({
             {label}
           </Text>
           {iconRight ?? null}
-        </>
+        </View>
       )}
     </Pressable>
   );
