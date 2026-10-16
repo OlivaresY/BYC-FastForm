@@ -7,8 +7,11 @@ export type BaseButtonVariant =
   (typeof BASE_BUTTON_VARIANTS)[keyof typeof BASE_BUTTON_VARIANTS];
 
 export interface BaseButtonProps extends Omit<PressableProps, "style"> {
+  className?: string;
   disabled?: boolean;
+  fullWidth?: boolean;
   icon?: ReactNode;
+  iconRight?: ReactNode;
   label: string;
   loading?: boolean;
   onPress?: () => void;

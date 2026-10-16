@@ -1,3 +1,5 @@
+import React from 'react';
+import { View } from 'react-native';
 import type { Meta, StoryObj } from '@storybook/react-native';
 import { APPLICANT_STEP_VIEW_DEFAULT_VALUES } from '../constants/ApplicantStepView.constants';
 import { ApplicantStepView } from './ApplicantStepView';
@@ -20,6 +22,13 @@ const meta = {
     vehicleBeneficiary: 'same_holder',
   },
   component: ApplicantStepView,
+  decorators: [
+    (Story: React.ComponentType): React.JSX.Element => (
+      <View className="w-full flex-1 self-stretch bg-[#F7F7F6]">
+        <Story />
+      </View>
+    ),
+  ],
   title: 'CreditWizard/ApplicantStepView',
 } satisfies Meta<typeof ApplicantStepView>;
 
@@ -27,19 +36,7 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const PhysicalRegime: Story = {
-  args: {
-    regime: 'physical',
-  },
-};
-
-export const LegalRegime: Story = {
-  args: {
-    regime: 'legal',
-  },
-};
-
-export const PhysicalValid: Story = {
+export const Default: Story = {
   args: {
     isIdentificationValid: true,
     isValid: true,
@@ -60,6 +57,14 @@ export const PhysicalValid: Story = {
   },
 };
 
+export const PhysicalDisabled: Story = {
+  args: {
+    isIdentificationValid: false,
+    isValid: false,
+    regime: 'physical',
+  },
+};
+
 export const LegalValid: Story = {
   args: {
     isIdentificationValid: true,
@@ -73,5 +78,13 @@ export const LegalValid: Story = {
     },
     regime: 'legal',
     vehicleBeneficiary: 'same_holder',
+  },
+};
+
+export const LegalDisabled: Story = {
+  args: {
+    isIdentificationValid: false,
+    isValid: false,
+    regime: 'legal',
   },
 };

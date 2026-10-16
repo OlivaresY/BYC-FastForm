@@ -1,3 +1,4 @@
+export { ArrowRightIcon } from "./ArrowRightIcon";
 export { BookmarkIcon } from "./BookmarkIcon";
 export { BuildingIcon } from "./BuildingIcon";
 export { CalendarIcon } from "./CalendarIcon";
