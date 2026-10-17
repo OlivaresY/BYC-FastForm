@@ -31,37 +31,19 @@ export const VEHICLE_BENEFICIARY_SECTION_ICON_DIMENSIONS = {
   VIEW_BOX: "0 0 24 24",
 } as const;
 
-export const VEHICLE_BENEFICIARY_SECTION_ICONS = {
-  CAR: {
-    paths: [
-      "M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 1 12v4c0 .6.4 1 1 1h2",
-      "M9 17a2 2 0 1 1-4 0 2 2 0 0 1 4 0z",
-      "M19 17a2 2 0 1 1-4 0 2 2 0 0 1 4 0z",
-    ],
-  },
-  CHECKMARK: {
-    path: "M20 6 9 17l-5-5",
-  },
-  RADIO_CIRCLE: {
-    cx: 12,
-    cy: 12,
-    r: 9,
-  },
-} as const;
-
 export const VEHICLE_BENEFICIARY_SECTION_STYLES = {
-  ACTIVE_BUTTON: "border-[#B91C1C]",
-  ACTIVE_LABEL: "text-[#111111] font-bold",
+  ACTIVE_BUTTON: "border-brand-red",
+  ACTIVE_LABEL: "text-text-primary font-bold",
   BUTTON_BASE:
     "flex-1 min-h-[48px] min-w-[48px] flex-row items-center justify-center rounded-xl border bg-white px-3 py-2.5 gap-2",
   BUTTON_DISABLED: "opacity-40",
   CONTAINER: "w-full",
   HEADER_ROW: "flex-row items-center gap-2 mb-1",
-  HEADER_TITLE: "text-xs font-bold tracking-wider text-[#111111]",
-  INACTIVE_BUTTON: "border-[#E5E7EB]",
-  INACTIVE_LABEL: "text-[#5A6B80] font-medium",
+  HEADER_TITLE: "text-xs font-bold tracking-wider text-text-primary",
+  INACTIVE_BUTTON: "border-gray-200",
+  INACTIVE_LABEL: "text-text-secondary font-medium",
   LABEL_BASE: "flex-shrink text-center text-sm",
-  PROMPT: "mb-3 text-sm font-normal text-[#5A6B80]",
+  PROMPT: "mb-3 text-sm font-normal text-text-secondary",
   SELECTOR_ROW: "flex-row gap-3",
 } as const;
 

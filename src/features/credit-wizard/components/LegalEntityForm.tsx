@@ -1,12 +1,12 @@
-import React from "react";
-import { Text, View } from "react-native";
+import React, { useMemo } from 'react';
+import { Text, View } from 'react-native';
 import {
   BuildingIcon as SharedBuildingIcon,
   DocumentIcon as SharedDocumentIcon,
   UserIcon as SharedUserIcon,
-} from "@/shared/ui/Icons";
-import { CustomSelect } from "@/shared/ui/CustomSelect";
-import { CustomTextInput } from "@/shared/ui/CustomTextInput";
+} from '@/shared/ui/Icons';
+import { CustomSelect } from '@/shared/ui/CustomSelect';
+import { CustomTextInput } from '@/shared/ui/CustomTextInput';
 import {
   LEGAL_ENTITY_FORM_COLORS,
   LEGAL_ENTITY_FORM_COPY,
@@ -14,8 +14,8 @@ import {
   LEGAL_ENTITY_FORM_ICON_DIMENSIONS,
   LEGAL_ENTITY_FORM_STYLES,
   LEGAL_ENTITY_FORM_TEST_IDS,
-} from "../constants/LegalEntityForm.constants";
-import type { LegalEntityFormProps } from "../types/LegalEntityForm.types";
+} from '../constants/LegalEntityForm.constants';
+import type { LegalEntityFormProps } from '../types/LegalEntityForm.types';
 
 interface SectionHeaderProps {
   icon: React.JSX.Element;
@@ -61,7 +61,7 @@ const SectionHeader = ({
   <View className={LEGAL_ENTITY_FORM_STYLES.SECTION_HEADER_ROW} testID={testID}>
     {icon}
     <Text
-      accessibilityRole="header"
+      accessibilityRole='header'
       className={LEGAL_ENTITY_FORM_STYLES.SECTION_HEADER_TITLE}
     >
       {title}
@@ -82,6 +82,21 @@ export const LegalEntityForm = ({
     options?.identificationTypeOptions ??
     LEGAL_ENTITY_FORM_DEFAULT_OPTIONS.IDENTIFICATION_TYPE;
 
+  const handlers = useMemo(
+    () => ({
+      identificationNumber: (val: string): void =>
+        onFieldChange('identificationNumber', val),
+      identificationType: (val: string): void =>
+        onFieldChange('identificationType', val),
+      legalName: (val: string): void => onFieldChange('legalName', val),
+      representativeIdentification: (val: string): void =>
+        onFieldChange('representativeIdentification', val),
+      representativeName: (val: string): void =>
+        onFieldChange('representativeName', val),
+    }),
+    [onFieldChange],
+  );
+
   return (
     <View
       className={LEGAL_ENTITY_FORM_STYLES.CONTAINER}
@@ -99,7 +114,7 @@ export const LegalEntityForm = ({
           disabled={disabled}
           errorMessage={errors?.identificationType}
           label={LEGAL_ENTITY_FORM_COPY.IDENTIFICATION_TYPE_LABEL}
-          onValueChange={(val) => onFieldChange("identificationType", val)}
+          onValueChange={handlers.identificationType}
           options={identificationTypeOptions}
           placeholder={LEGAL_ENTITY_FORM_COPY.IDENTIFICATION_TYPE_PLACEHOLDER}
           required
@@ -113,8 +128,8 @@ export const LegalEntityForm = ({
           helperText={LEGAL_ENTITY_FORM_COPY.IDENTIFICATION_NUMBER_HELPER}
           isValid={isIdentificationValid}
           label={LEGAL_ENTITY_FORM_COPY.IDENTIFICATION_NUMBER_LABEL}
-          leftIcon="hash"
-          onChangeText={(val) => onFieldChange("identificationNumber", val)}
+          leftIcon='hash'
+          onChangeText={handlers.identificationNumber}
           placeholder={LEGAL_ENTITY_FORM_COPY.IDENTIFICATION_NUMBER_PLACEHOLDER}
           required
           testID={LEGAL_ENTITY_FORM_TEST_IDS.IDENTIFICATION_NUMBER_INPUT}
@@ -134,7 +149,7 @@ export const LegalEntityForm = ({
           editable={!disabled}
           error={errors?.legalName}
           label={LEGAL_ENTITY_FORM_COPY.LEGAL_NAME_LABEL}
-          onChangeText={(val) => onFieldChange("legalName", val)}
+          onChangeText={handlers.legalName}
           placeholder={LEGAL_ENTITY_FORM_COPY.LEGAL_NAME_PLACEHOLDER}
           required
           testID={LEGAL_ENTITY_FORM_TEST_IDS.LEGAL_NAME_INPUT}
@@ -154,9 +169,7 @@ export const LegalEntityForm = ({
           editable={!disabled}
           error={errors?.representativeIdentification}
           label={LEGAL_ENTITY_FORM_COPY.REPRESENTATIVE_IDENTIFICATION_LABEL}
-          onChangeText={(val) =>
-            onFieldChange("representativeIdentification", val)
-          }
+          onChangeText={handlers.representativeIdentification}
           placeholder={
             LEGAL_ENTITY_FORM_COPY.REPRESENTATIVE_IDENTIFICATION_PLACEHOLDER
           }
@@ -171,7 +184,7 @@ export const LegalEntityForm = ({
           editable={!disabled}
           error={errors?.representativeName}
           label={LEGAL_ENTITY_FORM_COPY.REPRESENTATIVE_NAME_LABEL}
-          onChangeText={(val) => onFieldChange("representativeName", val)}
+          onChangeText={handlers.representativeName}
           placeholder={LEGAL_ENTITY_FORM_COPY.REPRESENTATIVE_NAME_PLACEHOLDER}
           required
           testID={LEGAL_ENTITY_FORM_TEST_IDS.REPRESENTATIVE_NAME_INPUT}
@@ -181,3 +194,5 @@ export const LegalEntityForm = ({
     </View>
   );
 };
+
+export const LegalEntityFormMemo = React.memo(LegalEntityForm);

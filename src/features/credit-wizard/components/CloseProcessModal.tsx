@@ -9,12 +9,7 @@ import {
   CLOSE_PROCESS_MODAL_STYLES,
   CLOSE_PROCESS_MODAL_TEST_IDS,
 } from "../constants/CloseProcessModal.constants";
-export interface CloseProcessModalProps {
-  onClose: () => void;
-  onDiscard: () => void;
-  onSaveDraft: () => void;
-  visible: boolean;
-}
+import type { CloseProcessModalProps } from "../types/CloseProcessModal.types";
 
 /**
  * CloseProcessModal presents a confirmation dialog when the user attempts

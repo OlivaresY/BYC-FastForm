@@ -1,23 +1,33 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from 'react';
+import { APPLICANT_STEP_VIEW_DEFAULT_VALUES } from '../constants/ApplicantStepView.constants';
 import {
-  APPLICANT_STEP_VIEW_DEFAULT_VALUES,
-  APPLICANT_STEP_VIEW_ERRORS,
-  APPLICANT_STEP_VIEW_NUMERICAL,
-} from "../constants/ApplicantStepView.constants";
-import type { LegalEntityType } from "../types/LegalEntitySelector.types";
+  LEGAL_APPLICANT_FIELDS,
+  LegalApplicantSchema,
+  LegalIdentificationNumberSchema,
+  mapIssuesToFieldErrors,
+  normalizeThirdPartyBirthDate,
+  PHYSICAL_APPLICANT_FIELDS,
+  PhysicalApplicantSchema,
+  PhysicalIdentificationNumberSchema,
+  THIRD_PARTY_BENEFICIARY_FIELDS,
+  ThirdPartyBeneficiarySchema,
+} from '../types/ApplicantStepView.schema';
+import type { LegalEntityType } from '../types/LegalEntitySelector.types';
 import type {
   LegalEntityFormField,
   LegalEntityFormValues,
-} from "../types/LegalEntityForm.types";
+} from '../types/LegalEntityForm.types';
 import type {
   PhysicalPersonFormField,
   PhysicalPersonFormValues,
-} from "../types/PhysicalPersonForm.types";
-import type { VehicleBeneficiaryType } from "../types/VehicleBeneficiarySection.types";
+} from '../types/PhysicalPersonForm.types';
+import type { VehicleBeneficiaryType } from '../types/VehicleBeneficiarySection.types';
 import type {
+  ThirdPartyBeneficiaryField,
+  ThirdPartyBeneficiaryValues,
   UseApplicantStepViewModelProps,
   UseApplicantStepViewModelReturn,
-} from "../types/ApplicantStepView.types";
+} from '../types/ApplicantStepView.types';
 
 export const useApplicantStepViewModel = (
   props?: UseApplicantStepViewModelProps,
@@ -26,12 +36,13 @@ export const useApplicantStepViewModel = (
     initialLegalValues,
     initialPhysicalValues,
     initialRegime,
+    initialThirdPartyValues,
     initialVehicleBeneficiary,
     onSubmit: onSubmitProp,
   } = props ?? {};
 
   const [regime, setRegime] = useState<LegalEntityType>(
-    initialRegime ?? "physical",
+    initialRegime ?? 'physical',
   );
 
   const [physicalValues, setPhysicalValues] =
@@ -47,8 +58,20 @@ export const useApplicantStepViewModel = (
 
   const [vehicleBeneficiary, setVehicleBeneficiary] =
     useState<VehicleBeneficiaryType>(
-      initialVehicleBeneficiary ?? "same_holder",
+      initialVehicleBeneficiary ?? 'same_holder',
     );
+
+  const [isBeneficiaryModalOpen, setIsBeneficiaryModalOpen] =
+    useState<boolean>(false);
+
+  const [thirdPartyValues, setThirdPartyValues] =
+    useState<ThirdPartyBeneficiaryValues>({
+      ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
+      ...(initialVehicleBeneficiary === 'third_party'
+        ? { isThirdPartyRegistration: true }
+        : {}),
+      ...initialThirdPartyValues,
+    });
 
   const [physicalErrors, setPhysicalErrors] = useState<
     Partial<Record<PhysicalPersonFormField, string>>
@@ -58,57 +81,61 @@ export const useApplicantStepViewModel = (
     Partial<Record<LegalEntityFormField, string>>
   >({});
 
+  const [thirdPartyErrors, setThirdPartyErrors] = useState<
+    Partial<Record<ThirdPartyBeneficiaryField, string>>
+  >({});
+
   // ===========================================================================
   // Validation Computations
   // ===========================================================================
 
-  const isPhysicalIdentificationValid = useMemo<boolean>(() => {
-    const sanitizedId = physicalValues.identificationNumber.replace(/\D/g, "");
-    return (
-      sanitizedId.length >= APPLICANT_STEP_VIEW_NUMERICAL.MIN_PHYSICAL_ID_LENGTH
-    );
-  }, [physicalValues.identificationNumber]);
+  const isPhysicalIdentificationValid = useMemo<boolean>(
+    () =>
+      PhysicalIdentificationNumberSchema.safeParse(
+        physicalValues.identificationNumber,
+      ).success,
+    [physicalValues.identificationNumber],
+  );
 
-  const isLegalIdentificationValid = useMemo<boolean>(() => {
-    const sanitizedId = legalValues.identificationNumber.replace(/\D/g, "");
-    return (
-      sanitizedId.length >= APPLICANT_STEP_VIEW_NUMERICAL.MIN_LEGAL_ID_LENGTH
-    );
-  }, [legalValues.identificationNumber]);
+  const isLegalIdentificationValid = useMemo<boolean>(
+    () =>
+      LegalIdentificationNumberSchema.safeParse(
+        legalValues.identificationNumber,
+      ).success,
+    [legalValues.identificationNumber],
+  );
 
   const isIdentificationValid =
-    regime === "physical"
+    regime === 'physical'
       ? isPhysicalIdentificationValid
       : isLegalIdentificationValid;
 
-  const isPhysicalValid = useMemo<boolean>(() => {
-    return (
-      physicalValues.identificationType.trim() !== "" &&
-      isPhysicalIdentificationValid &&
-      physicalValues.firstName.trim() !== "" &&
-      physicalValues.firstLastName.trim() !== "" &&
-      physicalValues.secondLastName.trim() !== "" &&
-      physicalValues.birthDate.trim() !== "" &&
-      physicalValues.nationality.trim() !== "" &&
-      physicalValues.maritalStatus.trim() !== "" &&
-      physicalValues.gender.trim() !== ""
-    );
-  }, [isPhysicalIdentificationValid, physicalValues]);
+  const isPhysicalValid = useMemo<boolean>(
+    () => PhysicalApplicantSchema.safeParse(physicalValues).success,
+    [physicalValues],
+  );
 
-  const isLegalValid = useMemo<boolean>(() => {
-    return (
-      legalValues.identificationType.trim() !== "" &&
-      isLegalIdentificationValid &&
-      legalValues.legalName.trim() !== "" &&
-      legalValues.representativeIdentification.trim() !== "" &&
-      legalValues.representativeName.trim() !== ""
-    );
-  }, [isLegalIdentificationValid, legalValues]);
+  const isLegalValid = useMemo<boolean>(
+    () => LegalApplicantSchema.safeParse(legalValues).success,
+    [legalValues],
+  );
 
-  const isValid = regime === "physical" ? isPhysicalValid : isLegalValid;
+  const isValid = regime === 'physical' ? isPhysicalValid : isLegalValid;
 
   // ===========================================================================
-  // Handlers
+  // Modal Handlers
+  // ===========================================================================
+
+  const openBeneficiaryModal = useCallback((): void => {
+    setIsBeneficiaryModalOpen(true);
+  }, []);
+
+  const closeBeneficiaryModal = useCallback((): void => {
+    setIsBeneficiaryModalOpen(false);
+  }, []);
+
+  // ===========================================================================
+  // Form Handlers
   // ===========================================================================
 
   const onRegimeChange = useCallback((newRegime: LegalEntityType): void => {
@@ -151,103 +178,130 @@ export const useApplicantStepViewModel = (
     [],
   );
 
-  const onVehicleBeneficiaryChange = useCallback(
-    (beneficiary: VehicleBeneficiaryType): void => {
-      setVehicleBeneficiary(beneficiary);
+  const onThirdPartyFieldChange = useCallback(
+    <K extends ThirdPartyBeneficiaryField>(
+      field: K,
+      value: ThirdPartyBeneficiaryValues[K],
+    ): void => {
+      setThirdPartyValues((prev) => ({ ...prev, [field]: value }));
+      setThirdPartyErrors((prev) => {
+        if (prev[field]) {
+          const next = { ...prev };
+          delete next[field];
+          return next;
+        }
+        return prev;
+      });
     },
     [],
   );
 
+  const onVehicleBeneficiaryChange = useCallback(
+    (beneficiary: VehicleBeneficiaryType): void => {
+      setVehicleBeneficiary(beneficiary);
+
+      if (beneficiary === 'third_party') {
+        setThirdPartyValues((prev) => ({
+          ...prev,
+          isThirdPartyRegistration: true,
+        }));
+        openBeneficiaryModal();
+      } else {
+        setThirdPartyValues(APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY);
+        setThirdPartyErrors({});
+        closeBeneficiaryModal();
+      }
+    },
+    [closeBeneficiaryModal, openBeneficiaryModal],
+  );
+
   const onSubmit = useCallback((): void => {
-    if (regime === "physical") {
-      const errors: Partial<Record<PhysicalPersonFormField, string>> = {};
-      if (!physicalValues.identificationType.trim()) {
-        errors.identificationType =
-          APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.IDENTIFICATION_TYPE;
-      }
-      if (!isPhysicalIdentificationValid) {
-        errors.identificationNumber =
-          APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.IDENTIFICATION_NUMBER;
-      }
-      if (!physicalValues.firstName.trim()) {
-        errors.firstName = APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.FIRST_NAME;
-      }
-      if (!physicalValues.firstLastName.trim()) {
-        errors.firstLastName =
-          APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.FIRST_LAST_NAME;
-      }
-      if (!physicalValues.secondLastName.trim()) {
-        errors.secondLastName =
-          APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.SECOND_LAST_NAME;
-      }
-      if (!physicalValues.birthDate.trim()) {
-        errors.birthDate = APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.BIRTH_DATE;
-      }
-      if (!physicalValues.nationality.trim()) {
-        errors.nationality = APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.NATIONALITY;
-      }
-      if (!physicalValues.maritalStatus.trim()) {
-        errors.maritalStatus =
-          APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.MARITAL_STATUS;
-      }
-      if (!physicalValues.gender.trim()) {
-        errors.gender = APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.GENDER;
-      }
+    const isThirdParty = vehicleBeneficiary === 'third_party';
+    let hasValidationErrors = false;
 
-      if (Object.keys(errors).length > 0) {
-        setPhysicalErrors(errors);
-        return;
-      }
-
-      onSubmitProp?.({
-        regime: "physical",
-        values: physicalValues,
-        vehicleBeneficiary,
+    if (isThirdParty) {
+      const thirdPartyResult = ThirdPartyBeneficiarySchema.safeParse({
+        ...thirdPartyValues,
+        isThirdPartyRegistration: true,
+        thirdPartyBirthDate: normalizeThirdPartyBirthDate(
+          thirdPartyValues.thirdPartyBirthDate,
+        ),
       });
-    } else {
-      const errors: Partial<Record<LegalEntityFormField, string>> = {};
-      if (!legalValues.identificationType.trim()) {
-        errors.identificationType =
-          APPLICANT_STEP_VIEW_ERRORS.LEGAL.IDENTIFICATION_TYPE;
-      }
-      if (!isLegalIdentificationValid) {
-        errors.identificationNumber =
-          APPLICANT_STEP_VIEW_ERRORS.LEGAL.IDENTIFICATION_NUMBER;
-      }
-      if (!legalValues.legalName.trim()) {
-        errors.legalName = APPLICANT_STEP_VIEW_ERRORS.LEGAL.LEGAL_NAME;
-      }
-      if (!legalValues.representativeIdentification.trim()) {
-        errors.representativeIdentification =
-          APPLICANT_STEP_VIEW_ERRORS.LEGAL.REPRESENTATIVE_IDENTIFICATION;
-      }
-      if (!legalValues.representativeName.trim()) {
-        errors.representativeName =
-          APPLICANT_STEP_VIEW_ERRORS.LEGAL.REPRESENTATIVE_NAME;
-      }
 
-      if (Object.keys(errors).length > 0) {
-        setLegalErrors(errors);
-        return;
+      if (!thirdPartyResult.success) {
+        setThirdPartyErrors(
+          mapIssuesToFieldErrors(
+            thirdPartyResult.error.issues,
+            THIRD_PARTY_BENEFICIARY_FIELDS,
+          ),
+        );
+        openBeneficiaryModal();
+        hasValidationErrors = true;
       }
-
-      onSubmitProp?.({
-        regime: "legal",
-        values: legalValues,
-        vehicleBeneficiary,
-      });
     }
+
+    if (regime === 'physical') {
+      const physicalResult = PhysicalApplicantSchema.safeParse(physicalValues);
+
+      if (!physicalResult.success) {
+        setPhysicalErrors(
+          mapIssuesToFieldErrors(
+            physicalResult.error.issues,
+            PHYSICAL_APPLICANT_FIELDS,
+          ),
+        );
+        hasValidationErrors = true;
+      }
+    } else {
+      const legalResult = LegalApplicantSchema.safeParse(legalValues);
+
+      if (!legalResult.success) {
+        setLegalErrors(
+          mapIssuesToFieldErrors(
+            legalResult.error.issues,
+            LEGAL_APPLICANT_FIELDS,
+          ),
+        );
+        hasValidationErrors = true;
+      }
+    }
+
+    if (hasValidationErrors) {
+      return;
+    }
+
+    const thirdPartyPayload = isThirdParty
+      ? { ...thirdPartyValues, isThirdPartyRegistration: true }
+      : {};
+
+    onSubmitProp?.(
+      regime === 'physical'
+        ? {
+            regime: 'physical',
+            values: physicalValues,
+            vehicleBeneficiary,
+            ...thirdPartyPayload,
+          }
+        : {
+            regime: 'legal',
+            values: legalValues,
+            vehicleBeneficiary,
+            ...thirdPartyPayload,
+          },
+    );
   }, [
-    isLegalIdentificationValid,
-    isPhysicalIdentificationValid,
     legalValues,
     onSubmitProp,
+    openBeneficiaryModal,
     physicalValues,
     regime,
+    thirdPartyValues,
     vehicleBeneficiary,
   ]);
 
   return {
+    closeBeneficiaryModal,
+    isBeneficiaryModalOpen,
     isIdentificationValid,
     isValid,
     legalErrors,
@@ -256,10 +310,14 @@ export const useApplicantStepViewModel = (
     onPhysicalFieldChange,
     onRegimeChange,
     onSubmit,
+    onThirdPartyFieldChange,
     onVehicleBeneficiaryChange,
+    openBeneficiaryModal,
     physicalErrors,
     physicalValues,
     regime,
+    thirdPartyErrors,
+    thirdPartyValues,
     vehicleBeneficiary,
   };
 };

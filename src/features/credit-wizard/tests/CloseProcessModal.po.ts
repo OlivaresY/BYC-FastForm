@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react-native";
 import type { ReactTestInstance } from "react-test-renderer";
 import { CloseProcessModal } from "../components/CloseProcessModal";
 import { CLOSE_PROCESS_MODAL_TEST_IDS } from "../constants/CloseProcessModal.constants";
-import type { CloseProcessModalProps } from "../components/CloseProcessModal";
+import type { CloseProcessModalProps } from "../types/CloseProcessModal.types";
 
 export class CloseProcessModalPageObject {
   public static render(

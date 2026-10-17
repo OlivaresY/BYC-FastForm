@@ -1,10 +1,10 @@
-import React from "react";
-import { Pressable, Text, View } from "react-native";
+import React, { useCallback } from 'react';
+import { Pressable, Text, View } from 'react-native';
 import {
   CarIcon as SharedCarIcon,
   CheckmarkIcon as SharedCheckmarkIcon,
   CircleIcon as SharedCircleIcon,
-} from "@/shared/ui/Icons";
+} from '@/shared/ui/Icons';
 import {
   VEHICLE_BENEFICIARY_SECTION_COLORS,
   VEHICLE_BENEFICIARY_SECTION_COPY,
@@ -12,8 +12,8 @@ import {
   VEHICLE_BENEFICIARY_SECTION_ICON_DIMENSIONS,
   VEHICLE_BENEFICIARY_SECTION_STYLES,
   VEHICLE_BENEFICIARY_SECTION_TEST_IDS,
-} from "../constants/VehicleBeneficiarySection.constants";
-import type { VehicleBeneficiarySectionProps } from "../types/VehicleBeneficiarySection.types";
+} from '../constants/VehicleBeneficiarySection.constants';
+import type { VehicleBeneficiarySectionProps } from '../types/VehicleBeneficiarySection.types';
 
 interface OptionIconProps {
   isActive: boolean;
@@ -66,13 +66,13 @@ export const VehicleBeneficiarySection = ({
   const isThirdPartySelected =
     selectedBeneficiary === VEHICLE_BENEFICIARY_SECTION_ENTITIES.THIRD_PARTY;
 
-  const handleSelectSameHolder = (): void => {
+  const handleSelectSameHolder = useCallback((): void => {
     onSelectBeneficiary(VEHICLE_BENEFICIARY_SECTION_ENTITIES.SAME_HOLDER);
-  };
+  }, [onSelectBeneficiary]);
 
-  const handleSelectThirdParty = (): void => {
+  const handleSelectThirdParty = useCallback((): void => {
     onSelectBeneficiary(VEHICLE_BENEFICIARY_SECTION_ENTITIES.THIRD_PARTY);
-  };
+  }, [onSelectBeneficiary]);
 
   const sameHolderBorderClass = isSameHolderSelected
     ? VEHICLE_BENEFICIARY_SECTION_STYLES.ACTIVE_BUTTON
@@ -84,7 +84,7 @@ export const VehicleBeneficiarySection = ({
 
   const disabledClass = disabled
     ? ` ${VEHICLE_BENEFICIARY_SECTION_STYLES.BUTTON_DISABLED}`
-    : "";
+    : '';
 
   return (
     <View
@@ -117,7 +117,7 @@ export const VehicleBeneficiarySection = ({
       <View className={VEHICLE_BENEFICIARY_SECTION_STYLES.SELECTOR_ROW}>
         {/* Option 1: Sí, mismo titular */}
         <Pressable
-          accessibilityRole="button"
+          accessibilityRole='button'
           accessibilityState={{
             disabled: !!disabled,
             selected: isSameHolderSelected,
@@ -145,7 +145,7 @@ export const VehicleBeneficiarySection = ({
 
         {/* Option 2: No, a nombre de un tercero */}
         <Pressable
-          accessibilityRole="button"
+          accessibilityRole='button'
           accessibilityState={{
             disabled: !!disabled,
             selected: isThirdPartySelected,
@@ -174,3 +174,7 @@ export const VehicleBeneficiarySection = ({
     </View>
   );
 };
+
+export const VehicleBeneficiarySectionMemo = React.memo(
+  VehicleBeneficiarySection,
+);

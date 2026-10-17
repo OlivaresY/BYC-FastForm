@@ -10,24 +10,53 @@ import type {
 import type { VehicleBeneficiaryType } from './VehicleBeneficiarySection.types';
 
 // =============================================================================
+// Final Beneficiary (Third-Party) Domain Types
+// =============================================================================
+
+export interface ThirdPartyBeneficiaryValues {
+  isThirdPartyRegistration?: boolean;
+  thirdPartyBirthDate?: Date | string;
+  thirdPartyDocNumber?: string;
+  thirdPartyDocType?: string;
+  thirdPartyFullName?: string;
+  thirdPartyNationality?: string;
+  thirdPartyRelationship?: string;
+}
+
+export type ThirdPartyBeneficiaryField =
+  | 'thirdPartyBirthDate'
+  | 'thirdPartyDocNumber'
+  | 'thirdPartyDocType'
+  | 'thirdPartyFullName'
+  | 'thirdPartyNationality'
+  | 'thirdPartyRelationship';
+
+// =============================================================================
 // Discriminated Submission Payloads
 // =============================================================================
 
-export interface PhysicalApplicantStepData {
-  regime: 'physical';
-  values: PhysicalPersonFormValues;
+export interface BaseApplicantStepData extends ThirdPartyBeneficiaryValues {
   vehicleBeneficiary: VehicleBeneficiaryType;
 }
 
-export interface LegalApplicantStepData {
+export interface PhysicalApplicantStepData extends BaseApplicantStepData {
+  regime: 'physical';
+  values: PhysicalPersonFormValues;
+}
+
+export interface LegalApplicantStepData extends BaseApplicantStepData {
   regime: 'legal';
   values: LegalEntityFormValues;
-  vehicleBeneficiary: VehicleBeneficiaryType;
 }
 
 export type ApplicantStepData =
-  | PhysicalApplicantStepData
-  | LegalApplicantStepData;
+  PhysicalApplicantStepData | LegalApplicantStepData;
+
+export interface ApplicantStepFormData extends ThirdPartyBeneficiaryValues {
+  isThirdPartyRegistration: boolean;
+  regime: LegalEntityType;
+  vehicleBeneficiary: VehicleBeneficiaryType;
+}
 
 // =============================================================================
 // ViewModel Hook Options & Return Interface
@@ -37,12 +66,14 @@ export interface UseApplicantStepViewModelProps {
   initialLegalValues?: Partial<LegalEntityFormValues>;
   initialPhysicalValues?: Partial<PhysicalPersonFormValues>;
   initialRegime?: LegalEntityType;
+  initialThirdPartyValues?: Partial<ThirdPartyBeneficiaryValues>;
   initialVehicleBeneficiary?: VehicleBeneficiaryType;
   onSubmit?: (data: ApplicantStepData) => void;
 }
 
 export interface UseApplicantStepViewModelReturn {
   // State
+  isBeneficiaryModalOpen: boolean;
   isIdentificationValid: boolean;
   isValid: boolean;
   legalErrors: Partial<Record<LegalEntityFormField, string>>;
@@ -50,9 +81,12 @@ export interface UseApplicantStepViewModelReturn {
   physicalErrors: Partial<Record<PhysicalPersonFormField, string>>;
   physicalValues: PhysicalPersonFormValues;
   regime: LegalEntityType;
+  thirdPartyErrors: Partial<Record<ThirdPartyBeneficiaryField, string>>;
+  thirdPartyValues: ThirdPartyBeneficiaryValues;
   vehicleBeneficiary: VehicleBeneficiaryType;
 
   // Handlers
+  closeBeneficiaryModal: () => void;
   onLegalFieldChange: <K extends LegalEntityFormField>(
     field: K,
     value: LegalEntityFormValues[K],
@@ -63,22 +97,60 @@ export interface UseApplicantStepViewModelReturn {
   ) => void;
   onRegimeChange: (regime: LegalEntityType) => void;
   onSubmit: () => void;
+  onThirdPartyFieldChange: <K extends ThirdPartyBeneficiaryField>(
+    field: K,
+    value: ThirdPartyBeneficiaryValues[K],
+  ) => void;
   onVehicleBeneficiaryChange: (beneficiary: VehicleBeneficiaryType) => void;
+  openBeneficiaryModal: () => void;
 }
 
 // =============================================================================
 // Orchestrator Component Props
 // =============================================================================
 
-export interface ApplicantStepViewProps
-  extends Omit<
-    UseApplicantStepViewModelReturn,
-    'isIdentificationValid' | 'isValid' | 'legalErrors' | 'physicalErrors'
-  > {
+export interface ApplicantStepViewProps extends Omit<
+  UseApplicantStepViewModelReturn,
+  | 'closeBeneficiaryModal'
+  | 'isBeneficiaryModalOpen'
+  | 'isIdentificationValid'
+  | 'isValid'
+  | 'legalErrors'
+  | 'onThirdPartyFieldChange'
+  | 'openBeneficiaryModal'
+  | 'physicalErrors'
+  | 'thirdPartyErrors'
+  | 'thirdPartyValues'
+> {
+  closeBeneficiaryModal?: () => void;
   disabled?: boolean;
+  isBeneficiaryModalOpen?: boolean;
   isIdentificationValid?: boolean;
   isValid?: boolean;
   legalErrors?: Partial<Record<LegalEntityFormField, string>>;
+  onThirdPartyFieldChange?: <K extends ThirdPartyBeneficiaryField>(
+    field: K,
+    value: ThirdPartyBeneficiaryValues[K],
+  ) => void;
+  openBeneficiaryModal?: () => void;
   physicalErrors?: Partial<Record<PhysicalPersonFormField, string>>;
   testID?: string;
+  thirdPartyErrors?: Partial<Record<ThirdPartyBeneficiaryField, string>>;
+  thirdPartyValues?: ThirdPartyBeneficiaryValues;
+}
+
+// =============================================================================
+// Final Beneficiary Modal Component Props
+// =============================================================================
+
+export interface FinalBeneficiaryModalProps {
+  errors?: Partial<Record<ThirdPartyBeneficiaryField, string>>;
+  isOpen: boolean;
+  onClose: () => void;
+  onFieldChange: <K extends ThirdPartyBeneficiaryField>(
+    field: K,
+    value: ThirdPartyBeneficiaryValues[K],
+  ) => void;
+  testID?: string;
+  values: ThirdPartyBeneficiaryValues;
 }

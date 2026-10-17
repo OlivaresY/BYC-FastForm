@@ -65,23 +65,23 @@ export const LEGAL_ENTITY_SELECTOR_ICONS: Record<
 } as const;
 
 export const LEGAL_ENTITY_SELECTOR_STYLES = {
-  ACTIVE_BADGE: "bg-[#FDE8E8]",
-  ACTIVE_CARD: "border-[#B91C1C]",
+  ACTIVE_BADGE: "bg-red-100",
+  ACTIVE_CARD: "border-brand-red",
   ACTIVE_SUBTITLE:
-    "flex-shrink mt-0.5 text-center text-xs text-[#B91C1C] font-medium",
-  ACTIVE_TITLE: "flex-shrink text-center text-sm text-[#111111] font-bold",
+    "flex-shrink mt-0.5 text-center text-xs text-brand-red font-medium",
+  ACTIVE_TITLE: "flex-shrink text-center text-sm text-text-primary font-bold",
   CARD_BASE:
     "flex-1 min-h-[48px] min-w-[48px] items-center justify-center rounded-xl border bg-white p-4",
   CARD_DISABLED: "opacity-40",
   CONTAINER: "w-full",
   GRID: "flex-row gap-3",
-  HEADER_SUBTITLE: "mb-3 mt-1 text-sm font-normal text-[#5A6B80]",
-  HEADER_TITLE: "text-xs font-bold tracking-wider text-[#111111]",
+  HEADER_SUBTITLE: "mb-3 mt-1 text-sm font-normal text-text-secondary",
+  HEADER_TITLE: "text-xs font-bold tracking-wider text-text-primary",
   ICON_BADGE_BASE: "mb-3 h-11 w-11 items-center justify-center rounded-full",
-  INACTIVE_BADGE: "bg-[#EBE9E4]",
-  INACTIVE_CARD: "border-[#E5E7EB]",
-  INACTIVE_SUBTITLE: "flex-shrink mt-0.5 text-center text-xs text-[#5A6B80]",
-  INACTIVE_TITLE: "flex-shrink text-center text-sm text-[#111111] font-medium",
+  INACTIVE_BADGE: "bg-stone-200",
+  INACTIVE_CARD: "border-gray-200",
+  INACTIVE_SUBTITLE: "flex-shrink mt-0.5 text-center text-xs text-text-secondary",
+  INACTIVE_TITLE: "flex-shrink text-center text-sm text-text-primary font-medium",
 } as const;
 
 export const LEGAL_ENTITY_SELECTOR_SVG_ATTRIBUTES = {

@@ -36,42 +36,11 @@ export const LEGAL_ENTITY_FORM_ICON_DIMENSIONS = {
   VIEW_BOX: "0 0 24 24",
 } as const;
 
-export const LEGAL_ENTITY_FORM_ICONS = {
-  BUILDING: {
-    paths: [
-      "M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z",
-      "M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2",
-      "M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2",
-      "M10 6h4",
-      "M10 10h4",
-      "M10 14h4",
-      "M10 18h4",
-    ],
-  },
-  DOCUMENT: {
-    paths: [
-      "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z",
-      "M14 2v4a2 2 0 0 0 2 2h4",
-      "M10 9H8",
-      "M16 13H8",
-      "M16 17H8",
-    ],
-  },
-  USER: {
-    circle: {
-      cx: 12,
-      cy: 7,
-      r: 4,
-    },
-    path: "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2",
-  },
-} as const;
-
 export const LEGAL_ENTITY_FORM_STYLES = {
   CONTAINER: "w-full gap-6",
   SECTION_CONTAINER: "w-full gap-3",
   SECTION_HEADER_ROW: "flex-row items-center gap-2 mb-1",
-  SECTION_HEADER_TITLE: "text-xs font-bold tracking-wider text-[#111111]",
+  SECTION_HEADER_TITLE: "text-xs font-bold tracking-wider text-text-primary",
 } as const;
 
 export const LEGAL_ENTITY_FORM_SVG_ATTRIBUTES = {

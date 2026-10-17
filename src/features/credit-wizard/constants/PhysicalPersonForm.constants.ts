@@ -66,48 +66,13 @@ export const PHYSICAL_PERSON_FORM_ICON_DIMENSIONS = {
   VIEW_BOX: "0 0 24 24",
 } as const;
 
-export const PHYSICAL_PERSON_FORM_ICONS = {
-  CLOCK: {
-    circle: {
-      cx: 12,
-      cy: 12,
-      r: 10,
-    },
-    path: "M12 6v6l4 2",
-  },
-  ID_CARD: {
-    paths: [
-      "M16 10h2",
-      "M16 14h2",
-      "M6.17 15a3 3 0 0 1 5.66 0",
-      "M9 11a2 2 0 1 0 0-4 2 2 0 0 0 0 4",
-    ],
-    rect: {
-      height: 14,
-      rx: 2,
-      ry: 2,
-      width: 20,
-      x: 2,
-      y: 5,
-    },
-  },
-  USER: {
-    circle: {
-      cx: 12,
-      cy: 7,
-      r: 4,
-    },
-    path: "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2",
-  },
-} as const;
-
 export const PHYSICAL_PERSON_FORM_STYLES = {
   CONTAINER: "w-full gap-6",
   GRID_COLUMN: "flex-1",
   GRID_ROW: "flex-row gap-3",
   SECTION_CONTAINER: "w-full gap-3",
   SECTION_HEADER_ROW: "flex-row items-center gap-2 mb-1",
-  SECTION_HEADER_TITLE: "text-xs font-bold tracking-wider text-[#111111]",
+  SECTION_HEADER_TITLE: "text-xs font-bold tracking-wider text-text-primary",
 } as const;
 
 export const PHYSICAL_PERSON_FORM_SVG_ATTRIBUTES = {

@@ -1,12 +1,12 @@
-import React from "react";
-import { Text, View } from "react-native";
+import React, { useMemo } from 'react';
+import { Text, View } from 'react-native';
 import {
   ClockIcon as SharedClockIcon,
   IdCardIcon as SharedIdCardIcon,
   UserIcon as SharedUserIcon,
-} from "@/shared/ui/Icons";
-import { CustomSelect } from "@/shared/ui/CustomSelect";
-import { CustomTextInput } from "@/shared/ui/CustomTextInput";
+} from '@/shared/ui/Icons';
+import { CustomSelect } from '@/shared/ui/CustomSelect';
+import { CustomTextInput } from '@/shared/ui/CustomTextInput';
 import {
   PHYSICAL_PERSON_FORM_COLORS,
   PHYSICAL_PERSON_FORM_COPY,
@@ -14,8 +14,8 @@ import {
   PHYSICAL_PERSON_FORM_ICON_DIMENSIONS,
   PHYSICAL_PERSON_FORM_STYLES,
   PHYSICAL_PERSON_FORM_TEST_IDS,
-} from "../constants/PhysicalPersonForm.constants";
-import type { PhysicalPersonFormProps } from "../types/PhysicalPersonForm.types";
+} from '../constants/PhysicalPersonForm.constants';
+import type { PhysicalPersonFormProps } from '../types/PhysicalPersonForm.types';
 
 interface SectionHeaderProps {
   icon: React.JSX.Element;
@@ -93,6 +93,25 @@ export const PhysicalPersonForm = ({
   const genderOptions =
     options?.genderOptions ?? PHYSICAL_PERSON_FORM_DEFAULT_OPTIONS.GENDER;
 
+  const handlers = useMemo(
+    () => ({
+      birthDate: (val: string): void => onFieldChange('birthDate', val),
+      firstLastName: (val: string): void => onFieldChange('firstLastName', val),
+      firstName: (val: string): void => onFieldChange('firstName', val),
+      gender: (val: string): void => onFieldChange('gender', val),
+      identificationNumber: (val: string): void =>
+        onFieldChange('identificationNumber', val),
+      identificationType: (val: string): void =>
+        onFieldChange('identificationType', val),
+      maritalStatus: (val: string): void => onFieldChange('maritalStatus', val),
+      middleName: (val: string): void => onFieldChange('middleName', val),
+      nationality: (val: string): void => onFieldChange('nationality', val),
+      secondLastName: (val: string): void =>
+        onFieldChange('secondLastName', val),
+    }),
+    [onFieldChange],
+  );
+
   return (
     <View
       className={PHYSICAL_PERSON_FORM_STYLES.CONTAINER}
@@ -110,7 +129,7 @@ export const PhysicalPersonForm = ({
           disabled={disabled}
           errorMessage={errors?.identificationType}
           label={PHYSICAL_PERSON_FORM_COPY.IDENTIFICATION_TYPE_LABEL}
-          onValueChange={(val) => onFieldChange("identificationType", val)}
+          onValueChange={handlers.identificationType}
           options={identificationTypeOptions}
           placeholder={
             PHYSICAL_PERSON_FORM_COPY.IDENTIFICATION_TYPE_PLACEHOLDER
@@ -126,8 +145,8 @@ export const PhysicalPersonForm = ({
           helperText={PHYSICAL_PERSON_FORM_COPY.IDENTIFICATION_NUMBER_HELPER}
           isValid={isIdentificationValid}
           label={PHYSICAL_PERSON_FORM_COPY.IDENTIFICATION_NUMBER_LABEL}
-          leftIcon="hash"
-          onChangeText={(val) => onFieldChange("identificationNumber", val)}
+          leftIcon='hash'
+          onChangeText={handlers.identificationNumber}
           placeholder={
             PHYSICAL_PERSON_FORM_COPY.IDENTIFICATION_NUMBER_PLACEHOLDER
           }
@@ -152,7 +171,7 @@ export const PhysicalPersonForm = ({
               editable={!disabled}
               error={errors?.firstName}
               label={PHYSICAL_PERSON_FORM_COPY.FIRST_NAME_LABEL}
-              onChangeText={(val) => onFieldChange("firstName", val)}
+              onChangeText={handlers.firstName}
               placeholder={PHYSICAL_PERSON_FORM_COPY.FIRST_NAME_PLACEHOLDER}
               required
               testID={PHYSICAL_PERSON_FORM_TEST_IDS.FIRST_NAME_INPUT}
@@ -164,7 +183,7 @@ export const PhysicalPersonForm = ({
               editable={!disabled}
               error={errors?.middleName}
               label={PHYSICAL_PERSON_FORM_COPY.MIDDLE_NAME_LABEL}
-              onChangeText={(val) => onFieldChange("middleName", val)}
+              onChangeText={handlers.middleName}
               placeholder={PHYSICAL_PERSON_FORM_COPY.MIDDLE_NAME_PLACEHOLDER}
               required={false}
               testID={PHYSICAL_PERSON_FORM_TEST_IDS.MIDDLE_NAME_INPUT}
@@ -180,7 +199,7 @@ export const PhysicalPersonForm = ({
               editable={!disabled}
               error={errors?.firstLastName}
               label={PHYSICAL_PERSON_FORM_COPY.FIRST_LAST_NAME_LABEL}
-              onChangeText={(val) => onFieldChange("firstLastName", val)}
+              onChangeText={handlers.firstLastName}
               placeholder={
                 PHYSICAL_PERSON_FORM_COPY.FIRST_LAST_NAME_PLACEHOLDER
               }
@@ -194,7 +213,7 @@ export const PhysicalPersonForm = ({
               editable={!disabled}
               error={errors?.secondLastName}
               label={PHYSICAL_PERSON_FORM_COPY.SECOND_LAST_NAME_LABEL}
-              onChangeText={(val) => onFieldChange("secondLastName", val)}
+              onChangeText={handlers.secondLastName}
               placeholder={
                 PHYSICAL_PERSON_FORM_COPY.SECOND_LAST_NAME_PLACEHOLDER
               }
@@ -219,8 +238,8 @@ export const PhysicalPersonForm = ({
           error={errors?.birthDate}
           helperText={PHYSICAL_PERSON_FORM_COPY.BIRTH_DATE_HELPER}
           label={PHYSICAL_PERSON_FORM_COPY.BIRTH_DATE_LABEL}
-          leftIcon="calendar"
-          onChangeText={(val) => onFieldChange("birthDate", val)}
+          leftIcon='calendar'
+          onChangeText={handlers.birthDate}
           placeholder={PHYSICAL_PERSON_FORM_COPY.BIRTH_DATE_PLACEHOLDER}
           required
           testID={PHYSICAL_PERSON_FORM_TEST_IDS.BIRTH_DATE_INPUT}
@@ -231,8 +250,8 @@ export const PhysicalPersonForm = ({
           disabled={disabled}
           errorMessage={errors?.nationality}
           label={PHYSICAL_PERSON_FORM_COPY.NATIONALITY_LABEL}
-          leftIcon="globe"
-          onValueChange={(val) => onFieldChange("nationality", val)}
+          leftIcon='globe'
+          onValueChange={handlers.nationality}
           options={nationalityOptions}
           placeholder={PHYSICAL_PERSON_FORM_COPY.NATIONALITY_PLACEHOLDER}
           required
@@ -247,7 +266,7 @@ export const PhysicalPersonForm = ({
               disabled={disabled}
               errorMessage={errors?.maritalStatus}
               label={PHYSICAL_PERSON_FORM_COPY.MARITAL_STATUS_LABEL}
-              onValueChange={(val) => onFieldChange("maritalStatus", val)}
+              onValueChange={handlers.maritalStatus}
               options={maritalStatusOptions}
               placeholder={PHYSICAL_PERSON_FORM_COPY.MARITAL_STATUS_PLACEHOLDER}
               required
@@ -260,7 +279,7 @@ export const PhysicalPersonForm = ({
               disabled={disabled}
               errorMessage={errors?.gender}
               label={PHYSICAL_PERSON_FORM_COPY.GENDER_LABEL}
-              onValueChange={(val) => onFieldChange("gender", val)}
+              onValueChange={handlers.gender}
               options={genderOptions}
               placeholder={PHYSICAL_PERSON_FORM_COPY.GENDER_PLACEHOLDER}
               required
@@ -273,3 +292,5 @@ export const PhysicalPersonForm = ({
     </View>
   );
 };
+
+export const PhysicalPersonFormMemo = React.memo(PhysicalPersonForm);
