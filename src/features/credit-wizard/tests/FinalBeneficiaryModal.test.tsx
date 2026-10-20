@@ -1,4 +1,9 @@
-import { APPLICANT_STEP_VIEW_DEFAULT_VALUES, APPLICANT_STEP_VIEW_ERRORS } from '../constants/ApplicantStepView.constants';
+import { z } from 'zod';
+import {
+  APPLICANT_STEP_VIEW_DEFAULT_VALUES,
+  APPLICANT_STEP_VIEW_ERRORS,
+} from '../constants/ApplicantStepView.constants';
+import { ThirdPartyBeneficiaryFieldsSchema } from '../types/ApplicantStepView.schema';
 import { FinalBeneficiaryModalPageObject } from './FinalBeneficiaryModal.po';
 
 describe('FinalBeneficiaryModal Component', () => {
@@ -20,9 +25,16 @@ describe('FinalBeneficiaryModal Component', () => {
     expect(page.title).toBeTruthy();
     expect(page.subtitle).toBeTruthy();
     expect(page.closeButton).toBeTruthy();
+    expect(page.section1Header).toBeTruthy();
+    expect(page.section2Header).toBeTruthy();
+    expect(page.section3Header).toBeTruthy();
+    expect(page.section4Header).toBeTruthy();
+    expect(page.identificationLabel).toBeTruthy();
     expect(page.docTypeInput).toBeTruthy();
     expect(page.docNumberInput).toBeTruthy();
     expect(page.fullNameInput).toBeTruthy();
+    expect(page.phoneInput).toBeTruthy();
+    expect(page.emailInput).toBeTruthy();
     expect(page.relationshipInput).toBeTruthy();
     expect(page.birthDateInput).toBeTruthy();
     expect(page.nationalityInput).toBeTruthy();
@@ -102,6 +114,8 @@ describe('FinalBeneficiaryModal Component', () => {
     page
       .fillFullName('Juan Pérez')
       .fillDocNumber('1-2345-6789')
+      .fillPhone('8888-8888')
+      .fillEmail('juan@example.com')
       .fillBirthDate('1990-05-15');
 
     // Assert
@@ -112,6 +126,14 @@ describe('FinalBeneficiaryModal Component', () => {
     expect(handleFieldChange).toHaveBeenCalledWith(
       'thirdPartyDocNumber',
       '1-2345-6789',
+    );
+    expect(handleFieldChange).toHaveBeenCalledWith(
+      'thirdPartyPhone',
+      '8888-8888',
+    );
+    expect(handleFieldChange).toHaveBeenCalledWith(
+      'thirdPartyEmail',
+      'juan@example.com',
     );
     expect(handleFieldChange).toHaveBeenCalledWith(
       'thirdPartyBirthDate',
@@ -164,6 +186,28 @@ describe('FinalBeneficiaryModal Component', () => {
     ).toBeNull();
   });
 
+  it('renders phone and email error messages when provided', () => {
+    // Arrange & Act
+    const page = FinalBeneficiaryModalPageObject.render({
+      errors: {
+        thirdPartyEmail: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL,
+        thirdPartyPhone: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.PHONE,
+      },
+      isOpen: true,
+      onClose: jest.fn(),
+      onFieldChange: jest.fn(),
+      values: APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
+    });
+
+    // Assert
+    expect(
+      page.queryErrorText(APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.PHONE),
+    ).toBeTruthy();
+    expect(
+      page.queryErrorText(APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL),
+    ).toBeTruthy();
+  });
+
   it('shows a Date birth date as YYYY-MM-DD', () => {
     // Arrange & Act
     const page = FinalBeneficiaryModalPageObject.render({
@@ -178,5 +222,39 @@ describe('FinalBeneficiaryModal Component', () => {
 
     // Assert
     expect(page.birthDateValue).toBe('1990-05-15');
+  });
+
+  describe('Zod Validation for Phone and Email (ThirdPartyBeneficiaryFieldsSchema)', () => {
+    it('validates correct email and phone formats', () => {
+      const result = z.object(ThirdPartyBeneficiaryFieldsSchema).safeParse({
+        thirdPartyEmail: 'valid.email@example.com',
+        thirdPartyPhone: '8888-8888',
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects invalid email formats', () => {
+      const result = z.object(ThirdPartyBeneficiaryFieldsSchema).safeParse({
+        thirdPartyEmail: 'invalid-email',
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe(
+          APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL,
+        );
+      }
+    });
+
+    it('rejects invalid phone formats', () => {
+      const result = z.object(ThirdPartyBeneficiaryFieldsSchema).safeParse({
+        thirdPartyPhone: 'short',
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe(
+          APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.PHONE,
+        );
+      }
+    });
   });
 });

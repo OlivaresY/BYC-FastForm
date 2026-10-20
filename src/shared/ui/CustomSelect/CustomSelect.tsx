@@ -89,7 +89,7 @@ export const CustomSelect = ({
           >
             {label}
           </Text>
-          {required ? (
+          {required && !label.trim().endsWith('*') ? (
             <Text
               className={CUSTOM_SELECT_STYLES.REQUIRED_ASTERISK}
               testID={requiredAsteriskTestId}

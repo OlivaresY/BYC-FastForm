@@ -114,23 +114,52 @@ export const LEGAL_APPLICANT_FIELDS = [
 // Third-Party Beneficiary Schema & Validation
 // =============================================================================
 
+const PHONE_PATTERN = /^[0-9+()\s-]{7,20}$/;
+
+const optionalBeneficiaryEmailSchema = z
+  .string()
+  .trim()
+  .refine(
+    (value) => value === '' || z.string().email().safeParse(value).success,
+    {
+      message: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL,
+    },
+  )
+  .optional();
+
+const optionalBeneficiaryPhoneSchema = z
+  .string()
+  .trim()
+  .refine((value) => value === '' || PHONE_PATTERN.test(value), {
+    message: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.PHONE,
+  })
+  .optional();
+
 export const ThirdPartyBeneficiaryFieldsSchema = {
+  email: optionalBeneficiaryEmailSchema,
   isThirdPartyRegistration: z.boolean().optional(),
+  phone: optionalBeneficiaryPhoneSchema,
   thirdPartyBirthDate: z.string().optional(),
   thirdPartyDocNumber: z.string().optional(),
   thirdPartyDocType: z.string().optional(),
+  thirdPartyEmail: optionalBeneficiaryEmailSchema,
   thirdPartyFullName: z.string().optional(),
   thirdPartyNationality: z.string().optional(),
+  thirdPartyPhone: optionalBeneficiaryPhoneSchema,
   thirdPartyRelationship: z.string().optional(),
 };
 
 export interface ThirdPartyValidationPayload {
+  email?: string | null;
   isThirdPartyRegistration?: boolean | null;
+  phone?: string | null;
   thirdPartyBirthDate?: string | null;
   thirdPartyDocNumber?: string | null;
   thirdPartyDocType?: string | null;
+  thirdPartyEmail?: string | null;
   thirdPartyFullName?: string | null;
   thirdPartyNationality?: string | null;
+  thirdPartyPhone?: string | null;
   thirdPartyRelationship?: string | null;
 }
 
@@ -138,13 +167,21 @@ export const THIRD_PARTY_BENEFICIARY_FIELDS = [
   'thirdPartyBirthDate',
   'thirdPartyDocNumber',
   'thirdPartyDocType',
+  'thirdPartyEmail',
   'thirdPartyFullName',
   'thirdPartyNationality',
+  'thirdPartyPhone',
   'thirdPartyRelationship',
 ] as const satisfies readonly ThirdPartyBeneficiaryField[];
 
 const THIRD_PARTY_REQUIRED_RULES: readonly {
-  field: ThirdPartyBeneficiaryField;
+  field:
+    | 'thirdPartyBirthDate'
+    | 'thirdPartyDocNumber'
+    | 'thirdPartyDocType'
+    | 'thirdPartyFullName'
+    | 'thirdPartyNationality'
+    | 'thirdPartyRelationship';
   message: string;
 }[] = [
   {

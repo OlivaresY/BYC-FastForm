@@ -13,11 +13,13 @@ export const APPLICANT_STEP_VIEW_COLORS = {
 
 export const APPLICANT_STEP_VIEW_COPY = {
   DESCRIPTION:
-    'Complete la información del solicitante principal y defina las condiciones del régimen legal.',
+    'Ingresa los datos básicos del solicitante para iniciar la gestión y perfilado de crédito multi-banco.',
   HEADER_SUBTITLE: 'Ingrese la información básica del solicitante.',
   HEADER_TITLE: 'Datos del Solicitante',
   SUBMIT_BUTTON: 'Siguiente: Información de Contacto',
-  TITLE: 'Información del Solicitante',
+  SUBTITLE:
+    'Ingresa los datos básicos del solicitante para iniciar la gestión y perfilado de crédito multi-banco.',
+  TITLE: 'ENTIDAD Y PERSONAL',
 } as const;
 
 export const APPLICANT_STEP_VIEW_DEFAULT_VALUES: {
@@ -79,8 +81,10 @@ export const APPLICANT_STEP_VIEW_ERRORS = {
     BIRTH_DATE: 'La fecha de nacimiento del beneficiario es obligatoria.',
     DOC_NUMBER: 'El número de identificación del beneficiario es obligatorio.',
     DOC_TYPE: 'Seleccione el tipo de identificación del beneficiario.',
+    EMAIL: 'El correo electrónico del beneficiario es obligatorio.',
     FULL_NAME: 'El nombre completo del beneficiario es obligatorio.',
     NATIONALITY: 'Seleccione la nacionalidad del beneficiario.',
+    PHONE: 'El teléfono del beneficiario es obligatorio.',
     RELATIONSHIP: 'Seleccione el parentesco con el beneficiario.',
   },
 } as const;
@@ -130,28 +134,43 @@ export const APPLICANT_STEP_VIEW_TEST_IDS = {
 
 export const BENEFICIARY_MODAL_COPY = {
   BACKDROP_ACCESSIBILITY_LABEL: 'Cerrar modal de beneficiario',
-  BIRTH_DATE_LABEL: 'Fecha de Nacimiento',
+  BIRTH_DATE_LABEL: 'Fecha de Nacimiento *',
   BIRTH_DATE_PLACEHOLDER: 'DD / MM / AAAA',
   CLOSE_ACCESSIBILITY_LABEL: 'Cerrar',
-  DOC_NUMBER_LABEL: 'Número de Identificación',
+  DOC_NUMBER_LABEL: 'Número de Identificación *',
   DOC_NUMBER_PLACEHOLDER: 'Ingrese el número de documento',
-  DOC_TYPE_LABEL: 'Tipo de Documento',
+  DOC_TYPE_LABEL: 'Tipo y Número de Identificación *',
   DOC_TYPE_PLACEHOLDER: 'Seleccione tipo de documento',
-  FULL_NAME_LABEL: 'Nombre Completo',
+  EMAIL_LABEL: 'Correo Electrónico *',
+  EMAIL_PLACEHOLDER: 'ejemplo@correo.com',
+  FULL_NAME_LABEL: 'Nombre Completo del Tercero *',
   FULL_NAME_PLACEHOLDER: 'Ingrese nombre completo del tercero',
-  NATIONALITY_LABEL: 'Nacionalidad',
+  IDENTIFICATION_LABEL: 'Tipo y Número de Identificación *',
+  NATIONALITY_LABEL: 'Nacionalidad *',
   NATIONALITY_PLACEHOLDER: 'Seleccione nacionalidad',
-  RELATIONSHIP_LABEL: 'Parentesco / Relación',
+  PHONE_LABEL: 'Teléfono Principal *',
+  PHONE_PLACEHOLDER: '8888-8888',
+  RELATIONSHIP_LABEL: 'Parentesco o Relación *',
   RELATIONSHIP_PLACEHOLDER: 'Seleccione parentesco',
   SAVE_BUTTON: 'Guardar Datos',
+  SECTION_1_TITLE: 'DOCUMENTO DE IDENTIDAD',
+  SECTION_2_TITLE: 'NOMBRES Y APELLIDOS OFICIALES',
+  SECTION_3_TITLE: 'DATOS DE CONTACTO',
+  SECTION_4_TITLE: 'DATOS DEMOGRÁFICOS',
   SUBTITLE:
     'Complete la información de la persona a cuyo nombre se registrará el vehículo.',
   TITLE: 'Beneficiario Final (Tercero)',
 } as const;
 
+export const BENEFICIARY_MODAL_COLORS = {
+  SECTION_ICON_STROKE: '#1E293B',
+} as const;
+
 export const BENEFICIARY_MODAL_DIMENSIONS = {
   BLUR_INTENSITY: 50,
   CLOSE_ICON_SIZE: 20,
+  SECTION_ICON_SIZE: 20,
+  SECTION_ICON_STROKE_WIDTH: 2,
 } as const;
 
 export const BENEFICIARY_MODAL_OPTIONS = {
@@ -178,13 +197,20 @@ export const BENEFICIARY_MODAL_OPTIONS = {
 } as const;
 
 export const BENEFICIARY_MODAL_STYLES = {
+  BOTTOM_BAR: '-mx-6 -mb-6 border-t border-gray-200 bg-white p-4',
   CLOSE_BUTTON:
     'min-h-[48px] min-w-[48px] items-center justify-center text-text-primary',
+  GROUP_CONTAINER: 'w-full gap-3',
+  GROUP_LABEL: 'text-sm font-medium text-text-primary',
   HEADER_ROW: 'flex-row items-start justify-between',
   HEADER_TEXT_BLOCK: 'flex-1 pr-4',
-  MODAL_CONTAINER: 'w-full max-h-[85%] rounded-t-[2rem] bg-white p-6 gap-4',
-  SAVE_BUTTON: 'mt-2 w-full self-stretch',
-  SCROLL_VIEW: 'flex-1',
+  MODAL_CONTAINER:
+    'flex-1 w-full max-h-[85%] min-h-[500px] rounded-t-[2rem] bg-white p-6 gap-4',
+  SAVE_BUTTON: 'w-full self-stretch',
+  SCROLL_VIEW: 'flex-1 w-full',
+  SECTION_HEADER_ROW: 'flex-row items-center gap-2 mb-1',
+  SECTION_HEADER_TITLE:
+    'text-xs font-bold text-slate-800 uppercase tracking-wide',
   SUBTITLE: 'mt-1 text-xs text-text-secondary leading-relaxed',
   TITLE: 'text-lg font-bold text-text-primary',
 } as const;
@@ -192,12 +218,20 @@ export const BENEFICIARY_MODAL_STYLES = {
 export const BENEFICIARY_MODAL_TEST_IDS = {
   BACKDROP: 'beneficiary-modal-backdrop',
   BIRTH_DATE_INPUT: 'beneficiary-modal-birth-date-input',
+  BOTTOM_BAR: 'beneficiary-modal-bottom-bar',
   CLOSE_BUTTON: 'beneficiary-modal-close-button',
   DOC_NUMBER_INPUT: 'beneficiary-modal-doc-number-input',
   DOC_TYPE_INPUT: 'beneficiary-modal-doc-type-input',
+  EMAIL_INPUT: 'beneficiary-modal-email-input',
   FULL_NAME_INPUT: 'beneficiary-modal-full-name-input',
+  IDENTIFICATION_LABEL: 'beneficiary-modal-identification-label',
   MODAL_CONTAINER: 'beneficiary-modal-container',
   NATIONALITY_INPUT: 'beneficiary-modal-nationality-input',
+  PHONE_INPUT: 'beneficiary-modal-phone-input',
   RELATIONSHIP_INPUT: 'beneficiary-modal-relationship-input',
   SAVE_BUTTON: 'beneficiary-modal-save-button',
+  SECTION_1_HEADER: 'beneficiary-modal-section-1-header',
+  SECTION_2_HEADER: 'beneficiary-modal-section-2-header',
+  SECTION_3_HEADER: 'beneficiary-modal-section-3-header',
+  SECTION_4_HEADER: 'beneficiary-modal-section-4-header',
 } as const;

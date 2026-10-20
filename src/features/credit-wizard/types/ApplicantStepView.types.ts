@@ -14,21 +14,35 @@ import type { VehicleBeneficiaryType } from './VehicleBeneficiarySection.types';
 // =============================================================================
 
 export interface ThirdPartyBeneficiaryValues {
+  birthDate?: Date | string;
+  email?: string;
+  fullName?: string;
+  identificationNumber?: string;
+  identificationType?: string;
   isThirdPartyRegistration?: boolean;
+  nationality?: string;
+  phone?: string;
+  relationship?: string;
   thirdPartyBirthDate?: Date | string;
   thirdPartyDocNumber?: string;
   thirdPartyDocType?: string;
+  thirdPartyEmail?: string;
   thirdPartyFullName?: string;
   thirdPartyNationality?: string;
+  thirdPartyPhone?: string;
   thirdPartyRelationship?: string;
 }
 
 export type ThirdPartyBeneficiaryField =
+  | 'email'
+  | 'phone'
   | 'thirdPartyBirthDate'
   | 'thirdPartyDocNumber'
   | 'thirdPartyDocType'
+  | 'thirdPartyEmail'
   | 'thirdPartyFullName'
   | 'thirdPartyNationality'
+  | 'thirdPartyPhone'
   | 'thirdPartyRelationship';
 
 // =============================================================================
@@ -152,5 +166,6 @@ export interface FinalBeneficiaryModalProps {
     value: ThirdPartyBeneficiaryValues[K],
   ) => void;
   testID?: string;
-  values: ThirdPartyBeneficiaryValues;
+  thirdPartyValues?: ThirdPartyBeneficiaryValues;
+  values?: ThirdPartyBeneficiaryValues;
 }

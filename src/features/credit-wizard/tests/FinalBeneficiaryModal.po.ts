@@ -48,8 +48,16 @@ export class FinalBeneficiaryModalPageObject {
     return screen.getByTestId(BENEFICIARY_MODAL_TEST_IDS.DOC_TYPE_INPUT);
   }
 
+  public get emailInput(): ReactTestInstance {
+    return screen.getByTestId(BENEFICIARY_MODAL_TEST_IDS.EMAIL_INPUT);
+  }
+
   public get fullNameInput(): ReactTestInstance {
     return screen.getByTestId(BENEFICIARY_MODAL_TEST_IDS.FULL_NAME_INPUT);
+  }
+
+  public get identificationLabel(): ReactTestInstance {
+    return screen.getByTestId(BENEFICIARY_MODAL_TEST_IDS.IDENTIFICATION_LABEL);
   }
 
   public get modalContainer(): ReactTestInstance {
@@ -60,12 +68,32 @@ export class FinalBeneficiaryModalPageObject {
     return screen.getByTestId(BENEFICIARY_MODAL_TEST_IDS.NATIONALITY_INPUT);
   }
 
+  public get phoneInput(): ReactTestInstance {
+    return screen.getByTestId(BENEFICIARY_MODAL_TEST_IDS.PHONE_INPUT);
+  }
+
   public get relationshipInput(): ReactTestInstance {
     return screen.getByTestId(BENEFICIARY_MODAL_TEST_IDS.RELATIONSHIP_INPUT);
   }
 
   public get saveButton(): ReactTestInstance {
     return screen.getByTestId(BENEFICIARY_MODAL_TEST_IDS.SAVE_BUTTON);
+  }
+
+  public get section1Header(): ReactTestInstance {
+    return screen.getByTestId(BENEFICIARY_MODAL_TEST_IDS.SECTION_1_HEADER);
+  }
+
+  public get section2Header(): ReactTestInstance {
+    return screen.getByTestId(BENEFICIARY_MODAL_TEST_IDS.SECTION_2_HEADER);
+  }
+
+  public get section3Header(): ReactTestInstance {
+    return screen.getByTestId(BENEFICIARY_MODAL_TEST_IDS.SECTION_3_HEADER);
+  }
+
+  public get section4Header(): ReactTestInstance {
+    return screen.getByTestId(BENEFICIARY_MODAL_TEST_IDS.SECTION_4_HEADER);
   }
 
   public get subtitle(): ReactTestInstance | null {
@@ -98,8 +126,18 @@ export class FinalBeneficiaryModalPageObject {
     return this;
   }
 
+  public fillEmail(email: string): this {
+    fireEvent.changeText(this.emailInput, email);
+    return this;
+  }
+
   public fillFullName(name: string): this {
     fireEvent.changeText(this.fullNameInput, name);
+    return this;
+  }
+
+  public fillPhone(phone: string): this {
+    fireEvent.changeText(this.phoneInput, phone);
     return this;
   }
 

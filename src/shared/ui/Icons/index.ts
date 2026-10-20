@@ -13,5 +13,7 @@ export { GlobeIcon } from "./GlobeIcon";
 export { HashIcon } from "./HashIcon";
 export type { IconProps } from "./Icons.types";
 export { IdCardIcon } from "./IdCardIcon";
+export { MailIcon } from "./MailIcon";
+export { PhoneIcon } from "./PhoneIcon";
 export { SaveIcon } from "./SaveIcon";
 export { UserIcon } from "./UserIcon";
