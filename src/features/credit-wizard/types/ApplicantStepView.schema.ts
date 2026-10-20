@@ -135,11 +135,165 @@ const optionalBeneficiaryPhoneSchema = z
   })
   .optional();
 
+const isValidCalendarDate = (
+  year: number,
+  month: number,
+  day: number,
+): boolean => {
+  if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1) {
+    return false;
+  }
+
+  const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+
+  const daysInMonth = [
+    31,
+    isLeapYear ? 29 : 28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31,
+  ];
+
+  const maxDays = daysInMonth[month - 1] ?? 31;
+  return day <= maxDays;
+};
+
+/**
+ * Normalizes a third-party birth date into a clean string (YYYY-MM-DD)
+ * using strict regex parsing that completely ignores system timezones to prevent
+ * accidental date shifting (e.g. UTC-6 converting midnight into the previous day).
+ *
+ * Supported formats:
+ * - ISO date string: 'YYYY-MM-DD'
+ * - ISO datetime string: 'YYYY-MM-DDTHH:mm:ss...'
+ * - Localized slash format: 'DD/MM/YYYY' or 'DD / MM / YYYY'
+ * - Localized dash format: 'DD-MM-YYYY' or 'DD - MM - YYYY'
+ * - Date object: Extracts UTC year, month, day directly without .toISOString()
+ *
+ * Returns 'YYYY-MM-DD' if valid, or '' if missing or invalid.
+ */
+export const normalizeThirdPartyBirthDate = (
+  value: Date | string | undefined | null,
+): string => {
+  if (value === undefined || value === null) {
+    return '';
+  }
+
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) {
+      return '';
+    }
+    const year = value.getUTCFullYear();
+    const month = value.getUTCMonth() + 1;
+    const day = value.getUTCDate();
+
+    if (!isValidCalendarDate(year, month, day)) {
+      return '';
+    }
+
+    const y = String(year).padStart(4, '0');
+    const m = String(month).padStart(2, '0');
+    const d = String(day).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  const trimmed = value.trim();
+  if (trimmed === '') {
+    return '';
+  }
+
+  // 1. ISO format: YYYY-MM-DD
+  const isoMatch = /^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.exec(
+    trimmed,
+  );
+  if (isoMatch) {
+    const year = Number(isoMatch[1]);
+    const month = Number(isoMatch[2]);
+    const day = Number(isoMatch[3]);
+
+    if (!isValidCalendarDate(year, month, day)) {
+      return '';
+    }
+
+    return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+  }
+
+  // 2. ISO timestamp format: YYYY-MM-DDTHH:mm:ss...
+  const isoTimestampMatch =
+    /^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T/.exec(trimmed);
+  if (isoTimestampMatch) {
+    const year = Number(isoTimestampMatch[1]);
+    const month = Number(isoTimestampMatch[2]);
+    const day = Number(isoTimestampMatch[3]);
+
+    if (!isValidCalendarDate(year, month, day)) {
+      return '';
+    }
+
+    return `${isoTimestampMatch[1]}-${isoTimestampMatch[2]}-${isoTimestampMatch[3]}`;
+  }
+
+  // 3. Localized format with slashes: DD/MM/YYYY or DD / MM / YYYY
+  const slashMatch = /^(\d{1,2})\s*\/\s*(\d{1,2})\s*\/\s*(\d{4})$/.exec(
+    trimmed,
+  );
+  if (slashMatch) {
+    const day = Number(slashMatch[1]);
+    const month = Number(slashMatch[2]);
+    const year = Number(slashMatch[3]);
+
+    if (!isValidCalendarDate(year, month, day)) {
+      return '';
+    }
+
+    const y = String(year).padStart(4, '0');
+    const m = String(month).padStart(2, '0');
+    const d = String(day).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  // 4. Localized format with dashes: DD-MM-YYYY or DD - MM - YYYY
+  const dashMatch = /^(\d{1,2})\s*-\s*(\d{1,2})\s*-\s*(\d{4})$/.exec(trimmed);
+  if (dashMatch) {
+    const day = Number(dashMatch[1]);
+    const month = Number(dashMatch[2]);
+    const year = Number(dashMatch[3]);
+
+    if (!isValidCalendarDate(year, month, day)) {
+      return '';
+    }
+
+    const y = String(year).padStart(4, '0');
+    const m = String(month).padStart(2, '0');
+    const d = String(day).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  return '';
+};
+
+const beneficiaryBirthDateSchema = z
+  .union([z.string(), z.date()])
+  .refine((value) => normalizeThirdPartyBirthDate(value) !== '', {
+    message: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.BIRTH_DATE,
+  });
+
 export const ThirdPartyBeneficiaryFieldsSchema = {
   email: optionalBeneficiaryEmailSchema,
   isThirdPartyRegistration: z.boolean().optional(),
   phone: optionalBeneficiaryPhoneSchema,
-  thirdPartyBirthDate: z.string().optional(),
+  thirdPartyBirthDate: z.union([z.string(), z.date()]).optional(),
   thirdPartyDocNumber: z.string().optional(),
   thirdPartyDocType: z.string().optional(),
   thirdPartyEmail: optionalBeneficiaryEmailSchema,
@@ -149,11 +303,54 @@ export const ThirdPartyBeneficiaryFieldsSchema = {
   thirdPartyRelationship: z.string().optional(),
 };
 
+export const ThirdPartyBeneficiaryStrictFieldsSchema = {
+  birthDate: z.union([z.date(), z.string()]).optional(),
+  email: optionalBeneficiaryEmailSchema,
+  fullName: z.string().optional(),
+  identificationNumber: z.string().optional(),
+  identificationType: z.string().optional(),
+  isThirdPartyRegistration: z.literal(true),
+  nationality: z.string().optional(),
+  phone: optionalBeneficiaryPhoneSchema,
+  relationship: z.string().optional(),
+  thirdPartyBirthDate: beneficiaryBirthDateSchema,
+  thirdPartyDocNumber: requiredText(
+    APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.DOC_NUMBER,
+  ),
+  thirdPartyDocType: requiredText(
+    APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.DOC_TYPE,
+  ),
+  thirdPartyEmail: z
+    .string({ error: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL })
+    .trim()
+    .min(1, APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL)
+    .email(APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL),
+  thirdPartyFullName: requiredText(
+    APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.FULL_NAME,
+  ),
+  thirdPartyNationality: requiredText(
+    APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.NATIONALITY,
+  ),
+  thirdPartyPhone: z
+    .string({ error: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.PHONE })
+    .trim()
+    .min(8, APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.PHONE)
+    .regex(PHONE_PATTERN, APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.PHONE),
+  thirdPartyRelationship: requiredText(
+    APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.RELATIONSHIP,
+  ),
+};
+
+export const StrictThirdPartyBeneficiarySchema = z.object(
+  ThirdPartyBeneficiaryStrictFieldsSchema,
+);
+
 export interface ThirdPartyValidationPayload {
+  birthDate?: Date | string | null;
   email?: string | null;
   isThirdPartyRegistration?: boolean | null;
   phone?: string | null;
-  thirdPartyBirthDate?: string | null;
+  thirdPartyBirthDate?: Date | string | null;
   thirdPartyDocNumber?: string | null;
   thirdPartyDocType?: string | null;
   thirdPartyEmail?: string | null;
@@ -179,8 +376,10 @@ const THIRD_PARTY_REQUIRED_RULES: readonly {
     | 'thirdPartyBirthDate'
     | 'thirdPartyDocNumber'
     | 'thirdPartyDocType'
+    | 'thirdPartyEmail'
     | 'thirdPartyFullName'
     | 'thirdPartyNationality'
+    | 'thirdPartyPhone'
     | 'thirdPartyRelationship';
   message: string;
 }[] = [
@@ -208,6 +407,14 @@ const THIRD_PARTY_REQUIRED_RULES: readonly {
     field: 'thirdPartyNationality',
     message: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.NATIONALITY,
   },
+  {
+    field: 'thirdPartyPhone',
+    message: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.PHONE,
+  },
+  {
+    field: 'thirdPartyEmail',
+    message: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL,
+  },
 ];
 
 export const validateThirdPartyBeneficiary = (
@@ -220,7 +427,11 @@ export const validateThirdPartyBeneficiary = (
 
   THIRD_PARTY_REQUIRED_RULES.forEach(({ field, message }) => {
     const value = data[field];
-    if (!value || value.trim() === '') {
+    const isBlank =
+      value === undefined ||
+      value === null ||
+      (typeof value === 'string' && value.trim() === '');
+    if (isBlank) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message,
@@ -228,28 +439,49 @@ export const validateThirdPartyBeneficiary = (
       });
     }
   });
+
+  const phoneValue = data.thirdPartyPhone ?? data.phone;
+  if (
+    phoneValue &&
+    phoneValue.trim() !== '' &&
+    (phoneValue.trim().length < 8 || !PHONE_PATTERN.test(phoneValue.trim()))
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.PHONE,
+      path: ['thirdPartyPhone'],
+    });
+  }
+
+  const emailValue = data.thirdPartyEmail ?? data.email;
+  if (
+    emailValue &&
+    emailValue.trim() !== '' &&
+    !z.string().email().safeParse(emailValue.trim()).success
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL,
+      path: ['thirdPartyEmail'],
+    });
+  }
+  const rawBirthDate = data.thirdPartyBirthDate ?? data.birthDate;
+  if (
+    rawBirthDate &&
+    (typeof rawBirthDate === 'string' ? rawBirthDate.trim() !== '' : true) &&
+    normalizeThirdPartyBirthDate(rawBirthDate) === ''
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.BIRTH_DATE,
+      path: ['thirdPartyBirthDate'],
+    });
+  }
 };
 
 export const ThirdPartyBeneficiarySchema = z
   .object(ThirdPartyBeneficiaryFieldsSchema)
   .superRefine(validateThirdPartyBeneficiary);
-
-/**
- * Normalizes the third-party birth date to the plain string the schema
- * expects. `Date` instances become `YYYY-MM-DD`; invalid dates become empty so
- * they fail the required rule instead of throwing.
- */
-export const normalizeThirdPartyBirthDate = (
-  value: Date | string | undefined,
-): string => {
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime())
-      ? ''
-      : value.toISOString().split('T')[0];
-  }
-
-  return value ?? '';
-};
 
 // =============================================================================
 // Submission Schemas

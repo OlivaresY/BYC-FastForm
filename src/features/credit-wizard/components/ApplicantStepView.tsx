@@ -31,6 +31,7 @@ const NOOP_FIELD_CHANGE = (): void => undefined;
 export const ApplicantStepView = ({
   closeBeneficiaryModal,
   disabled = false,
+  handleSaveThirdPartyData,
   isBeneficiaryModalOpen = false,
   isIdentificationValid = false,
   isValid = false,
@@ -174,6 +175,13 @@ export const ApplicantStepView = ({
         isOpen={isBeneficiaryModalOpen}
         onClose={closeBeneficiaryModal ?? NOOP_VOID}
         onFieldChange={onThirdPartyFieldChange ?? NOOP_FIELD_CHANGE}
+        onSave={
+          handleSaveThirdPartyData
+            ? () => {
+                handleSaveThirdPartyData();
+              }
+            : undefined
+        }
         values={
           thirdPartyValues ?? APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY
         }

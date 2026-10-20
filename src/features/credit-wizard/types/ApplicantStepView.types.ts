@@ -101,6 +101,7 @@ export interface UseApplicantStepViewModelReturn {
 
   // Handlers
   closeBeneficiaryModal: () => void;
+  handleSaveThirdPartyData: () => boolean;
   onLegalFieldChange: <K extends LegalEntityFormField>(
     field: K,
     value: LegalEntityFormValues[K],
@@ -126,6 +127,7 @@ export interface UseApplicantStepViewModelReturn {
 export interface ApplicantStepViewProps extends Omit<
   UseApplicantStepViewModelReturn,
   | 'closeBeneficiaryModal'
+  | 'handleSaveThirdPartyData'
   | 'isBeneficiaryModalOpen'
   | 'isIdentificationValid'
   | 'isValid'
@@ -138,6 +140,7 @@ export interface ApplicantStepViewProps extends Omit<
 > {
   closeBeneficiaryModal?: () => void;
   disabled?: boolean;
+  handleSaveThirdPartyData?: () => boolean | void;
   isBeneficiaryModalOpen?: boolean;
   isIdentificationValid?: boolean;
   isValid?: boolean;
@@ -165,6 +168,7 @@ export interface FinalBeneficiaryModalProps {
     field: K,
     value: ThirdPartyBeneficiaryValues[K],
   ) => void;
+  onSave?: () => void;
   testID?: string;
   thirdPartyValues?: ThirdPartyBeneficiaryValues;
   values?: ThirdPartyBeneficiaryValues;

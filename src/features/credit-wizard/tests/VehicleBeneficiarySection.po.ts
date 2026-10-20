@@ -1,10 +1,10 @@
-import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react-native";
-import type { RenderAPI } from "@testing-library/react-native";
-import type { ReactTestInstance } from "react-test-renderer";
-import { VehicleBeneficiarySection } from "../components/VehicleBeneficiarySection";
-import { VEHICLE_BENEFICIARY_SECTION_TEST_IDS } from "../constants/VehicleBeneficiarySection.constants";
-import type { VehicleBeneficiarySectionProps } from "../types/VehicleBeneficiarySection.types";
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react-native';
+import type { RenderAPI } from '@testing-library/react-native';
+import type { ReactTestInstance } from 'react-test-renderer';
+import { VehicleBeneficiarySection } from '../components/VehicleBeneficiarySection';
+import { VEHICLE_BENEFICIARY_SECTION_TEST_IDS } from '../constants/VehicleBeneficiarySection.constants';
+import type { VehicleBeneficiarySectionProps } from '../types/VehicleBeneficiarySection.types';
 
 export class VehicleBeneficiarySectionPageObject {
   private readonly customTestId?: string;

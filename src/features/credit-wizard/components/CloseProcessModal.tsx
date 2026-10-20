@@ -1,15 +1,15 @@
-import React from "react";
-import { Modal, Pressable, Text, View } from "react-native";
-import { BookmarkIcon, CloseIcon, SaveIcon } from "@/shared/ui/Icons";
-import { BaseButton, BASE_BUTTON_VARIANTS } from "@/shared/ui/BaseButton";
+import React from 'react';
+import { Modal, Pressable, Text, View } from 'react-native';
+import { BookmarkIcon, CloseIcon, SaveIcon } from '@/shared/ui/Icons';
+import { BaseButton, BASE_BUTTON_VARIANTS } from '@/shared/ui/BaseButton';
 import {
   CLOSE_PROCESS_MODAL_COLORS,
   CLOSE_PROCESS_MODAL_COPY,
   CLOSE_PROCESS_MODAL_ICON_SIZES,
   CLOSE_PROCESS_MODAL_STYLES,
   CLOSE_PROCESS_MODAL_TEST_IDS,
-} from "../constants/CloseProcessModal.constants";
-import type { CloseProcessModalProps } from "../types/CloseProcessModal.types";
+} from '../constants/CloseProcessModal.constants';
+import type { CloseProcessModalProps } from '../types/CloseProcessModal.types';
 
 /**
  * CloseProcessModal presents a confirmation dialog when the user attempts
@@ -28,7 +28,7 @@ export const CloseProcessModal = ({
   visible,
 }: CloseProcessModalProps): React.JSX.Element => (
   <Modal
-    animationType="fade"
+    animationType='fade'
     onRequestClose={onClose}
     statusBarTranslucent
     transparent
@@ -36,7 +36,7 @@ export const CloseProcessModal = ({
   >
     <Pressable
       accessibilityLabel={CLOSE_PROCESS_MODAL_COPY.BACKDROP_ACCESSIBILITY_LABEL}
-      accessibilityRole="button"
+      accessibilityRole='button'
       className={CLOSE_PROCESS_MODAL_STYLES.BACKDROP}
       onPress={onClose}
       testID={CLOSE_PROCESS_MODAL_TEST_IDS.BACKDROP}
@@ -51,7 +51,7 @@ export const CloseProcessModal = ({
           accessibilityLabel={
             CLOSE_PROCESS_MODAL_COPY.CLOSE_ACCESSIBILITY_LABEL
           }
-          accessibilityRole="button"
+          accessibilityRole='button'
           className={CLOSE_PROCESS_MODAL_STYLES.CLOSE_BUTTON}
           hitSlop={{ bottom: 8, left: 8, right: 8, top: 8 }}
           onPress={onClose}
@@ -71,7 +71,7 @@ export const CloseProcessModal = ({
         </View>
 
         <Text
-          accessibilityRole="header"
+          accessibilityRole='header'
           className={CLOSE_PROCESS_MODAL_STYLES.TITLE}
           testID={CLOSE_PROCESS_MODAL_TEST_IDS.TITLE}
         >

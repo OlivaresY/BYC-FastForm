@@ -104,8 +104,10 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
         thirdPartyBirthDate: '',
         thirdPartyDocNumber: '',
         thirdPartyDocType: '',
+        thirdPartyEmail: '',
         thirdPartyFullName: '',
         thirdPartyNationality: '',
+        thirdPartyPhone: '',
         thirdPartyRelationship: '',
       });
     });
@@ -136,8 +138,10 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
         thirdPartyBirthDate: '1990-05-15',
         thirdPartyDocNumber: '2-0345-0678',
         thirdPartyDocType: 'national_id',
+        thirdPartyEmail: '',
         thirdPartyFullName: 'María González',
         thirdPartyNationality: 'Costa Rican',
+        thirdPartyPhone: '',
         thirdPartyRelationship: 'Spouse',
       });
     });
@@ -173,8 +177,10 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
         thirdPartyBirthDate: '',
         thirdPartyDocNumber: '',
         thirdPartyDocType: '',
+        thirdPartyEmail: '',
         thirdPartyFullName: '',
         thirdPartyNationality: '',
+        thirdPartyPhone: '',
         thirdPartyRelationship: '',
       });
     });
@@ -205,6 +211,8 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
         .setThirdPartyField('thirdPartyRelationship', 'Spouse')
         .setThirdPartyField('thirdPartyBirthDate', '1990-05-15')
         .setThirdPartyField('thirdPartyNationality', 'Costa Rican')
+        .setThirdPartyField('thirdPartyPhone', '8888-8888')
+        .setThirdPartyField('thirdPartyEmail', 'carlos@example.com')
         .submit();
 
       expect(onSubmitMock).toHaveBeenCalledTimes(1);
@@ -215,8 +223,10 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
           thirdPartyBirthDate: '1990-05-15',
           thirdPartyDocNumber: '2-0345-0678',
           thirdPartyDocType: 'national_id',
+          thirdPartyEmail: 'carlos@example.com',
           thirdPartyFullName: 'Carlos Mora',
           thirdPartyNationality: 'Costa Rican',
+          thirdPartyPhone: '8888-8888',
           thirdPartyRelationship: 'Spouse',
           vehicleBeneficiary: 'third_party',
         }),
@@ -276,6 +286,115 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
 
       expect(page.thirdPartyErrors.thirdPartyFullName).toBeUndefined();
     });
+
+    it('sets isValid to false when vehicleBeneficiary is third_party and third-party values are incomplete', () => {
+      const page = ApplicantStepViewModelPageObject.render({
+        initialPhysicalValues: {
+          birthDate: '1985-01-01',
+          firstLastName: 'Ramírez',
+          firstName: 'Ana',
+          gender: 'female',
+          identificationNumber: '1-1234-0567',
+          identificationType: 'national_id',
+          maritalStatus: 'single',
+          nationality: 'CR',
+          secondLastName: 'Mora',
+        },
+        initialRegime: 'physical',
+      });
+
+      // Initially same_holder and valid applicant
+      expect(page.isValid).toBe(true);
+
+      // Select third_party
+      page.setVehicleBeneficiary('third_party');
+
+      // isValid must become false because third-party data is incomplete
+      expect(page.isValid).toBe(false);
+
+      // Fill valid third party data
+      page
+        .setThirdPartyField('thirdPartyDocType', 'national_id')
+        .setThirdPartyField('thirdPartyDocNumber', '2-0345-0678')
+        .setThirdPartyField('thirdPartyFullName', 'Carlos Mora')
+        .setThirdPartyField('thirdPartyRelationship', 'spouse')
+        .setThirdPartyField('thirdPartyBirthDate', '1990-05-15')
+        .setThirdPartyField('thirdPartyNationality', 'CR')
+        .setThirdPartyField('thirdPartyPhone', '8888-8888')
+        .setThirdPartyField('thirdPartyEmail', 'carlos@example.com');
+
+      // Now isValid must be true
+      expect(page.isValid).toBe(true);
+
+      // If an invalid email is provided, isValid becomes false
+      page.setThirdPartyField('thirdPartyEmail', 'not-an-email');
+      expect(page.isValid).toBe(false);
+
+      // Switching back to same_holder restores isValid to true
+      page.setVehicleBeneficiary('same_holder');
+      expect(page.isValid).toBe(true);
+    });
+
+    it('handleSaveThirdPartyData fails validation, sets errors, and keeps modal open when fields are invalid', () => {
+      const page = ApplicantStepViewModelPageObject.render();
+
+      page.setVehicleBeneficiary('third_party');
+      expect(page.isBeneficiaryModalOpen).toBe(true);
+
+      // Attempt to save empty data
+      const success = page.handleSaveThirdPartyData();
+
+      expect(success).toBe(false);
+      expect(page.isBeneficiaryModalOpen).toBe(true);
+      expect(page.thirdPartyErrors.thirdPartyDocType).toBe(
+        APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.DOC_TYPE,
+      );
+      expect(page.thirdPartyErrors.thirdPartyDocNumber).toBe(
+        APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.DOC_NUMBER,
+      );
+      expect(page.thirdPartyErrors.thirdPartyFullName).toBe(
+        APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.FULL_NAME,
+      );
+      expect(page.thirdPartyErrors.thirdPartyRelationship).toBe(
+        APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.RELATIONSHIP,
+      );
+      expect(page.thirdPartyErrors.thirdPartyBirthDate).toBe(
+        APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.BIRTH_DATE,
+      );
+      expect(page.thirdPartyErrors.thirdPartyNationality).toBe(
+        APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.NATIONALITY,
+      );
+      expect(page.thirdPartyErrors.thirdPartyPhone).toBe(
+        APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.PHONE,
+      );
+      expect(page.thirdPartyErrors.thirdPartyEmail).toBe(
+        APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL,
+      );
+    });
+
+    it('handleSaveThirdPartyData succeeds, clears errors, and closes modal when all fields are valid', () => {
+      const page = ApplicantStepViewModelPageObject.render();
+
+      page.setVehicleBeneficiary('third_party');
+      expect(page.isBeneficiaryModalOpen).toBe(true);
+
+      // Fill valid fields
+      page
+        .setThirdPartyField('thirdPartyDocType', 'national_id')
+        .setThirdPartyField('thirdPartyDocNumber', '2-0345-0678')
+        .setThirdPartyField('thirdPartyFullName', 'Carlos Mora')
+        .setThirdPartyField('thirdPartyRelationship', 'spouse')
+        .setThirdPartyField('thirdPartyBirthDate', '1990-05-15')
+        .setThirdPartyField('thirdPartyNationality', 'CR')
+        .setThirdPartyField('thirdPartyPhone', '8888-8888')
+        .setThirdPartyField('thirdPartyEmail', 'carlos@example.com');
+
+      const success = page.handleSaveThirdPartyData();
+
+      expect(success).toBe(true);
+      expect(page.thirdPartyErrors).toEqual({});
+      expect(page.isBeneficiaryModalOpen).toBe(false);
+    });
   });
 });
 
@@ -310,7 +429,9 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
       .setThirdPartyField('thirdPartyFullName', 'Carlos Mora')
       .setThirdPartyField('thirdPartyRelationship', 'spouse')
       .setThirdPartyField('thirdPartyBirthDate', '1990-05-15')
-      .setThirdPartyField('thirdPartyNationality', 'CR');
+      .setThirdPartyField('thirdPartyNationality', 'CR')
+      .setThirdPartyField('thirdPartyPhone', '8888-8888')
+      .setThirdPartyField('thirdPartyEmail', 'carlos@example.com');
   };
 
   describe('Submission payload shape', () => {
@@ -447,9 +568,11 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
         thirdPartyBirthDate: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.BIRTH_DATE,
         thirdPartyDocNumber: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.DOC_NUMBER,
         thirdPartyDocType: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.DOC_TYPE,
+        thirdPartyEmail: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL,
         thirdPartyFullName: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.FULL_NAME,
         thirdPartyNationality:
           APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.NATIONALITY,
+        thirdPartyPhone: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.PHONE,
         thirdPartyRelationship:
           APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.RELATIONSHIP,
       });
@@ -538,8 +661,10 @@ describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () =>
   const THIRD_PARTY_FIELDS = {
     thirdPartyDocNumber: '2-0345-0678',
     thirdPartyDocType: 'national_id',
+    thirdPartyEmail: 'carlos@example.com',
     thirdPartyFullName: 'Carlos Mora',
     thirdPartyNationality: 'CR',
+    thirdPartyPhone: '8888-8888',
     thirdPartyRelationship: 'spouse',
   } as const;
 
@@ -618,5 +743,46 @@ describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () =>
     expect(page.thirdPartyErrors).toEqual({
       thirdPartyBirthDate: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.BIRTH_DATE,
     });
+  });
+
+  it('accepts localized string birth date (DD/MM/YYYY) and validates successfully', () => {
+    const onSubmit = jest.fn();
+    const page = ApplicantStepViewModelPageObject.render({
+      initialPhysicalValues: VALID_PHYSICAL,
+      initialRegime: 'physical',
+      initialThirdPartyValues: {
+        ...THIRD_PARTY_FIELDS,
+        thirdPartyBirthDate: '10 / 05 / 1990',
+      },
+      initialVehicleBeneficiary: 'third_party',
+      onSubmit,
+    });
+
+    page.submit();
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(page.isValid).toBe(true);
+  });
+
+  it('rejects invalid string birth date and populates thirdPartyErrors', () => {
+    const onSubmit = jest.fn();
+    const page = ApplicantStepViewModelPageObject.render({
+      initialPhysicalValues: VALID_PHYSICAL,
+      initialRegime: 'physical',
+      initialThirdPartyValues: {
+        ...THIRD_PARTY_FIELDS,
+        thirdPartyBirthDate: '31/02/1990',
+      },
+      initialVehicleBeneficiary: 'third_party',
+      onSubmit,
+    });
+
+    page.submit();
+
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(page.thirdPartyErrors.thirdPartyBirthDate).toBe(
+      APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.BIRTH_DATE,
+    );
+    expect(page.isValid).toBe(false);
   });
 });

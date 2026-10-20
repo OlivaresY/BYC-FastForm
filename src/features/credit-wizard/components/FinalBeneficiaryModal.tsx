@@ -36,6 +36,7 @@ export const FinalBeneficiaryModal = ({
   isOpen,
   onClose,
   onFieldChange,
+  onSave,
   testID,
   thirdPartyValues,
   values: valuesProp,
@@ -60,10 +61,12 @@ export const FinalBeneficiaryModal = ({
   const normalizedNationality =
     nationality === 'costarricense' ? 'CR' : nationality;
 
-  const formattedBirthDate = useMemo(
-    (): string => normalizeThirdPartyBirthDate(rawBirthDate),
-    [rawBirthDate],
-  );
+  const formattedBirthDate = useMemo((): string => {
+    if (rawBirthDate instanceof Date) {
+      return normalizeThirdPartyBirthDate(rawBirthDate);
+    }
+    return typeof rawBirthDate === 'string' ? rawBirthDate : '';
+  }, [rawBirthDate]);
 
   const handlers = useMemo(
     () => ({
@@ -333,7 +336,7 @@ export const FinalBeneficiaryModal = ({
                 className={BENEFICIARY_MODAL_STYLES.SAVE_BUTTON}
                 fullWidth
                 label={BENEFICIARY_MODAL_COPY.SAVE_BUTTON}
-                onPress={onClose}
+                onPress={onSave ?? onClose}
                 testID={BENEFICIARY_MODAL_TEST_IDS.SAVE_BUTTON}
                 variant='primary'
               />

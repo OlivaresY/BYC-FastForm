@@ -1,26 +1,26 @@
-import React from "react";
+import React from 'react';
 import {
   fireEvent,
   render,
   screen,
   within,
-} from "@testing-library/react-native";
-import type { ReactTestInstance } from "react-test-renderer";
-import { CUSTOM_SELECT_TEST_IDS } from "@/shared/ui/CustomSelect";
-import { LegalEntityForm } from "../components/LegalEntityForm";
-import { LEGAL_ENTITY_FORM_TEST_IDS } from "../constants/LegalEntityForm.constants";
+} from '@testing-library/react-native';
+import type { ReactTestInstance } from 'react-test-renderer';
+import { CUSTOM_SELECT_TEST_IDS } from '@/shared/ui/CustomSelect';
+import { LegalEntityForm } from '../components/LegalEntityForm';
+import { LEGAL_ENTITY_FORM_TEST_IDS } from '../constants/LegalEntityForm.constants';
 import type {
   LegalEntityFormField,
   LegalEntityFormProps,
-} from "../types/LegalEntityForm.types";
+} from '../types/LegalEntityForm.types';
 
 export type TextInputField =
-  | "identificationNumber"
-  | "legalName"
-  | "representativeIdentification"
-  | "representativeName";
+  | 'identificationNumber'
+  | 'legalName'
+  | 'representativeIdentification'
+  | 'representativeName';
 
-export type SelectField = "identificationType";
+export type SelectField = 'identificationType';
 
 const TEXT_FIELD_TEST_ID_MAP: Record<TextInputField, string> = {
   identificationNumber: LEGAL_ENTITY_FORM_TEST_IDS.IDENTIFICATION_NUMBER_INPUT,
@@ -98,7 +98,7 @@ export class LegalEntityFormPageObject {
   }
 
   public getSelectTrigger(
-    field: SelectField = "identificationType",
+    field: SelectField = 'identificationType',
   ): ReactTestInstance {
     const container = this.getFieldContainer(field);
     const baseId = SELECT_FIELD_TEST_ID_MAP[field];
@@ -106,7 +106,7 @@ export class LegalEntityFormPageObject {
   }
 
   public getSelectTriggerText(
-    field: SelectField = "identificationType",
+    field: SelectField = 'identificationType',
   ): string {
     const container = this.getFieldContainer(field);
     const baseId = SELECT_FIELD_TEST_ID_MAP[field];
@@ -144,7 +144,7 @@ export class LegalEntityFormPageObject {
   }
 
   public getFieldHelperText(
-    field: "identificationNumber",
+    field: 'identificationNumber',
   ): ReactTestInstance | null {
     const container = this.getFieldContainer(field);
     const baseId = TEXT_FIELD_TEST_ID_MAP[field];
@@ -152,14 +152,14 @@ export class LegalEntityFormPageObject {
   }
 
   public get identificationLeftIcon(): ReactTestInstance | null {
-    const container = this.getFieldContainer("identificationNumber");
+    const container = this.getFieldContainer('identificationNumber');
     return within(container).queryByTestId(
       `${LEGAL_ENTITY_FORM_TEST_IDS.IDENTIFICATION_NUMBER_INPUT}-left-icon`,
     );
   }
 
   public get identificationValidIcon(): ReactTestInstance | null {
-    const container = this.getFieldContainer("identificationNumber");
+    const container = this.getFieldContainer('identificationNumber');
     return within(container).queryByTestId(
       `${LEGAL_ENTITY_FORM_TEST_IDS.IDENTIFICATION_NUMBER_INPUT}-valid-icon`,
     );
@@ -174,7 +174,7 @@ export class LegalEntityFormPageObject {
     return this;
   }
 
-  public openSelect(field: SelectField = "identificationType"): this {
+  public openSelect(field: SelectField = 'identificationType'): this {
     fireEvent.press(this.getSelectTrigger(field));
     return this;
   }
@@ -195,7 +195,7 @@ export class LegalEntityFormPageObject {
     return this.getTextInput(field).props.editable !== false;
   }
 
-  public isSelectDisabled(field: SelectField = "identificationType"): boolean {
+  public isSelectDisabled(field: SelectField = 'identificationType'): boolean {
     return (
       this.getSelectTrigger(field).props.accessibilityState?.disabled === true
     );

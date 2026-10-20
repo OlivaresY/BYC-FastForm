@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-native';
 import { View } from 'react-native';
 import { ModalStoryWrapper } from '@/shared/components/ModalStoryWrapper';
 import { FinalBeneficiaryModalMemo as FinalBeneficiaryModal } from './FinalBeneficiaryModal';

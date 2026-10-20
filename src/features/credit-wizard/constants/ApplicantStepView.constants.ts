@@ -51,8 +51,10 @@ export const APPLICANT_STEP_VIEW_DEFAULT_VALUES: {
     thirdPartyBirthDate: '',
     thirdPartyDocNumber: '',
     thirdPartyDocType: '',
+    thirdPartyEmail: '',
     thirdPartyFullName: '',
     thirdPartyNationality: '',
+    thirdPartyPhone: '',
     thirdPartyRelationship: '',
   },
 } as const;

@@ -9,8 +9,8 @@ import {
   PHYSICAL_APPLICANT_FIELDS,
   PhysicalApplicantSchema,
   PhysicalIdentificationNumberSchema,
+  StrictThirdPartyBeneficiarySchema,
   THIRD_PARTY_BENEFICIARY_FIELDS,
-  ThirdPartyBeneficiarySchema,
 } from '../types/ApplicantStepView.schema';
 import type { LegalEntityType } from '../types/LegalEntitySelector.types';
 import type {
@@ -28,6 +28,25 @@ import type {
   UseApplicantStepViewModelProps,
   UseApplicantStepViewModelReturn,
 } from '../types/ApplicantStepView.types';
+
+const normalizeThirdPartyPayload = (values: ThirdPartyBeneficiaryValues) => ({
+  ...values,
+  isThirdPartyRegistration: true as const,
+  thirdPartyBirthDate: normalizeThirdPartyBirthDate(
+    values.thirdPartyBirthDate ?? values.birthDate,
+  ),
+  thirdPartyDocNumber:
+    values.thirdPartyDocNumber ?? values.identificationNumber ?? '',
+  thirdPartyDocType:
+    values.thirdPartyDocType ?? values.identificationType ?? '',
+  thirdPartyEmail: values.thirdPartyEmail ?? values.email ?? '',
+  thirdPartyFullName: values.thirdPartyFullName ?? values.fullName ?? '',
+  thirdPartyNationality:
+    values.thirdPartyNationality ?? values.nationality ?? '',
+  thirdPartyPhone: values.thirdPartyPhone ?? values.phone ?? '',
+  thirdPartyRelationship:
+    values.thirdPartyRelationship ?? values.relationship ?? '',
+});
 
 export const useApplicantStepViewModel = (
   props?: UseApplicantStepViewModelProps,
@@ -120,7 +139,20 @@ export const useApplicantStepViewModel = (
     [legalValues],
   );
 
-  const isValid = regime === 'physical' ? isPhysicalValid : isLegalValid;
+  const isApplicantValid =
+    regime === 'physical' ? isPhysicalValid : isLegalValid;
+
+  const isThirdPartyValid = useMemo<boolean>(() => {
+    if (vehicleBeneficiary !== 'third_party') {
+      return true;
+    }
+
+    return StrictThirdPartyBeneficiarySchema.safeParse(
+      normalizeThirdPartyPayload(thirdPartyValues),
+    ).success;
+  }, [thirdPartyValues, vehicleBeneficiary]);
+
+  const isValid = isApplicantValid && isThirdPartyValid;
 
   // ===========================================================================
   // Modal Handlers
@@ -133,6 +165,25 @@ export const useApplicantStepViewModel = (
   const closeBeneficiaryModal = useCallback((): void => {
     setIsBeneficiaryModalOpen(false);
   }, []);
+
+  const handleSaveThirdPartyData = useCallback((): boolean => {
+    const payload = normalizeThirdPartyPayload(thirdPartyValues);
+    const result = StrictThirdPartyBeneficiarySchema.safeParse(payload);
+
+    if (!result.success) {
+      setThirdPartyErrors(
+        mapIssuesToFieldErrors(
+          result.error.issues,
+          THIRD_PARTY_BENEFICIARY_FIELDS,
+        ),
+      );
+      return false;
+    }
+
+    setThirdPartyErrors({});
+    closeBeneficiaryModal();
+    return true;
+  }, [closeBeneficiaryModal, thirdPartyValues]);
 
   // ===========================================================================
   // Form Handlers
@@ -220,13 +271,9 @@ export const useApplicantStepViewModel = (
     let hasValidationErrors = false;
 
     if (isThirdParty) {
-      const thirdPartyResult = ThirdPartyBeneficiarySchema.safeParse({
-        ...thirdPartyValues,
-        isThirdPartyRegistration: true,
-        thirdPartyBirthDate: normalizeThirdPartyBirthDate(
-          thirdPartyValues.thirdPartyBirthDate,
-        ),
-      });
+      const thirdPartyResult = StrictThirdPartyBeneficiarySchema.safeParse(
+        normalizeThirdPartyPayload(thirdPartyValues),
+      );
 
       if (!thirdPartyResult.success) {
         setThirdPartyErrors(
@@ -301,6 +348,7 @@ export const useApplicantStepViewModel = (
 
   return {
     closeBeneficiaryModal,
+    handleSaveThirdPartyData,
     isBeneficiaryModalOpen,
     isIdentificationValid,
     isValid,

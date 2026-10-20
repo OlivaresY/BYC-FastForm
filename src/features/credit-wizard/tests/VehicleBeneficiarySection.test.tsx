@@ -2,11 +2,11 @@ import {
   VEHICLE_BENEFICIARY_SECTION_COPY,
   VEHICLE_BENEFICIARY_SECTION_ENTITIES,
   VEHICLE_BENEFICIARY_SECTION_STYLES,
-} from "../constants/VehicleBeneficiarySection.constants";
-import { VehicleBeneficiarySectionPageObject } from "./VehicleBeneficiarySection.po";
+} from '../constants/VehicleBeneficiarySection.constants';
+import { VehicleBeneficiarySectionPageObject } from './VehicleBeneficiarySection.po';
 
-describe("VehicleBeneficiarySection Component", () => {
-  it("renders section header row with car icon, title, and prompt question", () => {
+describe('VehicleBeneficiarySection Component', () => {
+  it('renders section header row with car icon, title, and prompt question', () => {
     // Arrange & Act
     const onSelectBeneficiaryMock = jest.fn();
     const page = VehicleBeneficiarySectionPageObject.render({
@@ -24,9 +24,9 @@ describe("VehicleBeneficiarySection Component", () => {
     expect(page.getPromptText()).toBe(VEHICLE_BENEFICIARY_SECTION_COPY.PROMPT);
   });
 
-  it("renders with custom testID when provided", () => {
+  it('renders with custom testID when provided', () => {
     // Arrange & Act
-    const customTestId = "custom-vehicle-beneficiary-section";
+    const customTestId = 'custom-vehicle-beneficiary-section';
     const onSelectBeneficiaryMock = jest.fn();
     const page = VehicleBeneficiarySectionPageObject.render({
       onSelectBeneficiary: onSelectBeneficiaryMock,
@@ -38,7 +38,7 @@ describe("VehicleBeneficiarySection Component", () => {
     expect(page.container).toBeTruthy();
   });
 
-  it("renders both option buttons with their respective labels", () => {
+  it('renders both option buttons with their respective labels', () => {
     // Arrange & Act
     const onSelectBeneficiaryMock = jest.fn();
     const page = VehicleBeneficiarySectionPageObject.render({
@@ -58,7 +58,7 @@ describe("VehicleBeneficiarySection Component", () => {
     );
   });
 
-  it("displays active state on same_holder button and inactive on third_party button when same_holder is selected", () => {
+  it('displays active state on same_holder button and inactive on third_party button when same_holder is selected', () => {
     // Arrange & Act
     const onSelectBeneficiaryMock = jest.fn();
     const page = VehicleBeneficiarySectionPageObject.render({
@@ -87,7 +87,7 @@ describe("VehicleBeneficiarySection Component", () => {
     );
   });
 
-  it("displays active state on third_party button and inactive on same_holder button when third_party is selected", () => {
+  it('displays active state on third_party button and inactive on same_holder button when third_party is selected', () => {
     // Arrange & Act
     const onSelectBeneficiaryMock = jest.fn();
     const page = VehicleBeneficiarySectionPageObject.render({
@@ -116,7 +116,7 @@ describe("VehicleBeneficiarySection Component", () => {
     );
   });
 
-  it("triggers onSelectBeneficiary with same_holder when same_holder button is pressed", () => {
+  it('triggers onSelectBeneficiary with same_holder when same_holder button is pressed', () => {
     // Arrange
     const onSelectBeneficiaryMock = jest.fn();
     const page = VehicleBeneficiarySectionPageObject.render({
@@ -134,7 +134,7 @@ describe("VehicleBeneficiarySection Component", () => {
     );
   });
 
-  it("triggers onSelectBeneficiary with third_party when third_party button is pressed", () => {
+  it('triggers onSelectBeneficiary with third_party when third_party button is pressed', () => {
     // Arrange
     const onSelectBeneficiaryMock = jest.fn();
     const page = VehicleBeneficiarySectionPageObject.render({
@@ -152,7 +152,7 @@ describe("VehicleBeneficiarySection Component", () => {
     );
   });
 
-  it("does not trigger onSelectBeneficiary when buttons are pressed while disabled", () => {
+  it('does not trigger onSelectBeneficiary when buttons are pressed while disabled', () => {
     // Arrange
     const onSelectBeneficiaryMock = jest.fn();
     const page = VehicleBeneficiarySectionPageObject.render({
@@ -187,7 +187,7 @@ describe("VehicleBeneficiarySection Component", () => {
     });
 
     // Assert
-    expect(page.sameHolderButton.props.accessibilityRole).toBe("button");
-    expect(page.thirdPartyButton.props.accessibilityRole).toBe("button");
+    expect(page.sameHolderButton.props.accessibilityRole).toBe('button');
+    expect(page.thirdPartyButton.props.accessibilityRole).toBe('button');
   });
 });

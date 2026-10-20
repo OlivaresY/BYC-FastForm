@@ -24,7 +24,7 @@ const meta = {
   component: ApplicantStepView,
   decorators: [
     (Story: React.ComponentType): React.JSX.Element => (
-      <View className="w-full flex-1 self-stretch bg-background">
+      <View className='w-full flex-1 self-stretch bg-background'>
         <Story />
       </View>
     ),

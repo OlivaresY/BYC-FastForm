@@ -37,8 +37,10 @@ export {
   LegalApplicantStepSchema,
   PhysicalApplicantSchema,
   PhysicalApplicantStepSchema,
+  StrictThirdPartyBeneficiarySchema,
   ThirdPartyBeneficiaryFieldsSchema,
   ThirdPartyBeneficiarySchema,
+  ThirdPartyBeneficiaryStrictFieldsSchema,
 } from './types/ApplicantStepView.schema';
 
 export type {
