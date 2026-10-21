@@ -26,6 +26,13 @@ export const PROCESS_TOP_BAR_DIMENSIONS = {
   HIT_SLOP_PX: 12,
 } as const;
 
+export const PROCESS_TOP_BAR_HIT_SLOP = {
+  bottom: 12,
+  left: 12,
+  right: 12,
+  top: 12,
+} as const;
+
 export const PROCESS_TOP_BAR_STYLES = {
   AVATAR_CONTAINER:
     "h-8 w-8 items-center justify-center rounded-full bg-[#E5E0D8]",

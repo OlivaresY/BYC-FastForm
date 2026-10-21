@@ -156,3 +156,4 @@ export const WizardProgressHeader = ({
 };
 
 export const WizardProgressHeaderMemo = React.memo(WizardProgressHeader);
+WizardProgressHeaderMemo.displayName = "WizardProgressHeaderMemo";

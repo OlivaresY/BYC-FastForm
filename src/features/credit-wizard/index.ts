@@ -1,5 +1,6 @@
 export {
   ApplicantStepView,
+  ApplicantStepViewMemo,
   CloseProcessModal,
   LegalEntityForm,
   LegalEntitySelector,

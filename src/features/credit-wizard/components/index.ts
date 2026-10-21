@@ -1,4 +1,4 @@
-export { ApplicantStepView } from "./ApplicantStepView";
+export { ApplicantStepView, ApplicantStepViewMemo } from "./ApplicantStepView";
 export { CloseProcessModal } from "./CloseProcessModal";
 export type { CloseProcessModalProps } from "./CloseProcessModal";
 export { LegalEntityForm } from "./LegalEntityForm";
