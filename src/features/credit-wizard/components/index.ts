@@ -5,4 +5,7 @@ export { LegalEntityForm } from "./LegalEntityForm";
 export { LegalEntitySelector } from "./LegalEntitySelector";
 export { PhysicalPersonForm } from "./PhysicalPersonForm";
 export { VehicleBeneficiarySection } from "./VehicleBeneficiarySection";
-export { WizardProgressHeader } from "./WizardProgressHeader";
+export {
+  WizardProgressHeader,
+  WizardProgressHeaderMemo,
+} from "./WizardProgressHeader";

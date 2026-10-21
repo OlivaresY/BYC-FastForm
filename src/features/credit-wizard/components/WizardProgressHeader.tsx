@@ -116,19 +116,23 @@ export const WizardProgressHeader = ({
       </View>
 
       {/* Middle Block: Title & Subtitle */}
-      <Text
-        className="mt-4 text-2xl font-extrabold tracking-tight text-gray-900"
-        testID={WIZARD_PROGRESS_HEADER_TEST_IDS.TITLE}
-      >
-        {title}
-      </Text>
+      {Boolean(title) && (
+        <Text
+          className="mt-4 text-2xl font-extrabold tracking-tight text-gray-900"
+          testID={WIZARD_PROGRESS_HEADER_TEST_IDS.TITLE}
+        >
+          {title}
+        </Text>
+      )}
 
-      <Text
-        className="mb-4 mt-1 text-sm font-normal text-slate-500"
-        testID={WIZARD_PROGRESS_HEADER_TEST_IDS.SUBTITLE}
-      >
-        {subtitle}
-      </Text>
+      {Boolean(subtitle) && (
+        <Text
+          className="mb-4 mt-1 text-sm font-normal text-slate-500"
+          testID={WIZARD_PROGRESS_HEADER_TEST_IDS.SUBTITLE}
+        >
+          {subtitle}
+        </Text>
+      )}
 
       {/* Bottom Element: Segmented Line */}
       <View
@@ -150,3 +154,5 @@ export const WizardProgressHeader = ({
     </View>
   );
 };
+
+export const WizardProgressHeaderMemo = React.memo(WizardProgressHeader);

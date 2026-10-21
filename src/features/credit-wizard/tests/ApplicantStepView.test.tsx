@@ -13,6 +13,7 @@ describe("ApplicantStepView Integration", () => {
 
       // Assert - Structural elements
       expect(page.container).toBeTruthy();
+      expect(page.processTopBar).toBeTruthy();
       expect(page.scrollView).toBeTruthy();
       expect(page.wizardHeader).toBeTruthy();
       expect(page.title.props.children).toBe(APPLICANT_STEP_VIEW_COPY.TITLE);
@@ -490,6 +491,36 @@ describe("ApplicantStepView Integration", () => {
       // Switch to physical to verify initialPhysicalValues
       page.selectPhysicalRegime();
       expect(page.getPhysicalInputValue("firstName")).toBe("Elena");
+    });
+  });
+
+  describe("Process Top Bar Actions", () => {
+    it("invokes handleOpenCloseModal when close button in ProcessTopBar is pressed", () => {
+      // Arrange
+      const handleOpenCloseModal = jest.fn();
+      const page = ApplicantStepViewPageObject.render({
+        handleOpenCloseModal,
+      });
+
+      // Act
+      page.pressCloseButton();
+
+      // Assert
+      expect(handleOpenCloseModal).toHaveBeenCalledTimes(1);
+    });
+
+    it("invokes onClose fallback when close button in ProcessTopBar is pressed", () => {
+      // Arrange
+      const onClose = jest.fn();
+      const page = ApplicantStepViewPageObject.render({
+        onClose,
+      });
+
+      // Act
+      page.pressCloseButton();
+
+      // Assert
+      expect(onClose).toHaveBeenCalledTimes(1);
     });
   });
 });

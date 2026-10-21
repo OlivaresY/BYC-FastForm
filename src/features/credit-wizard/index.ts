@@ -6,6 +6,7 @@ export {
   PhysicalPersonForm,
   VehicleBeneficiarySection,
   WizardProgressHeader,
+  WizardProgressHeaderMemo,
 } from "./components";
 
 export { useApplicantStepViewModel } from "./hooks";

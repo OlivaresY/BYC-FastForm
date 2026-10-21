@@ -67,7 +67,7 @@ describe("WizardProgressHeader Component", () => {
     });
 
     it.each([1, 2, 3, 4])(
-      "renders uniform green active segments (bg-[#385741]) for step %i",
+      "renders uniform green active segments for step %i",
       (currentStep) => {
         // Arrange & Act
         const pom = WizardProgressHeaderPageObject.render({
@@ -81,7 +81,6 @@ describe("WizardProgressHeader Component", () => {
           expect(classes[i]).toContain(
             WIZARD_PROGRESS_HEADER_SEGMENT_CLASSES.ACTIVE,
           );
-          expect(classes[i]).toContain("bg-[#385741]");
         }
         for (let i = currentStep; i < 4; i++) {
           expect(classes[i]).toContain(

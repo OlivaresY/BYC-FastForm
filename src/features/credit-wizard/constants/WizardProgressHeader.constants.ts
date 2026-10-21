@@ -75,9 +75,9 @@ export const WIZARD_PROGRESS_HEADER_NUMERICAL_CONSTANTS = {
 } as const;
 
 export const WIZARD_PROGRESS_HEADER_SEGMENT_CLASSES = {
-  ACTIVE: "bg-[#385741]",
+  ACTIVE: "bg-brand-green",
   BASE: "h-[3px] flex-1 rounded-full",
-  INACTIVE: "bg-[#E6E2DE]",
+  INACTIVE: "bg-[#E5E0D8]",
 } as const;
 
 export const WIZARD_PROGRESS_HEADER_STEP_ICON_STYLES = {

@@ -1,7 +1,8 @@
-import React from 'react';
-import { ScrollView, Text, View } from 'react-native';
-import { BaseButton } from '@/shared/ui/BaseButton';
-import { ArrowRightIcon } from '@/shared/ui/Icons';
+import React from "react";
+import { ScrollView, Text, View } from "react-native";
+import { BaseButton } from "@/shared/ui/BaseButton";
+import { ArrowRightIcon } from "@/shared/ui/Icons";
+import { ProcessTopBar } from "@/shared/ui/ProcessTopBar";
 import {
   APPLICANT_STEP_VIEW_COLORS,
   APPLICANT_STEP_VIEW_COPY,
@@ -9,20 +10,22 @@ import {
   APPLICANT_STEP_VIEW_NUMERICAL,
   APPLICANT_STEP_VIEW_STYLES,
   APPLICANT_STEP_VIEW_TEST_IDS,
-} from '../constants/ApplicantStepView.constants';
-import type { ApplicantStepViewProps } from '../types/ApplicantStepView.types';
-import { LegalEntityForm } from './LegalEntityForm';
-import { LegalEntitySelector } from './LegalEntitySelector';
-import { PhysicalPersonForm } from './PhysicalPersonForm';
-import { VehicleBeneficiarySection } from './VehicleBeneficiarySection';
-import { WizardProgressHeader } from './WizardProgressHeader';
+} from "../constants/ApplicantStepView.constants";
+import type { ApplicantStepViewProps } from "../types/ApplicantStepView.types";
+import { LegalEntityForm } from "./LegalEntityForm";
+import { LegalEntitySelector } from "./LegalEntitySelector";
+import { PhysicalPersonForm } from "./PhysicalPersonForm";
+import { VehicleBeneficiarySection } from "./VehicleBeneficiarySection";
+import { WizardProgressHeaderMemo } from "./WizardProgressHeader";
 
 export const ApplicantStepView = ({
   disabled = false,
+  handleOpenCloseModal: handleOpenCloseModalProp,
   isIdentificationValid = false,
   isValid = false,
   legalErrors,
   legalValues,
+  onClose,
   onLegalFieldChange,
   onPhysicalFieldChange,
   onRegimeChange,
@@ -34,11 +37,19 @@ export const ApplicantStepView = ({
   testID,
   vehicleBeneficiary,
 }: ApplicantStepViewProps): React.JSX.Element => {
+  const handleOpenCloseModal = handleOpenCloseModalProp ?? onClose;
+
   return (
     <View
       className={APPLICANT_STEP_VIEW_STYLES.CONTAINER}
       testID={testID ?? APPLICANT_STEP_VIEW_TEST_IDS.CONTAINER}
     >
+      <ProcessTopBar
+        onClose={handleOpenCloseModal}
+        testID={APPLICANT_STEP_VIEW_TEST_IDS.PROCESS_TOP_BAR}
+        userInitials="YO"
+      />
+
       <ScrollView
         className="w-full flex-1 self-stretch"
         keyboardShouldPersistTaps="handled"
@@ -47,11 +58,9 @@ export const ApplicantStepView = ({
       >
         <View className={APPLICANT_STEP_VIEW_STYLES.SCROLL_CONTENT}>
           {/* 1. Wizard Progress Header */}
-          <WizardProgressHeader
+          <WizardProgressHeaderMemo
             currentStep={APPLICANT_STEP_VIEW_NUMERICAL.CURRENT_STEP}
-            subtitle={APPLICANT_STEP_VIEW_COPY.HEADER_SUBTITLE}
             testID={APPLICANT_STEP_VIEW_TEST_IDS.WIZARD_HEADER}
-            title={APPLICANT_STEP_VIEW_COPY.HEADER_TITLE}
             totalSteps={APPLICANT_STEP_VIEW_NUMERICAL.TOTAL_STEPS}
           />
 
@@ -85,7 +94,7 @@ export const ApplicantStepView = ({
             className={APPLICANT_STEP_VIEW_STYLES.TAUPE_CONTAINER}
             testID={APPLICANT_STEP_VIEW_TEST_IDS.TAUPE_CONTAINER}
           >
-            {regime === 'physical' ? (
+            {regime === "physical" ? (
               <PhysicalPersonForm
                 disabled={disabled}
                 errors={physicalErrors}

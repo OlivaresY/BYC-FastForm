@@ -1,33 +1,32 @@
-import type { LegalEntityType } from './LegalEntitySelector.types';
+import type { LegalEntityType } from "./LegalEntitySelector.types";
 import type {
   PhysicalPersonFormField,
   PhysicalPersonFormValues,
-} from './PhysicalPersonForm.types';
+} from "./PhysicalPersonForm.types";
 import type {
   LegalEntityFormField,
   LegalEntityFormValues,
-} from './LegalEntityForm.types';
-import type { VehicleBeneficiaryType } from './VehicleBeneficiarySection.types';
+} from "./LegalEntityForm.types";
+import type { VehicleBeneficiaryType } from "./VehicleBeneficiarySection.types";
 
 // =============================================================================
 // Discriminated Submission Payloads
 // =============================================================================
 
 export interface PhysicalApplicantStepData {
-  regime: 'physical';
+  regime: "physical";
   values: PhysicalPersonFormValues;
   vehicleBeneficiary: VehicleBeneficiaryType;
 }
 
 export interface LegalApplicantStepData {
-  regime: 'legal';
+  regime: "legal";
   values: LegalEntityFormValues;
   vehicleBeneficiary: VehicleBeneficiaryType;
 }
 
 export type ApplicantStepData =
-  | PhysicalApplicantStepData
-  | LegalApplicantStepData;
+  PhysicalApplicantStepData | LegalApplicantStepData;
 
 // =============================================================================
 // ViewModel Hook Options & Return Interface
@@ -70,15 +69,16 @@ export interface UseApplicantStepViewModelReturn {
 // Orchestrator Component Props
 // =============================================================================
 
-export interface ApplicantStepViewProps
-  extends Omit<
-    UseApplicantStepViewModelReturn,
-    'isIdentificationValid' | 'isValid' | 'legalErrors' | 'physicalErrors'
-  > {
+export interface ApplicantStepViewProps extends Omit<
+  UseApplicantStepViewModelReturn,
+  "isIdentificationValid" | "isValid" | "legalErrors" | "physicalErrors"
+> {
   disabled?: boolean;
+  handleOpenCloseModal?: () => void;
   isIdentificationValid?: boolean;
   isValid?: boolean;
   legalErrors?: Partial<Record<LegalEntityFormField, string>>;
+  onClose?: () => void;
   physicalErrors?: Partial<Record<PhysicalPersonFormField, string>>;
   testID?: string;
 }
