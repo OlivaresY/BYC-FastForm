@@ -1,9 +1,7 @@
 import React from 'react';
 import {
-  act,
   fireEvent,
   render,
-  renderHook,
   screen,
   within,
 } from '@testing-library/react-native';
@@ -21,8 +19,6 @@ import type {
   UseApplicantStepViewModelProps,
 } from '../types/ApplicantStepView.types';
 
-export { act };
-
 export type PhysicalTextInputField =
   | 'birthDate'
   | 'firstLastName'
@@ -32,10 +28,7 @@ export type PhysicalTextInputField =
   | 'secondLastName';
 
 export type PhysicalSelectField =
-  | 'gender'
-  | 'identificationType'
-  | 'maritalStatus'
-  | 'nationality';
+  'gender' | 'identificationType' | 'maritalStatus' | 'nationality';
 
 export type LegalTextInputField =
   | 'identificationNumber'
@@ -61,16 +54,14 @@ const PHYSICAL_SELECT_MAP: Record<PhysicalSelectField, string> = {
 };
 
 const LEGAL_TEXT_MAP: Record<LegalTextInputField, string> = {
-  identificationNumber:
-    LEGAL_ENTITY_FORM_TEST_IDS.IDENTIFICATION_NUMBER_INPUT,
+  identificationNumber: LEGAL_ENTITY_FORM_TEST_IDS.IDENTIFICATION_NUMBER_INPUT,
   legalName: LEGAL_ENTITY_FORM_TEST_IDS.LEGAL_NAME_INPUT,
   representativeIdentification:
     LEGAL_ENTITY_FORM_TEST_IDS.REPRESENTATIVE_IDENTIFICATION_INPUT,
   representativeName: LEGAL_ENTITY_FORM_TEST_IDS.REPRESENTATIVE_NAME_INPUT,
 };
 
-interface ApplicantStepViewTestContainerProps
-  extends UseApplicantStepViewModelProps {
+interface ApplicantStepViewTestContainerProps extends UseApplicantStepViewModelProps {
   disabled?: boolean;
   testID?: string;
 }
@@ -98,9 +89,7 @@ export class ApplicantStepViewPageObject {
   public static render(
     props?: ApplicantStepViewTestContainerProps,
   ): ApplicantStepViewPageObject {
-    render(
-      React.createElement(ApplicantStepViewTestContainer, props ?? {}),
-    );
+    render(React.createElement(ApplicantStepViewTestContainer, props ?? {}));
     return new ApplicantStepViewPageObject(props?.testID);
   }
 
@@ -109,10 +98,6 @@ export class ApplicantStepViewPageObject {
   ): ApplicantStepViewPageObject {
     render(React.createElement(ApplicantStepView, props));
     return new ApplicantStepViewPageObject(props.testID);
-  }
-
-  public static renderHook(props?: UseApplicantStepViewModelProps) {
-    return renderHook(() => useApplicantStepViewModel(props));
   }
 
   // =========================================================================
@@ -215,10 +200,7 @@ export class ApplicantStepViewPageObject {
     return this;
   }
 
-  public selectPhysicalOption(
-    field: PhysicalSelectField,
-    value: string,
-  ): this {
+  public selectPhysicalOption(field: PhysicalSelectField, value: string): this {
     const baseId = PHYSICAL_SELECT_MAP[field];
     const trigger = screen.getByTestId(`${baseId}-trigger`);
     fireEvent.press(trigger);
@@ -254,7 +236,7 @@ export class ApplicantStepViewPageObject {
     this.fillPhysicalField('firstName', 'Carlos');
     this.fillPhysicalField('firstLastName', 'Rodríguez');
     this.fillPhysicalField('secondLastName', 'Castro');
-    this.fillPhysicalField('birthDate', '15 / 08 / 1988');
+    this.fillPhysicalField('birthDate', '15-08-1988');
     this.selectPhysicalOption('nationality', 'CR');
     this.selectPhysicalOption('maritalStatus', 'married');
     this.selectPhysicalOption('gender', 'male');

@@ -1,14 +1,14 @@
-import type { Meta, StoryObj } from "@storybook/react-native";
-import { LegalEntitySelector } from "./LegalEntitySelector";
+import type { Meta, StoryObj } from '@storybook/react-native';
+import { LegalEntitySelector } from './LegalEntitySelector';
 
 const meta = {
   args: {
     disabled: false,
     onSelectEntity: () => {},
-    selectedEntity: "physical",
+    selectedEntity: 'physical',
   },
   component: LegalEntitySelector,
-  title: "Features/CreditWizard/LegalEntitySelector",
+  title: 'Features/CreditWizard/LegalEntitySelector',
 } satisfies Meta<typeof LegalEntitySelector>;
 
 export default meta;
@@ -18,20 +18,20 @@ type Story = StoryObj<typeof meta>;
 export const PhysicalPersonSelected: Story = {
   args: {
     disabled: false,
-    selectedEntity: "physical",
+    selectedEntity: 'physical',
   },
 };
 
 export const LegalEntitySelected: Story = {
   args: {
     disabled: false,
-    selectedEntity: "legal",
+    selectedEntity: 'legal',
   },
 };
 
 export const Disabled: Story = {
   args: {
     disabled: true,
-    selectedEntity: "physical",
+    selectedEntity: 'physical',
   },
 };

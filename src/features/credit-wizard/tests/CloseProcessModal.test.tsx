@@ -1,8 +1,8 @@
-import { CLOSE_PROCESS_MODAL_COPY } from "../constants/CloseProcessModal.constants";
-import { CloseProcessModalPageObject } from "./CloseProcessModal.po";
+import { CLOSE_PROCESS_MODAL_COPY } from '../constants/CloseProcessModal.constants';
+import { CloseProcessModalPageObject } from './CloseProcessModal.po';
 
-describe("CloseProcessModal Component", () => {
-  it("renders modal title, body copy, and action buttons when visible is true", () => {
+describe('CloseProcessModal Component', () => {
+  it('renders modal title, body copy, and action buttons when visible is true', () => {
     // Arrange
     const handleClose = jest.fn();
     const handleDiscard = jest.fn();
@@ -26,7 +26,7 @@ describe("CloseProcessModal Component", () => {
     expect(page.closeButton).toBeTruthy();
   });
 
-  it("triggers onClose callback when close button is pressed", () => {
+  it('triggers onClose callback when close button is pressed', () => {
     // Arrange
     const handleClose = jest.fn();
     const handleDiscard = jest.fn();
@@ -48,7 +48,7 @@ describe("CloseProcessModal Component", () => {
     expect(handleSaveDraft).not.toHaveBeenCalled();
   });
 
-  it("triggers onSaveDraft callback when Guardar Borrador button is pressed", () => {
+  it('triggers onSaveDraft callback when Guardar Borrador button is pressed', () => {
     // Arrange
     const handleClose = jest.fn();
     const handleDiscard = jest.fn();
@@ -70,7 +70,7 @@ describe("CloseProcessModal Component", () => {
     expect(handleDiscard).not.toHaveBeenCalled();
   });
 
-  it("triggers onDiscard callback when Descartar button is pressed", () => {
+  it('triggers onDiscard callback when Descartar button is pressed', () => {
     // Arrange
     const handleClose = jest.fn();
     const handleDiscard = jest.fn();
@@ -92,7 +92,7 @@ describe("CloseProcessModal Component", () => {
     expect(handleSaveDraft).not.toHaveBeenCalled();
   });
 
-  it("does not render modal content when visible is false", () => {
+  it('does not render modal content when visible is false', () => {
     // Arrange
     const handleClose = jest.fn();
     const handleDiscard = jest.fn();
@@ -110,7 +110,7 @@ describe("CloseProcessModal Component", () => {
     expect(page.backdrop).toBeNull();
   });
 
-  it("triggers onClose callback when backdrop is pressed", () => {
+  it('triggers onClose callback when backdrop is pressed', () => {
     // Arrange
     const handleClose = jest.fn();
     const handleDiscard = jest.fn();
@@ -132,7 +132,7 @@ describe("CloseProcessModal Component", () => {
     expect(handleSaveDraft).not.toHaveBeenCalled();
   });
 
-  it("does not trigger onClose when modal card is pressed", () => {
+  it('does not trigger onClose when modal card is pressed', () => {
     // Arrange
     const handleClose = jest.fn();
     const handleDiscard = jest.fn();
@@ -154,7 +154,7 @@ describe("CloseProcessModal Component", () => {
     expect(handleSaveDraft).not.toHaveBeenCalled();
   });
 
-  it("renders distinct accessibility labels on backdrop and close button with button role", () => {
+  it('renders distinct accessibility labels on backdrop and close button with button role', () => {
     // Arrange
     const page = CloseProcessModalPageObject.render({
       onClose: jest.fn(),
@@ -164,11 +164,11 @@ describe("CloseProcessModal Component", () => {
     });
 
     // Assert
-    expect(page.backdrop?.props.accessibilityRole).toBe("button");
+    expect(page.backdrop?.props.accessibilityRole).toBe('button');
     expect(page.backdrop?.props.accessibilityLabel).toBe(
       CLOSE_PROCESS_MODAL_COPY.BACKDROP_ACCESSIBILITY_LABEL,
     );
-    expect(page.closeButton.props.accessibilityRole).toBe("button");
+    expect(page.closeButton.props.accessibilityRole).toBe('button');
     expect(page.closeButton.props.accessibilityLabel).toBe(
       CLOSE_PROCESS_MODAL_COPY.CLOSE_ACCESSIBILITY_LABEL,
     );

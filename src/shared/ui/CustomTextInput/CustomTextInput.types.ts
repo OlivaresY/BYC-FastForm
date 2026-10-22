@@ -1,6 +1,6 @@
 import type { TextInputProps } from "react-native";
 
-export type CustomTextInputPresetIcon = "calendar" | "hash";
+export type CustomTextInputPresetIcon = "calendar" | "hash" | "mail" | "phone";
 
 export interface CustomTextInputProps extends Omit<
   TextInputProps,

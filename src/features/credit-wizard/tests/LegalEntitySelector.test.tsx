@@ -2,11 +2,11 @@ import {
   LEGAL_ENTITY_SELECTOR_COPY,
   LEGAL_ENTITY_SELECTOR_ENTITIES,
   LEGAL_ENTITY_SELECTOR_STYLES,
-} from "../constants/LegalEntitySelector.constants";
-import { LegalEntitySelectorPageObject } from "./LegalEntitySelector.po";
+} from '../constants/LegalEntitySelector.constants';
+import { LegalEntitySelectorPageObject } from './LegalEntitySelector.po';
 
-describe("LegalEntitySelector Component", () => {
-  it("renders section header title and subtitle correctly", () => {
+describe('LegalEntitySelector Component', () => {
+  it('renders section header title and subtitle correctly', () => {
     // Arrange & Act
     const onSelectEntityMock = jest.fn();
     const page = LegalEntitySelectorPageObject.render({
@@ -24,9 +24,9 @@ describe("LegalEntitySelector Component", () => {
     );
   });
 
-  it("renders with custom testID when provided", () => {
+  it('renders with custom testID when provided', () => {
     // Arrange & Act
-    const customTestId = "custom-legal-entity-selector";
+    const customTestId = 'custom-legal-entity-selector';
     const onSelectEntityMock = jest.fn();
     const page = LegalEntitySelectorPageObject.render({
       onSelectEntity: onSelectEntityMock,
@@ -38,7 +38,7 @@ describe("LegalEntitySelector Component", () => {
     expect(page.container).toBeTruthy();
   });
 
-  it("renders both entity cards with their titles and subtitles", () => {
+  it('renders both entity cards with their titles and subtitles', () => {
     // Arrange & Act
     const onSelectEntityMock = jest.fn();
     const page = LegalEntitySelectorPageObject.render({
@@ -64,7 +64,7 @@ describe("LegalEntitySelector Component", () => {
     );
   });
 
-  it("displays active state on physical card and inactive on legal card when physical is selected", () => {
+  it('displays active state on physical card and inactive on legal card when physical is selected', () => {
     // Arrange & Act
     const onSelectEntityMock = jest.fn();
     const page = LegalEntitySelectorPageObject.render({
@@ -105,7 +105,7 @@ describe("LegalEntitySelector Component", () => {
     );
   });
 
-  it("displays active state on legal card and inactive on physical card when legal is selected", () => {
+  it('displays active state on legal card and inactive on physical card when legal is selected', () => {
     // Arrange & Act
     const onSelectEntityMock = jest.fn();
     const page = LegalEntitySelectorPageObject.render({
@@ -146,7 +146,7 @@ describe("LegalEntitySelector Component", () => {
     );
   });
 
-  it("triggers onSelectEntity with physical when physical card is pressed", () => {
+  it('triggers onSelectEntity with physical when physical card is pressed', () => {
     // Arrange
     const onSelectEntityMock = jest.fn();
     const page = LegalEntitySelectorPageObject.render({
@@ -164,7 +164,7 @@ describe("LegalEntitySelector Component", () => {
     );
   });
 
-  it("triggers onSelectEntity with legal when legal card is pressed", () => {
+  it('triggers onSelectEntity with legal when legal card is pressed', () => {
     // Arrange
     const onSelectEntityMock = jest.fn();
     const page = LegalEntitySelectorPageObject.render({
@@ -182,7 +182,7 @@ describe("LegalEntitySelector Component", () => {
     );
   });
 
-  it("does not trigger onSelectEntity when physical or legal card is pressed while disabled", () => {
+  it('does not trigger onSelectEntity when physical or legal card is pressed while disabled', () => {
     // Arrange
     const onSelectEntityMock = jest.fn();
     const page = LegalEntitySelectorPageObject.render({
@@ -217,7 +217,7 @@ describe("LegalEntitySelector Component", () => {
     });
 
     // Assert
-    expect(page.physicalCard.props.accessibilityRole).toBe("button");
-    expect(page.legalCard.props.accessibilityRole).toBe("button");
+    expect(page.physicalCard.props.accessibilityRole).toBe('button');
+    expect(page.legalCard.props.accessibilityRole).toBe('button');
   });
 });

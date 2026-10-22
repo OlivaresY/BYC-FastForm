@@ -1,10 +1,10 @@
-import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react-native";
-import type { RenderAPI } from "@testing-library/react-native";
-import type { ReactTestInstance } from "react-test-renderer";
-import { LegalEntitySelector } from "../components/LegalEntitySelector";
-import { LEGAL_ENTITY_SELECTOR_TEST_IDS } from "../constants/LegalEntitySelector.constants";
-import type { LegalEntitySelectorProps } from "../types/LegalEntitySelector.types";
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react-native';
+import type { RenderAPI } from '@testing-library/react-native';
+import type { ReactTestInstance } from 'react-test-renderer';
+import { LegalEntitySelector } from '../components/LegalEntitySelector';
+import { LEGAL_ENTITY_SELECTOR_TEST_IDS } from '../constants/LegalEntitySelector.constants';
+import type { LegalEntitySelectorProps } from '../types/LegalEntitySelector.types';
 
 export class LegalEntitySelectorPageObject {
   private readonly customTestId?: string;

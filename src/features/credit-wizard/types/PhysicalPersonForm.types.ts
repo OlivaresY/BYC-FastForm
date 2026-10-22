@@ -1,16 +1,16 @@
-import type { CustomSelectOption } from "@/shared/ui/CustomSelect";
+import type { CustomSelectOption } from '@/shared/ui/CustomSelect';
 
 export type PhysicalPersonFormField =
-  | "birthDate"
-  | "firstLastName"
-  | "firstName"
-  | "gender"
-  | "identificationNumber"
-  | "identificationType"
-  | "maritalStatus"
-  | "middleName"
-  | "nationality"
-  | "secondLastName";
+  | 'birthDate'
+  | 'firstLastName'
+  | 'firstName'
+  | 'gender'
+  | 'identificationNumber'
+  | 'identificationType'
+  | 'maritalStatus'
+  | 'middleName'
+  | 'nationality'
+  | 'secondLastName';
 
 export interface PhysicalPersonFormValues {
   birthDate: string;

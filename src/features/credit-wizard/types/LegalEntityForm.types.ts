@@ -1,11 +1,11 @@
-import type { CustomSelectOption } from "@/shared/ui/CustomSelect";
+import type { CustomSelectOption } from '@/shared/ui/CustomSelect';
 
 export type LegalEntityFormField =
-  | "identificationNumber"
-  | "identificationType"
-  | "legalName"
-  | "representativeIdentification"
-  | "representativeName";
+  | 'identificationNumber'
+  | 'identificationType'
+  | 'legalName'
+  | 'representativeIdentification'
+  | 'representativeName';
 
 export interface LegalEntityFormValues {
   identificationNumber: string;

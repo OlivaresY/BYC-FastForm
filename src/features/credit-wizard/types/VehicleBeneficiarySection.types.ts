@@ -1,4 +1,4 @@
-export type VehicleBeneficiaryType = "same_holder" | "third_party";
+export type VehicleBeneficiaryType = 'same_holder' | 'third_party';
 
 export interface VehicleBeneficiarySectionProps {
   disabled?: boolean;

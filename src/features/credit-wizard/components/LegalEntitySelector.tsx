@@ -1,6 +1,6 @@
-import React from "react";
-import { Pressable, Text, View } from "react-native";
-import { BuildingIcon, UserIcon } from "@/shared/ui/Icons";
+import React, { useCallback } from 'react';
+import { Pressable, Text, View } from 'react-native';
+import { BuildingIcon, UserIcon } from '@/shared/ui/Icons';
 import {
   LEGAL_ENTITY_SELECTOR_COLORS,
   LEGAL_ENTITY_SELECTOR_COPY,
@@ -8,8 +8,8 @@ import {
   LEGAL_ENTITY_SELECTOR_ICON_DIMENSIONS,
   LEGAL_ENTITY_SELECTOR_STYLES,
   LEGAL_ENTITY_SELECTOR_TEST_IDS,
-} from "../constants/LegalEntitySelector.constants";
-import type { LegalEntitySelectorProps } from "../types/LegalEntitySelector.types";
+} from '../constants/LegalEntitySelector.constants';
+import type { LegalEntitySelectorProps } from '../types/LegalEntitySelector.types';
 
 interface EntityCardBadgeProps {
   icon: React.JSX.Element;
@@ -45,13 +45,13 @@ export const LegalEntitySelector = ({
   const isLegalSelected =
     selectedEntity === LEGAL_ENTITY_SELECTOR_ENTITIES.LEGAL;
 
-  const handleSelectPhysical = (): void => {
+  const handleSelectPhysical = useCallback((): void => {
     onSelectEntity(LEGAL_ENTITY_SELECTOR_ENTITIES.PHYSICAL);
-  };
+  }, [onSelectEntity]);
 
-  const handleSelectLegal = (): void => {
+  const handleSelectLegal = useCallback((): void => {
     onSelectEntity(LEGAL_ENTITY_SELECTOR_ENTITIES.LEGAL);
-  };
+  }, [onSelectEntity]);
 
   const physicalBorderClass = isPhysicalSelected
     ? LEGAL_ENTITY_SELECTOR_STYLES.ACTIVE_CARD
@@ -63,7 +63,7 @@ export const LegalEntitySelector = ({
 
   const disabledClass = disabled
     ? ` ${LEGAL_ENTITY_SELECTOR_STYLES.CARD_DISABLED}`
-    : "";
+    : '';
 
   return (
     <View
@@ -89,7 +89,7 @@ export const LegalEntitySelector = ({
       <View className={LEGAL_ENTITY_SELECTOR_STYLES.GRID}>
         {/* Card 1: Persona Física */}
         <Pressable
-          accessibilityRole="button"
+          accessibilityRole='button'
           accessibilityState={{
             disabled: !!disabled,
             selected: isPhysicalSelected,
@@ -142,7 +142,7 @@ export const LegalEntitySelector = ({
 
         {/* Card 2: Persona Jurídica */}
         <Pressable
-          accessibilityRole="button"
+          accessibilityRole='button'
           accessibilityState={{
             disabled: !!disabled,
             selected: isLegalSelected,
@@ -196,3 +196,5 @@ export const LegalEntitySelector = ({
     </View>
   );
 };
+
+export const LegalEntitySelectorMemo = React.memo(LegalEntitySelector);
