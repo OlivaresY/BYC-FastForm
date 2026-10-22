@@ -7,7 +7,6 @@ import { ApplicantStepView } from "./ApplicantStepView";
 const meta = {
   args: {
     disabled: false,
-    handleOpenCloseModal: () => {},
     isIdentificationValid: false,
     isValid: false,
     legalErrors: {},

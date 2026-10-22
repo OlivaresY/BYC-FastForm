@@ -74,11 +74,10 @@ export interface ApplicantStepViewProps extends Omit<
   "isIdentificationValid" | "isValid" | "legalErrors" | "physicalErrors"
 > {
   disabled?: boolean;
-  handleOpenCloseModal?: () => void;
   isIdentificationValid?: boolean;
   isValid?: boolean;
   legalErrors?: Partial<Record<LegalEntityFormField, string>>;
-  onClose?: () => void;
+  onClose: () => void;
   physicalErrors?: Partial<Record<PhysicalPersonFormField, string>>;
   testID?: string;
 }

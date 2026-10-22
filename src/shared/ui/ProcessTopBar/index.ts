@@ -1,4 +1,4 @@
-export { ProcessTopBar, ProcessTopBarMemo } from "./ProcessTopBar";
+export { ProcessTopBar } from "./ProcessTopBar";
 export type { ProcessTopBarProps } from "./ProcessTopBar.types";
 export {
   PROCESS_TOP_BAR_COLORS,

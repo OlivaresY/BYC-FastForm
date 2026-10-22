@@ -28,7 +28,8 @@ export const CLOSE_PROCESS_MODAL_STYLES = {
   BODY: "mb-8 mt-3 text-center text-base text-text-secondary",
   CLOSE_BUTTON:
     "absolute right-3 top-3 min-h-[48px] min-w-[48px] items-center justify-center rounded-full active:bg-black/5",
-  CONTAINER: "w-[90%] max-w-[340px] items-center rounded-3xl bg-white px-6 py-8",
+  CONTAINER:
+    "w-[90%] max-w-[340px] items-center rounded-3xl bg-white px-6 py-8",
   TITLE: "mt-6 text-center text-xl font-bold text-text-primary",
 } as const;
 

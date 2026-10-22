@@ -68,15 +68,13 @@ const LEGAL_TEXT_MAP: Record<LegalTextInputField, string> = {
 
 interface ApplicantStepViewTestContainerProps extends UseApplicantStepViewModelProps {
   disabled?: boolean;
-  handleOpenCloseModal?: () => void;
   onClose?: () => void;
   testID?: string;
 }
 
 const ApplicantStepViewTestContainer = ({
   disabled,
-  handleOpenCloseModal,
-  onClose,
+  onClose = jest.fn(),
   testID,
   ...hookProps
 }: ApplicantStepViewTestContainerProps): React.JSX.Element => {
@@ -84,7 +82,6 @@ const ApplicantStepViewTestContainer = ({
   return React.createElement(ApplicantStepView, {
     ...viewModel,
     disabled,
-    handleOpenCloseModal,
     onClose,
     testID,
   });
@@ -105,10 +102,14 @@ export class ApplicantStepViewPageObject {
   }
 
   public static renderDirect(
-    props: ApplicantStepViewProps,
+    props: Omit<ApplicantStepViewProps, "onClose"> & { onClose?: () => void },
   ): ApplicantStepViewPageObject {
-    render(React.createElement(ApplicantStepView, props));
-    return new ApplicantStepViewPageObject(props.testID);
+    const finalProps: ApplicantStepViewProps = {
+      onClose: jest.fn(),
+      ...props,
+    };
+    render(React.createElement(ApplicantStepView, finalProps));
+    return new ApplicantStepViewPageObject(finalProps.testID);
   }
 
   public static renderHook(props?: UseApplicantStepViewModelProps) {

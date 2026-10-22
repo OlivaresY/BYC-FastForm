@@ -1,13 +1,11 @@
 export {
   ApplicantStepView,
-  ApplicantStepViewMemo,
   CloseProcessModal,
   LegalEntityForm,
   LegalEntitySelector,
   PhysicalPersonForm,
   VehicleBeneficiarySection,
   WizardProgressHeader,
-  WizardProgressHeaderMemo,
 } from "./components";
 
 export { useApplicantStepViewModel } from "./hooks";

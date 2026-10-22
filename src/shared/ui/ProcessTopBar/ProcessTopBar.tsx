@@ -105,5 +105,3 @@ export const ProcessTopBar = React.memo(
 );
 
 ProcessTopBar.displayName = "ProcessTopBar";
-
-export const ProcessTopBarMemo = ProcessTopBar;

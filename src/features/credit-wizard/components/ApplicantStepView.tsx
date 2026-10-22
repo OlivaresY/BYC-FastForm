@@ -16,12 +16,11 @@ import { LegalEntityForm } from "./LegalEntityForm";
 import { LegalEntitySelector } from "./LegalEntitySelector";
 import { PhysicalPersonForm } from "./PhysicalPersonForm";
 import { VehicleBeneficiarySection } from "./VehicleBeneficiarySection";
-import { WizardProgressHeaderMemo } from "./WizardProgressHeader";
+import { WizardProgressHeader } from "./WizardProgressHeader";
 
 export const ApplicantStepView = React.memo(
   ({
     disabled = false,
-    handleOpenCloseModal: handleOpenCloseModalProp,
     isIdentificationValid = false,
     isValid = false,
     legalErrors,
@@ -38,15 +37,13 @@ export const ApplicantStepView = React.memo(
     testID,
     vehicleBeneficiary,
   }: ApplicantStepViewProps): React.JSX.Element => {
-    const handleOpenCloseModal = handleOpenCloseModalProp ?? onClose;
-
     return (
       <View
         className={APPLICANT_STEP_VIEW_STYLES.CONTAINER}
         testID={testID ?? APPLICANT_STEP_VIEW_TEST_IDS.CONTAINER}
       >
         <ProcessTopBar
-          onClose={handleOpenCloseModal}
+          onClose={onClose}
           testID={APPLICANT_STEP_VIEW_TEST_IDS.PROCESS_TOP_BAR}
           userInitials="YO"
         />
@@ -59,7 +56,7 @@ export const ApplicantStepView = React.memo(
         >
           <View className={APPLICANT_STEP_VIEW_STYLES.SCROLL_CONTENT}>
             {/* 1. Wizard Progress Header */}
-            <WizardProgressHeaderMemo
+            <WizardProgressHeader
               currentStep={APPLICANT_STEP_VIEW_NUMERICAL.CURRENT_STEP}
               testID={APPLICANT_STEP_VIEW_TEST_IDS.WIZARD_HEADER}
               totalSteps={APPLICANT_STEP_VIEW_NUMERICAL.TOTAL_STEPS}
@@ -162,5 +159,3 @@ export const ApplicantStepView = React.memo(
 );
 
 ApplicantStepView.displayName = "ApplicantStepView";
-
-export const ApplicantStepViewMemo = ApplicantStepView;

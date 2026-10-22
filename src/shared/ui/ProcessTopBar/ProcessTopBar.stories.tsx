@@ -4,6 +4,9 @@ import type { Meta, StoryObj } from "@storybook/react-native";
 import { ProcessTopBar } from "./ProcessTopBar";
 
 const meta = {
+  args: {
+    onClose: (): void => {},
+  },
   component: ProcessTopBar,
   decorators: [
     (Story: React.ComponentType): React.JSX.Element => (

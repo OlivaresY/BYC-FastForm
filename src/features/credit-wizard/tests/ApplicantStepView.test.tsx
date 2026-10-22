@@ -495,21 +495,7 @@ describe("ApplicantStepView Integration", () => {
   });
 
   describe("Process Top Bar Actions", () => {
-    it("invokes handleOpenCloseModal when close button in ProcessTopBar is pressed", () => {
-      // Arrange
-      const handleOpenCloseModal = jest.fn();
-      const page = ApplicantStepViewPageObject.render({
-        handleOpenCloseModal,
-      });
-
-      // Act
-      page.pressCloseButton();
-
-      // Assert
-      expect(handleOpenCloseModal).toHaveBeenCalledTimes(1);
-    });
-
-    it("invokes onClose fallback when close button in ProcessTopBar is pressed", () => {
+    it("invokes onClose when close button in ProcessTopBar is pressed", () => {
       // Arrange
       const onClose = jest.fn();
       const page = ApplicantStepViewPageObject.render({

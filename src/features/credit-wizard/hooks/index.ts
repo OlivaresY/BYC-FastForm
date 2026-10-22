@@ -1,1 +1,1 @@
-export { useApplicantStepViewModel } from './useApplicantStepViewModel';
+export { useApplicantStepViewModel } from "./useApplicantStepViewModel";

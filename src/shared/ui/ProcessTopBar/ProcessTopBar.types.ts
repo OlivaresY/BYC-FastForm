@@ -1,6 +1,6 @@
 export interface ProcessTopBarProps {
   className?: string;
-  onClose?: () => void;
+  onClose: () => void;
   onProfilePress?: () => void;
   testID?: string;
   userInitials?: string;

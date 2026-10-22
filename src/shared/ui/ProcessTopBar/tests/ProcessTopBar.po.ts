@@ -13,10 +13,14 @@ export class ProcessTopBarPageObject {
   }
 
   public static render(
-    props: ProcessTopBarProps = {},
+    props: Partial<ProcessTopBarProps> = {},
   ): ProcessTopBarPageObject {
-    render(React.createElement(ProcessTopBar, props));
-    return new ProcessTopBarPageObject(props.testID);
+    const finalProps: ProcessTopBarProps = {
+      onClose: jest.fn(),
+      ...props,
+    };
+    render(React.createElement(ProcessTopBar, finalProps));
+    return new ProcessTopBarPageObject(finalProps.testID);
   }
 
   // =========================================================================
