@@ -1,8 +1,8 @@
-import React from 'react';
-import { View } from 'react-native';
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { APPLICANT_STEP_VIEW_DEFAULT_VALUES } from '../constants/ApplicantStepView.constants';
-import { ApplicantStepView } from './ApplicantStepView';
+import React from "react";
+import { View } from "react-native";
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { APPLICANT_STEP_VIEW_DEFAULT_VALUES } from "../constants/ApplicantStepView.constants";
+import { ApplicantStepView } from "./ApplicantStepView";
 
 const meta = {
   args: {
@@ -11,6 +11,7 @@ const meta = {
     isValid: false,
     legalErrors: {},
     legalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
+    onClose: () => {},
     onLegalFieldChange: () => {},
     onPhysicalFieldChange: () => {},
     onRegimeChange: () => {},
@@ -18,8 +19,8 @@ const meta = {
     onVehicleBeneficiaryChange: () => {},
     physicalErrors: {},
     physicalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.PHYSICAL,
-    regime: 'physical',
-    vehicleBeneficiary: 'same_holder',
+    regime: "physical",
+    vehicleBeneficiary: "same_holder",
   },
   component: ApplicantStepView,
   decorators: [
@@ -29,7 +30,7 @@ const meta = {
       </View>
     ),
   ],
-  title: 'CreditWizard/ApplicantStepView',
+  title: "CreditWizard/ApplicantStepView",
 } satisfies Meta<typeof ApplicantStepView>;
 
 export default meta;
@@ -41,19 +42,19 @@ export const Default: Story = {
     isIdentificationValid: true,
     isValid: true,
     physicalValues: {
-      birthDate: '15 / 08 / 1988',
-      firstLastName: 'Rodríguez',
-      firstName: 'Carlos',
-      gender: 'male',
-      identificationNumber: '1-1234-0567',
-      identificationType: 'national_id',
-      maritalStatus: 'married',
-      middleName: 'Alberto',
-      nationality: 'CR',
-      secondLastName: 'Castro',
+      birthDate: "15 / 08 / 1988",
+      firstLastName: "Rodríguez",
+      firstName: "Carlos",
+      gender: "male",
+      identificationNumber: "1-1234-0567",
+      identificationType: "national_id",
+      maritalStatus: "married",
+      middleName: "Alberto",
+      nationality: "CR",
+      secondLastName: "Castro",
     },
-    regime: 'physical',
-    vehicleBeneficiary: 'same_holder',
+    regime: "physical",
+    vehicleBeneficiary: "same_holder",
   },
 };
 
@@ -61,7 +62,7 @@ export const PhysicalDisabled: Story = {
   args: {
     isIdentificationValid: false,
     isValid: false,
-    regime: 'physical',
+    regime: "physical",
   },
 };
 
@@ -70,14 +71,14 @@ export const LegalValid: Story = {
     isIdentificationValid: true,
     isValid: true,
     legalValues: {
-      identificationNumber: '3-101-123456',
-      identificationType: 'legal_id',
-      legalName: 'Inversiones Tecnológicas S.A.',
-      representativeIdentification: '1-1150-0222',
-      representativeName: 'Juan Alberto Pérez Rojas',
+      identificationNumber: "3-101-123456",
+      identificationType: "legal_id",
+      legalName: "Inversiones Tecnológicas S.A.",
+      representativeIdentification: "1-1150-0222",
+      representativeName: "Juan Alberto Pérez Rojas",
     },
-    regime: 'legal',
-    vehicleBeneficiary: 'same_holder',
+    regime: "legal",
+    vehicleBeneficiary: "same_holder",
   },
 };
 
@@ -85,6 +86,6 @@ export const LegalDisabled: Story = {
   args: {
     isIdentificationValid: false,
     isValid: false,
-    regime: 'legal',
+    regime: "legal",
   },
 };

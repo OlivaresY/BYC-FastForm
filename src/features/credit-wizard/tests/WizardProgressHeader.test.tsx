@@ -179,4 +179,22 @@ describe('WizardProgressHeader Component', () => {
       expect(pom.checkIcon).not.toBeNull();
     });
   });
+
+  describe("Layout Stability", () => {
+    it("maintains min-height and structural stability when title and subtitle are omitted", () => {
+      // Arrange & Act
+      const pom = WizardProgressHeaderPageObject.render({
+        currentStep: 1,
+        totalSteps: 4,
+      });
+
+      // Assert
+      expect(pom.container.props.className).toContain("min-h-[50px]");
+      expect(pom.container.props.className).toContain("justify-between");
+      expect(pom.title).toBeNull();
+      expect(pom.subtitle).toBeNull();
+      expect(pom.stepPill).toBeTruthy();
+      expect(pom.segmentedLine).toBeTruthy();
+    });
+  });
 });

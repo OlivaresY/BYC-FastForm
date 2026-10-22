@@ -79,7 +79,7 @@ export const WIZARD_PROGRESS_HEADER_NUMERICAL_CONSTANTS = {
 export const WIZARD_PROGRESS_HEADER_SEGMENT_CLASSES = {
   ACTIVE: 'bg-brand-green',
   BASE: 'h-[3px] flex-1 rounded-full',
-  INACTIVE: 'bg-stone-200',
+  INACTIVE: 'bg-[#E5E0D8]',
 } as const;
 
 export const WIZARD_PROGRESS_HEADER_STEP_ICON_STYLES = {
@@ -141,7 +141,7 @@ export const WIZARD_PROGRESS_HEADER_STEP_ICONS: Record<
 } as const;
 
 export const WIZARD_PROGRESS_HEADER_STYLES = {
-  CONTAINER: 'w-full bg-transparent',
+  CONTAINER: 'w-full min-h-[50px] justify-between bg-transparent',
   PERCENTAGE_BADGE_BASE: 'flex-row items-center gap-1 rounded-full px-2.5 py-1',
   PERCENTAGE_TEXT_BASE: 'text-xs font-bold',
   SEGMENTED_LINE: 'mt-4 w-full flex-row gap-0.5',

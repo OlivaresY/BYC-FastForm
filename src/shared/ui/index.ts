@@ -13,3 +13,6 @@ export type { CustomTextInputProps } from "./CustomTextInput";
 
 export { ErrorBanner } from "./ErrorBanner";
 export type { ErrorBannerProps } from "./ErrorBanner";
+
+export { ProcessTopBar } from "./ProcessTopBar";
+export type { ProcessTopBarProps } from "./ProcessTopBar";

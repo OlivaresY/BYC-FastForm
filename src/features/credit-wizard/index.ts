@@ -2,17 +2,11 @@ export {
   ApplicantStepView,
   CloseProcessModal,
   FinalBeneficiaryModal,
-  FinalBeneficiaryModalMemo,
   LegalEntityForm,
-  LegalEntityFormMemo,
   LegalEntitySelector,
-  LegalEntitySelectorMemo,
   PhysicalPersonForm,
-  PhysicalPersonFormMemo,
   VehicleBeneficiarySection,
-  VehicleBeneficiarySectionMemo,
   WizardProgressHeader,
-  WizardProgressHeaderMemo,
 } from './components';
 
 export {

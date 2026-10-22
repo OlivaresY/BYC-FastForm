@@ -65,12 +65,12 @@ export class WizardProgressHeaderPageObject {
     return screen.getByTestId(WIZARD_PROGRESS_HEADER_TEST_IDS.STEP_PILL);
   }
 
-  public get subtitle(): ReactTestInstance {
-    return screen.getByTestId(WIZARD_PROGRESS_HEADER_TEST_IDS.SUBTITLE);
+  public get subtitle(): ReactTestInstance | null {
+    return screen.queryByTestId(WIZARD_PROGRESS_HEADER_TEST_IDS.SUBTITLE);
   }
 
-  public get title(): ReactTestInstance {
-    return screen.getByTestId(WIZARD_PROGRESS_HEADER_TEST_IDS.TITLE);
+  public get title(): ReactTestInstance | null {
+    return screen.queryByTestId(WIZARD_PROGRESS_HEADER_TEST_IDS.TITLE);
   }
 
   // =========================================================================
@@ -113,12 +113,12 @@ export class WizardProgressHeaderPageObject {
     return this.stepLabel.props.children;
   }
 
-  public getSubtitleText(): string {
-    return this.subtitle.props.children;
+  public getSubtitleText(): string | undefined {
+    return this.subtitle?.props.children;
   }
 
-  public getTitleText(): string {
-    return this.title.props.children;
+  public getTitleText(): string | undefined {
+    return this.title?.props.children;
   }
 
   // =========================================================================

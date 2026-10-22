@@ -1,13 +1,13 @@
-import type { LegalEntityType } from './LegalEntitySelector.types';
+import type { LegalEntityType } from "./LegalEntitySelector.types";
 import type {
   PhysicalPersonFormField,
   PhysicalPersonFormValues,
-} from './PhysicalPersonForm.types';
+} from "./PhysicalPersonForm.types";
 import type {
   LegalEntityFormField,
   LegalEntityFormValues,
-} from './LegalEntityForm.types';
-import type { VehicleBeneficiaryType } from './VehicleBeneficiarySection.types';
+} from "./LegalEntityForm.types";
+import type { VehicleBeneficiaryType } from "./VehicleBeneficiarySection.types";
 
 // =============================================================================
 // Final Beneficiary (Third-Party) Domain Types
@@ -135,6 +135,7 @@ export interface ApplicantStepViewProps extends Omit<
   isIdentificationValid?: boolean;
   isValid?: boolean;
   legalErrors?: Partial<Record<LegalEntityFormField, string>>;
+  onClose: () => void;
   onThirdPartyFieldChange?: <K extends ThirdPartyBeneficiaryField>(
     field: K,
     value: ThirdPartyBeneficiaryValues[K],
