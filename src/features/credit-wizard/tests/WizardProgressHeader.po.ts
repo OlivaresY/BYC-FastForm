@@ -1,13 +1,13 @@
-import React from "react";
-import { render, screen } from "@testing-library/react-native";
-import type { RenderAPI } from "@testing-library/react-native";
-import type { ReactTestInstance } from "react-test-renderer";
-import { WizardProgressHeader } from "../components/WizardProgressHeader";
+import React from 'react';
+import { render, screen } from '@testing-library/react-native';
+import type { RenderAPI } from '@testing-library/react-native';
+import type { ReactTestInstance } from 'react-test-renderer';
+import { WizardProgressHeader } from '../components/WizardProgressHeader';
 import {
   WIZARD_PROGRESS_HEADER_SEGMENT_CLASSES,
   WIZARD_PROGRESS_HEADER_TEST_IDS,
-} from "../constants/WizardProgressHeader.constants";
-import type { WizardProgressHeaderProps } from "../types/WizardProgressHeader.types";
+} from '../constants/WizardProgressHeader.constants';
+import type { WizardProgressHeaderProps } from '../types/WizardProgressHeader.types';
 
 export class WizardProgressHeaderPageObject {
   private readonly renderApi: RenderAPI;

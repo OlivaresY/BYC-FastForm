@@ -1,21 +1,21 @@
-import { LEGAL_ENTITY_FORM_COPY } from "../constants/LegalEntityForm.constants";
-import { LegalEntityFormPageObject } from "./LegalEntityForm.po";
+import { LEGAL_ENTITY_FORM_COPY } from '../constants/LegalEntityForm.constants';
+import { LegalEntityFormPageObject } from './LegalEntityForm.po';
 import type {
   LegalEntityFormField,
   LegalEntityFormValues,
-} from "../types/LegalEntityForm.types";
+} from '../types/LegalEntityForm.types';
 
 const initialValues: LegalEntityFormValues = {
-  identificationNumber: "",
-  identificationType: "",
-  legalName: "",
-  representativeIdentification: "",
-  representativeName: "",
+  identificationNumber: '',
+  identificationType: '',
+  legalName: '',
+  representativeIdentification: '',
+  representativeName: '',
 };
 
-describe("LegalEntityForm Component", () => {
-  describe("Section Headers & Visual Structure", () => {
-    it("renders all 3 section headers with their respective SVG icons and titles", () => {
+describe('LegalEntityForm Component', () => {
+  describe('Section Headers & Visual Structure', () => {
+    it('renders all 3 section headers with their respective SVG icons and titles', () => {
       // Arrange
       const handleFieldChange = jest.fn();
       const page = LegalEntityFormPageObject.render({
@@ -33,8 +33,8 @@ describe("LegalEntityForm Component", () => {
     });
   });
 
-  describe("Field Rendering & Required Asterisks", () => {
-    it("renders red required asterisk on all 5 mandatory fields", () => {
+  describe('Field Rendering & Required Asterisks', () => {
+    it('renders red required asterisk on all 5 mandatory fields', () => {
       // Arrange
       const handleFieldChange = jest.fn();
       const page = LegalEntityFormPageObject.render({
@@ -43,11 +43,11 @@ describe("LegalEntityForm Component", () => {
       });
 
       const requiredFields: LegalEntityFormField[] = [
-        "identificationType",
-        "identificationNumber",
-        "legalName",
-        "representativeIdentification",
-        "representativeName",
+        'identificationType',
+        'identificationNumber',
+        'legalName',
+        'representativeIdentification',
+        'representativeName',
       ];
 
       // Assert
@@ -56,7 +56,7 @@ describe("LegalEntityForm Component", () => {
       });
     });
 
-    it("renders helper text on identificationNumber", () => {
+    it('renders helper text on identificationNumber', () => {
       // Arrange
       const handleFieldChange = jest.fn();
       const page = LegalEntityFormPageObject.render({
@@ -66,11 +66,11 @@ describe("LegalEntityForm Component", () => {
 
       // Assert
       expect(
-        page.getFieldHelperText("identificationNumber")?.props.children,
+        page.getFieldHelperText('identificationNumber')?.props.children,
       ).toBe(LEGAL_ENTITY_FORM_COPY.IDENTIFICATION_NUMBER_HELPER);
     });
 
-    it("renders left icon on identificationNumber", () => {
+    it('renders left icon on identificationNumber', () => {
       // Arrange
       const handleFieldChange = jest.fn();
       const page = LegalEntityFormPageObject.render({
@@ -82,7 +82,7 @@ describe("LegalEntityForm Component", () => {
       expect(page.identificationLeftIcon).toBeTruthy();
     });
 
-    it("renders labels for all fields", () => {
+    it('renders labels for all fields', () => {
       // Arrange
       const handleFieldChange = jest.fn();
       const page = LegalEntityFormPageObject.render({
@@ -91,11 +91,11 @@ describe("LegalEntityForm Component", () => {
       });
 
       const allFields: LegalEntityFormField[] = [
-        "identificationType",
-        "identificationNumber",
-        "legalName",
-        "representativeIdentification",
-        "representativeName",
+        'identificationType',
+        'identificationNumber',
+        'legalName',
+        'representativeIdentification',
+        'representativeName',
       ];
 
       // Assert
@@ -105,21 +105,21 @@ describe("LegalEntityForm Component", () => {
     });
   });
 
-  describe("Identification Validation Status", () => {
-    it("renders green validation checkmark when isIdentificationValid is true", () => {
+  describe('Identification Validation Status', () => {
+    it('renders green validation checkmark when isIdentificationValid is true', () => {
       // Arrange
       const handleFieldChange = jest.fn();
       const page = LegalEntityFormPageObject.render({
         isIdentificationValid: true,
         onFieldChange: handleFieldChange,
-        values: { ...initialValues, identificationNumber: "3-101-123456" },
+        values: { ...initialValues, identificationNumber: '3-101-123456' },
       });
 
       // Assert
       expect(page.identificationValidIcon).toBeTruthy();
     });
 
-    it("omits green validation checkmark when isIdentificationValid is false or omitted", () => {
+    it('omits green validation checkmark when isIdentificationValid is false or omitted', () => {
       // Arrange
       const handleFieldChange = jest.fn();
       const page = LegalEntityFormPageObject.render({
@@ -133,8 +133,8 @@ describe("LegalEntityForm Component", () => {
     });
   });
 
-  describe("Text Input Interactions & Value Propagation", () => {
-    it("calls onFieldChange when identificationNumber is modified", () => {
+  describe('Text Input Interactions & Value Propagation', () => {
+    it('calls onFieldChange when identificationNumber is modified', () => {
       // Arrange
       const handleFieldChange = jest.fn();
       const page = LegalEntityFormPageObject.render({
@@ -143,16 +143,16 @@ describe("LegalEntityForm Component", () => {
       });
 
       // Act
-      page.fillField("identificationNumber", "3-101-654321");
+      page.fillField('identificationNumber', '3-101-654321');
 
       // Assert
       expect(handleFieldChange).toHaveBeenCalledWith(
-        "identificationNumber",
-        "3-101-654321",
+        'identificationNumber',
+        '3-101-654321',
       );
     });
 
-    it("calls onFieldChange when legalName is modified", () => {
+    it('calls onFieldChange when legalName is modified', () => {
       // Arrange
       const handleFieldChange = jest.fn();
       const page = LegalEntityFormPageObject.render({
@@ -161,16 +161,16 @@ describe("LegalEntityForm Component", () => {
       });
 
       // Act
-      page.fillField("legalName", "Corporación Alpha S.A.");
+      page.fillField('legalName', 'Corporación Alpha S.A.');
 
       // Assert
       expect(handleFieldChange).toHaveBeenCalledWith(
-        "legalName",
-        "Corporación Alpha S.A.",
+        'legalName',
+        'Corporación Alpha S.A.',
       );
     });
 
-    it("calls onFieldChange when representativeIdentification is modified", () => {
+    it('calls onFieldChange when representativeIdentification is modified', () => {
       // Arrange
       const handleFieldChange = jest.fn();
       const page = LegalEntityFormPageObject.render({
@@ -179,16 +179,16 @@ describe("LegalEntityForm Component", () => {
       });
 
       // Act
-      page.fillField("representativeIdentification", "1-0987-0654");
+      page.fillField('representativeIdentification', '1-0987-0654');
 
       // Assert
       expect(handleFieldChange).toHaveBeenCalledWith(
-        "representativeIdentification",
-        "1-0987-0654",
+        'representativeIdentification',
+        '1-0987-0654',
       );
     });
 
-    it("calls onFieldChange when representativeName is modified", () => {
+    it('calls onFieldChange when representativeName is modified', () => {
       // Arrange
       const handleFieldChange = jest.fn();
       const page = LegalEntityFormPageObject.render({
@@ -197,18 +197,18 @@ describe("LegalEntityForm Component", () => {
       });
 
       // Act
-      page.fillField("representativeName", "Mario Soto Delgado");
+      page.fillField('representativeName', 'Mario Soto Delgado');
 
       // Assert
       expect(handleFieldChange).toHaveBeenCalledWith(
-        "representativeName",
-        "Mario Soto Delgado",
+        'representativeName',
+        'Mario Soto Delgado',
       );
     });
   });
 
-  describe("Select Dropdown Interactions & Value Propagation", () => {
-    it("opens identificationType select and calls onFieldChange when an option is selected", () => {
+  describe('Select Dropdown Interactions & Value Propagation', () => {
+    it('opens identificationType select and calls onFieldChange when an option is selected', () => {
       // Arrange
       const handleFieldChange = jest.fn();
       const page = LegalEntityFormPageObject.render({
@@ -217,74 +217,74 @@ describe("LegalEntityForm Component", () => {
       });
 
       // Act
-      page.openSelect("identificationType");
-      page.selectOption("legal_id");
+      page.openSelect('identificationType');
+      page.selectOption('legal_id');
 
       // Assert
       expect(handleFieldChange).toHaveBeenCalledWith(
-        "identificationType",
-        "legal_id",
+        'identificationType',
+        'legal_id',
       );
     });
 
-    it("displays placeholder initially and selected option label when identificationType is set", () => {
+    it('displays placeholder initially and selected option label when identificationType is set', () => {
       // Arrange & Assert - Placeholder initially
       const pageWithEmptyValue = LegalEntityFormPageObject.render({
         onFieldChange: jest.fn(),
         values: initialValues,
       });
       expect(
-        pageWithEmptyValue.getSelectTriggerText("identificationType"),
+        pageWithEmptyValue.getSelectTriggerText('identificationType'),
       ).toBe(LEGAL_ENTITY_FORM_COPY.IDENTIFICATION_TYPE_PLACEHOLDER);
 
       // Arrange & Assert - Selected option label
       const pageWithSelectedValue = LegalEntityFormPageObject.render({
         onFieldChange: jest.fn(),
-        values: { ...initialValues, identificationType: "legal_id" },
+        values: { ...initialValues, identificationType: 'legal_id' },
       });
       expect(
-        pageWithSelectedValue.getSelectTriggerText("identificationType"),
-      ).toBe("Cédula Jurídica");
+        pageWithSelectedValue.getSelectTriggerText('identificationType'),
+      ).toBe('Cédula Jurídica');
     });
   });
 
-  describe("Validation Errors", () => {
-    it("renders error feedback across all fields when errors are present", () => {
+  describe('Validation Errors', () => {
+    it('renders error feedback across all fields when errors are present', () => {
       // Arrange
       const handleFieldChange = jest.fn();
       const page = LegalEntityFormPageObject.render({
         errors: {
-          identificationNumber: "Número de cédula jurídica inválido",
-          identificationType: "Seleccione un tipo de cédula",
-          legalName: "La razón social es requerida",
-          representativeIdentification: "Cédula del representante requerida",
-          representativeName: "Nombre del representante requerido",
+          identificationNumber: 'Número de cédula jurídica inválido',
+          identificationType: 'Seleccione un tipo de cédula',
+          legalName: 'La razón social es requerida',
+          representativeIdentification: 'Cédula del representante requerida',
+          representativeName: 'Nombre del representante requerido',
         },
         onFieldChange: handleFieldChange,
         values: initialValues,
       });
 
       // Assert
-      expect(page.getFieldError("identificationType")?.props.children).toBe(
-        "Seleccione un tipo de cédula",
+      expect(page.getFieldError('identificationType')?.props.children).toBe(
+        'Seleccione un tipo de cédula',
       );
-      expect(page.getFieldError("identificationNumber")?.props.children).toBe(
-        "Número de cédula jurídica inválido",
+      expect(page.getFieldError('identificationNumber')?.props.children).toBe(
+        'Número de cédula jurídica inválido',
       );
-      expect(page.getFieldError("legalName")?.props.children).toBe(
-        "La razón social es requerida",
+      expect(page.getFieldError('legalName')?.props.children).toBe(
+        'La razón social es requerida',
       );
       expect(
-        page.getFieldError("representativeIdentification")?.props.children,
-      ).toBe("Cédula del representante requerida");
-      expect(page.getFieldError("representativeName")?.props.children).toBe(
-        "Nombre del representante requerido",
+        page.getFieldError('representativeIdentification')?.props.children,
+      ).toBe('Cédula del representante requerida');
+      expect(page.getFieldError('representativeName')?.props.children).toBe(
+        'Nombre del representante requerido',
       );
     });
   });
 
-  describe("Disabled State", () => {
-    it("disables all text inputs and select trigger when disabled is true", () => {
+  describe('Disabled State', () => {
+    it('disables all text inputs and select trigger when disabled is true', () => {
       // Arrange
       const handleFieldChange = jest.fn();
       const page = LegalEntityFormPageObject.render({
@@ -294,16 +294,16 @@ describe("LegalEntityForm Component", () => {
       });
 
       // Assert - Text inputs
-      expect(page.isInputEditable("identificationNumber")).toBe(false);
-      expect(page.isInputEditable("legalName")).toBe(false);
-      expect(page.isInputEditable("representativeIdentification")).toBe(false);
-      expect(page.isInputEditable("representativeName")).toBe(false);
+      expect(page.isInputEditable('identificationNumber')).toBe(false);
+      expect(page.isInputEditable('legalName')).toBe(false);
+      expect(page.isInputEditable('representativeIdentification')).toBe(false);
+      expect(page.isInputEditable('representativeName')).toBe(false);
 
       // Assert - Select
-      expect(page.isSelectDisabled("identificationType")).toBe(true);
+      expect(page.isSelectDisabled('identificationType')).toBe(true);
     });
 
-    it("leaves all text inputs editable and select enabled by default", () => {
+    it('leaves all text inputs editable and select enabled by default', () => {
       // Arrange
       const handleFieldChange = jest.fn();
       const page = LegalEntityFormPageObject.render({
@@ -312,22 +312,22 @@ describe("LegalEntityForm Component", () => {
       });
 
       // Assert - Text inputs
-      expect(page.isInputEditable("identificationNumber")).toBe(true);
-      expect(page.isInputEditable("legalName")).toBe(true);
-      expect(page.isInputEditable("representativeIdentification")).toBe(true);
-      expect(page.isInputEditable("representativeName")).toBe(true);
+      expect(page.isInputEditable('identificationNumber')).toBe(true);
+      expect(page.isInputEditable('legalName')).toBe(true);
+      expect(page.isInputEditable('representativeIdentification')).toBe(true);
+      expect(page.isInputEditable('representativeName')).toBe(true);
 
       // Assert - Select
-      expect(page.isSelectDisabled("identificationType")).toBe(false);
+      expect(page.isSelectDisabled('identificationType')).toBe(false);
     });
   });
 
-  describe("Custom Options & Custom testID", () => {
-    it("uses custom options overrides when provided in options prop", () => {
+  describe('Custom Options & Custom testID', () => {
+    it('uses custom options overrides when provided in options prop', () => {
       // Arrange
       const handleFieldChange = jest.fn();
       const customIdTypeOptions = [
-        { label: "Cédula Especial", value: "special_id" },
+        { label: 'Cédula Especial', value: 'special_id' },
       ];
 
       const page = LegalEntityFormPageObject.render({
@@ -339,27 +339,27 @@ describe("LegalEntityForm Component", () => {
       });
 
       // Act
-      page.openSelect("identificationType");
-      page.selectOption("special_id");
+      page.openSelect('identificationType');
+      page.selectOption('special_id');
 
       // Assert
       expect(handleFieldChange).toHaveBeenCalledWith(
-        "identificationType",
-        "special_id",
+        'identificationType',
+        'special_id',
       );
     });
 
-    it("renders with custom testID when provided", () => {
+    it('renders with custom testID when provided', () => {
       // Arrange
       const handleFieldChange = jest.fn();
       const page = LegalEntityFormPageObject.render({
         onFieldChange: handleFieldChange,
-        testID: "custom-legal-entity-form",
+        testID: 'custom-legal-entity-form',
         values: initialValues,
       });
 
       // Assert
-      expect(page.container.props.testID).toBe("custom-legal-entity-form");
+      expect(page.container.props.testID).toBe('custom-legal-entity-form');
     });
   });
 });

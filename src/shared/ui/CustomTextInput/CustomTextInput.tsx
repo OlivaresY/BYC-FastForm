@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 import { Text, TextInput, View } from "react-native";
 import type { TextInputProps } from "react-native";
-import { CalendarIcon, CheckmarkIcon, HashIcon } from "../Icons";
+import {
+  CalendarIcon,
+  CheckmarkIcon,
+  HashIcon,
+  MailIcon,
+  PhoneIcon,
+} from "../Icons";
 import {
   CUSTOM_TEXT_INPUT_COLORS,
   CUSTOM_TEXT_INPUT_COPY,
@@ -23,23 +29,53 @@ interface ValidIconProps {
   testID: string;
 }
 
-const LeftIcon = ({ testID, type }: LeftIconProps): React.JSX.Element => (
-  <View testID={testID}>
-    {type === "calendar" ? (
-      <CalendarIcon
-        color={CUSTOM_TEXT_INPUT_COLORS.ICON_STROKE}
-        size={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.SIZE_PX}
-        strokeWidth={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
-      />
-    ) : (
-      <HashIcon
-        color={CUSTOM_TEXT_INPUT_COLORS.ICON_STROKE}
-        size={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.SIZE_PX}
-        strokeWidth={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
-      />
-    )}
-  </View>
-);
+const LeftIcon = ({ testID, type }: LeftIconProps): React.JSX.Element | null => {
+  if (type === "calendar") {
+    return (
+      <View testID={testID}>
+        <CalendarIcon
+          color={CUSTOM_TEXT_INPUT_COLORS.ICON_STROKE}
+          size={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.SIZE_PX}
+          strokeWidth={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
+        />
+      </View>
+    );
+  }
+  if (type === "mail") {
+    return (
+      <View testID={testID}>
+        <MailIcon
+          color={CUSTOM_TEXT_INPUT_COLORS.ICON_STROKE}
+          size={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.SIZE_PX}
+          strokeWidth={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
+        />
+      </View>
+    );
+  }
+  if (type === "phone") {
+    return (
+      <View testID={testID}>
+        <PhoneIcon
+          color={CUSTOM_TEXT_INPUT_COLORS.ICON_STROKE}
+          size={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.SIZE_PX}
+          strokeWidth={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
+        />
+      </View>
+    );
+  }
+  if (type === "hash") {
+    return (
+      <View testID={testID}>
+        <HashIcon
+          color={CUSTOM_TEXT_INPUT_COLORS.ICON_STROKE}
+          size={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.SIZE_PX}
+          strokeWidth={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
+        />
+      </View>
+    );
+  }
+  return null;
+};
 
 const ValidCheckmarkIcon = ({ testID }: ValidIconProps): React.JSX.Element => (
   <View testID={testID}>
@@ -126,7 +162,7 @@ export const CustomTextInput = ({
           >
             {label}
           </Text>
-          {required ? (
+          {required && !label.trim().endsWith('*') ? (
             <Text
               className={CUSTOM_TEXT_INPUT_STYLES.REQUIRED_ASTERISK}
               testID={requiredAsteriskTestId}

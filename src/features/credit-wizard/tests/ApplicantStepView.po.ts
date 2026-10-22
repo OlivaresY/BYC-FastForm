@@ -1,9 +1,7 @@
 import React from "react";
 import {
-  act,
   fireEvent,
   render,
-  renderHook,
   screen,
   within,
 } from "@testing-library/react-native";
@@ -22,8 +20,6 @@ import type {
   UseApplicantStepViewModelProps,
 } from "../types/ApplicantStepView.types";
 
-export { act };
-
 export type PhysicalTextInputField =
   | "birthDate"
   | "firstLastName"
@@ -33,7 +29,7 @@ export type PhysicalTextInputField =
   | "secondLastName";
 
 export type PhysicalSelectField =
-  "gender" | "identificationType" | "maritalStatus" | "nationality";
+  'gender' | 'identificationType' | 'maritalStatus' | 'nationality';
 
 export type LegalTextInputField =
   | "identificationNumber"
@@ -110,10 +106,6 @@ export class ApplicantStepViewPageObject {
     };
     render(React.createElement(ApplicantStepView, finalProps));
     return new ApplicantStepViewPageObject(finalProps.testID);
-  }
-
-  public static renderHook(props?: UseApplicantStepViewModelProps) {
-    return renderHook(() => useApplicantStepViewModel(props));
   }
 
   // =========================================================================
@@ -251,15 +243,15 @@ export class ApplicantStepViewPageObject {
   }
 
   public fillAllPhysicalFieldsValid(): this {
-    this.selectPhysicalOption("identificationType", "national_id");
-    this.fillPhysicalField("identificationNumber", "1-1234-0567");
-    this.fillPhysicalField("firstName", "Carlos");
-    this.fillPhysicalField("firstLastName", "Rodríguez");
-    this.fillPhysicalField("secondLastName", "Castro");
-    this.fillPhysicalField("birthDate", "15 / 08 / 1988");
-    this.selectPhysicalOption("nationality", "CR");
-    this.selectPhysicalOption("maritalStatus", "married");
-    this.selectPhysicalOption("gender", "male");
+    this.selectPhysicalOption('identificationType', 'national_id');
+    this.fillPhysicalField('identificationNumber', '1-1234-0567');
+    this.fillPhysicalField('firstName', 'Carlos');
+    this.fillPhysicalField('firstLastName', 'Rodríguez');
+    this.fillPhysicalField('secondLastName', 'Castro');
+    this.fillPhysicalField('birthDate', '15-08-1988');
+    this.selectPhysicalOption('nationality', 'CR');
+    this.selectPhysicalOption('maritalStatus', 'married');
+    this.selectPhysicalOption('gender', 'male');
     return this;
   }
 

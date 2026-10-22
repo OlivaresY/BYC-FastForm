@@ -1,18 +1,16 @@
-import React from "react";
-import { Text, View } from "react-native";
-import Svg, { Path } from "react-native-svg";
-import { CheckmarkIcon } from "@/shared/ui/Icons";
+import React from 'react';
+import { Text, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
+import { CheckmarkIcon } from '@/shared/ui/Icons';
 import {
-  getWizardProgressBadgeVariant,
-  getWizardProgressStepIcon,
   WIZARD_PROGRESS_HEADER_CHECK_ICON,
-  WIZARD_PROGRESS_HEADER_LABELS,
-  WIZARD_PROGRESS_HEADER_NUMERICAL_CONSTANTS,
   WIZARD_PROGRESS_HEADER_SEGMENT_CLASSES,
   WIZARD_PROGRESS_HEADER_STEP_ICON_STYLES,
+  WIZARD_PROGRESS_HEADER_STYLES,
   WIZARD_PROGRESS_HEADER_TEST_IDS,
-} from "../constants/WizardProgressHeader.constants";
-import type { WizardProgressHeaderProps } from "../types/WizardProgressHeader.types";
+} from '../constants/WizardProgressHeader.constants';
+import { useWizardProgressHeaderViewModel } from '../hooks/useWizardProgressHeaderViewModel';
+import type { WizardProgressHeaderProps } from '../types/WizardProgressHeader.types';
 
 export const WizardProgressHeader = React.memo(
   ({
@@ -23,57 +21,28 @@ export const WizardProgressHeader = React.memo(
     title,
     totalSteps,
   }: WizardProgressHeaderProps): React.JSX.Element => {
-    const isValidStepInput =
-      Number.isFinite(totalSteps) &&
-      totalSteps > 0 &&
-      Number.isFinite(currentStep);
-
-    const rawPercentage = isValidStepInput
-      ? Math.round((currentStep / totalSteps) * 100)
-      : WIZARD_PROGRESS_HEADER_NUMERICAL_CONSTANTS.DEFAULT_PERCENTAGE;
-
-    const percentage = Math.min(
-      WIZARD_PROGRESS_HEADER_NUMERICAL_CONSTANTS.MAX_PERCENTAGE,
-      Math.max(
-        WIZARD_PROGRESS_HEADER_NUMERICAL_CONSTANTS.MIN_PERCENTAGE,
-        rawPercentage,
-      ),
-    );
-
-    const segmentCount = isValidStepInput
-      ? Math.floor(totalSteps)
-      : WIZARD_PROGRESS_HEADER_NUMERICAL_CONSTANTS.NO_SEGMENTS;
-
-    const segments = Array.from({ length: segmentCount }, (_, index) => ({
-      isActive: index < currentStep,
-      key: `${WIZARD_PROGRESS_HEADER_TEST_IDS.SEGMENT_PREFIX}${index}`,
-    }));
-
-    const badgeVariant = getWizardProgressBadgeVariant(percentage);
-    const stepIconConfig = getWizardProgressStepIcon(currentStep);
-
-    const stepText = `${WIZARD_PROGRESS_HEADER_LABELS.STEP_PREFIX} ${currentStep} ${WIZARD_PROGRESS_HEADER_LABELS.OF} ${totalSteps}`;
-    const percentageText = `${percentage}${WIZARD_PROGRESS_HEADER_LABELS.COMPLETED_SUFFIX}`;
+    const { badgeVariant, percentageText, segments, stepIconConfig, stepText } =
+      useWizardProgressHeaderViewModel({ currentStep, totalSteps });
 
     return (
       <View
-        className="w-full min-h-[50px] justify-between bg-transparent"
+        className={WIZARD_PROGRESS_HEADER_STYLES.CONTAINER}
         style={style}
         testID={testID ?? WIZARD_PROGRESS_HEADER_TEST_IDS.CONTAINER}
       >
         {/* Top Row: Step Pill (Left) & Percentage Badge (Right) */}
-        <View className="flex-row items-center justify-between">
+        <View className={WIZARD_PROGRESS_HEADER_STYLES.TOP_ROW}>
           <View
-            className="flex-row items-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-1"
+            className={WIZARD_PROGRESS_HEADER_STYLES.STEP_PILL}
             testID={WIZARD_PROGRESS_HEADER_TEST_IDS.STEP_PILL}
           >
             <View testID={WIZARD_PROGRESS_HEADER_TEST_IDS.STEP_ICON}>
               <Svg
-                fill="none"
+                fill='none'
                 height={stepIconConfig.sizePx}
                 stroke={WIZARD_PROGRESS_HEADER_STEP_ICON_STYLES.STROKE_COLOR}
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                strokeLinecap='round'
+                strokeLinejoin='round'
                 strokeWidth={stepIconConfig.strokeWidthPx}
                 viewBox={stepIconConfig.viewBox}
                 width={stepIconConfig.sizePx}
@@ -87,7 +56,7 @@ export const WizardProgressHeader = React.memo(
               </Svg>
             </View>
             <Text
-              className="text-xs font-semibold uppercase text-gray-900"
+              className={WIZARD_PROGRESS_HEADER_STYLES.STEP_LABEL}
               testID={WIZARD_PROGRESS_HEADER_TEST_IDS.STEP_LABEL}
             >
               {stepText}
@@ -95,7 +64,7 @@ export const WizardProgressHeader = React.memo(
           </View>
 
           <View
-            className={`flex-row items-center gap-1 rounded-full px-2.5 py-1 ${badgeVariant.containerClassName}`}
+            className={`${WIZARD_PROGRESS_HEADER_STYLES.PERCENTAGE_BADGE_BASE} ${badgeVariant.containerClassName}`}
             testID={WIZARD_PROGRESS_HEADER_TEST_IDS.PERCENTAGE_BADGE}
           >
             {badgeVariant.hasCheckIcon ? (
@@ -110,7 +79,7 @@ export const WizardProgressHeader = React.memo(
               </View>
             ) : null}
             <Text
-              className={`text-xs font-bold ${badgeVariant.textClassName}`}
+              className={`${WIZARD_PROGRESS_HEADER_STYLES.PERCENTAGE_TEXT_BASE} ${badgeVariant.textClassName}`}
               testID={WIZARD_PROGRESS_HEADER_TEST_IDS.PERCENTAGE_TEXT}
             >
               {percentageText}
@@ -121,7 +90,7 @@ export const WizardProgressHeader = React.memo(
         {/* Middle Block: Title & Subtitle */}
         {Boolean(title) && (
           <Text
-            className="mt-4 text-2xl font-extrabold tracking-tight text-gray-900"
+            className={WIZARD_PROGRESS_HEADER_STYLES.TITLE}
             testID={WIZARD_PROGRESS_HEADER_TEST_IDS.TITLE}
           >
             {title}
@@ -130,7 +99,7 @@ export const WizardProgressHeader = React.memo(
 
         {Boolean(subtitle) && (
           <Text
-            className="mb-4 mt-1 text-sm font-normal text-slate-500"
+            className={WIZARD_PROGRESS_HEADER_STYLES.SUBTITLE}
             testID={WIZARD_PROGRESS_HEADER_TEST_IDS.SUBTITLE}
           >
             {subtitle}
@@ -139,7 +108,7 @@ export const WizardProgressHeader = React.memo(
 
         {/* Bottom Element: Segmented Line */}
         <View
-          className="mt-4 w-full flex-row gap-0.5"
+          className={WIZARD_PROGRESS_HEADER_STYLES.SEGMENTED_LINE}
           testID={WIZARD_PROGRESS_HEADER_TEST_IDS.SEGMENTED_LINE}
         >
           {segments.map(({ isActive, key }) => (
@@ -159,4 +128,4 @@ export const WizardProgressHeader = React.memo(
   },
 );
 
-WizardProgressHeader.displayName = "WizardProgressHeader";
+WizardProgressHeader.displayName = 'WizardProgressHeader';
