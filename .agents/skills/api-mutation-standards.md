@@ -19,13 +19,14 @@ All API mutations must reside in `src/features/<feature-name>/services/`.
 Every mutation must check for the Supabase `error` object and `throw` it so the ViewModel can catch it.
 
 ### Correct Service Example:
+
 ```typescript
 // src/features/credit-application/services/creditService.ts
 import { supabase } from '@/shared/utils/supabase';
 import { CreditApplicationInsert, CreditApplicationRow } from '../types';
 
 export const createCreditApplication = async (
-  payload: CreditApplicationInsert
+  payload: CreditApplicationInsert,
 ): Promise<CreditApplicationRow> => {
   const { data, error } = await supabase
     .from('credit_applications')
@@ -63,7 +64,9 @@ export const useCreditFormViewModel = () => {
     try {
       await createCreditApplication(payload);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al procesar la solicitud.');
+      setError(
+        err instanceof Error ? err.message : 'Error al procesar la solicitud.',
+      );
     } finally {
       setIsLoading(false);
     }

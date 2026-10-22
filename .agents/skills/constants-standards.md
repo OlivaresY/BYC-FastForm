@@ -28,25 +28,29 @@ Whenever you author or edit components, ViewModels, utilities, or services:
 
 ### Strings
 
-Replace raw strings with named constants. 
+Replace raw strings with named constants.
 
-| Raw literal             | Centralized replacement                  |
-| :---                    | :---                                     |
-| `""`                    | `STRING.EMPTY`                           |
-| `"credit_applications"` | `SUPABASE_TABLES.CREDIT_APPLICATIONS`    |
-| `"/login"`              | `ROUTES.LOGIN`                           |
-| `"@auth_token"`         | `STORAGE_KEYS.AUTH_TOKEN`                |
+| Raw literal             | Centralized replacement               |
+| :---------------------- | :------------------------------------ |
+| `""`                    | `STRING.EMPTY`                        |
+| `"credit_applications"` | `SUPABASE_TABLES.CREDIT_APPLICATIONS` |
+| `"/login"`              | `ROUTES.LOGIN`                        |
+| `"@auth_token"`         | `STORAGE_KEYS.AUTH_TOKEN`             |
 
 ```tsx
 // ❌ INCORRECT (Raw literals)
-const isSelected = value === "";
-if (route === "/login") { router.push("/login"); }
+const isSelected = value === '';
+if (route === '/login') {
+  router.push('/login');
+}
 
 // ✅ CORRECT (Centralized constants)
 import { STRING, ROUTES } from '@/shared/constants';
 
 const isSelected = value === STRING.EMPTY;
-if (route === ROUTES.LOGIN) { router.push(ROUTES.LOGIN); }
+if (route === ROUTES.LOGIN) {
+  router.push(ROUTES.LOGIN);
+}
 ```
 
 ---
@@ -82,5 +86,6 @@ export const APPLICATION_STATUS = {
 } as const;
 
 // Derives type: "APPROVED" | "PENDING" | "REJECTED"
-export type ApplicationStatus = typeof APPLICATION_STATUS[keyof typeof APPLICATION_STATUS];
+export type ApplicationStatus =
+  (typeof APPLICATION_STATUS)[keyof typeof APPLICATION_STATUS];
 ```

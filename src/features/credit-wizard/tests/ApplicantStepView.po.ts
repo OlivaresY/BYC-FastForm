@@ -1,41 +1,41 @@
-import React from "react";
+import React from 'react';
 import {
   fireEvent,
   render,
   screen,
   within,
-} from "@testing-library/react-native";
-import type { ReactTestInstance } from "react-test-renderer";
-import { CUSTOM_SELECT_TEST_IDS } from "@/shared/ui/CustomSelect";
-import { PROCESS_TOP_BAR_TEST_IDS } from "@/shared/ui/ProcessTopBar";
-import { ApplicantStepView } from "../components/ApplicantStepView";
-import { APPLICANT_STEP_VIEW_TEST_IDS } from "../constants/ApplicantStepView.constants";
-import { LEGAL_ENTITY_FORM_TEST_IDS } from "../constants/LegalEntityForm.constants";
-import { LEGAL_ENTITY_SELECTOR_TEST_IDS } from "../constants/LegalEntitySelector.constants";
-import { PHYSICAL_PERSON_FORM_TEST_IDS } from "../constants/PhysicalPersonForm.constants";
-import { VEHICLE_BENEFICIARY_SECTION_TEST_IDS } from "../constants/VehicleBeneficiarySection.constants";
-import { useApplicantStepViewModel } from "../hooks/useApplicantStepViewModel";
+} from '@testing-library/react-native';
+import type { ReactTestInstance } from 'react-test-renderer';
+import { CUSTOM_SELECT_TEST_IDS } from '@/shared/ui/CustomSelect';
+import { PROCESS_TOP_BAR_TEST_IDS } from '@/shared/ui/ProcessTopBar';
+import { ApplicantStepView } from '../components/ApplicantStepView';
+import { APPLICANT_STEP_VIEW_TEST_IDS } from '../constants/ApplicantStepView.constants';
+import { LEGAL_ENTITY_FORM_TEST_IDS } from '../constants/LegalEntityForm.constants';
+import { LEGAL_ENTITY_SELECTOR_TEST_IDS } from '../constants/LegalEntitySelector.constants';
+import { PHYSICAL_PERSON_FORM_TEST_IDS } from '../constants/PhysicalPersonForm.constants';
+import { VEHICLE_BENEFICIARY_SECTION_TEST_IDS } from '../constants/VehicleBeneficiarySection.constants';
+import { useApplicantStepViewModel } from '../hooks/useApplicantStepViewModel';
 import type {
   ApplicantStepViewProps,
   UseApplicantStepViewModelProps,
-} from "../types/ApplicantStepView.types";
+} from '../types/ApplicantStepView.types';
 
 export type PhysicalTextInputField =
-  | "birthDate"
-  | "firstLastName"
-  | "firstName"
-  | "identificationNumber"
-  | "middleName"
-  | "secondLastName";
+  | 'birthDate'
+  | 'firstLastName'
+  | 'firstName'
+  | 'identificationNumber'
+  | 'middleName'
+  | 'secondLastName';
 
 export type PhysicalSelectField =
   'gender' | 'identificationType' | 'maritalStatus' | 'nationality';
 
 export type LegalTextInputField =
-  | "identificationNumber"
-  | "legalName"
-  | "representativeIdentification"
-  | "representativeName";
+  | 'identificationNumber'
+  | 'legalName'
+  | 'representativeIdentification'
+  | 'representativeName';
 
 const PHYSICAL_TEXT_MAP: Record<PhysicalTextInputField, string> = {
   birthDate: PHYSICAL_PERSON_FORM_TEST_IDS.BIRTH_DATE_INPUT,
@@ -98,7 +98,7 @@ export class ApplicantStepViewPageObject {
   }
 
   public static renderDirect(
-    props: Omit<ApplicantStepViewProps, "onClose"> & { onClose?: () => void },
+    props: Omit<ApplicantStepViewProps, 'onClose'> & { onClose?: () => void },
   ): ApplicantStepViewPageObject {
     const finalProps: ApplicantStepViewProps = {
       onClose: jest.fn(),
@@ -256,11 +256,11 @@ export class ApplicantStepViewPageObject {
   }
 
   public fillAllLegalFieldsValid(): this {
-    this.selectLegalOption("legal_id");
-    this.fillLegalField("identificationNumber", "3-101-123456");
-    this.fillLegalField("legalName", "Inversiones Tecnológicas S.A.");
-    this.fillLegalField("representativeIdentification", "1-1150-0222");
-    this.fillLegalField("representativeName", "Juan Alberto Pérez Rojas");
+    this.selectLegalOption('legal_id');
+    this.fillLegalField('identificationNumber', '3-101-123456');
+    this.fillLegalField('legalName', 'Inversiones Tecnológicas S.A.');
+    this.fillLegalField('representativeIdentification', '1-1150-0222');
+    this.fillLegalField('representativeName', 'Juan Alberto Pérez Rojas');
     return this;
   }
 

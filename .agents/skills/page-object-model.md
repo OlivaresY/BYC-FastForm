@@ -17,12 +17,12 @@ Adhering to this standard guarantees that test suites remain resilient against U
 
 In our Feature-Sliced Design (FSD) architecture, application features are partitioned into strict Model-View-ViewModel (MVVM) layers. The Page Object Model mirrors this exact separation of concerns in the automated testing suite:
 
-| Application Layer | File Type | Responsibility | Testing Counterpart | Testing Responsibility |
-| :--- | :--- | :--- | :--- | :--- |
-| **View** | `<Feature>.tsx` | Pure JSX presentation, layout, NativeWind tokens | `<Feature>.po.ts` | Locates elements, encapsulates `testID`s, executes gestures |
-| **ViewModel** | `use<Feature>ViewModel.ts` | State orchestration, validation, business calculations | `use<Feature>ViewModel.test.ts` | Tests state transitions via `renderHook` in isolation |
-| **Model** | `services/*.ts` | Supabase RPCs, REST endpoints, storage | `jest.mock(...)` | Boundary stubs configured in test setup / Arrange phase |
-| **Contract** | `<Feature>.test.tsx` | Test orchestration | **The Test Suite** | Declares user scenarios and asserts domain outcomes |
+| Application Layer | File Type                  | Responsibility                                         | Testing Counterpart             | Testing Responsibility                                      |
+| :---------------- | :------------------------- | :----------------------------------------------------- | :------------------------------ | :---------------------------------------------------------- |
+| **View**          | `<Feature>.tsx`            | Pure JSX presentation, layout, NativeWind tokens       | `<Feature>.po.ts`               | Locates elements, encapsulates `testID`s, executes gestures |
+| **ViewModel**     | `use<Feature>ViewModel.ts` | State orchestration, validation, business calculations | `use<Feature>ViewModel.test.ts` | Tests state transitions via `renderHook` in isolation       |
+| **Model**         | `services/*.ts`            | Supabase RPCs, REST endpoints, storage                 | `jest.mock(...)`                | Boundary stubs configured in test setup / Arrange phase     |
+| **Contract**      | `<Feature>.test.tsx`       | Test orchestration                                     | **The Test Suite**              | Declares user scenarios and asserts domain outcomes         |
 
 ```text
 +-------------------------------------------------------------+
@@ -56,23 +56,31 @@ In our Feature-Sliced Design (FSD) architecture, application features are partit
 Every engineer and AI agent writing UI tests in this codebase must strictly adhere to these four cardinal rules. Violations will cause automated CI test review failure.
 
 ### Rule 1: Dedicated `.po.ts` Class Mandate
-Every UI test suite (`<Feature>.test.tsx`) **MUST** be paired with a dedicated Page Object class residing in a `<Feature>.po.ts` file in the same `tests/` directory. 
-- Page Objects must be structured as **TypeScript classes**. 
+
+Every UI test suite (`<Feature>.test.tsx`) **MUST** be paired with a dedicated Page Object class residing in a `<Feature>.po.ts` file in the same `tests/` directory.
+
+- Page Objects must be structured as **TypeScript classes**.
 - Free-floating utility functions or ad-hoc test helper files are prohibited.
 
 ### Rule 2: Complete UI Selector Decoupling
+
 Test assertion files (`.test.tsx`) must be completely agnostic of UI selectors:
+
 - **Zero testIDs in test files:** `testID` string literals (e.g., `'advisor-login-submit-button'`) must **never** appear inside `.test.tsx`.
 - **Zero direct RNTL queries in test files:** Direct invocations of `screen.getByTestId()`, `screen.getByText()`, `screen.findByText()`, `screen.queryByTestId()`, or container query equivalents inside `.test.tsx` are strictly prohibited.
 - All selectors are defined in feature constants (`*.constants.ts`) and accessed solely by the `.po.ts` class.
 
 ### Rule 3: Zero Assertions in Page Objects
+
 The Page Object owns **interaction**, never **verification**:
+
 - Page Objects must **NEVER** contain Jest matchers (`expect(...)`, `toBe()`, `toBeTruthy()`, `toHaveBeenCalled()`).
 - The Page Object exposes typed getters (`ReactTestInstance` or `null`) and promise-based element finders so that the `.test.tsx` file retains full ownership of assertions.
 
 ### Rule 4: Strict TypeScript Typing & Fluent Method Chaining
+
 All interaction helpers on the Page Object must return `this` (or `Promise<this>` for asynchronous steps):
+
 - This enforces the **fluent interface pattern**, enabling clean, sequential multi-step business actions.
 - All method parameters, props, and getters must be strictly typed using domain models and interfaces. The `any` type is strictly forbidden.
 
@@ -171,6 +179,7 @@ export class FeaturePageObject {
 ```
 
 ### Getter Classification Guide:
+
 1. **Synchronous Present (`get element(): ReactTestInstance`):** Uses `screen.getByTestId()`. Use when the element is guaranteed to be in the DOM immediately.
 2. **Synchronous Optional/Absence (`get element(): ReactTestInstance | null`):** Uses `screen.queryByTestId()`. Use when asserting that an element does not exist or conditional banners before an action.
 3. **Asynchronous Present (`async findElement(): Promise<ReactTestInstance>`):** Uses `screen.findByTestId()`. Use when elements appear after an async operation, network resolution, or animation.
@@ -182,7 +191,9 @@ export class FeaturePageObject {
 Fluent method chaining allows user interaction sequences to read as natural, readable business narratives.
 
 ### 5.1 Synchronous Chaining (`return this`)
+
 When interactions execute synchronously (e.g., text inputs, checkbox toggles, tab switches):
+
 ```ts
 public fillClientName(name: string): this {
   fireEvent.changeText(this.clientNameInput, name);
@@ -196,6 +207,7 @@ public selectVehicleTier(tier: CreditTier): this {
 ```
 
 Usage in `.test.tsx`:
+
 ```tsx
 page
   .fillClientName('Carlos Alvarado')
@@ -204,7 +216,9 @@ page
 ```
 
 ### 5.2 Asynchronous Chaining (`return Promise<this>`)
+
 When an action triggers transitions that require awaiting async side-effects inside the helper:
+
 ```ts
 public async searchClientByNationalId(id: string): Promise<this> {
   fireEvent.changeText(this.nationalIdInput, id);
@@ -214,14 +228,15 @@ public async searchClientByNationalId(id: string): Promise<this> {
 ```
 
 Usage in `.test.tsx`:
+
 ```tsx
-await page
-  .fillAdvisorPin('4481')
-  .searchClientByNationalId('1-1152-0491');
+await page.fillAdvisorPin('4481').searchClientByNationalId('1-1152-0491');
 ```
 
 ### 5.3 Composite Helper Methods
+
 For repetitive form setups across multiple tests, provide higher-order composite fluent helpers that accept strongly-typed parameter bundles:
+
 ```ts
 public fillCompleteApplication(data: CreditApplicationFormData): this {
   return this
@@ -242,6 +257,7 @@ public fillCompleteApplication(data: CreditApplicationFormData): this {
 This workflow validates advisor authentication, PIN authorization, and dealership branch assignment at CoriMotors.
 
 #### 1. Constants Definition: `src/features/advisor-auth/constants/AdvisorLogin.constants.ts`
+
 ```ts
 export const ADVISOR_LOGIN_TEST_IDS = {
   BRANCH_SELECTOR: 'advisor-login-branch-selector',
@@ -263,6 +279,7 @@ export const ADVISOR_LOGIN_BRANCHES = {
 ```
 
 #### 2. Page Object Class: `src/features/advisor-auth/tests/AdvisorLoginForm.po.ts`
+
 ```ts
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import type { RenderAPI } from '@testing-library/react-native';
@@ -348,6 +365,7 @@ export class AdvisorLoginFormPageObject {
 ```
 
 #### 3. Test Suite: `src/features/advisor-auth/tests/AdvisorLoginForm.test.tsx`
+
 ```tsx
 import React from 'react';
 import { ADVISOR_LOGIN_BRANCHES } from '../constants/AdvisorLogin.constants';
@@ -365,7 +383,7 @@ describe('AdvisorLoginForm Component', () => {
     page.loginWithCredentials(
       'ADV-9021',
       '8492',
-      ADVISOR_LOGIN_BRANCHES.LINDORA
+      ADVISOR_LOGIN_BRANCHES.LINDORA,
     );
 
     // Assert
@@ -407,6 +425,7 @@ describe('AdvisorLoginForm Component', () => {
 This workflow models the automotive credit application intake at CoriMotors: client national identity validation, monthly income verification, BYD electric vehicle selection, down payment (prima), and loan term selection.
 
 #### 1. Constants: `src/features/credit-application/constants/CreditApplication.constants.ts`
+
 ```ts
 export const CREDIT_APP_TEST_IDS = {
   CALCULATED_MONTHLY_FEE: 'credit-app-calculated-monthly-fee',
@@ -429,6 +448,7 @@ export const VEHICLE_MODELS = {
 ```
 
 #### 2. Page Object Class: `src/features/credit-application/tests/CreditApplicationForm.po.ts`
+
 ```ts
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import type { RenderAPI } from '@testing-library/react-native';
@@ -540,6 +560,7 @@ export class CreditApplicationFormPageObject {
 ```
 
 #### 3. Test Suite: `src/features/credit-application/tests/CreditApplicationForm.test.tsx`
+
 ```tsx
 import React from 'react';
 import {
@@ -578,7 +599,7 @@ describe('CreditApplicationForm Component', () => {
         nationalId: '1-1823-0491',
         tenureMonths: 60,
         vehicleModel: VEHICLE_MODELS.BYD_SONG_PLUS,
-      })
+      }),
     );
   });
 
@@ -606,22 +627,23 @@ describe('CreditApplicationForm Component', () => {
 
 ## 7. Anti-Pattern Matrix: Forbidden vs. Approved Patterns
 
-| Anti-Pattern (STRICTLY PROHIBITED) | Approved Pattern (MANDATORY STANDARD) | Why It Matters |
-| :--- | :--- | :--- |
+| Anti-Pattern (STRICTLY PROHIBITED)                                                             | Approved Pattern (MANDATORY STANDARD)                                                          | Why It Matters                                                                                    |
+| :--------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------ |
 | **Hardcoded testID in test suite:**<br>`screen.getByTestId('advisor-id-input')` in `.test.tsx` | **Page Object Getter:**<br>`page.advisorIdInput` in `.test.tsx` calling encapsulated PO getter | Changes to testIDs only require updating one line in the constants file. Test suites never break. |
-| **Direct event firing in test suite:**<br>`fireEvent.changeText(input, 'val')` in `.test.tsx` | **Fluent Page Object Action:**<br>`page.fillAdvisorId('val')` | Test reads like user interaction narrative, not mechanical DOM plumbing. |
-| **Assertion inside Page Object:**<br>`public expectError() { expect(...).toBeVisible(); }` | **Assertion in `.test.tsx`:**<br>`expect(page.errorBanner).toBeTruthy();` | Page Objects model interface structure; test suites own expectations and failure reports. |
-| **`void` action methods breaking chaining:**<br>`public fillId(val: string): void` | **Fluent `this` return:**<br>`public fillId(val: string): this { ... return this; }` | Enables clean, concise multi-step actions without repeating `page.` on every line. |
-| **Untyped loose parameters:**<br>`fillForm(data: any): this` | **Strongly-typed DTO contract:**<br>`fillForm(data: CreditAppFormData): this` | Prevents runtime test bugs and leverages TypeScript autocomplete during test authoring. |
-| **Querying by volatile Spanish text:**<br>`screen.getByText('Monto solicitado:')` | **Querying by semantic testID in PO:**<br>`screen.getByTestId(CREDIT_TEST_IDS.AMOUNT_INPUT)` | Text copy changes for marketing or translations do not crash unit tests. |
+| **Direct event firing in test suite:**<br>`fireEvent.changeText(input, 'val')` in `.test.tsx`  | **Fluent Page Object Action:**<br>`page.fillAdvisorId('val')`                                  | Test reads like user interaction narrative, not mechanical DOM plumbing.                          |
+| **Assertion inside Page Object:**<br>`public expectError() { expect(...).toBeVisible(); }`     | **Assertion in `.test.tsx`:**<br>`expect(page.errorBanner).toBeTruthy();`                      | Page Objects model interface structure; test suites own expectations and failure reports.         |
+| **`void` action methods breaking chaining:**<br>`public fillId(val: string): void`             | **Fluent `this` return:**<br>`public fillId(val: string): this { ... return this; }`           | Enables clean, concise multi-step actions without repeating `page.` on every line.                |
+| **Untyped loose parameters:**<br>`fillForm(data: any): this`                                   | **Strongly-typed DTO contract:**<br>`fillForm(data: CreditAppFormData): this`                  | Prevents runtime test bugs and leverages TypeScript autocomplete during test authoring.           |
+| **Querying by volatile Spanish text:**<br>`screen.getByText('Monto solicitado:')`              | **Querying by semantic testID in PO:**<br>`screen.getByTestId(CREDIT_TEST_IDS.AMOUNT_INPUT)`   | Text copy changes for marketing or translations do not crash unit tests.                          |
 
 ---
 
 ## 8. Asynchronous Gestures & Modal Transitions
 
-In React Native, certain automotive workflows trigger modal dialogs (e.g., `DossierModal`, vehicle specs modal, credit score status loaders). 
+In React Native, certain automotive workflows trigger modal dialogs (e.g., `DossierModal`, vehicle specs modal, credit score status loaders).
 
 When testing asynchronous transitions:
+
 1. **Never use arbitrary `setTimeout` or sleep loops.**
 2. Expose `async find*` methods on the Page Object that delegate to RNTL's `screen.findBy*` or wrap state transitions in `waitFor`.
 
@@ -640,6 +662,7 @@ export class DossierModalPageObject {
 ```
 
 In the test file:
+
 ```tsx
 it('displays client credit dossier documents when advisor expands the preview', async () => {
   // Arrange

@@ -8,6 +8,7 @@ description: Enforces Prettier formatting rules for React Native, Expo, and Type
 This skill is the single source of truth for code formatting across the mobile application.
 
 ## 0. Canonical Config Reference
+
 This skill mirrors the exact rules defined in `.prettierrc.json` located at the root of the repository. Both the configuration file and this skill must stay in lockstep.
 
 ## 1. Mandatory Protocol
@@ -38,8 +39,8 @@ Whenever you create or edit any supported file (TS, TSX, JSON, CSS, Markdown):
 
 ```typescript
 // ❌ INCORRECT
-const label = "ready"
-const count = 1
+const label = 'ready';
+const count = 1;
 
 // ✅ CORRECT
 const label = 'ready';

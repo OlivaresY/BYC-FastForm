@@ -1,9 +1,9 @@
-import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react-native";
-import type { ReactTestInstance } from "react-test-renderer";
-import { ProcessTopBar } from "../ProcessTopBar";
-import { PROCESS_TOP_BAR_TEST_IDS } from "../constants/ProcessTopBar.constants";
-import type { ProcessTopBarProps } from "../ProcessTopBar.types";
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react-native';
+import type { ReactTestInstance } from 'react-test-renderer';
+import { ProcessTopBar } from '../ProcessTopBar';
+import { PROCESS_TOP_BAR_TEST_IDS } from '../constants/ProcessTopBar.constants';
+import type { ProcessTopBarProps } from '../ProcessTopBar.types';
 
 export class ProcessTopBarPageObject {
   private readonly customTestId?: string;

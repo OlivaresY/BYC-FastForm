@@ -81,7 +81,7 @@ export const BaseButton = ({
   return (
     <Pressable
       {...rest}
-      accessibilityRole="button"
+      accessibilityRole='button'
       accessibilityState={{ disabled: isInteractionDisabled }}
       className={containerClasses}
       disabled={isInteractionDisabled}
@@ -93,7 +93,7 @@ export const BaseButton = ({
       {loading ? (
         <ActivityIndicator
           color={loaderColor}
-          size="small"
+          size='small'
           testID={BASE_BUTTON_TEST_IDS.LOADER}
         />
       ) : (

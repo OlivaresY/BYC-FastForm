@@ -1,10 +1,10 @@
-import type { TextInputProps } from "react-native";
+import type { TextInputProps } from 'react-native';
 
-export type CustomTextInputPresetIcon = "calendar" | "hash" | "mail" | "phone";
+export type CustomTextInputPresetIcon = 'calendar' | 'hash' | 'mail' | 'phone';
 
 export interface CustomTextInputProps extends Omit<
   TextInputProps,
-  "secureTextEntry"
+  'secureTextEntry'
 > {
   error?: string;
   helperText?: string;

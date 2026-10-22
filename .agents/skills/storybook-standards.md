@@ -43,12 +43,15 @@ export const Primary: Story = {
 ## 2. Metro Bundler Configuration (`metro.config.js`)
 
 ### Prohibited: Manual Resolver Interception
+
 Writing custom `resolveRequest` hacks (such as manually trapping `storybook/internal/*` subpaths with `require.resolve`) is **strictly forbidden**. Manual overrides are brittle, bypass Storybook's story-watching lifecycle, and create maintenance liabilities across version bumps.
 
 ### Mandatory: Official `withStorybook` Composition
+
 Metro must be configured using the official `@storybook/react-native/metro/withStorybook` enhancer, composed together with `withNativeWind`.
 
 #### Key Responsibilities of `withStorybook`:
+
 - **Automated Story Indexing:** Automatically executes story indexing (`generate()`), keeping `.storybook/storybook.requires.ts` continuously synchronized with `src/**/*.stories.tsx` without manual imports.
 - **Internal Export Aliasing:** Automatically resolves internal Storybook package subpaths and CSF3 dependencies.
 - **Tree-Shaking & Bundle Stripping:** When `enabled: false`, it stubs `@storybook/*` modules to empty stubs, guaranteeing zero Storybook bloat in production bundles.
@@ -57,7 +60,9 @@ Metro must be configured using the official `@storybook/react-native/metro/withS
 // ✅ Correct — metro.config.js composition
 const { getDefaultConfig } = require('expo/metro-config');
 const { withNativeWind } = require('nativewind/metro');
-const { withStorybook } = require('@storybook/react-native/metro/withStorybook');
+const {
+  withStorybook,
+} = require('@storybook/react-native/metro/withStorybook');
 const path = require('path');
 
 let config = getDefaultConfig(__dirname);
@@ -75,8 +80,8 @@ module.exports = withNativeWind(config, { input: './global.css' });
 ```javascript
 // ❌ Incorrect — FORBIDDEN manual resolver hacks
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  if (moduleName.startsWith("storybook/internal/")) {
-    return { filePath: require.resolve(moduleName), type: "sourceFile" };
+  if (moduleName.startsWith('storybook/internal/')) {
+    return { filePath: require.resolve(moduleName), type: 'sourceFile' };
   }
   return originalResolveRequest(context, moduleName, platform);
 };
@@ -87,9 +92,11 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
 ## 3. Entry Point Injection & Bundle Isolation (`app/_layout.tsx`)
 
 ### Prohibited: Static Top-Level Imports
+
 Never import Storybook statically at the top level of `app/_layout.tsx` or any root navigation file. Static imports force Metro to traverse and bundle the entire Storybook dependency graph (including on-device UI, bottom sheets, and datetime pickers) into production and standard development builds.
 
 ### Mandatory: Dynamic Conditional Loading
+
 Storybook MUST be dynamically imported inside the condition checking `process.env.EXPO_PUBLIC_STORYBOOK_ENABLED === 'true'`.
 
 ```tsx

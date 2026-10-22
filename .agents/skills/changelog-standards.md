@@ -12,11 +12,13 @@ This skill defines the protocol for tracking project progression and updates ins
 Every time a feature, bugfix, or refactor task is completed, tested, and approved, the AI agent must update the root **`CHANGELOG.md`** file before concluding the task.
 
 ### Format Structure & Categorization:
+
 - Update or create the `# UNRELEASED` section at the top of the file.
 - Categorize entries strictly under `## Feature` or `## Bugfix`.
 - Append the full Jira issue URL provided during the task context.
 
 ### Example Format:
+
 ```markdown
 # UNRELEASED
 
@@ -27,3 +29,4 @@ Every time a feature, bugfix, or refactor task is completed, tested, and approve
 ## Bugfix
 
 - https://tec-dev-ia.atlassian.net/browse/HOM-YYY
+```

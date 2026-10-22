@@ -1,9 +1,9 @@
-import React from "react";
-import Svg, { Path } from "react-native-svg";
-import type { IconProps } from "./Icons.types";
+import React from 'react';
+import Svg, { Path } from 'react-native-svg';
+import type { IconProps } from './Icons.types';
 
 export const BuildingIcon = ({
-  color = "#5A6B80",
+  color = '#5A6B80',
   height,
   size = 24,
   strokeWidth = 2,
@@ -11,22 +11,22 @@ export const BuildingIcon = ({
   ...rest
 }: IconProps): React.JSX.Element => (
   <Svg
-    fill="none"
+    fill='none'
     height={height ?? size}
     stroke={color}
-    strokeLinecap="round"
-    strokeLinejoin="round"
+    strokeLinecap='round'
+    strokeLinejoin='round'
     strokeWidth={strokeWidth}
-    viewBox="0 0 24 24"
+    viewBox='0 0 24 24'
     width={width ?? size}
     {...rest}
   >
-    <Path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" />
-    <Path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />
-    <Path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" />
-    <Path d="M10 6h4" />
-    <Path d="M10 10h4" />
-    <Path d="M10 14h4" />
-    <Path d="M10 18h4" />
+    <Path d='M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z' />
+    <Path d='M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2' />
+    <Path d='M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2' />
+    <Path d='M10 6h4' />
+    <Path d='M10 10h4' />
+    <Path d='M10 14h4' />
+    <Path d='M10 18h4' />
   </Svg>
 );

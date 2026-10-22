@@ -1,9 +1,9 @@
-import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react-native";
-import type { ReactTestInstance } from "react-test-renderer";
-import { CustomTextInput } from "../CustomTextInput";
-import { CUSTOM_TEXT_INPUT_TEST_IDS } from "../constants/CustomTextInput.constants";
-import type { CustomTextInputProps } from "../CustomTextInput.types";
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react-native';
+import type { ReactTestInstance } from 'react-test-renderer';
+import { CustomTextInput } from '../CustomTextInput';
+import { CUSTOM_TEXT_INPUT_TEST_IDS } from '../constants/CustomTextInput.constants';
+import type { CustomTextInputProps } from '../CustomTextInput.types';
 
 export class CustomTextInputPageObject {
   private readonly customTestId?: string;
@@ -94,17 +94,17 @@ export class CustomTextInputPageObject {
   }
 
   public focus(): this {
-    fireEvent(this.input, "focus");
+    fireEvent(this.input, 'focus');
     return this;
   }
 
   public blur(): this {
-    fireEvent(this.input, "blur");
+    fireEvent(this.input, 'blur');
     return this;
   }
 
   public clear(): this {
-    fireEvent.changeText(this.input, "");
+    fireEvent.changeText(this.input, '');
     return this;
   }
 

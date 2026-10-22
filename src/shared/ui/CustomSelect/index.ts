@@ -1,4 +1,4 @@
-export { CustomSelect } from "./CustomSelect";
+export { CustomSelect } from './CustomSelect';
 export {
   CUSTOM_SELECT_COLORS,
   CUSTOM_SELECT_COPY,
@@ -7,12 +7,12 @@ export {
   CUSTOM_SELECT_STYLES,
   CUSTOM_SELECT_SVG_ATTRIBUTES,
   CUSTOM_SELECT_TEST_IDS,
-} from "./constants/CustomSelect.constants";
+} from './constants/CustomSelect.constants';
 export type {
   CustomSelectOption,
   CustomSelectPresetIcon,
   CustomSelectProps,
   UseCustomSelectProps,
   UseCustomSelectReturn,
-} from "./CustomSelect.types";
-export { useCustomSelect } from "./hooks/useCustomSelect";
+} from './CustomSelect.types';
+export { useCustomSelect } from './hooks/useCustomSelect';

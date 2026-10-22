@@ -1,15 +1,15 @@
-import React from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
-import { CheckmarkIcon, ChevronDownIcon, CloseIcon, GlobeIcon } from "../Icons";
+import React from 'react';
+import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { CheckmarkIcon, ChevronDownIcon, CloseIcon, GlobeIcon } from '../Icons';
 import {
   CUSTOM_SELECT_COLORS,
   CUSTOM_SELECT_COPY,
   CUSTOM_SELECT_ICON_DIMENSIONS,
   CUSTOM_SELECT_STYLES,
   CUSTOM_SELECT_TEST_IDS,
-} from "./constants/CustomSelect.constants";
-import type { CustomSelectProps } from "./CustomSelect.types";
-import { useCustomSelect } from "./hooks/useCustomSelect";
+} from './constants/CustomSelect.constants';
+import type { CustomSelectProps } from './CustomSelect.types';
+import { useCustomSelect } from './hooks/useCustomSelect';
 
 export const CustomSelect = ({
   disabled = false,
@@ -45,7 +45,7 @@ export const CustomSelect = ({
 
   const disabledClass = disabled
     ? ` ${CUSTOM_SELECT_STYLES.TRIGGER_DISABLED}`
-    : "";
+    : '';
 
   const displayText = selectedOptionLabel ?? placeholder;
   const isSelected = Boolean(selectedOptionLabel);
@@ -102,7 +102,7 @@ export const CustomSelect = ({
 
       {/* Trigger Button */}
       <Pressable
-        accessibilityRole="button"
+        accessibilityRole='button'
         accessibilityState={{ disabled: !!disabled, expanded: isOpen }}
         aria-invalid={Boolean(errorMessage)}
         className={`${CUSTOM_SELECT_STYLES.TRIGGER_BASE} ${borderClass}${disabledClass}`}
@@ -110,7 +110,7 @@ export const CustomSelect = ({
         onPress={openModal}
         testID={triggerTestId}
       >
-        {leftIcon === "globe" ? (
+        {leftIcon === 'globe' ? (
           <View testID={leftIconTestId}>
             <GlobeIcon
               color={CUSTOM_SELECT_COLORS.GLOBE_STROKE}
@@ -126,7 +126,7 @@ export const CustomSelect = ({
               ? CUSTOM_SELECT_STYLES.TRIGGER_TEXT_SELECTED
               : CUSTOM_SELECT_STYLES.TRIGGER_TEXT_PLACEHOLDER
           }
-          ellipsizeMode="tail"
+          ellipsizeMode='tail'
           numberOfLines={1}
           testID={triggerTextTestId}
         >
@@ -158,7 +158,7 @@ export const CustomSelect = ({
 
       {/* Options Modal */}
       <Modal
-        animationType="fade"
+        animationType='fade'
         onRequestClose={closeModal}
         statusBarTranslucent
         testID={CUSTOM_SELECT_TEST_IDS.MODAL}
@@ -169,7 +169,7 @@ export const CustomSelect = ({
           accessibilityLabel={
             CUSTOM_SELECT_COPY.CLOSE_MODAL_ACCESSIBILITY_LABEL
           }
-          accessibilityRole="button"
+          accessibilityRole='button'
           className={CUSTOM_SELECT_STYLES.MODAL_BACKDROP}
           onPress={closeModal}
           testID={CUSTOM_SELECT_TEST_IDS.MODAL_BACKDROP}
@@ -198,7 +198,7 @@ export const CustomSelect = ({
                 accessibilityLabel={
                   CUSTOM_SELECT_COPY.CLOSE_MODAL_ACCESSIBILITY_LABEL
                 }
-                accessibilityRole="button"
+                accessibilityRole='button'
                 className={CUSTOM_SELECT_STYLES.MODAL_CLOSE_BUTTON}
                 hitSlop={{ bottom: 8, left: 8, right: 8, top: 8 }}
                 onPress={closeModal}
@@ -214,7 +214,7 @@ export const CustomSelect = ({
 
             {/* Modal Options List */}
             <ScrollView
-              className="max-h-80"
+              className='max-h-80'
               showsVerticalScrollIndicator={false}
             >
               <View className={CUSTOM_SELECT_STYLES.OPTION_LIST}>
@@ -225,7 +225,7 @@ export const CustomSelect = ({
 
                   return (
                     <Pressable
-                      accessibilityRole="button"
+                      accessibilityRole='button'
                       accessibilityState={{ selected: isOptionActive }}
                       className={
                         isOptionActive

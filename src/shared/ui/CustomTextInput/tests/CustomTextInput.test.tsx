@@ -1,47 +1,47 @@
-import { CustomTextInputPageObject } from "./CustomTextInput.po";
+import { CustomTextInputPageObject } from './CustomTextInput.po';
 
-describe("CustomTextInput Component", () => {
-  it("renders input with label and placeholder in default state", () => {
+describe('CustomTextInput Component', () => {
+  it('renders input with label and placeholder in default state', () => {
     // Arrange
     const page = CustomTextInputPageObject.render({
-      label: "Cédula de Identidad",
-      placeholder: "Ej: 1-1152-0491",
+      label: 'Cédula de Identidad',
+      placeholder: 'Ej: 1-1152-0491',
     });
 
     // Assert
     expect(page.label).toBeTruthy();
-    expect(page.label?.props.children).toBe("Cédula de Identidad");
-    expect(page.input.props.placeholder).toBe("Ej: 1-1152-0491");
+    expect(page.label?.props.children).toBe('Cédula de Identidad');
+    expect(page.input.props.placeholder).toBe('Ej: 1-1152-0491');
     expect(page.error).toBeNull();
-    expect(page.getWrapperClassName()).toContain("border-border-base");
+    expect(page.getWrapperClassName()).toContain('border-border-base');
     expect(page.requiredAsterisk).toBeNull();
     expect(page.helperText).toBeNull();
     expect(page.leftIcon).toBeNull();
     expect(page.validIcon).toBeNull();
   });
 
-  it("updates text and dispatches onChangeText handler upon filling and clears text", () => {
+  it('updates text and dispatches onChangeText handler upon filling and clears text', () => {
     // Arrange
     const handleChangeText = jest.fn();
     const page = CustomTextInputPageObject.render({
       onChangeText: handleChangeText,
-      placeholder: "Nombre completo",
+      placeholder: 'Nombre completo',
     });
 
     // Act
-    page.fill("Carlos Alvarado");
+    page.fill('Carlos Alvarado');
 
     // Assert
     expect(handleChangeText).toHaveBeenCalledTimes(1);
-    expect(handleChangeText).toHaveBeenCalledWith("Carlos Alvarado");
+    expect(handleChangeText).toHaveBeenCalledWith('Carlos Alvarado');
 
     // Act - clear
     page.clear();
     expect(handleChangeText).toHaveBeenCalledTimes(2);
-    expect(handleChangeText).toHaveBeenCalledWith("");
+    expect(handleChangeText).toHaveBeenCalledWith('');
   });
 
-  it("updates border to active focus color on focus and restores on blur", () => {
+  it('updates border to active focus color on focus and restores on blur', () => {
     // Arrange
     const handleFocus = jest.fn();
     const handleBlur = jest.fn();
@@ -55,101 +55,101 @@ describe("CustomTextInput Component", () => {
 
     // Assert - Focus
     expect(handleFocus).toHaveBeenCalledTimes(1);
-    expect(page.getWrapperClassName()).toContain("border-text-secondary");
+    expect(page.getWrapperClassName()).toContain('border-text-secondary');
 
     // Act - Blur
     page.blur();
 
     // Assert - Blur
     expect(handleBlur).toHaveBeenCalledTimes(1);
-    expect(page.getWrapperClassName()).toContain("border-border-base");
+    expect(page.getWrapperClassName()).toContain('border-border-base');
   });
 
-  it("renders error validation feedback and applies error border", () => {
+  it('renders error validation feedback and applies error border', () => {
     // Arrange
     const page = CustomTextInputPageObject.render({
-      error: "Formato de cédula inválido",
-      label: "Identificación",
+      error: 'Formato de cédula inválido',
+      label: 'Identificación',
     });
 
     // Assert
     expect(page.error).toBeTruthy();
-    expect(page.error?.props.children).toBe("Formato de cédula inválido");
-    expect(page.getWrapperClassName()).toContain("border-brand-red");
+    expect(page.error?.props.children).toBe('Formato de cédula inválido');
+    expect(page.getWrapperClassName()).toContain('border-brand-red');
   });
 
-  it("enables secureTextEntry when isPassword is true", () => {
+  it('enables secureTextEntry when isPassword is true', () => {
     // Arrange
     const page = CustomTextInputPageObject.render({
       isPassword: true,
-      label: "PIN de Asesor",
+      label: 'PIN de Asesor',
     });
 
     // Assert
     expect(page.input.props.secureTextEntry).toBe(true);
   });
 
-  it("renders red required asterisk when required is true", () => {
+  it('renders red required asterisk when required is true', () => {
     // Arrange
     const page = CustomTextInputPageObject.render({
-      label: "Primer Nombre",
+      label: 'Primer Nombre',
       required: true,
     });
 
     // Assert
     expect(page.requiredAsterisk).toBeTruthy();
-    expect(page.requiredAsterisk?.props.children).toBe("*");
+    expect(page.requiredAsterisk?.props.children).toBe('*');
   });
 
-  it("renders helperText when error is absent", () => {
+  it('renders helperText when error is absent', () => {
     // Arrange
     const page = CustomTextInputPageObject.render({
-      helperText: "Formato oficial costarricense con guiones.",
-      label: "Identificación",
+      helperText: 'Formato oficial costarricense con guiones.',
+      label: 'Identificación',
     });
 
     // Assert
     expect(page.helperText).toBeTruthy();
     expect(page.helperText?.props.children).toBe(
-      "Formato oficial costarricense con guiones.",
+      'Formato oficial costarricense con guiones.',
     );
   });
 
-  it("prioritizes error over helperText when both are provided", () => {
+  it('prioritizes error over helperText when both are provided', () => {
     // Arrange
     const page = CustomTextInputPageObject.render({
-      error: "Campo requerido",
-      helperText: "Formato oficial costarricense con guiones.",
-      label: "Identificación",
+      error: 'Campo requerido',
+      helperText: 'Formato oficial costarricense con guiones.',
+      label: 'Identificación',
     });
 
     // Assert
     expect(page.error).toBeTruthy();
-    expect(page.error?.props.children).toBe("Campo requerido");
+    expect(page.error?.props.children).toBe('Campo requerido');
     expect(page.helperText).toBeNull();
   });
 
-  it("renders hash left icon when leftIcon is hash", () => {
+  it('renders hash left icon when leftIcon is hash', () => {
     // Arrange
     const page = CustomTextInputPageObject.render({
-      leftIcon: "hash",
+      leftIcon: 'hash',
     });
 
     // Assert
     expect(page.leftIcon).toBeTruthy();
   });
 
-  it("renders calendar left icon when leftIcon is calendar", () => {
+  it('renders calendar left icon when leftIcon is calendar', () => {
     // Arrange
     const page = CustomTextInputPageObject.render({
-      leftIcon: "calendar",
+      leftIcon: 'calendar',
     });
 
     // Assert
     expect(page.leftIcon).toBeTruthy();
   });
 
-  it("renders valid checkmark icon when isValid is true", () => {
+  it('renders valid checkmark icon when isValid is true', () => {
     // Arrange
     const page = CustomTextInputPageObject.render({
       isValid: true,
@@ -159,27 +159,27 @@ describe("CustomTextInput Component", () => {
     expect(page.validIcon).toBeTruthy();
   });
 
-  it("propagates custom testID to all child elements deterministically", () => {
+  it('propagates custom testID to all child elements deterministically', () => {
     // Arrange
     const page = CustomTextInputPageObject.render({
-      error: "Error message",
+      error: 'Error message',
       isValid: true,
-      label: "Número de Cédula",
-      leftIcon: "hash",
+      label: 'Número de Cédula',
+      leftIcon: 'hash',
       required: true,
-      testID: "custom-id",
+      testID: 'custom-id',
     });
 
     // Assert
-    expect(page.container.props.testID).toBe("custom-id-container");
-    expect(page.label?.props.testID).toBe("custom-id-label");
+    expect(page.container.props.testID).toBe('custom-id-container');
+    expect(page.label?.props.testID).toBe('custom-id-label');
     expect(page.requiredAsterisk?.props.testID).toBe(
-      "custom-id-required-asterisk",
+      'custom-id-required-asterisk',
     );
-    expect(page.inputWrapper.props.testID).toBe("custom-id-wrapper");
-    expect(page.input.props.testID).toBe("custom-id");
-    expect(page.leftIcon?.props.testID).toBe("custom-id-left-icon");
-    expect(page.validIcon?.props.testID).toBe("custom-id-valid-icon");
-    expect(page.error?.props.testID).toBe("custom-id-error");
+    expect(page.inputWrapper.props.testID).toBe('custom-id-wrapper');
+    expect(page.input.props.testID).toBe('custom-id');
+    expect(page.leftIcon?.props.testID).toBe('custom-id-left-icon');
+    expect(page.validIcon?.props.testID).toBe('custom-id-valid-icon');
+    expect(page.error?.props.testID).toBe('custom-id-error');
   });
 });
