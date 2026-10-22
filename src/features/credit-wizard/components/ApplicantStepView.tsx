@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -51,6 +51,10 @@ export const ApplicantStepView = ({
   thirdPartyValues,
   vehicleBeneficiary,
 }: ApplicantStepViewProps): React.JSX.Element => {
+  const handleSaveModal = useCallback((): void => {
+    handleSaveThirdPartyData?.();
+  }, [handleSaveThirdPartyData]);
+
   return (
     <View
       className={APPLICANT_STEP_VIEW_STYLES.CONTAINER}
@@ -175,13 +179,7 @@ export const ApplicantStepView = ({
         isOpen={isBeneficiaryModalOpen}
         onClose={closeBeneficiaryModal ?? NOOP_VOID}
         onFieldChange={onThirdPartyFieldChange ?? NOOP_FIELD_CHANGE}
-        onSave={
-          handleSaveThirdPartyData
-            ? () => {
-                handleSaveThirdPartyData();
-              }
-            : undefined
-        }
+        onSave={handleSaveThirdPartyData ? handleSaveModal : undefined}
         values={
           thirdPartyValues ?? APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY
         }

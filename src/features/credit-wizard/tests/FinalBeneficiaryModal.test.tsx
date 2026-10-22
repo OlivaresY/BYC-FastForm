@@ -4,7 +4,7 @@ import {
   APPLICANT_STEP_VIEW_ERRORS,
 } from '../constants/ApplicantStepView.constants';
 import {
-  normalizeThirdPartyBirthDate,
+  isValidDateDDMMYYYY,
   StrictThirdPartyBeneficiarySchema,
   ThirdPartyBeneficiaryFieldsSchema,
 } from '../types/ApplicantStepView.schema';
@@ -142,7 +142,7 @@ describe('FinalBeneficiaryModal Component', () => {
       .fillDocNumber('1-2345-6789')
       .fillPhone('8888-8888')
       .fillEmail('juan@example.com')
-      .fillBirthDate('1990-05-15');
+      .fillBirthDate('15-05-1990');
 
     // Assert
     expect(handleFieldChange).toHaveBeenCalledWith(
@@ -163,7 +163,7 @@ describe('FinalBeneficiaryModal Component', () => {
     );
     expect(handleFieldChange).toHaveBeenCalledWith(
       'thirdPartyBirthDate',
-      '1990-05-15',
+      '15-05-1990',
     );
   });
 
@@ -234,7 +234,7 @@ describe('FinalBeneficiaryModal Component', () => {
     ).toBeTruthy();
   });
 
-  it('shows a Date birth date as YYYY-MM-DD', () => {
+  it('shows string birth date value in DD-MM-YYYY format', () => {
     // Arrange & Act
     const page = FinalBeneficiaryModalPageObject.render({
       isOpen: true,
@@ -242,12 +242,12 @@ describe('FinalBeneficiaryModal Component', () => {
       onFieldChange: jest.fn(),
       values: {
         ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
-        thirdPartyBirthDate: new Date('1990-05-15T00:00:00.000Z'),
+        thirdPartyBirthDate: '15-05-1990',
       },
     });
 
     // Assert
-    expect(page.birthDateValue).toBe('1990-05-15');
+    expect(page.birthDateValue).toBe('15-05-1990');
   });
 
   describe('Zod Validation for Phone and Email (ThirdPartyBeneficiaryFieldsSchema)', () => {
@@ -287,7 +287,7 @@ describe('FinalBeneficiaryModal Component', () => {
   describe('Zod Validation for Phone and Email (StrictThirdPartyBeneficiarySchema)', () => {
     const validThirdPartyData = {
       isThirdPartyRegistration: true as const,
-      thirdPartyBirthDate: '1990-05-15',
+      thirdPartyBirthDate: '15-05-1990',
       thirdPartyDocNumber: '2-0345-0678',
       thirdPartyDocType: 'national_id',
       thirdPartyEmail: 'valid.email@example.com',
@@ -333,14 +333,24 @@ describe('FinalBeneficiaryModal Component', () => {
       }
     });
 
-    it('validates thirdPartyBirthDate in strict validation schema with valid formats', () => {
+    it('accepts strictly formatted DD-MM-YYYY date in thirdPartyBirthDate', () => {
+      const withValidDate = {
+        ...validThirdPartyData,
+        thirdPartyBirthDate: '10-05-1990',
+      };
+      expect(
+        StrictThirdPartyBeneficiarySchema.safeParse(withValidDate).success,
+      ).toBe(true);
+    });
+
+    it('rejects slash formats and ISO formats in thirdPartyBirthDate', () => {
       const withSlashDate = {
         ...validThirdPartyData,
-        thirdPartyBirthDate: '10 / 05 / 1990',
+        thirdPartyBirthDate: '10/05/1990',
       };
       expect(
         StrictThirdPartyBeneficiarySchema.safeParse(withSlashDate).success,
-      ).toBe(true);
+      ).toBe(false);
 
       const withIsoDate = {
         ...validThirdPartyData,
@@ -348,7 +358,7 @@ describe('FinalBeneficiaryModal Component', () => {
       };
       expect(
         StrictThirdPartyBeneficiarySchema.safeParse(withIsoDate).success,
-      ).toBe(true);
+      ).toBe(false);
     });
 
     it('rejects invalid thirdPartyBirthDate in strict validation schema', () => {
@@ -372,65 +382,43 @@ describe('FinalBeneficiaryModal Component', () => {
     });
   });
 
-  describe('normalizeThirdPartyBirthDate (Timezone-Agnostic Normalization)', () => {
-    it('normalizes standard ISO YYYY-MM-DD date string', () => {
-      expect(normalizeThirdPartyBirthDate('1990-05-15')).toBe('1990-05-15');
+  describe('isValidDateDDMMYYYY (Strict DD-MM-YYYY Date Validation)', () => {
+    it('accepts valid DD-MM-YYYY date strings', () => {
+      expect(isValidDateDDMMYYYY('15-05-1990')).toBe(true);
+      expect(isValidDateDDMMYYYY('10-05-1990')).toBe(true);
+      expect(isValidDateDDMMYYYY('01-01-2000')).toBe(true);
     });
 
-    it('normalizes localized DD/MM/YYYY date strings with or without spaces', () => {
-      expect(normalizeThirdPartyBirthDate('10/05/1990')).toBe('1990-05-10');
-      expect(normalizeThirdPartyBirthDate('10 / 05 / 1990')).toBe('1990-05-10');
-      expect(normalizeThirdPartyBirthDate('15 / 08 / 1988')).toBe('1988-08-15');
+    it('rejects slash and ISO formats', () => {
+      expect(isValidDateDDMMYYYY('10/05/1990')).toBe(false);
+      expect(isValidDateDDMMYYYY('10 / 05 / 1990')).toBe(false);
+      expect(isValidDateDDMMYYYY('1990-05-15')).toBe(false);
     });
 
-    it('normalizes localized dash date strings DD-MM-YYYY', () => {
-      expect(normalizeThirdPartyBirthDate('10-05-1990')).toBe('1990-05-10');
-      expect(normalizeThirdPartyBirthDate('10 - 05 - 1990')).toBe('1990-05-10');
+    it('rejects non-string and empty values', () => {
+      expect(isValidDateDDMMYYYY(undefined)).toBe(false);
+      expect(isValidDateDDMMYYYY(null)).toBe(false);
+      expect(isValidDateDDMMYYYY('')).toBe(false);
+      expect(isValidDateDDMMYYYY('   ')).toBe(false);
+      expect(isValidDateDDMMYYYY('not-a-date')).toBe(false);
     });
 
-    it('normalizes ISO datetime string without timezone mutation', () => {
-      expect(normalizeThirdPartyBirthDate('1990-05-15T00:00:00.000Z')).toBe(
-        '1990-05-15',
-      );
-    });
-
-    it('normalizes JavaScript Date instance without timezone shifting', () => {
-      const date = new Date('1990-05-15T00:00:00.000Z');
-      expect(normalizeThirdPartyBirthDate(date)).toBe('1990-05-15');
-    });
-
-    it('returns empty string for invalid Date instances', () => {
-      expect(normalizeThirdPartyBirthDate(new Date('not-a-date'))).toBe('');
-    });
-
-    it('returns empty string for missing, empty, or whitespace-only values', () => {
-      expect(normalizeThirdPartyBirthDate(undefined)).toBe('');
-      expect(normalizeThirdPartyBirthDate(null)).toBe('');
-      expect(normalizeThirdPartyBirthDate('')).toBe('');
-      expect(normalizeThirdPartyBirthDate('   ')).toBe('');
-    });
-
-    it('returns empty string for non-date string gibberish', () => {
-      expect(normalizeThirdPartyBirthDate('not-a-date')).toBe('');
-      expect(normalizeThirdPartyBirthDate('invalid-string')).toBe('');
-    });
-
-    it('validates leap years accurately without timezone dependency', () => {
+    it('validates leap years accurately in DD-MM-YYYY format', () => {
       // 2000 is a leap year (divisible by 400)
-      expect(normalizeThirdPartyBirthDate('29/02/2000')).toBe('2000-02-29');
+      expect(isValidDateDDMMYYYY('29-02-2000')).toBe(true);
       // 2024 is a leap year (divisible by 4)
-      expect(normalizeThirdPartyBirthDate('29/02/2024')).toBe('2024-02-29');
+      expect(isValidDateDDMMYYYY('29-02-2024')).toBe(true);
       // 1900 is NOT a leap year (divisible by 100 but not 400)
-      expect(normalizeThirdPartyBirthDate('29/02/1900')).toBe('');
+      expect(isValidDateDDMMYYYY('29-02-1900')).toBe(false);
       // 2023 is NOT a leap year
-      expect(normalizeThirdPartyBirthDate('29/02/2023')).toBe('');
+      expect(isValidDateDDMMYYYY('29-02-2023')).toBe(false);
     });
 
     it('rejects impossible calendar dates', () => {
-      expect(normalizeThirdPartyBirthDate('31/02/1990')).toBe('');
-      expect(normalizeThirdPartyBirthDate('31/04/1990')).toBe('');
-      expect(normalizeThirdPartyBirthDate('32/01/1990')).toBe('');
-      expect(normalizeThirdPartyBirthDate('15/13/1990')).toBe('');
+      expect(isValidDateDDMMYYYY('31-02-1990')).toBe(false);
+      expect(isValidDateDDMMYYYY('31-04-1990')).toBe(false);
+      expect(isValidDateDDMMYYYY('32-01-1990')).toBe(false);
+      expect(isValidDateDDMMYYYY('15-13-1990')).toBe(false);
     });
   });
 });

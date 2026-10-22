@@ -221,13 +221,10 @@ describe('PhysicalPersonForm Component', () => {
       });
 
       // Act
-      page.fillField('birthDate', '15 / 08 / 1988');
+      page.fillField('birthDate', '15-08-1988');
 
       // Assert
-      expect(handleFieldChange).toHaveBeenCalledWith(
-        'birthDate',
-        '15 / 08 / 1988',
-      );
+      expect(handleFieldChange).toHaveBeenCalledWith('birthDate', '15-08-1988');
     });
   });
 

@@ -29,7 +29,6 @@ import {
   BENEFICIARY_MODAL_TEST_IDS,
 } from '../constants/ApplicantStepView.constants';
 import type { FinalBeneficiaryModalProps } from '../types/ApplicantStepView.types';
-import { normalizeThirdPartyBirthDate } from '../types/ApplicantStepView.schema';
 
 export const FinalBeneficiaryModal = ({
   errors,
@@ -43,51 +42,31 @@ export const FinalBeneficiaryModal = ({
 }: FinalBeneficiaryModalProps): React.JSX.Element => {
   const values = valuesProp ?? thirdPartyValues ?? {};
 
-  const docType = values.thirdPartyDocType ?? values.identificationType;
-  const docNumber =
-    values.thirdPartyDocNumber ?? values.identificationNumber ?? '';
-  const fullName = values.thirdPartyFullName ?? values.fullName ?? '';
-  const relationship = values.thirdPartyRelationship ?? values.relationship;
-  const rawBirthDate = values.thirdPartyBirthDate ?? values.birthDate;
-  const nationality = values.thirdPartyNationality ?? values.nationality;
-
-  const phone = values.thirdPartyPhone ?? values.phone ?? '';
-  const email = values.thirdPartyEmail ?? values.email ?? '';
-
-  const normalizedDocType =
-    docType === 'cedula_nacional' ? 'national_id' : docType;
-  const normalizedRelationship =
-    relationship === 'conyuge' ? 'spouse' : relationship;
-  const normalizedNationality =
-    nationality === 'costarricense' ? 'CR' : nationality;
-
-  const formattedBirthDate = useMemo((): string => {
-    if (rawBirthDate instanceof Date) {
-      return normalizeThirdPartyBirthDate(rawBirthDate);
-    }
-    return typeof rawBirthDate === 'string' ? rawBirthDate : '';
-  }, [rawBirthDate]);
+  const docType = values.thirdPartyDocType ?? '';
+  const docNumber = values.thirdPartyDocNumber ?? '';
+  const fullName = values.thirdPartyFullName ?? '';
+  const relationship = values.thirdPartyRelationship ?? '';
+  const birthDate = values.thirdPartyBirthDate ?? '';
+  const nationality = values.thirdPartyNationality ?? '';
+  const phone = values.thirdPartyPhone ?? '';
+  const email = values.thirdPartyEmail ?? '';
 
   const handlers = useMemo(
     () => ({
-      email: (val: string): void => {
-        onFieldChange?.('thirdPartyEmail', val);
-        onFieldChange?.('email', val);
-      },
-      phone: (val: string): void => {
-        onFieldChange?.('thirdPartyPhone', val);
-        onFieldChange?.('phone', val);
-      },
       thirdPartyBirthDate: (val: string): void =>
         onFieldChange?.('thirdPartyBirthDate', val),
       thirdPartyDocNumber: (val: string): void =>
         onFieldChange?.('thirdPartyDocNumber', val),
       thirdPartyDocType: (val: string): void =>
         onFieldChange?.('thirdPartyDocType', val),
+      thirdPartyEmail: (val: string): void =>
+        onFieldChange?.('thirdPartyEmail', val),
       thirdPartyFullName: (val: string): void =>
         onFieldChange?.('thirdPartyFullName', val),
       thirdPartyNationality: (val: string): void =>
         onFieldChange?.('thirdPartyNationality', val),
+      thirdPartyPhone: (val: string): void =>
+        onFieldChange?.('thirdPartyPhone', val),
       thirdPartyRelationship: (val: string): void =>
         onFieldChange?.('thirdPartyRelationship', val),
     }),
@@ -196,7 +175,7 @@ export const FinalBeneficiaryModal = ({
                 placeholder={BENEFICIARY_MODAL_COPY.DOC_TYPE_PLACEHOLDER}
                 required={true}
                 testID={BENEFICIARY_MODAL_TEST_IDS.DOC_TYPE_INPUT}
-                value={normalizedDocType}
+                value={docType}
               />
 
               <CustomTextInput
@@ -253,10 +232,10 @@ export const FinalBeneficiaryModal = ({
               </View>
 
               <CustomTextInput
-                error={errors?.thirdPartyPhone ?? errors?.phone}
+                error={errors?.thirdPartyPhone}
                 keyboardType='phone-pad'
                 label={BENEFICIARY_MODAL_COPY.PHONE_LABEL}
-                onChangeText={handlers.phone}
+                onChangeText={handlers.thirdPartyPhone}
                 placeholder={BENEFICIARY_MODAL_COPY.PHONE_PLACEHOLDER}
                 required={true}
                 testID={BENEFICIARY_MODAL_TEST_IDS.PHONE_INPUT}
@@ -265,10 +244,10 @@ export const FinalBeneficiaryModal = ({
 
               <CustomTextInput
                 autoCapitalize='none'
-                error={errors?.thirdPartyEmail ?? errors?.email}
+                error={errors?.thirdPartyEmail}
                 keyboardType='email-address'
                 label={BENEFICIARY_MODAL_COPY.EMAIL_LABEL}
-                onChangeText={handlers.email}
+                onChangeText={handlers.thirdPartyEmail}
                 placeholder={BENEFICIARY_MODAL_COPY.EMAIL_PLACEHOLDER}
                 required={true}
                 testID={BENEFICIARY_MODAL_TEST_IDS.EMAIL_INPUT}
@@ -300,7 +279,7 @@ export const FinalBeneficiaryModal = ({
                 placeholder={BENEFICIARY_MODAL_COPY.RELATIONSHIP_PLACEHOLDER}
                 required={true}
                 testID={BENEFICIARY_MODAL_TEST_IDS.RELATIONSHIP_INPUT}
-                value={normalizedRelationship}
+                value={relationship}
               />
 
               <CustomTextInput
@@ -311,7 +290,7 @@ export const FinalBeneficiaryModal = ({
                 placeholder={BENEFICIARY_MODAL_COPY.BIRTH_DATE_PLACEHOLDER}
                 required={true}
                 testID={BENEFICIARY_MODAL_TEST_IDS.BIRTH_DATE_INPUT}
-                value={formattedBirthDate}
+                value={birthDate}
               />
 
               <CustomSelect
@@ -323,7 +302,7 @@ export const FinalBeneficiaryModal = ({
                 placeholder={BENEFICIARY_MODAL_COPY.NATIONALITY_PLACEHOLDER}
                 required={true}
                 testID={BENEFICIARY_MODAL_TEST_IDS.NATIONALITY_INPUT}
-                value={normalizedNationality}
+                value={nationality}
               />
             </ScrollView>
 

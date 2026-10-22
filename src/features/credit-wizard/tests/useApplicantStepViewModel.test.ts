@@ -1,4 +1,7 @@
-import { APPLICANT_STEP_VIEW_ERRORS } from '../constants/ApplicantStepView.constants';
+import {
+  APPLICANT_STEP_VIEW_DEFAULT_VALUES,
+  APPLICANT_STEP_VIEW_ERRORS,
+} from '../constants/ApplicantStepView.constants';
 import { ApplicantStepViewModelPageObject } from './useApplicantStepViewModel.po';
 
 describe('useApplicantStepViewModel - Identification Normalization', () => {
@@ -130,12 +133,12 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
         .setThirdPartyField('thirdPartyDocNumber', '2-0345-0678')
         .setThirdPartyField('thirdPartyDocType', 'national_id')
         .setThirdPartyField('thirdPartyRelationship', 'Spouse')
-        .setThirdPartyField('thirdPartyBirthDate', '1990-05-15')
+        .setThirdPartyField('thirdPartyBirthDate', '15-05-1990')
         .setThirdPartyField('thirdPartyNationality', 'Costa Rican');
 
       expect(page.thirdPartyValues).toEqual({
         isThirdPartyRegistration: false,
-        thirdPartyBirthDate: '1990-05-15',
+        thirdPartyBirthDate: '15-05-1990',
         thirdPartyDocNumber: '2-0345-0678',
         thirdPartyDocType: 'national_id',
         thirdPartyEmail: '',
@@ -185,11 +188,80 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
       });
     });
 
+    it('rolls back to same_holder and resets values when canceling a new third-party entry without saved snapshot', () => {
+      const page = ApplicantStepViewModelPageObject.render();
+
+      // User selects third_party, modal opens automatically
+      page.setVehicleBeneficiary('third_party');
+      expect(page.vehicleBeneficiary).toBe('third_party');
+      expect(page.isBeneficiaryModalOpen).toBe(true);
+
+      // User fills partial uncommitted data
+      page.setThirdPartyField('thirdPartyFullName', 'Temp Unsaved Name');
+      page.setThirdPartyField('thirdPartyDocNumber', '1-2345-6789');
+
+      // User cancels / closes modal without saving
+      page.closeBeneficiaryModal();
+
+      // Assert rollback to same_holder and cleared values
+      expect(page.isBeneficiaryModalOpen).toBe(false);
+      expect(page.vehicleBeneficiary).toBe('same_holder');
+      expect(page.thirdPartyValues).toEqual(
+        APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
+      );
+      expect(page.thirdPartyErrors).toEqual({});
+    });
+
+    it('restores snapshot values and keeps third_party beneficiary when canceling an aborted edit', () => {
+      const page = ApplicantStepViewModelPageObject.render();
+
+      // User selects third_party
+      page.setVehicleBeneficiary('third_party');
+
+      // User enters valid third-party data
+      page
+        .setThirdPartyField('thirdPartyDocType', 'national_id')
+        .setThirdPartyField('thirdPartyDocNumber', '2-0345-0678')
+        .setThirdPartyField('thirdPartyFullName', 'Carlos Mora')
+        .setThirdPartyField('thirdPartyRelationship', 'spouse')
+        .setThirdPartyField('thirdPartyBirthDate', '15-05-1990')
+        .setThirdPartyField('thirdPartyNationality', 'CR')
+        .setThirdPartyField('thirdPartyPhone', '8888-8888')
+        .setThirdPartyField('thirdPartyEmail', 'carlos@example.com');
+
+      // Save valid data -> creates savedThirdPartyValues snapshot
+      const saveSuccess = page.saveThirdPartyData();
+      expect(saveSuccess).toBe(true);
+      expect(page.isBeneficiaryModalOpen).toBe(false);
+      expect(page.vehicleBeneficiary).toBe('third_party');
+
+      const savedSnapshot = { ...page.thirdPartyValues };
+
+      // User reopens modal to edit
+      page.openBeneficiaryModal();
+      expect(page.isBeneficiaryModalOpen).toBe(true);
+
+      // User changes fields (e.g. invalidates or edits)
+      page.setThirdPartyField('thirdPartyFullName', 'Accidental Modification');
+      page.setThirdPartyField('thirdPartyEmail', 'invalid-email');
+
+      // User cancels / closes modal without saving
+      page.closeBeneficiaryModal();
+
+      // Assert: modal closes, vehicleBeneficiary stays third_party, values restored from snapshot
+      expect(page.isBeneficiaryModalOpen).toBe(false);
+      expect(page.vehicleBeneficiary).toBe('third_party');
+      expect(page.thirdPartyValues).toEqual(savedSnapshot);
+      expect(page.thirdPartyValues.thirdPartyFullName).toBe('Carlos Mora');
+      expect(page.thirdPartyValues.thirdPartyEmail).toBe('carlos@example.com');
+      expect(page.thirdPartyErrors).toEqual({});
+    });
+
     it('includes third-party values in onSubmit payload when third_party is selected and all fields valid', () => {
       const onSubmitMock = jest.fn();
       const page = ApplicantStepViewModelPageObject.render({
         initialPhysicalValues: {
-          birthDate: '1985-01-01',
+          birthDate: '01-01-1985',
           firstLastName: 'Ramírez',
           firstName: 'Ana',
           gender: 'female',
@@ -209,7 +281,7 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
         .setThirdPartyField('thirdPartyDocNumber', '2-0345-0678')
         .setThirdPartyField('thirdPartyFullName', 'Carlos Mora')
         .setThirdPartyField('thirdPartyRelationship', 'Spouse')
-        .setThirdPartyField('thirdPartyBirthDate', '1990-05-15')
+        .setThirdPartyField('thirdPartyBirthDate', '15-05-1990')
         .setThirdPartyField('thirdPartyNationality', 'Costa Rican')
         .setThirdPartyField('thirdPartyPhone', '8888-8888')
         .setThirdPartyField('thirdPartyEmail', 'carlos@example.com')
@@ -220,7 +292,7 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
         expect.objectContaining({
           isThirdPartyRegistration: true,
           regime: 'physical',
-          thirdPartyBirthDate: '1990-05-15',
+          thirdPartyBirthDate: '15-05-1990',
           thirdPartyDocNumber: '2-0345-0678',
           thirdPartyDocType: 'national_id',
           thirdPartyEmail: 'carlos@example.com',
@@ -237,7 +309,7 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
       const onSubmitMock = jest.fn();
       const page = ApplicantStepViewModelPageObject.render({
         initialPhysicalValues: {
-          birthDate: '1985-01-01',
+          birthDate: '01-01-1985',
           firstLastName: 'Ramírez',
           firstName: 'Ana',
           gender: 'female',
@@ -265,7 +337,7 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
     it('clears specific thirdPartyErrors field when user enters a value', () => {
       const page = ApplicantStepViewModelPageObject.render({
         initialPhysicalValues: {
-          birthDate: '1985-01-01',
+          birthDate: '01-01-1985',
           firstLastName: 'Ramírez',
           firstName: 'Ana',
           gender: 'female',
@@ -290,7 +362,7 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
     it('sets isValid to false when vehicleBeneficiary is third_party and third-party values are incomplete', () => {
       const page = ApplicantStepViewModelPageObject.render({
         initialPhysicalValues: {
-          birthDate: '1985-01-01',
+          birthDate: '01-01-1985',
           firstLastName: 'Ramírez',
           firstName: 'Ana',
           gender: 'female',
@@ -318,7 +390,7 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
         .setThirdPartyField('thirdPartyDocNumber', '2-0345-0678')
         .setThirdPartyField('thirdPartyFullName', 'Carlos Mora')
         .setThirdPartyField('thirdPartyRelationship', 'spouse')
-        .setThirdPartyField('thirdPartyBirthDate', '1990-05-15')
+        .setThirdPartyField('thirdPartyBirthDate', '15-05-1990')
         .setThirdPartyField('thirdPartyNationality', 'CR')
         .setThirdPartyField('thirdPartyPhone', '8888-8888')
         .setThirdPartyField('thirdPartyEmail', 'carlos@example.com');
@@ -384,7 +456,7 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
         .setThirdPartyField('thirdPartyDocNumber', '2-0345-0678')
         .setThirdPartyField('thirdPartyFullName', 'Carlos Mora')
         .setThirdPartyField('thirdPartyRelationship', 'spouse')
-        .setThirdPartyField('thirdPartyBirthDate', '1990-05-15')
+        .setThirdPartyField('thirdPartyBirthDate', '15-05-1990')
         .setThirdPartyField('thirdPartyNationality', 'CR')
         .setThirdPartyField('thirdPartyPhone', '8888-8888')
         .setThirdPartyField('thirdPartyEmail', 'carlos@example.com');
@@ -400,7 +472,7 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
 
 describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () => {
   const VALID_PHYSICAL = {
-    birthDate: '1985-01-01',
+    birthDate: '01-01-1985',
     firstLastName: 'Ramírez',
     firstName: 'Ana',
     gender: 'female',
@@ -428,7 +500,7 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
       .setThirdPartyField('thirdPartyDocNumber', '2-0345-0678')
       .setThirdPartyField('thirdPartyFullName', 'Carlos Mora')
       .setThirdPartyField('thirdPartyRelationship', 'spouse')
-      .setThirdPartyField('thirdPartyBirthDate', '1990-05-15')
+      .setThirdPartyField('thirdPartyBirthDate', '15-05-1990')
       .setThirdPartyField('thirdPartyNationality', 'CR')
       .setThirdPartyField('thirdPartyPhone', '8888-8888')
       .setThirdPartyField('thirdPartyEmail', 'carlos@example.com');
@@ -647,7 +719,7 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
 
 describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () => {
   const VALID_PHYSICAL = {
-    birthDate: '1985-01-01',
+    birthDate: '01-01-1985',
     firstLastName: 'Ramírez',
     firstName: 'Ana',
     gender: 'female',
@@ -673,10 +745,9 @@ describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () =>
     const page = ApplicantStepViewModelPageObject.render({
       initialPhysicalValues: VALID_PHYSICAL,
       initialRegime: 'physical',
+      initialVehicleBeneficiary: 'third_party',
       onSubmit,
     });
-
-    page.setVehicleBeneficiary('third_party').closeBeneficiaryModal();
     expect(page.isBeneficiaryModalOpen).toBe(false);
 
     page.submit();
@@ -702,9 +773,9 @@ describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () =>
     );
   });
 
-  it('accepts a Date birth date and forwards the original Date untouched', () => {
+  it('accepts strictly formatted string birth date (DD-MM-YYYY) and validates successfully', () => {
     const onSubmit = jest.fn();
-    const birthDate = new Date('1990-05-15T00:00:00.000Z');
+    const birthDate = '15-05-1990';
     const page = ApplicantStepViewModelPageObject.render({
       initialPhysicalValues: VALID_PHYSICAL,
       initialRegime: 'physical',
@@ -724,14 +795,14 @@ describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () =>
     );
   });
 
-  it('reports an error instead of throwing for an invalid Date birth date', () => {
+  it('reports an error for an invalid format birth date', () => {
     const onSubmit = jest.fn();
     const page = ApplicantStepViewModelPageObject.render({
       initialPhysicalValues: VALID_PHYSICAL,
       initialRegime: 'physical',
       initialThirdPartyValues: {
         ...THIRD_PARTY_FIELDS,
-        thirdPartyBirthDate: new Date('not-a-date'),
+        thirdPartyBirthDate: 'not-a-date',
       },
       initialVehicleBeneficiary: 'third_party',
       onSubmit,
@@ -745,14 +816,14 @@ describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () =>
     });
   });
 
-  it('accepts localized string birth date (DD/MM/YYYY) and validates successfully', () => {
+  it('rejects slash string birth date (DD/MM/YYYY) in strict DD-MM-YYYY mode', () => {
     const onSubmit = jest.fn();
     const page = ApplicantStepViewModelPageObject.render({
       initialPhysicalValues: VALID_PHYSICAL,
       initialRegime: 'physical',
       initialThirdPartyValues: {
         ...THIRD_PARTY_FIELDS,
-        thirdPartyBirthDate: '10 / 05 / 1990',
+        thirdPartyBirthDate: '10/05/1990',
       },
       initialVehicleBeneficiary: 'third_party',
       onSubmit,
@@ -760,18 +831,18 @@ describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () =>
 
     page.submit();
 
-    expect(onSubmit).toHaveBeenCalledTimes(1);
-    expect(page.isValid).toBe(true);
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(page.isValid).toBe(false);
   });
 
-  it('rejects invalid string birth date and populates thirdPartyErrors', () => {
+  it('rejects invalid calendar date (31-02-1990) and populates thirdPartyErrors', () => {
     const onSubmit = jest.fn();
     const page = ApplicantStepViewModelPageObject.render({
       initialPhysicalValues: VALID_PHYSICAL,
       initialRegime: 'physical',
       initialThirdPartyValues: {
         ...THIRD_PARTY_FIELDS,
-        thirdPartyBirthDate: '31/02/1990',
+        thirdPartyBirthDate: '31-02-1990',
       },
       initialVehicleBeneficiary: 'third_party',
       onSubmit,

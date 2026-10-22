@@ -137,7 +137,7 @@ export const APPLICANT_STEP_VIEW_TEST_IDS = {
 export const BENEFICIARY_MODAL_COPY = {
   BACKDROP_ACCESSIBILITY_LABEL: 'Cerrar modal de beneficiario',
   BIRTH_DATE_LABEL: 'Fecha de Nacimiento *',
-  BIRTH_DATE_PLACEHOLDER: 'DD / MM / AAAA',
+  BIRTH_DATE_PLACEHOLDER: 'DD-MM-AAAA',
   CLOSE_ACCESSIBILITY_LABEL: 'Cerrar',
   DOC_NUMBER_LABEL: 'Número de Identificación *',
   DOC_NUMBER_PLACEHOLDER: 'Ingrese el número de documento',

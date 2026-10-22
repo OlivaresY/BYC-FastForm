@@ -91,7 +91,7 @@ describe('ApplicantStepView Integration', () => {
       const handleSubmit = jest.fn();
       const page = ApplicantStepViewPageObject.render({
         initialThirdPartyValues: {
-          thirdPartyBirthDate: '1990-01-01',
+          thirdPartyBirthDate: '01-01-1990',
           thirdPartyDocNumber: '1-2345-6789',
           thirdPartyDocType: 'national_id',
           thirdPartyEmail: 'juan@example.com',
@@ -172,7 +172,7 @@ describe('ApplicantStepView Integration', () => {
       expect(handleSubmit).toHaveBeenCalledWith({
         regime: 'physical',
         values: expect.objectContaining({
-          birthDate: '15 / 08 / 1988',
+          birthDate: '15-08-1988',
           firstLastName: 'Rodríguez',
           firstName: 'Carlos',
           gender: 'male',

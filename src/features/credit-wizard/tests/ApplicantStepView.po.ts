@@ -236,7 +236,7 @@ export class ApplicantStepViewPageObject {
     this.fillPhysicalField('firstName', 'Carlos');
     this.fillPhysicalField('firstLastName', 'Rodríguez');
     this.fillPhysicalField('secondLastName', 'Castro');
-    this.fillPhysicalField('birthDate', '15 / 08 / 1988');
+    this.fillPhysicalField('birthDate', '15-08-1988');
     this.selectPhysicalOption('nationality', 'CR');
     this.selectPhysicalOption('maritalStatus', 'married');
     this.selectPhysicalOption('gender', 'male');

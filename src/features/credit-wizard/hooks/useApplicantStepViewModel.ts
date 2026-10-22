@@ -5,7 +5,6 @@ import {
   LegalApplicantSchema,
   LegalIdentificationNumberSchema,
   mapIssuesToFieldErrors,
-  normalizeThirdPartyBirthDate,
   PHYSICAL_APPLICANT_FIELDS,
   PhysicalApplicantSchema,
   PhysicalIdentificationNumberSchema,
@@ -28,25 +27,6 @@ import type {
   UseApplicantStepViewModelProps,
   UseApplicantStepViewModelReturn,
 } from '../types/ApplicantStepView.types';
-
-const normalizeThirdPartyPayload = (values: ThirdPartyBeneficiaryValues) => ({
-  ...values,
-  isThirdPartyRegistration: true as const,
-  thirdPartyBirthDate: normalizeThirdPartyBirthDate(
-    values.thirdPartyBirthDate ?? values.birthDate,
-  ),
-  thirdPartyDocNumber:
-    values.thirdPartyDocNumber ?? values.identificationNumber ?? '',
-  thirdPartyDocType:
-    values.thirdPartyDocType ?? values.identificationType ?? '',
-  thirdPartyEmail: values.thirdPartyEmail ?? values.email ?? '',
-  thirdPartyFullName: values.thirdPartyFullName ?? values.fullName ?? '',
-  thirdPartyNationality:
-    values.thirdPartyNationality ?? values.nationality ?? '',
-  thirdPartyPhone: values.thirdPartyPhone ?? values.phone ?? '',
-  thirdPartyRelationship:
-    values.thirdPartyRelationship ?? values.relationship ?? '',
-});
 
 export const useApplicantStepViewModel = (
   props?: UseApplicantStepViewModelProps,
@@ -82,6 +62,24 @@ export const useApplicantStepViewModel = (
 
   const [isBeneficiaryModalOpen, setIsBeneficiaryModalOpen] =
     useState<boolean>(false);
+
+  const [savedThirdPartyValues, setSavedThirdPartyValues] =
+    useState<ThirdPartyBeneficiaryValues | null>(() => {
+      if (
+        initialVehicleBeneficiary === 'third_party' &&
+        initialThirdPartyValues
+      ) {
+        const candidate: ThirdPartyBeneficiaryValues = {
+          ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
+          ...initialThirdPartyValues,
+          isThirdPartyRegistration: true,
+        };
+        if (StrictThirdPartyBeneficiarySchema.safeParse(candidate).success) {
+          return candidate;
+        }
+      }
+      return null;
+    });
 
   const [thirdPartyValues, setThirdPartyValues] =
     useState<ThirdPartyBeneficiaryValues>({
@@ -147,9 +145,10 @@ export const useApplicantStepViewModel = (
       return true;
     }
 
-    return StrictThirdPartyBeneficiarySchema.safeParse(
-      normalizeThirdPartyPayload(thirdPartyValues),
-    ).success;
+    return StrictThirdPartyBeneficiarySchema.safeParse({
+      ...thirdPartyValues,
+      isThirdPartyRegistration: true,
+    }).success;
   }, [thirdPartyValues, vehicleBeneficiary]);
 
   const isValid = isApplicantValid && isThirdPartyValid;
@@ -163,12 +162,24 @@ export const useApplicantStepViewModel = (
   }, []);
 
   const closeBeneficiaryModal = useCallback((): void => {
-    setIsBeneficiaryModalOpen(false);
-  }, []);
+    if (savedThirdPartyValues !== null) {
+      setThirdPartyValues(savedThirdPartyValues);
+      setThirdPartyErrors({});
+      setIsBeneficiaryModalOpen(false);
+    } else {
+      setVehicleBeneficiary('same_holder');
+      setThirdPartyValues(APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY);
+      setThirdPartyErrors({});
+      setIsBeneficiaryModalOpen(false);
+    }
+  }, [savedThirdPartyValues]);
 
   const handleSaveThirdPartyData = useCallback((): boolean => {
-    const payload = normalizeThirdPartyPayload(thirdPartyValues);
-    const result = StrictThirdPartyBeneficiarySchema.safeParse(payload);
+    const candidate: ThirdPartyBeneficiaryValues = {
+      ...thirdPartyValues,
+      isThirdPartyRegistration: true,
+    };
+    const result = StrictThirdPartyBeneficiarySchema.safeParse(candidate);
 
     if (!result.success) {
       setThirdPartyErrors(
@@ -180,10 +191,12 @@ export const useApplicantStepViewModel = (
       return false;
     }
 
+    setThirdPartyValues(candidate);
+    setSavedThirdPartyValues(candidate);
     setThirdPartyErrors({});
-    closeBeneficiaryModal();
+    setIsBeneficiaryModalOpen(false);
     return true;
-  }, [closeBeneficiaryModal, thirdPartyValues]);
+  }, [thirdPartyValues]);
 
   // ===========================================================================
   // Form Handlers
@@ -252,18 +265,23 @@ export const useApplicantStepViewModel = (
       setVehicleBeneficiary(beneficiary);
 
       if (beneficiary === 'third_party') {
-        setThirdPartyValues((prev) => ({
-          ...prev,
-          isThirdPartyRegistration: true,
-        }));
-        openBeneficiaryModal();
+        if (savedThirdPartyValues !== null) {
+          setThirdPartyValues(savedThirdPartyValues);
+        } else {
+          setThirdPartyValues((prev) => ({
+            ...prev,
+            isThirdPartyRegistration: true,
+          }));
+        }
+        setIsBeneficiaryModalOpen(true);
       } else {
+        setSavedThirdPartyValues(null);
         setThirdPartyValues(APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY);
         setThirdPartyErrors({});
-        closeBeneficiaryModal();
+        setIsBeneficiaryModalOpen(false);
       }
     },
-    [closeBeneficiaryModal, openBeneficiaryModal],
+    [savedThirdPartyValues],
   );
 
   const onSubmit = useCallback((): void => {
@@ -271,9 +289,12 @@ export const useApplicantStepViewModel = (
     let hasValidationErrors = false;
 
     if (isThirdParty) {
-      const thirdPartyResult = StrictThirdPartyBeneficiarySchema.safeParse(
-        normalizeThirdPartyPayload(thirdPartyValues),
-      );
+      const candidate: ThirdPartyBeneficiaryValues = {
+        ...thirdPartyValues,
+        isThirdPartyRegistration: true,
+      };
+      const thirdPartyResult =
+        StrictThirdPartyBeneficiarySchema.safeParse(candidate);
 
       if (!thirdPartyResult.success) {
         setThirdPartyErrors(
@@ -282,7 +303,7 @@ export const useApplicantStepViewModel = (
             THIRD_PARTY_BENEFICIARY_FIELDS,
           ),
         );
-        openBeneficiaryModal();
+        setIsBeneficiaryModalOpen(true);
         hasValidationErrors = true;
       }
     }
@@ -317,29 +338,44 @@ export const useApplicantStepViewModel = (
       return;
     }
 
-    const thirdPartyPayload = isThirdParty
-      ? { ...thirdPartyValues, isThirdPartyRegistration: true }
-      : {};
-
-    onSubmitProp?.(
-      regime === 'physical'
-        ? {
-            regime: 'physical',
-            values: physicalValues,
-            vehicleBeneficiary,
-            ...thirdPartyPayload,
-          }
-        : {
-            regime: 'legal',
-            values: legalValues,
-            vehicleBeneficiary,
-            ...thirdPartyPayload,
-          },
-    );
+    if (isThirdParty) {
+      const thirdPartyPayload = {
+        ...thirdPartyValues,
+        isThirdPartyRegistration: true,
+      };
+      onSubmitProp?.(
+        regime === 'physical'
+          ? {
+              regime: 'physical',
+              values: physicalValues,
+              vehicleBeneficiary: 'third_party',
+              ...thirdPartyPayload,
+            }
+          : {
+              regime: 'legal',
+              values: legalValues,
+              vehicleBeneficiary: 'third_party',
+              ...thirdPartyPayload,
+            },
+      );
+    } else {
+      onSubmitProp?.(
+        regime === 'physical'
+          ? {
+              regime: 'physical',
+              values: physicalValues,
+              vehicleBeneficiary: 'same_holder',
+            }
+          : {
+              regime: 'legal',
+              values: legalValues,
+              vehicleBeneficiary: 'same_holder',
+            },
+      );
+    }
   }, [
     legalValues,
     onSubmitProp,
-    openBeneficiaryModal,
     physicalValues,
     regime,
     thirdPartyValues,

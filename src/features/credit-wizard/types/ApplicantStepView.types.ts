@@ -14,16 +14,8 @@ import type { VehicleBeneficiaryType } from './VehicleBeneficiarySection.types';
 // =============================================================================
 
 export interface ThirdPartyBeneficiaryValues {
-  birthDate?: Date | string;
-  email?: string;
-  fullName?: string;
-  identificationNumber?: string;
-  identificationType?: string;
   isThirdPartyRegistration?: boolean;
-  nationality?: string;
-  phone?: string;
-  relationship?: string;
-  thirdPartyBirthDate?: Date | string;
+  thirdPartyBirthDate?: string;
   thirdPartyDocNumber?: string;
   thirdPartyDocType?: string;
   thirdPartyEmail?: string;
@@ -34,8 +26,6 @@ export interface ThirdPartyBeneficiaryValues {
 }
 
 export type ThirdPartyBeneficiaryField =
-  | 'email'
-  | 'phone'
   | 'thirdPartyBirthDate'
   | 'thirdPartyDocNumber'
   | 'thirdPartyDocType'

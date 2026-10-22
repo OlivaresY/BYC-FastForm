@@ -8,7 +8,7 @@ export const PHYSICAL_PERSON_FORM_COLORS = {
 export const PHYSICAL_PERSON_FORM_COPY = {
   BIRTH_DATE_HELPER: 'Debe ser mayor de edad para trámite crediticio.',
   BIRTH_DATE_LABEL: 'Fecha de Nacimiento',
-  BIRTH_DATE_PLACEHOLDER: '15 / 08 / 1988',
+  BIRTH_DATE_PLACEHOLDER: '15-08-1988',
   FIRST_LAST_NAME_LABEL: 'Primer Apellido',
   FIRST_LAST_NAME_PLACEHOLDER: 'Rodríguez',
   FIRST_NAME_LABEL: 'Primer Nombre',
