@@ -1,9 +1,9 @@
-import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react-native";
-import type { ReactTestInstance } from "react-test-renderer";
-import { BaseButton } from "../BaseButton";
-import { BASE_BUTTON_TEST_IDS } from "../constants/BaseButton.constants";
-import type { BaseButtonProps } from "../BaseButton.types";
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react-native';
+import type { ReactTestInstance } from 'react-test-renderer';
+import { BaseButton } from '../BaseButton';
+import { BASE_BUTTON_TEST_IDS } from '../constants/BaseButton.constants';
+import type { BaseButtonProps } from '../BaseButton.types';
 
 export class BaseButtonPageObject {
   public static render(props: BaseButtonProps): BaseButtonPageObject {

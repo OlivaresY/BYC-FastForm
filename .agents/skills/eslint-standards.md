@@ -19,10 +19,11 @@ Whenever you create or edit `**/*.{js,jsx,ts,tsx}`:
 2. After the edit, run Expo's ESLint wrapper on the touched files and zero remaining errors before finishing:
    Command: `npx expo lint`
 3. Prefer auto-fixing violations where possible, then repair anything still reported by hand.
-4. Do not leave unused variables, `var`, `==`, or other violations "for later." 
+4. Do not leave unused variables, `var`, `==`, or other violations "for later."
 5. Do not disable a rule with an inline comment (`// eslint-disable-next-line`) unless the user explicitly asks and the exception is documented.
 
 ### Scope
+
 - **Files:** `**/*.{js,jsx,ts,tsx}`
 - **Base:** `universe/native` (Expo standard), `plugin:@typescript-eslint/recommended`, `plugin:react-hooks/recommended`
 

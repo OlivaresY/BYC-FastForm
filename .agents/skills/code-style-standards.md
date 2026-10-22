@@ -8,6 +8,7 @@ description: Define code-style conventions for React Native components, MVVM hoo
 Apply this skill when writing or refactoring React Native components, ViewModels (custom hooks), or their TypeScript implementation details. It defines declaration style, return-type annotations, and naming conventions.
 
 This skill defers to:
+
 - `eslint-standards` for all ESLint-owned rules and validation.
 - `prettier-standards` for formatting.
 - `component-architecture` for MVVM and file-split rules.
@@ -19,9 +20,14 @@ Declare React Native components and ViewModels (hooks) with `const` and an arrow
 For an arrow function that only returns one expression, follow `eslint-standards` for the expression-body requirement. Use a block body when the implementation needs statements (e.g., local bindings, hooks).
 
 **Incorrect:**
+
 ```tsx
 function ApplicationCard({ application }: ApplicationCardProps) {
-  return <View><Text>{application.status}</Text></View>;
+  return (
+    <View>
+      <Text>{application.status}</Text>
+    </View>
+  );
 }
 
 function useApplicationFilters() {
@@ -30,10 +36,13 @@ function useApplicationFilters() {
 ```
 
 **Correct:**
+
 ```tsx
 import { Card, Typography } from '@/shared/components';
 
-export const ApplicationCard: React.FC<ApplicationCardProps> = ({ application }) => (
+export const ApplicationCard: React.FC<ApplicationCardProps> = ({
+  application,
+}) => (
   <Card>
     <Typography>{application.status}</Typography>
   </Card>

@@ -1,24 +1,24 @@
-import React, { useState } from "react";
-import { Text, TextInput, View } from "react-native";
-import type { TextInputProps } from "react-native";
+import React, { useState } from 'react';
+import { Text, TextInput, View } from 'react-native';
+import type { TextInputProps } from 'react-native';
 import {
   CalendarIcon,
   CheckmarkIcon,
   HashIcon,
   MailIcon,
   PhoneIcon,
-} from "../Icons";
+} from '../Icons';
 import {
   CUSTOM_TEXT_INPUT_COLORS,
   CUSTOM_TEXT_INPUT_COPY,
   CUSTOM_TEXT_INPUT_ICON_DIMENSIONS,
   CUSTOM_TEXT_INPUT_STYLES,
   CUSTOM_TEXT_INPUT_TEST_IDS,
-} from "./constants/CustomTextInput.constants";
+} from './constants/CustomTextInput.constants';
 import type {
   CustomTextInputPresetIcon,
   CustomTextInputProps,
-} from "./CustomTextInput.types";
+} from './CustomTextInput.types';
 
 interface LeftIconProps {
   testID: string;
@@ -29,8 +29,11 @@ interface ValidIconProps {
   testID: string;
 }
 
-const LeftIcon = ({ testID, type }: LeftIconProps): React.JSX.Element | null => {
-  if (type === "calendar") {
+const LeftIcon = ({
+  testID,
+  type,
+}: LeftIconProps): React.JSX.Element | null => {
+  if (type === 'calendar') {
     return (
       <View testID={testID}>
         <CalendarIcon
@@ -41,7 +44,7 @@ const LeftIcon = ({ testID, type }: LeftIconProps): React.JSX.Element | null => 
       </View>
     );
   }
-  if (type === "mail") {
+  if (type === 'mail') {
     return (
       <View testID={testID}>
         <MailIcon
@@ -52,7 +55,7 @@ const LeftIcon = ({ testID, type }: LeftIconProps): React.JSX.Element | null => 
       </View>
     );
   }
-  if (type === "phone") {
+  if (type === 'phone') {
     return (
       <View testID={testID}>
         <PhoneIcon
@@ -63,7 +66,7 @@ const LeftIcon = ({ testID, type }: LeftIconProps): React.JSX.Element | null => 
       </View>
     );
   }
-  if (type === "hash") {
+  if (type === 'hash') {
     return (
       <View testID={testID}>
         <HashIcon
@@ -103,12 +106,12 @@ export const CustomTextInput = ({
 }: CustomTextInputProps): React.JSX.Element => {
   const [isFocused, setIsFocused] = useState<boolean>(false);
 
-  const handleFocus: TextInputProps["onFocus"] = (event): void => {
+  const handleFocus: TextInputProps['onFocus'] = (event): void => {
     setIsFocused(true);
     onFocus?.(event);
   };
 
-  const handleBlur: TextInputProps["onBlur"] = (event): void => {
+  const handleBlur: TextInputProps['onBlur'] = (event): void => {
     setIsFocused(false);
     onBlur?.(event);
   };

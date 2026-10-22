@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState } from 'react';
 import type {
   UseCustomSelectProps,
   UseCustomSelectReturn,
-} from "../CustomSelect.types";
+} from '../CustomSelect.types';
 
 export const useCustomSelect = ({
   onValueChange,

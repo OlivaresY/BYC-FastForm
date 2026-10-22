@@ -1,6 +1,6 @@
-import React from "react";
-import { Pressable, Text, View } from "react-native";
-import { CarIcon, CloseIcon } from "@/shared/ui/Icons";
+import React from 'react';
+import { Pressable, Text, View } from 'react-native';
+import { CarIcon, CloseIcon } from '@/shared/ui/Icons';
 import {
   PROCESS_TOP_BAR_COLORS,
   PROCESS_TOP_BAR_COPY,
@@ -8,8 +8,8 @@ import {
   PROCESS_TOP_BAR_HIT_SLOP,
   PROCESS_TOP_BAR_STYLES,
   PROCESS_TOP_BAR_TEST_IDS,
-} from "./constants/ProcessTopBar.constants";
-import type { ProcessTopBarProps } from "./ProcessTopBar.types";
+} from './constants/ProcessTopBar.constants';
+import type { ProcessTopBarProps } from './ProcessTopBar.types';
 
 export const ProcessTopBar = React.memo(
   ({
@@ -21,7 +21,7 @@ export const ProcessTopBar = React.memo(
   }: ProcessTopBarProps): React.JSX.Element => {
     const containerClasses = [PROCESS_TOP_BAR_STYLES.CONTAINER, className]
       .filter(Boolean)
-      .join(" ");
+      .join(' ');
 
     return (
       <View
@@ -34,7 +34,7 @@ export const ProcessTopBar = React.memo(
         >
           <Pressable
             accessibilityLabel={PROCESS_TOP_BAR_COPY.CLOSE_ACCESSIBILITY_LABEL}
-            accessibilityRole="button"
+            accessibilityRole='button'
             className={PROCESS_TOP_BAR_STYLES.CLOSE_BUTTON}
             hitSlop={PROCESS_TOP_BAR_HIT_SLOP}
             onPress={onClose}
@@ -49,7 +49,7 @@ export const ProcessTopBar = React.memo(
 
         <View className={PROCESS_TOP_BAR_STYLES.BRANDING_CONTAINER}>
           <Text
-            accessibilityRole="header"
+            accessibilityRole='header'
             className={PROCESS_TOP_BAR_STYLES.TITLE_TEXT}
             testID={PROCESS_TOP_BAR_TEST_IDS.TITLE}
           >
@@ -84,7 +84,7 @@ export const ProcessTopBar = React.memo(
         >
           <Pressable
             accessibilityLabel={PROCESS_TOP_BAR_COPY.AVATAR_ACCESSIBILITY_LABEL}
-            accessibilityRole="button"
+            accessibilityRole='button'
             className={PROCESS_TOP_BAR_STYLES.AVATAR_CONTAINER}
             disabled={!onProfilePress}
             hitSlop={PROCESS_TOP_BAR_HIT_SLOP}
@@ -104,4 +104,4 @@ export const ProcessTopBar = React.memo(
   },
 );
 
-ProcessTopBar.displayName = "ProcessTopBar";
+ProcessTopBar.displayName = 'ProcessTopBar';

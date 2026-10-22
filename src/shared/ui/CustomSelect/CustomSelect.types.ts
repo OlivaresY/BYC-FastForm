@@ -3,7 +3,7 @@ export interface CustomSelectOption {
   value: string;
 }
 
-export type CustomSelectPresetIcon = "globe";
+export type CustomSelectPresetIcon = 'globe';
 
 export interface CustomSelectProps {
   disabled?: boolean;

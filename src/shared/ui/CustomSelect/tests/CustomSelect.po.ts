@@ -1,10 +1,10 @@
-import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react-native";
-import type { RenderAPI } from "@testing-library/react-native";
-import type { ReactTestInstance } from "react-test-renderer";
-import { CustomSelect } from "../CustomSelect";
-import { CUSTOM_SELECT_TEST_IDS } from "../constants/CustomSelect.constants";
-import type { CustomSelectProps } from "../CustomSelect.types";
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react-native';
+import type { RenderAPI } from '@testing-library/react-native';
+import type { ReactTestInstance } from 'react-test-renderer';
+import { CustomSelect } from '../CustomSelect';
+import { CUSTOM_SELECT_TEST_IDS } from '../constants/CustomSelect.constants';
+import type { CustomSelectProps } from '../CustomSelect.types';
 
 export class CustomSelectPageObject {
   private readonly customTestId?: string;
@@ -155,7 +155,7 @@ export class CustomSelectPageObject {
   }
 
   public isTriggerInvalid(): boolean {
-    return this.trigger.props["aria-invalid"] === true;
+    return this.trigger.props['aria-invalid'] === true;
   }
 
   public isModalVisible(): boolean {
@@ -206,7 +206,7 @@ export class CustomSelectPageObject {
 
   public dismissModalViaNativeRequest(): this {
     if (this.modal) {
-      fireEvent(this.modal, "requestClose");
+      fireEvent(this.modal, 'requestClose');
     }
     return this;
   }

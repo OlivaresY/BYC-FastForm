@@ -25,7 +25,7 @@ const preview: Preview = {
   decorators: [
     (Story: React.ComponentType): React.JSX.Element => (
       <View
-        className="flex-1 items-center justify-center bg-brand-bg p-6"
+        className='flex-1 items-center justify-center bg-brand-bg p-6'
         style={styles.container}
       >
         <Story />

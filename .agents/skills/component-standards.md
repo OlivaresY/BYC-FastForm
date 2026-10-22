@@ -13,17 +13,18 @@ Governs how UI gets built in this mobile repository: reuse before creation, stri
 
 Expected core primitives (verify against `src/shared/components/index.ts` before creating new ones):
 
-| Category   | Component             | Path                                              |
-| :---       | :---                  | :---                                              |
-| Actions    | `Button`              | `src/shared/components/button/Button.tsx`         |
-| Layout     | `Screen`, `Card`      | `src/shared/components/layout/`                   |
-| Forms      | `InputField`, `Select`| `src/shared/components/form/`                     |
-| Typography | `Typography`          | `src/shared/components/typography/Typography.tsx` |
-| Media      | `Icon` (SVG ONLY)     | `src/shared/components/icon/Icon.tsx`             |
-| Feedback   | `Spinner`, `Toast`    | `src/shared/components/feedback/`                 |
+| Category   | Component              | Path                                              |
+| :--------- | :--------------------- | :------------------------------------------------ |
+| Actions    | `Button`               | `src/shared/components/button/Button.tsx`         |
+| Layout     | `Screen`, `Card`       | `src/shared/components/layout/`                   |
+| Forms      | `InputField`, `Select` | `src/shared/components/form/`                     |
+| Typography | `Typography`           | `src/shared/components/typography/Typography.tsx` |
+| Media      | `Icon` (SVG ONLY)      | `src/shared/components/icon/Icon.tsx`             |
+| Feedback   | `Spinner`, `Toast`     | `src/shared/components/feedback/`                 |
 
 ### Prohibited: Raw React Native tags for product UI
-`Text`, `TouchableOpacity`, `Pressable`, `TextInput`, and `Button` (from `react-native`) are **strictly forbidden** inside feature components (`src/features/**/components`). 
+
+`Text`, `TouchableOpacity`, `Pressable`, `TextInput`, and `Button` (from `react-native`) are **strictly forbidden** inside feature components (`src/features/**/components`).
 
 You MUST use the standardized wrappers from the Design System (`Typography`, `Button`, `InputField`, etc.). The only place where raw React Native tags are allowed is inside the primitive wrappers themselves (in `src/shared/components/`).
 
@@ -31,17 +32,20 @@ You MUST use the standardized wrappers from the Design System (`Typography`, `Bu
 // ✅ Correct — compose the existing primitive from your Design System
 import { Button, Typography, Icon } from '@/shared/components';
 
-<Button className="gap-2" onPress="{handleDelete}" variant="danger">
-  <Icon name="trash"/>
-  <Typography variant="buttonText">Eliminar</Typography>
-</Button>
+<Button className='gap-2' onPress='{handleDelete}' variant='danger'>
+  <Icon name='trash' />
+  <Typography variant='buttonText'>Eliminar</Typography>
+</Button>;
 
 // ❌ Incorrect — bypasses the standardized wrappers (FORBIDDEN)
 import { TouchableOpacity, Text } from 'react-native';
 
-<TouchableOpacity className="bg-red-600 rounded px-3 py-2" onPress="{handleDelete}">
-  <Text className="text-white">Eliminar</Text>
-</TouchableOpacity>
+<TouchableOpacity
+  className='bg-red-600 rounded px-3 py-2'
+  onPress='{handleDelete}'
+>
+  <Text className='text-white'>Eliminar</Text>
+</TouchableOpacity>;
 ```
 
 ## 2. Standardized Nullable & Undefined Type Handling
@@ -53,11 +57,15 @@ import { TouchableOpacity, Text } from 'react-native';
 
 ```tsx
 // ✅ CORRECT
-{items.length > 0 ? <Typography>{items.length} elementos</Typography> : null}
-<Typography>{user.name ?? 'Asesor no asignado'}</Typography>
+{
+  items.length > 0 ? <Typography>{items.length} elementos</Typography> : null;
+}
+<Typography>{user.name ?? 'Asesor no asignado'}</Typography>;
 
 // ❌ INCORRECT (Can crash or render a stray '0' on screen)
-{items.length && <Text>{items.length} elementos</Text>}
+{
+  items.length && <Text>{items.length} elementos</Text>;
+}
 ```
 
 ## 3. Ergonomics & Strict Visual Rules

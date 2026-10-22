@@ -1,9 +1,9 @@
-import React from "react";
-import { render, screen } from "@testing-library/react-native";
-import type { ReactTestInstance } from "react-test-renderer";
-import { ErrorBanner } from "../ErrorBanner";
-import { ERROR_BANNER_TEST_IDS } from "../constants/ErrorBanner.constants";
-import type { ErrorBannerProps } from "../ErrorBanner.types";
+import React from 'react';
+import { render, screen } from '@testing-library/react-native';
+import type { ReactTestInstance } from 'react-test-renderer';
+import { ErrorBanner } from '../ErrorBanner';
+import { ERROR_BANNER_TEST_IDS } from '../constants/ErrorBanner.constants';
+import type { ErrorBannerProps } from '../ErrorBanner.types';
 
 export class ErrorBannerPageObject {
   public static render(props: ErrorBannerProps): ErrorBannerPageObject {

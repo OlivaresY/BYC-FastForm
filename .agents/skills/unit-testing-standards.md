@@ -39,10 +39,12 @@ When you create or modify a component, a hook, or a ViewModel:
 If testing has not been configured yet, apply these dependencies and setup files.
 
 ### 2.1 Dependencies
-Command: 
+
+Command:
 `npm i -D jest jest-expo @testing-library/react-native @testing-library/jest-native react-test-renderer`
 
 ### 2.2 `jest.config.js`
+
 ```js
 module.exports = {
   preset: 'jest-expo',
@@ -55,6 +57,7 @@ module.exports = {
 ```
 
 ### 2.3 `jest.setup.ts`
+
 ```ts
 import '@testing-library/jest-native/extend-expect';
 import { cleanup } from '@testing-library/react-native';
@@ -86,18 +89,20 @@ src/features/<feature-name>/
 
 ## 4. Page Object Model (POM)
 
-The Page Object owns **how** to find elements and **how** to operate them. The test owns **what** must be true. 
+The Page Object owns **how** to find elements and **how** to operate them. The test owns **what** must be true.
 
 Write Page Objects as **factory functions**. Do not use classes.
 
 ### The Page Object
+
 ```ts
 import { screen, fireEvent } from '@testing-library/react-native';
 
 export const createCreditFormPage = () => {
   const amountInput = () => screen.getByPlaceholderText('Monto solicitado');
   const submitButton = () => screen.getByText('Enviar Solicitud');
-  const findSuccessBanner = () => screen.findByText('Solicitud enviada con éxito');
+  const findSuccessBanner = () =>
+    screen.findByText('Solicitud enviada con éxito');
 
   const fillAmount = (value: string) => {
     fireEvent.changeText(amountInput(), value);
@@ -118,7 +123,9 @@ export const createCreditFormPage = () => {
 ```
 
 ### Rule: No assertions in the Page Object
+
 **Incorrect:**
+
 ```ts
 const expectSuccess = () => {
   expect(successBanner()).toBeVisible();
@@ -126,9 +133,11 @@ const expectSuccess = () => {
 ```
 
 ### Rule: No raw queries in the test file
+
 `screen.getBy*`, `screen.findBy*`, and `fireEvent` must NOT appear in a `.test.tsx`. Only `render` and the Page Object factory do.
 
 **Correct (.test.tsx):**
+
 ```tsx
 await page.fillAmount('5000');
 await page.submit();
@@ -139,6 +148,7 @@ await page.submit();
 ## 5. Accessible Queries
 
 Query the way a user interacts. In React Native, use:
+
 1. `getByText(text)`
 2. `getByPlaceholderText(placeholder)`
 3. `getByLabelText(label)` (targets `accessibilityLabel`)
@@ -155,9 +165,11 @@ Every test reads as three visible blocks.
 it('shows the success banner after a successful submit', async () => {
   // Arrange
   const mockSubmit = jest.fn().mockResolvedValue(true);
-  jest.spyOn(creditService, 'createCreditApplication').mockImplementation(mockSubmit);
-  
-  render(<CreditApplicationForm/>);
+  jest
+    .spyOn(creditService, 'createCreditApplication')
+    .mockImplementation(mockSubmit);
+
+  render(<CreditApplicationForm />);
   const page = createCreditFormPage();
 
   // Act
@@ -168,6 +180,7 @@ it('shows the success banner after a successful submit', async () => {
   expect(await page.findSuccessBanner()).toBeTruthy();
 });
 ```
+
 Test names state the behaviour: `'does not submit when the amount is empty'`, never `'test submit 2'`.
 
 ---
@@ -177,6 +190,7 @@ Test names state the behaviour: `'does not submit when the amount is empty'`, ne
 Tests never hit a real backend or the real Supabase database.
 
 ### Supabase Stubbing
+
 Always mock Supabase responses at the Service layer or using Jest module mocks.
 
 ```ts
@@ -217,6 +231,7 @@ describe('useCreditFormViewModel', () => {
 ```
 
 **Rule of Thumb:**
+
 - If the user can see it, assert it in `<Feature>.test.tsx` through the POM.
 - If it is internal state the UI does not render directly, assert it in `use<Feature>ViewModel.test.ts`.
 
@@ -225,6 +240,7 @@ describe('useCreditFormViewModel', () => {
 ## 9. Checklist
 
 Before finishing a test change:
+
 - [ ] Tests live in `src/features/<feature>/tests/`.
 - [ ] Interactions and locators are encapsulated in `<Feature>.page.ts`.
 - [ ] No `expect` in the `.page.ts`.

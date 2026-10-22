@@ -1,5 +1,5 @@
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
 const Index = (): React.JSX.Element => {
   return (
@@ -11,15 +11,15 @@ const Index = (): React.JSX.Element => {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
-    backgroundColor: "#F7F7F6",
+    alignItems: 'center',
+    backgroundColor: '#F7F7F6',
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
   text: {
-    color: "#1C1917",
+    color: '#1C1917',
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: '600',
   },
 });
 
