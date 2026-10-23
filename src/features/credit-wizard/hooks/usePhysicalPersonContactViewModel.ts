@@ -49,7 +49,6 @@ export const usePhysicalPersonContactViewModel = (
 
   const onValidSubmit = useCallback(
     (data: PhysicalPersonContact): void => {
-      console.log('[BYC-25] Validated Physical Person Contact:', data);
       onSubmitProp?.(data);
     },
     [onSubmitProp],

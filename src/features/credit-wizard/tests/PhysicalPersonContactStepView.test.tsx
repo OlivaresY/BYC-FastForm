@@ -23,6 +23,7 @@ describe('PhysicalPersonContactStepView Integration', () => {
       );
       expect(page.form).toBeTruthy();
       expect(page.bottomBar).toBeTruthy();
+      expect(page.backButton).toBeTruthy();
       expect(page.submitButton).toBeTruthy();
 
       // Assert - Section 1: INFORMACIÓN DE CONTACTO
@@ -70,6 +71,20 @@ describe('PhysicalPersonContactStepView Integration', () => {
 
       // Act
       page.clickClose();
+
+      // Assert
+      expect(handleClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('triggers onClose callback when user presses back button in bottom bar', () => {
+      // Arrange
+      const handleClose = jest.fn();
+      const page = PhysicalPersonContactStepViewPageObject.render({
+        onClose: handleClose,
+      });
+
+      // Act
+      page.clickBack();
 
       // Assert
       expect(handleClose).toHaveBeenCalledTimes(1);

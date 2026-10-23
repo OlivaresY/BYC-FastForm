@@ -7,10 +7,11 @@ import {
   View,
 } from 'react-native';
 import { BaseButton } from '@/shared/ui/BaseButton';
-import { ArrowRightIcon } from '@/shared/ui/Icons';
+import { ArrowRightIcon, ChevronLeftIcon } from '@/shared/ui/Icons';
 import { ProcessTopBar } from '@/shared/ui/ProcessTopBar';
 import {
   PHYSICAL_PERSON_CONTACT_STEP_VIEW_COLORS,
+  PHYSICAL_PERSON_CONTACT_STEP_VIEW_CONSTANTS,
   PHYSICAL_PERSON_CONTACT_STEP_VIEW_COPY,
   PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS,
   PHYSICAL_PERSON_CONTACT_STEP_VIEW_NUMERICAL,
@@ -27,11 +28,12 @@ const NOOP_VOID = (): void => undefined;
 export const PhysicalPersonContactStepView = ({
   disabled = false,
   onClose,
+  onSubmit,
   options,
   testID,
   viewModel: viewModelProp,
 }: PhysicalPersonContactStepViewProps): React.JSX.Element => {
-  const defaultViewModel = usePhysicalPersonContactViewModel();
+  const defaultViewModel = usePhysicalPersonContactViewModel({ onSubmit });
   const viewModel = viewModelProp ?? defaultViewModel;
   const { control, errors, handleNextStep, isValid } = viewModel;
 
@@ -43,7 +45,9 @@ export const PhysicalPersonContactStepView = ({
       <ProcessTopBar
         onClose={onClose ?? NOOP_VOID}
         testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.PROCESS_TOP_BAR}
-        userInitials='YO'
+        userInitials={
+          PHYSICAL_PERSON_CONTACT_STEP_VIEW_CONSTANTS.MOCK_USER_INITIALS
+        }
       />
 
       <KeyboardAvoidingView
@@ -114,9 +118,28 @@ export const PhysicalPersonContactStepView = ({
           testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.BOTTOM_BAR}
         >
           <BaseButton
+            className={PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.BACK_BUTTON}
+            disabled={disabled}
+            icon={
+              <ChevronLeftIcon
+                color={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COLORS.BACK_ICON}
+                size={
+                  PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.BACK_ICON_SIZE
+                }
+                strokeWidth={
+                  PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.BACK_ICON_STROKE_WIDTH
+                }
+              />
+            }
+            label={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COPY.BACK_BUTTON}
+            onPress={onClose ?? NOOP_VOID}
+            testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.BACK_BUTTON}
+            variant='outline'
+          />
+
+          <BaseButton
             className={PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.SUBMIT_BUTTON}
             disabled={!isValid || disabled}
-            fullWidth
             iconRight={
               <ArrowRightIcon
                 color={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COLORS.SUBMIT_ICON}

@@ -114,6 +114,12 @@ export class PhysicalPersonContactStepViewPageObject {
     );
   }
 
+  public get backButton(): ReactTestInstance {
+    return screen.getByTestId(
+      PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.BACK_BUTTON,
+    );
+  }
+
   public get submitButton(): ReactTestInstance {
     return screen.getByTestId(
       PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.SUBMIT_BUTTON,
@@ -418,6 +424,11 @@ export class PhysicalPersonContactStepViewPageObject {
 
   public clickClose(): this {
     fireEvent.press(this.closeButton);
+    return this;
+  }
+
+  public clickBack(): this {
+    fireEvent.press(this.backButton);
     return this;
   }
 

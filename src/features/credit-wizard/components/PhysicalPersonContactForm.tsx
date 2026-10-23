@@ -1,14 +1,13 @@
 import React from 'react';
 import { Controller } from 'react-hook-form';
 import { Text, View } from 'react-native';
-import {
-  BookmarkIcon as SharedBookmarkIcon,
-  BuildingIcon as SharedBuildingIcon,
-  DocumentIcon as SharedDocumentIcon,
-  MailIcon as SharedMailIcon,
-} from '@/shared/ui/Icons';
 import { CustomSelect } from '@/shared/ui/CustomSelect';
 import { CustomTextInput } from '@/shared/ui/CustomTextInput';
+import {
+  BanknoteIcon,
+  IdCardIcon,
+  MapPinIcon,
+} from '@/shared/ui/Icons';
 import {
   PHYSICAL_PERSON_CONTACT_FORM_COLORS,
   PHYSICAL_PERSON_CONTACT_FORM_COPY,
@@ -27,7 +26,7 @@ interface SectionHeaderProps {
 
 const ContactSectionIcon = (): React.JSX.Element => (
   <View testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.SECTION_1_ICON}>
-    <SharedMailIcon
+    <IdCardIcon
       color={PHYSICAL_PERSON_CONTACT_FORM_COLORS.HEADER_ICON_STROKE}
       size={PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS.SIZE_PX}
       strokeWidth={PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS.STROKE_WIDTH_PX}
@@ -37,7 +36,7 @@ const ContactSectionIcon = (): React.JSX.Element => (
 
 const AddressSectionIcon = (): React.JSX.Element => (
   <View testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.SECTION_2_ICON}>
-    <SharedBuildingIcon
+    <MapPinIcon
       color={PHYSICAL_PERSON_CONTACT_FORM_COLORS.HEADER_ICON_STROKE}
       size={PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS.SIZE_PX}
       strokeWidth={PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS.STROKE_WIDTH_PX}
@@ -47,7 +46,7 @@ const AddressSectionIcon = (): React.JSX.Element => (
 
 const EmploymentSectionIcon = (): React.JSX.Element => (
   <View testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.SECTION_3_ICON}>
-    <SharedDocumentIcon
+    <IdCardIcon
       color={PHYSICAL_PERSON_CONTACT_FORM_COLORS.HEADER_ICON_STROKE}
       size={PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS.SIZE_PX}
       strokeWidth={PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS.STROKE_WIDTH_PX}
@@ -57,7 +56,7 @@ const EmploymentSectionIcon = (): React.JSX.Element => (
 
 const FinancialSectionIcon = (): React.JSX.Element => (
   <View testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.SECTION_4_ICON}>
-    <SharedBookmarkIcon
+    <BanknoteIcon
       color={PHYSICAL_PERSON_CONTACT_FORM_COLORS.HEADER_ICON_STROKE}
       size={PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS.SIZE_PX}
       strokeWidth={PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS.STROKE_WIDTH_PX}
@@ -117,6 +116,7 @@ export const PhysicalPersonContactForm = ({
           title={PHYSICAL_PERSON_CONTACT_FORM_COPY.SECTION_1_TITLE}
         />
 
+        {/* Correo Electrónico (Full Width) */}
         <Controller
           control={control}
           name='contactInfo.email'
@@ -128,7 +128,6 @@ export const PhysicalPersonContactForm = ({
               autoCapitalize='none'
               editable={!disabled}
               error={error?.message}
-              helperText={PHYSICAL_PERSON_CONTACT_FORM_COPY.EMAIL_HELPER}
               keyboardType='email-address'
               label={PHYSICAL_PERSON_CONTACT_FORM_COPY.EMAIL_LABEL}
               leftIcon='mail'
@@ -142,57 +141,66 @@ export const PhysicalPersonContactForm = ({
           )}
         />
 
-        <Controller
-          control={control}
-          name='contactInfo.cellPhone'
-          render={({
-            field: { onBlur, onChange, value },
-            fieldState: { error },
-          }) => (
-            <CustomTextInput
-              editable={!disabled}
-              error={error?.message}
-              helperText={PHYSICAL_PERSON_CONTACT_FORM_COPY.CELL_PHONE_HELPER}
-              keyboardType='phone-pad'
-              label={PHYSICAL_PERSON_CONTACT_FORM_COPY.CELL_PHONE_LABEL}
-              leftIcon='phone'
-              onBlur={onBlur}
-              onChangeText={onChange}
-              placeholder={
-                PHYSICAL_PERSON_CONTACT_FORM_COPY.CELL_PHONE_PLACEHOLDER
-              }
-              required
-              testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.CELL_PHONE_INPUT}
-              value={value ?? ''}
+        {/* Teléfono Celular & Teléfono Habitación (2-Column Flex Row) */}
+        <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_ROW}>
+          <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_COLUMN}>
+            <Controller
+              control={control}
+              name='contactInfo.cellPhone'
+              render={({
+                field: { onBlur, onChange, value },
+                fieldState: { error },
+              }) => (
+                <CustomTextInput
+                  editable={!disabled}
+                  error={error?.message}
+                  keyboardType='phone-pad'
+                  label={PHYSICAL_PERSON_CONTACT_FORM_COPY.CELL_PHONE_LABEL}
+                  leftIcon='smartphone'
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  placeholder={
+                    PHYSICAL_PERSON_CONTACT_FORM_COPY.CELL_PHONE_PLACEHOLDER
+                  }
+                  required
+                  testID={
+                    PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.CELL_PHONE_INPUT
+                  }
+                  value={value ?? ''}
+                />
+              )}
             />
-          )}
-        />
+          </View>
 
-        <Controller
-          control={control}
-          name='contactInfo.homePhone'
-          render={({
-            field: { onBlur, onChange, value },
-            fieldState: { error },
-          }) => (
-            <CustomTextInput
-              editable={!disabled}
-              error={error?.message}
-              helperText={PHYSICAL_PERSON_CONTACT_FORM_COPY.HOME_PHONE_HELPER}
-              keyboardType='phone-pad'
-              label={PHYSICAL_PERSON_CONTACT_FORM_COPY.HOME_PHONE_LABEL}
-              leftIcon='phone'
-              onBlur={onBlur}
-              onChangeText={onChange}
-              placeholder={
-                PHYSICAL_PERSON_CONTACT_FORM_COPY.HOME_PHONE_PLACEHOLDER
-              }
-              required={false}
-              testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.HOME_PHONE_INPUT}
-              value={value ?? ''}
+          <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_COLUMN}>
+            <Controller
+              control={control}
+              name='contactInfo.homePhone'
+              render={({
+                field: { onBlur, onChange, value },
+                fieldState: { error },
+              }) => (
+                <CustomTextInput
+                  editable={!disabled}
+                  error={error?.message}
+                  keyboardType='phone-pad'
+                  label={PHYSICAL_PERSON_CONTACT_FORM_COPY.HOME_PHONE_LABEL}
+                  leftIcon='phone-call'
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  placeholder={
+                    PHYSICAL_PERSON_CONTACT_FORM_COPY.HOME_PHONE_PLACEHOLDER
+                  }
+                  required={false}
+                  testID={
+                    PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.HOME_PHONE_INPUT
+                  }
+                  value={value ?? ''}
+                />
+              )}
             />
-          )}
-        />
+          </View>
+        </View>
       </View>
 
       {/* SECTION 2: DOMICILIO RESIDENCIAL */}
@@ -206,10 +214,14 @@ export const PhysicalPersonContactForm = ({
           title={PHYSICAL_PERSON_CONTACT_FORM_COPY.SECTION_2_TITLE}
         />
 
+        {/* Provincia (Full Width) */}
         <Controller
           control={control}
           name='residentialAddress.province'
-          render={({ field: { onChange, value }, fieldState: { error } }) => (
+          render={({
+            field: { onChange, value },
+            fieldState: { error },
+          }) => (
             <CustomSelect
               disabled={disabled}
               errorMessage={error?.message}
@@ -226,6 +238,7 @@ export const PhysicalPersonContactForm = ({
           )}
         />
 
+        {/* Cantón & Distrito (2-Column Flex Row) */}
         <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_ROW}>
           <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_COLUMN}>
             <Controller
@@ -251,6 +264,7 @@ export const PhysicalPersonContactForm = ({
               )}
             />
           </View>
+
           <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_COLUMN}>
             <Controller
               control={control}
@@ -277,6 +291,7 @@ export const PhysicalPersonContactForm = ({
           </View>
         </View>
 
+        {/* Dirección Exacta (Full Width) */}
         <Controller
           control={control}
           name='residentialAddress.exactAddress'
@@ -287,9 +302,6 @@ export const PhysicalPersonContactForm = ({
             <CustomTextInput
               editable={!disabled}
               error={error?.message}
-              helperText={
-                PHYSICAL_PERSON_CONTACT_FORM_COPY.EXACT_ADDRESS_HELPER
-              }
               label={PHYSICAL_PERSON_CONTACT_FORM_COPY.EXACT_ADDRESS_LABEL}
               multiline
               numberOfLines={3}
@@ -317,6 +329,7 @@ export const PhysicalPersonContactForm = ({
           title={PHYSICAL_PERSON_CONTACT_FORM_COPY.SECTION_3_TITLE}
         />
 
+        {/* Condición Laboral (Full Width) */}
         <Controller
           control={control}
           name='employmentData.employmentStatus'
@@ -339,52 +352,62 @@ export const PhysicalPersonContactForm = ({
           )}
         />
 
-        <Controller
-          control={control}
-          name='employmentData.profession'
-          render={({
-            field: { onBlur, onChange, value },
-            fieldState: { error },
-          }) => (
-            <CustomTextInput
-              editable={!disabled}
-              error={error?.message}
-              label={PHYSICAL_PERSON_CONTACT_FORM_COPY.PROFESSION_LABEL}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              placeholder={
-                PHYSICAL_PERSON_CONTACT_FORM_COPY.PROFESSION_PLACEHOLDER
-              }
-              required
-              testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.PROFESSION_INPUT}
-              value={value ?? ''}
+        {/* Profesión u Oficio & Patrono / Empresa (2-Column Flex Row) */}
+        <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_ROW}>
+          <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_COLUMN}>
+            <Controller
+              control={control}
+              name='employmentData.profession'
+              render={({
+                field: { onBlur, onChange, value },
+                fieldState: { error },
+              }) => (
+                <CustomTextInput
+                  editable={!disabled}
+                  error={error?.message}
+                  label={PHYSICAL_PERSON_CONTACT_FORM_COPY.PROFESSION_LABEL}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  placeholder={
+                    PHYSICAL_PERSON_CONTACT_FORM_COPY.PROFESSION_PLACEHOLDER
+                  }
+                  required
+                  testID={
+                    PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.PROFESSION_INPUT
+                  }
+                  value={value ?? ''}
+                />
+              )}
             />
-          )}
-        />
+          </View>
 
-        <Controller
-          control={control}
-          name='employmentData.employer'
-          render={({
-            field: { onBlur, onChange, value },
-            fieldState: { error },
-          }) => (
-            <CustomTextInput
-              editable={!disabled}
-              error={error?.message}
-              label={PHYSICAL_PERSON_CONTACT_FORM_COPY.EMPLOYER_LABEL}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              placeholder={
-                PHYSICAL_PERSON_CONTACT_FORM_COPY.EMPLOYER_PLACEHOLDER
-              }
-              required
-              testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.EMPLOYER_INPUT}
-              value={value ?? ''}
+          <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_COLUMN}>
+            <Controller
+              control={control}
+              name='employmentData.employer'
+              render={({
+                field: { onBlur, onChange, value },
+                fieldState: { error },
+              }) => (
+                <CustomTextInput
+                  editable={!disabled}
+                  error={error?.message}
+                  label={PHYSICAL_PERSON_CONTACT_FORM_COPY.EMPLOYER_LABEL}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  placeholder={
+                    PHYSICAL_PERSON_CONTACT_FORM_COPY.EMPLOYER_PLACEHOLDER
+                  }
+                  required
+                  testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.EMPLOYER_INPUT}
+                  value={value ?? ''}
+                />
+              )}
             />
-          )}
-        />
+          </View>
+        </View>
 
+        {/* Fecha de Ingreso & Tel. Oficina (2-Column Flex Row) */}
         <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_ROW}>
           <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_COLUMN}>
             <Controller
@@ -397,9 +420,6 @@ export const PhysicalPersonContactForm = ({
                 <CustomTextInput
                   editable={!disabled}
                   error={error?.message}
-                  helperText={
-                    PHYSICAL_PERSON_CONTACT_FORM_COPY.ENTRY_DATE_HELPER
-                  }
                   label={PHYSICAL_PERSON_CONTACT_FORM_COPY.ENTRY_DATE_LABEL}
                   leftIcon='calendar'
                   onBlur={onBlur}
@@ -416,6 +436,7 @@ export const PhysicalPersonContactForm = ({
               )}
             />
           </View>
+
           <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_COLUMN}>
             <Controller
               control={control}
@@ -427,12 +448,9 @@ export const PhysicalPersonContactForm = ({
                 <CustomTextInput
                   editable={!disabled}
                   error={error?.message}
-                  helperText={
-                    PHYSICAL_PERSON_CONTACT_FORM_COPY.OFFICE_PHONE_HELPER
-                  }
                   keyboardType='phone-pad'
                   label={PHYSICAL_PERSON_CONTACT_FORM_COPY.OFFICE_PHONE_LABEL}
-                  leftIcon='phone'
+                  leftIcon='phone-call'
                   onBlur={onBlur}
                   onChangeText={onChange}
                   placeholder={
@@ -461,6 +479,7 @@ export const PhysicalPersonContactForm = ({
           title={PHYSICAL_PERSON_CONTACT_FORM_COPY.SECTION_4_TITLE}
         />
 
+        {/* Moneda de Ingresos (Full Width) */}
         <Controller
           control={control}
           name='financialCapacity.currency'
@@ -481,6 +500,7 @@ export const PhysicalPersonContactForm = ({
           )}
         />
 
+        {/* Ingreso Bruto & Ingreso Neto (2-Column Flex Row with BanknoteIcon) */}
         <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_ROW}>
           <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_COLUMN}>
             <Controller
@@ -499,12 +519,9 @@ export const PhysicalPersonContactForm = ({
                   <CustomTextInput
                     editable={!disabled}
                     error={error?.message}
-                    helperText={
-                      PHYSICAL_PERSON_CONTACT_FORM_COPY.GROSS_INCOME_HELPER
-                    }
                     keyboardType='numeric'
                     label={PHYSICAL_PERSON_CONTACT_FORM_COPY.GROSS_INCOME_LABEL}
-                    leftIcon='hash'
+                    leftIcon='banknote'
                     onBlur={onBlur}
                     onChangeText={(text: string): void => {
                       const digits = text.replace(/[^0-9]/g, '');
@@ -523,6 +540,7 @@ export const PhysicalPersonContactForm = ({
               }}
             />
           </View>
+
           <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_COLUMN}>
             <Controller
               control={control}
@@ -540,12 +558,9 @@ export const PhysicalPersonContactForm = ({
                   <CustomTextInput
                     editable={!disabled}
                     error={error?.message}
-                    helperText={
-                      PHYSICAL_PERSON_CONTACT_FORM_COPY.NET_INCOME_HELPER
-                    }
                     keyboardType='numeric'
                     label={PHYSICAL_PERSON_CONTACT_FORM_COPY.NET_INCOME_LABEL}
-                    leftIcon='hash'
+                    leftIcon='banknote'
                     onBlur={onBlur}
                     onChangeText={(text: string): void => {
                       const digits = text.replace(/[^0-9]/g, '');
@@ -566,6 +581,7 @@ export const PhysicalPersonContactForm = ({
           </View>
         </View>
 
+        {/* Otros Ingresos Mensuales (Full Width with Opcional Badge & Helper Text) */}
         <Controller
           control={control}
           name='financialCapacity.otherIncomes'
@@ -587,7 +603,16 @@ export const PhysicalPersonContactForm = ({
                 }
                 keyboardType='numeric'
                 label={PHYSICAL_PERSON_CONTACT_FORM_COPY.OTHER_INCOMES_LABEL}
-                leftIcon='hash'
+                labelRight={
+                  <Text
+                    className={
+                      PHYSICAL_PERSON_CONTACT_FORM_STYLES.OTHER_INCOMES_BADGE_TEXT
+                    }
+                  >
+                    {PHYSICAL_PERSON_CONTACT_FORM_COPY.OTHER_INCOMES_BADGE}
+                  </Text>
+                }
+                leftIcon='banknote'
                 onBlur={onBlur}
                 onChangeText={(text: string): void => {
                   const digits = text.replace(/[^0-9]/g, '');
