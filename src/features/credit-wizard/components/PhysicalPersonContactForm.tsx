@@ -84,6 +84,7 @@ export const PhysicalPersonContactForm = ({
   control,
   disabled = false,
   errors: _errorsProp,
+  onInputFocus,
   options,
   testID,
   viewModel: _viewModelProp,
@@ -133,6 +134,7 @@ export const PhysicalPersonContactForm = ({
               leftIcon='mail'
               onBlur={onBlur}
               onChangeText={onChange}
+              onFocus={onInputFocus}
               placeholder={PHYSICAL_PERSON_CONTACT_FORM_COPY.EMAIL_PLACEHOLDER}
               required
               testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.EMAIL_INPUT}
@@ -159,6 +161,7 @@ export const PhysicalPersonContactForm = ({
                   leftIcon='smartphone'
                   onBlur={onBlur}
                   onChangeText={onChange}
+                  onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.CELL_PHONE_PLACEHOLDER
                   }
@@ -188,6 +191,7 @@ export const PhysicalPersonContactForm = ({
                   leftIcon='phone-call'
                   onBlur={onBlur}
                   onChangeText={onChange}
+                  onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.HOME_PHONE_PLACEHOLDER
                   }
@@ -307,6 +311,7 @@ export const PhysicalPersonContactForm = ({
               numberOfLines={3}
               onBlur={onBlur}
               onChangeText={onChange}
+              onFocus={onInputFocus}
               placeholder={
                 PHYSICAL_PERSON_CONTACT_FORM_COPY.EXACT_ADDRESS_PLACEHOLDER
               }
@@ -368,6 +373,7 @@ export const PhysicalPersonContactForm = ({
                   label={PHYSICAL_PERSON_CONTACT_FORM_COPY.PROFESSION_LABEL}
                   onBlur={onBlur}
                   onChangeText={onChange}
+                  onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.PROFESSION_PLACEHOLDER
                   }
@@ -395,6 +401,7 @@ export const PhysicalPersonContactForm = ({
                   label={PHYSICAL_PERSON_CONTACT_FORM_COPY.EMPLOYER_LABEL}
                   onBlur={onBlur}
                   onChangeText={onChange}
+                  onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.EMPLOYER_PLACEHOLDER
                   }
@@ -424,6 +431,7 @@ export const PhysicalPersonContactForm = ({
                   leftIcon='calendar'
                   onBlur={onBlur}
                   onChangeText={onChange}
+                  onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.ENTRY_DATE_PLACEHOLDER
                   }
@@ -453,6 +461,7 @@ export const PhysicalPersonContactForm = ({
                   leftIcon='phone-call'
                   onBlur={onBlur}
                   onChangeText={onChange}
+                  onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.OFFICE_PHONE_PLACEHOLDER
                   }
@@ -527,6 +536,7 @@ export const PhysicalPersonContactForm = ({
                       const digits = text.replace(/[^0-9]/g, '');
                       onChange(digits === '' ? 0 : Number(digits));
                     }}
+                    onFocus={onInputFocus}
                     placeholder={
                       PHYSICAL_PERSON_CONTACT_FORM_COPY.GROSS_INCOME_PLACEHOLDER
                     }
@@ -566,6 +576,7 @@ export const PhysicalPersonContactForm = ({
                       const digits = text.replace(/[^0-9]/g, '');
                       onChange(digits === '' ? 0 : Number(digits));
                     }}
+                    onFocus={onInputFocus}
                     placeholder={
                       PHYSICAL_PERSON_CONTACT_FORM_COPY.NET_INCOME_PLACEHOLDER
                     }
@@ -618,6 +629,7 @@ export const PhysicalPersonContactForm = ({
                   const digits = text.replace(/[^0-9]/g, '');
                   onChange(digits === '' ? undefined : Number(digits));
                 }}
+                onFocus={onInputFocus}
                 placeholder={
                   PHYSICAL_PERSON_CONTACT_FORM_COPY.OTHER_INCOMES_PLACEHOLDER
                 }

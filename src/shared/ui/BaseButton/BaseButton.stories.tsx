@@ -28,6 +28,13 @@ export const Secondary: Story = {
   },
 };
 
+export const Neutral: Story = {
+  args: {
+    label: 'Atrás',
+    variant: BASE_BUTTON_VARIANTS.NEUTRAL,
+  },
+};
+
 export const Outline: Story = {
   args: {
     label: 'Regresar al Inicio',

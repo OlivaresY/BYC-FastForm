@@ -17,6 +17,7 @@ export interface PhysicalPersonContactFormProps {
   control: Control<PhysicalPersonContact>;
   disabled?: boolean;
   errors?: FieldErrors<PhysicalPersonContact>;
+  onInputFocus?: () => void;
   options?: PhysicalPersonContactFormOptions;
   testID?: string;
   viewModel?: UsePhysicalPersonContactViewModelReturn;

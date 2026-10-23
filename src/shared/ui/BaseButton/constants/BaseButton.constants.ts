@@ -10,6 +10,7 @@ export const BASE_BUTTON_TEST_IDS = {
 
 export const BASE_BUTTON_VARIANTS = {
   GHOST: 'ghost',
+  NEUTRAL: 'neutral',
   OUTLINE: 'outline',
   PRIMARY: 'primary',
   SECONDARY: 'secondary',

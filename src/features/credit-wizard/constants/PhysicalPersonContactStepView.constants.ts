@@ -22,6 +22,8 @@ export const PHYSICAL_PERSON_CONTACT_STEP_VIEW_COPY = {
 export const PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS = {
   BACK_ICON_SIZE: 16,
   BACK_ICON_STROKE_WIDTH: 2,
+  BOTTOM_BAR_HEIGHT: 84,
+  EXTRA_KEYBOARD_SCROLL_OFFSET: 24,
   KEYBOARD_VERTICAL_OFFSET_IOS: 64,
   SUBMIT_ICON_SIZE: 16,
   SUBMIT_ICON_STROKE_WIDTH: 2,
@@ -40,7 +42,7 @@ export const PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES = {
   DESCRIPTION: 'text-sm text-text-secondary leading-relaxed',
   HEADER_BLOCK: 'gap-1',
   KEYBOARD_AVOIDING_VIEW: 'flex-1',
-  SCROLL_CONTENT: 'w-full self-stretch px-4 py-4 gap-6 pb-8',
+  SCROLL_CONTENT: 'w-full self-stretch px-4 py-4 gap-6',
   SCROLL_VIEW: 'w-full flex-1 self-stretch',
   SUBMIT_BUTTON: 'flex-1',
   TITLE: 'text-xl font-bold text-text-primary',

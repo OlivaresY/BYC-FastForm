@@ -18,6 +18,7 @@ import {
   PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES,
   PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS,
 } from '../constants/PhysicalPersonContactStepView.constants';
+import { useKeyboardAutoScroll } from '../hooks/useKeyboardAutoScroll';
 import { usePhysicalPersonContactViewModel } from '../hooks/usePhysicalPersonContactViewModel';
 import type { PhysicalPersonContactStepViewProps } from '../types/PhysicalPersonContactStepView.types';
 import { PhysicalPersonContactForm } from './PhysicalPersonContactForm';
@@ -36,6 +37,18 @@ export const PhysicalPersonContactStepView = ({
   const defaultViewModel = usePhysicalPersonContactViewModel({ onSubmit });
   const viewModel = viewModelProp ?? defaultViewModel;
   const { control, errors, handleNextStep, isValid } = viewModel;
+
+  const {
+    contentContainerStyle,
+    handleScroll,
+    onInputFocus,
+    scrollViewRef,
+  } = useKeyboardAutoScroll({
+    bottomBarHeight:
+      PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.BOTTOM_BAR_HEIGHT,
+    extraScrollPadding:
+      PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.EXTRA_KEYBOARD_SCROLL_OFFSET,
+  });
 
   return (
     <View
@@ -62,8 +75,14 @@ export const PhysicalPersonContactStepView = ({
         }
       >
         <ScrollView
+          automaticallyAdjustKeyboardInsets={true}
           className={PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.SCROLL_VIEW}
+          contentContainerStyle={contentContainerStyle}
+          keyboardDismissMode='on-drag'
           keyboardShouldPersistTaps='handled'
+          onScroll={handleScroll}
+          ref={scrollViewRef}
+          scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
           testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.SCROLL_VIEW}
         >
@@ -105,6 +124,7 @@ export const PhysicalPersonContactStepView = ({
               control={control}
               disabled={disabled}
               errors={errors}
+              onInputFocus={onInputFocus}
               options={options}
               testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.FORM}
               viewModel={viewModel}
@@ -134,7 +154,7 @@ export const PhysicalPersonContactStepView = ({
             label={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COPY.BACK_BUTTON}
             onPress={onClose ?? NOOP_VOID}
             testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.BACK_BUTTON}
-            variant='outline'
+            variant='neutral'
           />
 
           <BaseButton
