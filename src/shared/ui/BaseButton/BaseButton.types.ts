@@ -17,5 +17,6 @@ export interface BaseButtonProps extends Omit<PressableProps, 'style'> {
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
   testID?: string;
+  textClassName?: string;
   variant?: BaseButtonVariant;
 }

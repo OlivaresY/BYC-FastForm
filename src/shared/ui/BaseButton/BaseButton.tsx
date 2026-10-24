@@ -1,6 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import {
+  BASE_BUTTON_LOADER_COLORS,
   BASE_BUTTON_STYLES,
   BASE_BUTTON_TEST_IDS,
   BASE_BUTTON_VARIANTS,
@@ -18,6 +19,7 @@ export const BaseButton = ({
   onPress,
   style,
   testID,
+  textClassName,
   variant = BASE_BUTTON_VARIANTS.PRIMARY,
   ...rest
 }: BaseButtonProps): React.JSX.Element => {
@@ -29,30 +31,36 @@ export const BaseButton = ({
     text: string;
   } => {
     switch (variant) {
+      case BASE_BUTTON_VARIANTS.NEUTRAL:
+        return {
+          container: 'border border-gray-300 bg-white active:bg-gray-100',
+          loaderColor: BASE_BUTTON_LOADER_COLORS.NEUTRAL,
+          text: 'text-text-primary font-semibold text-base',
+        };
       case BASE_BUTTON_VARIANTS.SECONDARY:
         return {
           container: 'bg-primary-dark active:opacity-90',
-          loaderColor: '#FFFFFF',
+          loaderColor: BASE_BUTTON_LOADER_COLORS.SECONDARY,
           text: 'text-surface font-semibold text-base',
         };
       case BASE_BUTTON_VARIANTS.GHOST:
         return {
           container: 'bg-transparent active:bg-brand-red/10',
-          loaderColor: '#B91C1C',
+          loaderColor: BASE_BUTTON_LOADER_COLORS.GHOST,
           text: 'text-brand-red font-semibold text-base',
         };
       case BASE_BUTTON_VARIANTS.OUTLINE:
         return {
           container:
             'border-2 border-brand-red bg-transparent active:bg-brand-red/10',
-          loaderColor: '#B91C1C',
+          loaderColor: BASE_BUTTON_LOADER_COLORS.OUTLINE,
           text: 'text-brand-red font-semibold text-base',
         };
       case BASE_BUTTON_VARIANTS.PRIMARY:
       default:
         return {
           container: 'bg-brand-red active:opacity-90',
-          loaderColor: '#FFFFFF',
+          loaderColor: BASE_BUTTON_LOADER_COLORS.PRIMARY,
           text: 'text-surface font-semibold text-base',
         };
     }
@@ -100,7 +108,7 @@ export const BaseButton = ({
         <View className={BASE_BUTTON_STYLES.CONTENT_CONTAINER}>
           {icon ?? null}
           <Text
-            className={`${text} text-center flex-shrink`}
+            className={`${textClassName ?? text} text-center flex-shrink`}
             testID={BASE_BUTTON_TEST_IDS.LABEL}
           >
             {label}
