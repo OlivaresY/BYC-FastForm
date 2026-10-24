@@ -18,6 +18,7 @@ export const BaseButton = ({
   onPress,
   style,
   testID,
+  textClassName,
   variant = BASE_BUTTON_VARIANTS.PRIMARY,
   ...rest
 }: BaseButtonProps): React.JSX.Element => {
@@ -29,6 +30,13 @@ export const BaseButton = ({
     text: string;
   } => {
     switch (variant) {
+      case BASE_BUTTON_VARIANTS.NEUTRAL:
+        return {
+          container:
+            'border border-gray-300 bg-white active:bg-gray-100',
+          loaderColor: '#1F2937',
+          text: 'text-text-primary font-semibold text-base',
+        };
       case BASE_BUTTON_VARIANTS.SECONDARY:
         return {
           container: 'bg-primary-dark active:opacity-90',
@@ -100,7 +108,7 @@ export const BaseButton = ({
         <View className={BASE_BUTTON_STYLES.CONTENT_CONTAINER}>
           {icon ?? null}
           <Text
-            className={`${text} text-center flex-shrink`}
+            className={`${textClassName ?? text} text-center flex-shrink`}
             testID={BASE_BUTTON_TEST_IDS.LABEL}
           >
             {label}

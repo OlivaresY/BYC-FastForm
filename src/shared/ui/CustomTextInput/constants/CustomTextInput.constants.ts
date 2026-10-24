@@ -40,6 +40,10 @@ export const CUSTOM_TEXT_INPUT_ICONS = {
   },
 } as const;
 
+export const CUSTOM_TEXT_INPUT_SELECTION = {
+  BLURRED: { end: 0, start: 0 },
+} as const;
+
 export const CUSTOM_TEXT_INPUT_STYLES = {
   BORDER_BASE: 'border-border-base',
   BORDER_ERROR: 'border-brand-red',

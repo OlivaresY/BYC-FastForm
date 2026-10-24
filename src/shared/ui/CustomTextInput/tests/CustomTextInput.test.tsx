@@ -65,6 +65,28 @@ describe('CustomTextInput Component', () => {
     expect(page.getWrapperClassName()).toContain('border-border-base');
   });
 
+  it('manages smart selection to auto-scroll to start on blur and release on focus', () => {
+    // Arrange
+    const page = CustomTextInputPageObject.render({
+      placeholder: 'Ingreso mensual',
+    });
+
+    // Assert - initially blurred: selection is at start (0, 0)
+    expect(page.input.props.selection).toEqual({ end: 0, start: 0 });
+
+    // Act - Focus
+    page.focus();
+
+    // Assert - focused: selection is undefined to allow normal cursor movement
+    expect(page.input.props.selection).toBeUndefined();
+
+    // Act - Blur
+    page.blur();
+
+    // Assert - blurred: selection resets to start (0, 0) to scroll text back
+    expect(page.input.props.selection).toEqual({ end: 0, start: 0 });
+  });
+
   it('renders error validation feedback and applies error border', () => {
     // Arrange
     const page = CustomTextInputPageObject.render({

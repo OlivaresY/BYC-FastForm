@@ -2,16 +2,20 @@ import React, { useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
 import type { TextInputProps } from 'react-native';
 import {
+  BanknoteIcon,
   CalendarIcon,
   CheckmarkIcon,
   HashIcon,
   MailIcon,
+  PhoneCallIcon,
   PhoneIcon,
+  SmartphoneIcon,
 } from '../Icons';
 import {
   CUSTOM_TEXT_INPUT_COLORS,
   CUSTOM_TEXT_INPUT_COPY,
   CUSTOM_TEXT_INPUT_ICON_DIMENSIONS,
+  CUSTOM_TEXT_INPUT_SELECTION,
   CUSTOM_TEXT_INPUT_STYLES,
   CUSTOM_TEXT_INPUT_TEST_IDS,
 } from './constants/CustomTextInput.constants';
@@ -22,7 +26,7 @@ import type {
 
 interface LeftIconProps {
   testID: string;
-  type: CustomTextInputPresetIcon;
+  type: CustomTextInputPresetIcon | React.ReactNode;
 }
 
 interface ValidIconProps {
@@ -33,6 +37,9 @@ const LeftIcon = ({
   testID,
   type,
 }: LeftIconProps): React.JSX.Element | null => {
+  if (React.isValidElement(type)) {
+    return <View testID={testID}>{type}</View>;
+  }
   if (type === 'calendar') {
     return (
       <View testID={testID}>
@@ -59,6 +66,39 @@ const LeftIcon = ({
     return (
       <View testID={testID}>
         <PhoneIcon
+          color={CUSTOM_TEXT_INPUT_COLORS.ICON_STROKE}
+          size={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.SIZE_PX}
+          strokeWidth={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
+        />
+      </View>
+    );
+  }
+  if (type === 'phone-call') {
+    return (
+      <View testID={testID}>
+        <PhoneCallIcon
+          color={CUSTOM_TEXT_INPUT_COLORS.ICON_STROKE}
+          size={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.SIZE_PX}
+          strokeWidth={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
+        />
+      </View>
+    );
+  }
+  if (type === 'smartphone') {
+    return (
+      <View testID={testID}>
+        <SmartphoneIcon
+          color={CUSTOM_TEXT_INPUT_COLORS.ICON_STROKE}
+          size={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.SIZE_PX}
+          strokeWidth={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
+        />
+      </View>
+    );
+  }
+  if (type === 'banknote') {
+    return (
+      <View testID={testID}>
+        <BanknoteIcon
           color={CUSTOM_TEXT_INPUT_COLORS.ICON_STROKE}
           size={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.SIZE_PX}
           strokeWidth={CUSTOM_TEXT_INPUT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
@@ -96,11 +136,13 @@ export const CustomTextInput = ({
   isPassword = false,
   isValid = false,
   label,
+  labelRight,
   leftIcon,
   onBlur,
   onFocus,
   placeholder,
   required = false,
+  selection,
   testID,
   ...rest
 }: CustomTextInputProps): React.JSX.Element => {
@@ -157,21 +199,30 @@ export const CustomTextInput = ({
       className={CUSTOM_TEXT_INPUT_STYLES.CONTAINER}
       testID={containerTestId}
     >
-      {label ? (
-        <View className={CUSTOM_TEXT_INPUT_STYLES.LABEL_ROW}>
-          <Text
-            className={CUSTOM_TEXT_INPUT_STYLES.LABEL_TEXT}
-            testID={labelTestId}
-          >
-            {label}
-          </Text>
-          {required && !label.trim().endsWith('*') ? (
-            <Text
-              className={CUSTOM_TEXT_INPUT_STYLES.REQUIRED_ASTERISK}
-              testID={requiredAsteriskTestId}
-            >
-              {CUSTOM_TEXT_INPUT_COPY.REQUIRED_ASTERISK}
-            </Text>
+      {label || labelRight ? (
+        <View
+          className={`${CUSTOM_TEXT_INPUT_STYLES.LABEL_ROW} justify-between items-center w-full`}
+        >
+          <View className='flex-row items-center gap-1'>
+            {label ? (
+              <Text
+                className={CUSTOM_TEXT_INPUT_STYLES.LABEL_TEXT}
+                testID={labelTestId}
+              >
+                {label}
+              </Text>
+            ) : null}
+            {required && label && !label.trim().endsWith('*') ? (
+              <Text
+                className={CUSTOM_TEXT_INPUT_STYLES.REQUIRED_ASTERISK}
+                testID={requiredAsteriskTestId}
+              >
+                {CUSTOM_TEXT_INPUT_COPY.REQUIRED_ASTERISK}
+              </Text>
+            ) : null}
+          </View>
+          {labelRight ? (
+            <View testID={`${labelTestId}-right`}>{labelRight}</View>
           ) : null}
         </View>
       ) : null}
@@ -191,6 +242,10 @@ export const CustomTextInput = ({
           placeholder={placeholder}
           placeholderTextColor={CUSTOM_TEXT_INPUT_COLORS.PLACEHOLDER}
           secureTextEntry={isPassword}
+          selection={
+            selection ??
+            (isFocused ? undefined : CUSTOM_TEXT_INPUT_SELECTION.BLURRED)
+          }
           testID={inputTestId}
           {...rest}
         />
