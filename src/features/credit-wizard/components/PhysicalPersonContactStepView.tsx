@@ -1,13 +1,8 @@
 import React from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  View,
-} from 'react-native';
+import { Text, View } from 'react-native';
 import { BaseButton } from '@/shared/ui/BaseButton';
 import { ArrowRightIcon, ChevronLeftIcon } from '@/shared/ui/Icons';
+import { KeyboardAwareStepLayout } from '@/shared/ui/KeyboardAwareStepLayout';
 import { ProcessTopBar } from '@/shared/ui/ProcessTopBar';
 import {
   PHYSICAL_PERSON_CONTACT_STEP_VIEW_COLORS,
@@ -18,7 +13,6 @@ import {
   PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES,
   PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS,
 } from '../constants/PhysicalPersonContactStepView.constants';
-import { useKeyboardAutoScroll } from '../hooks/useKeyboardAutoScroll';
 import { usePhysicalPersonContactViewModel } from '../hooks/usePhysicalPersonContactViewModel';
 import type { PhysicalPersonContactStepViewProps } from '../types/PhysicalPersonContactStepView.types';
 import { PhysicalPersonContactForm } from './PhysicalPersonContactForm';
@@ -38,18 +32,6 @@ export const PhysicalPersonContactStepView = ({
   const viewModel = viewModelProp ?? defaultViewModel;
   const { control, errors, handleNextStep, isValid } = viewModel;
 
-  const {
-    contentContainerStyle,
-    handleScroll,
-    onInputFocus,
-    scrollViewRef,
-  } = useKeyboardAutoScroll({
-    bottomBarHeight:
-      PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.BOTTOM_BAR_HEIGHT,
-    extraScrollPadding:
-      PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.EXTRA_KEYBOARD_SCROLL_OFFSET,
-  });
-
   return (
     <View
       className={PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.CONTAINER}
@@ -63,29 +45,66 @@ export const PhysicalPersonContactStepView = ({
         }
       />
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        className={
-          PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.KEYBOARD_AVOIDING_VIEW
+      <KeyboardAwareStepLayout
+        bottomBarHeight={
+          PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.BOTTOM_BAR_HEIGHT
         }
-        keyboardVerticalOffset={
-          Platform.OS === 'ios'
-            ? PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.KEYBOARD_VERTICAL_OFFSET_IOS
-            : 0
+        extraScrollPadding={
+          PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.EXTRA_KEYBOARD_SCROLL_OFFSET
+        }
+        footer={
+          <View
+            className={PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.BOTTOM_BAR}
+            testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.BOTTOM_BAR}
+          >
+            <BaseButton
+              className={PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.BACK_BUTTON}
+              disabled={disabled}
+              icon={
+                <ChevronLeftIcon
+                  color={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COLORS.BACK_ICON}
+                  size={
+                    PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.BACK_ICON_SIZE
+                  }
+                  strokeWidth={
+                    PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.BACK_ICON_STROKE_WIDTH
+                  }
+                />
+              }
+              label={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COPY.BACK_BUTTON}
+              onPress={onClose ?? NOOP_VOID}
+              testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.BACK_BUTTON}
+              variant='neutral'
+            />
+
+            <BaseButton
+              className={PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.SUBMIT_BUTTON}
+              disabled={!isValid || disabled}
+              iconRight={
+                <ArrowRightIcon
+                  color={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COLORS.SUBMIT_ICON}
+                  size={
+                    PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.SUBMIT_ICON_SIZE
+                  }
+                  strokeWidth={
+                    PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.SUBMIT_ICON_STROKE_WIDTH
+                  }
+                />
+              }
+              label={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COPY.SUBMIT_BUTTON}
+              onPress={(): void => {
+                void handleNextStep();
+              }}
+              testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.SUBMIT_BUTTON}
+              variant='primary'
+            />
+          </View>
+        }
+        scrollViewTestID={
+          PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.SCROLL_VIEW
         }
       >
-        <ScrollView
-          automaticallyAdjustKeyboardInsets={true}
-          className={PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.SCROLL_VIEW}
-          contentContainerStyle={contentContainerStyle}
-          keyboardDismissMode='on-drag'
-          keyboardShouldPersistTaps='handled'
-          onScroll={handleScroll}
-          ref={scrollViewRef}
-          scrollEventThrottle={16}
-          showsVerticalScrollIndicator={false}
-          testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.SCROLL_VIEW}
-        >
+        {({ onInputFocus }) => (
           <View
             className={PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.SCROLL_CONTENT}
           >
@@ -130,56 +149,8 @@ export const PhysicalPersonContactStepView = ({
               viewModel={viewModel}
             />
           </View>
-        </ScrollView>
-
-        {/* 4. Fixed Bottom CTA Bar */}
-        <View
-          className={PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.BOTTOM_BAR}
-          testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.BOTTOM_BAR}
-        >
-          <BaseButton
-            className={PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.BACK_BUTTON}
-            disabled={disabled}
-            icon={
-              <ChevronLeftIcon
-                color={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COLORS.BACK_ICON}
-                size={
-                  PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.BACK_ICON_SIZE
-                }
-                strokeWidth={
-                  PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.BACK_ICON_STROKE_WIDTH
-                }
-              />
-            }
-            label={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COPY.BACK_BUTTON}
-            onPress={onClose ?? NOOP_VOID}
-            testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.BACK_BUTTON}
-            variant='neutral'
-          />
-
-          <BaseButton
-            className={PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.SUBMIT_BUTTON}
-            disabled={!isValid || disabled}
-            iconRight={
-              <ArrowRightIcon
-                color={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COLORS.SUBMIT_ICON}
-                size={
-                  PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.SUBMIT_ICON_SIZE
-                }
-                strokeWidth={
-                  PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.SUBMIT_ICON_STROKE_WIDTH
-                }
-              />
-            }
-            label={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COPY.SUBMIT_BUTTON}
-            onPress={(): void => {
-              void handleNextStep();
-            }}
-            testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.SUBMIT_BUTTON}
-            variant='primary'
-          />
-        </View>
-      </KeyboardAvoidingView>
+        )}
+      </KeyboardAwareStepLayout>
     </View>
   );
 };
