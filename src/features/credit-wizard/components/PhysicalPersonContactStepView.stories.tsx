@@ -1,6 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import type { Meta, StoryObj } from '@storybook/react-native';
+import { EMPLOYMENT_STATUSES } from '../constants/PhysicalPersonContact.constants';
 import { usePhysicalPersonContactViewModel } from '../hooks/usePhysicalPersonContactViewModel';
 import type { PhysicalPersonContact } from '../types/PhysicalPersonContact.types';
 import type { PhysicalPersonContactStepViewProps } from '../types/PhysicalPersonContactStepView.types';
@@ -14,7 +15,7 @@ const FIGMA_VALID_MOCK_DATA: PhysicalPersonContact = {
   },
   employmentData: {
     employer: 'Servicios Tecnológicos',
-    employmentStatus: 'Asalariado (Planilla CCSS)',
+    employmentStatus: EMPLOYMENT_STATUSES.SALARIED_CCSS,
     entryDate: '15-03-2020',
     officePhone: '+506 2540-1000',
     profession: 'Ingeniero de Software',

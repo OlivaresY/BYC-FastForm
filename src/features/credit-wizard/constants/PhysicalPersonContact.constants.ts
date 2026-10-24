@@ -1,3 +1,12 @@
+export const EMPLOYMENT_STATUSES = {
+  BUSINESS_OWNER: 'business_owner',
+  INDEPENDENT: 'independent',
+  RETIRED: 'retired',
+  SALARIED_CCSS: 'salaried_ccss',
+  SALARIED_PRIVATE: 'salaried_private',
+  SALARIED_PUBLIC: 'salaried_public',
+} as const;
+
 export const FINANCIAL_CURRENCIES = {
   CRC: 'CRC',
   USD: 'USD',
@@ -11,7 +20,7 @@ export const PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES = {
   },
   employmentData: {
     employer: '',
-    employmentStatus: '',
+    employmentStatus: EMPLOYMENT_STATUSES.SALARIED_CCSS,
     entryDate: '',
     officePhone: '',
     profession: '',
@@ -20,7 +29,7 @@ export const PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES = {
     currency: FINANCIAL_CURRENCIES.CRC,
     grossIncome: 0,
     netIncome: 0,
-    otherIncomes: 0,
+    otherIncomes: undefined,
   },
   residentialAddress: {
     canton: '',
@@ -40,6 +49,7 @@ export const PHYSICAL_PERSON_CONTACT_ERRORS = {
   },
   EMPLOYMENT_DATA: {
     EMPLOYER_REQUIRED: 'El nombre del patrono o empresa es obligatorio.',
+    EMPLOYMENT_STATUS_INVALID: 'Seleccione una situación laboral válida.',
     EMPLOYMENT_STATUS_REQUIRED: 'La situación laboral es obligatoria.',
     ENTRY_DATE_FUTURE: 'La fecha de ingreso no puede ser una fecha futura.',
     ENTRY_DATE_INVALID:
@@ -68,6 +78,7 @@ export const PHYSICAL_PERSON_CONTACT_ERRORS = {
 } as const;
 
 export const PHYSICAL_PERSON_CONTACT_PATTERNS = {
+  CURRENCY_THOUSANDS_SEPARATOR: /\B(?=(\d{3})+(?!\d))/g,
   DATE_DD_MM_YYYY: /^(0[1-9]|[12]\d|3[01])-(0[1-9]|1[0-2])-(\d{4})$/,
   INTERNATIONAL_PHONE:
     /^(\+?[1-9]\d{0,3}|\([1-9]\d{0,3}\))?\s?[\d\-\s()]{6,16}$/,

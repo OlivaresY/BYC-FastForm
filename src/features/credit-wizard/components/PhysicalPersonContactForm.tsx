@@ -8,6 +8,7 @@ import {
   IdCardIcon,
   MapPinIcon,
 } from '@/shared/ui/Icons';
+import { PHYSICAL_PERSON_CONTACT_PATTERNS } from '../constants/PhysicalPersonContact.constants';
 import {
   PHYSICAL_PERSON_CONTACT_FORM_COLORS,
   PHYSICAL_PERSON_CONTACT_FORM_COPY,
@@ -17,6 +18,48 @@ import {
   PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS,
 } from '../constants/PhysicalPersonContactForm.constants';
 import type { PhysicalPersonContactFormProps } from '../types/PhysicalPersonContactForm.types';
+
+const formatCurrencyDisplay = (value: number | undefined | null): string => {
+  if (value === undefined || value === null) {
+    return '';
+  }
+  return String(value).replace(
+    PHYSICAL_PERSON_CONTACT_PATTERNS.CURRENCY_THOUSANDS_SEPARATOR,
+    '.',
+  );
+};
+
+const formatDateDisplay = (text: string): string => {
+  let workingText = text;
+
+  // If the user types a separator, split by it to auto-pad
+  if (text.includes('-') || text.includes('/')) {
+    const parts = text.split(/[-/]/);
+    let day = parts[0].replace(/[^0-9]/g, '');
+    let month = parts.length > 1 ? parts[1].replace(/[^0-9]/g, '') : '';
+    const year = parts.length > 2 ? parts[2].replace(/[^0-9]/g, '') : '';
+
+    if (parts.length > 1 && day.length === 1) {
+      day = `0${day}`;
+    }
+    if (parts.length > 2 && month.length === 1) {
+      month = `0${month}`;
+    }
+
+    const combined = [day, month, year].filter(Boolean).join('');
+    workingText = combined;
+  }
+
+  // Fallback to strict digit formatting
+  const cleaned = workingText.replace(/[^0-9]/g, '');
+  if (cleaned.length <= 2) {
+    return cleaned;
+  }
+  if (cleaned.length <= 4) {
+    return `${cleaned.slice(0, 2)}-${cleaned.slice(2)}`;
+  }
+  return `${cleaned.slice(0, 2)}-${cleaned.slice(2, 4)}-${cleaned.slice(4, 8)}`;
+};
 
 interface SectionHeaderProps {
   icon: React.JSX.Element;
@@ -429,8 +472,12 @@ export const PhysicalPersonContactForm = ({
                   error={error?.message}
                   label={PHYSICAL_PERSON_CONTACT_FORM_COPY.ENTRY_DATE_LABEL}
                   leftIcon='calendar'
+                  maxLength={10}
                   onBlur={onBlur}
-                  onChangeText={onChange}
+                  onChangeText={(text: string): void => {
+                    const maskedDate = formatDateDisplay(text);
+                    onChange(maskedDate);
+                  }}
                   onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.ENTRY_DATE_PLACEHOLDER
@@ -519,9 +566,9 @@ export const PhysicalPersonContactForm = ({
                 field: { onBlur, onChange, value },
                 fieldState: { error },
               }) => {
-                const stringValue =
-                  value !== undefined && value !== null && value !== 0
-                    ? String(value)
+                const displayValue =
+                  value !== undefined && value !== null
+                    ? formatCurrencyDisplay(value)
                     : '';
 
                 return (
@@ -534,7 +581,7 @@ export const PhysicalPersonContactForm = ({
                     onBlur={onBlur}
                     onChangeText={(text: string): void => {
                       const digits = text.replace(/[^0-9]/g, '');
-                      onChange(digits === '' ? 0 : Number(digits));
+                      onChange(digits === '' ? undefined : Number(digits));
                     }}
                     onFocus={onInputFocus}
                     placeholder={
@@ -544,7 +591,7 @@ export const PhysicalPersonContactForm = ({
                     testID={
                       PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.GROSS_INCOME_INPUT
                     }
-                    value={stringValue}
+                    value={displayValue}
                   />
                 );
               }}
@@ -559,9 +606,9 @@ export const PhysicalPersonContactForm = ({
                 field: { onBlur, onChange, value },
                 fieldState: { error },
               }) => {
-                const stringValue =
-                  value !== undefined && value !== null && value !== 0
-                    ? String(value)
+                const displayValue =
+                  value !== undefined && value !== null
+                    ? formatCurrencyDisplay(value)
                     : '';
 
                 return (
@@ -574,7 +621,7 @@ export const PhysicalPersonContactForm = ({
                     onBlur={onBlur}
                     onChangeText={(text: string): void => {
                       const digits = text.replace(/[^0-9]/g, '');
-                      onChange(digits === '' ? 0 : Number(digits));
+                      onChange(digits === '' ? undefined : Number(digits));
                     }}
                     onFocus={onInputFocus}
                     placeholder={
@@ -584,7 +631,7 @@ export const PhysicalPersonContactForm = ({
                     testID={
                       PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.NET_INCOME_INPUT
                     }
-                    value={stringValue}
+                    value={displayValue}
                   />
                 );
               }}
@@ -600,9 +647,9 @@ export const PhysicalPersonContactForm = ({
             field: { onBlur, onChange, value },
             fieldState: { error },
           }) => {
-            const stringValue =
-              value !== undefined && value !== null && value !== 0
-                ? String(value)
+            const displayValue =
+              value !== undefined && value !== null
+                ? formatCurrencyDisplay(value)
                 : '';
 
             return (
@@ -637,7 +684,7 @@ export const PhysicalPersonContactForm = ({
                 testID={
                   PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.OTHER_INCOMES_INPUT
                 }
-                value={stringValue}
+                value={displayValue}
               />
             );
           }}

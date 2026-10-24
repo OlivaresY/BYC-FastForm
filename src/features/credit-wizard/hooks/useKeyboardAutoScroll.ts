@@ -13,6 +13,12 @@ import type {
   NativeSyntheticEvent,
 } from 'react-native';
 
+interface MeasurableNode {
+  measureInWindow: (
+    callback: (x: number, y: number, width: number, height: number) => void,
+  ) => void;
+}
+
 export interface UseKeyboardAutoScrollOptions {
   bottomBarHeight?: number;
   extraScrollPadding?: number;
@@ -64,10 +70,10 @@ export const useKeyboardAutoScroll = (
             return;
           }
 
-          const inputAny = focusedInput as any;
+          const inputNode = focusedInput as unknown as MeasurableNode;
 
-          if (typeof inputAny.measureInWindow === 'function') {
-            inputAny.measureInWindow(
+          if (typeof inputNode.measureInWindow === 'function') {
+            inputNode.measureInWindow(
               (_x: number, y: number, _width: number, height: number): void => {
                 const windowHeight = Dimensions.get('window').height;
                 const visibleBottom =

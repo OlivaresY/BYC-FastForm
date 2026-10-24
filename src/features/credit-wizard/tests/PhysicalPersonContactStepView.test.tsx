@@ -138,8 +138,8 @@ describe('PhysicalPersonContactStepView Integration', () => {
       // Arrange
       const page = PhysicalPersonContactStepViewPageObject.render();
 
-      // Act - Enter invalid slash format
-      page.setEntryDate('15/05/2019');
+      // Act - Enter invalid calendar date
+      page.setEntryDate('32-05-2019');
 
       // Assert - Error should appear
       await page.waitFor(() => {

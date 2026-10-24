@@ -15,6 +15,7 @@ import {
   CUSTOM_TEXT_INPUT_COLORS,
   CUSTOM_TEXT_INPUT_COPY,
   CUSTOM_TEXT_INPUT_ICON_DIMENSIONS,
+  CUSTOM_TEXT_INPUT_SELECTION,
   CUSTOM_TEXT_INPUT_STYLES,
   CUSTOM_TEXT_INPUT_TEST_IDS,
 } from './constants/CustomTextInput.constants';
@@ -141,6 +142,7 @@ export const CustomTextInput = ({
   onFocus,
   placeholder,
   required = false,
+  selection,
   testID,
   ...rest
 }: CustomTextInputProps): React.JSX.Element => {
@@ -240,6 +242,10 @@ export const CustomTextInput = ({
           placeholder={placeholder}
           placeholderTextColor={CUSTOM_TEXT_INPUT_COLORS.PLACEHOLDER}
           secureTextEntry={isPassword}
+          selection={
+            selection ??
+            (isFocused ? undefined : CUSTOM_TEXT_INPUT_SELECTION.BLURRED)
+          }
           testID={inputTestId}
           {...rest}
         />
