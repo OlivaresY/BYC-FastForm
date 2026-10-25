@@ -7,6 +7,7 @@
     "@gorhom/bottom-sheet": "^5.2.14",
     "@hookform/resolvers": "^5.9.1",
     "@react-native-community/datetimepicker": "9.2.1",
+    "@react-native-community/slider": "5.2.1",
     "@supabase/supabase-js": "^2.117.2",
     "expo": "~58.0.19",
     "expo-blur": "~58.0.5",
@@ -64,7 +65,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "storybook": "cross-env EXPO_PUBLIC_STORYBOOK_ENABLED=true npx expo start --clear",
+    "storybook:start": "cross-env EXPO_PUBLIC_STORYBOOK_ENABLED=true npx expo start --clear",
     "test": "jest"
   },
   "jest": {
