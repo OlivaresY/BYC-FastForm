@@ -1,14 +1,19 @@
-import React from 'react';
-import { Controller } from 'react-hook-form';
-import { Text, View } from 'react-native';
 import {
   BanknoteIcon,
   CustomSelect,
   CustomTextInput,
   IdCardIcon,
   MapPinIcon,
+  SectionHeader,
 } from '@/shared/ui';
-import { formatCurrencyDisplay, formatDateDisplay } from '@/shared/utils';
+import {
+  formatCurrencyDisplay,
+  formatDateDisplay,
+  sanitizeNumericDigits,
+} from '@/shared/utils';
+import React from 'react';
+import { Controller } from 'react-hook-form';
+import { Text, View } from 'react-native';
 import {
   PHYSICAL_PERSON_CONTACT_FORM_COLORS,
   PHYSICAL_PERSON_CONTACT_FORM_COPY,
@@ -20,11 +25,6 @@ import {
 } from '../constants/PhysicalPersonContactForm.constants';
 import type { PhysicalPersonContactFormProps } from '../types/PhysicalPersonContactForm.types';
 
-interface SectionHeaderProps {
-  icon: React.JSX.Element;
-  testID: string;
-  title: string;
-}
 
 const ContactSectionIcon = (): React.JSX.Element => (
   <View testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.SECTION_1_ICON}>
@@ -66,21 +66,6 @@ const FinancialSectionIcon = (): React.JSX.Element => (
   </View>
 );
 
-const SectionHeader = ({
-  icon,
-  testID,
-  title,
-}: SectionHeaderProps): React.JSX.Element => (
-  <View
-    className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.SECTION_HEADER_ROW}
-    testID={testID}
-  >
-    {icon}
-    <Text className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.SECTION_HEADER_TITLE}>
-      {title}
-    </Text>
-  </View>
-);
 
 const PhysicalPersonContactFormComponent = ({
   control,
@@ -549,7 +534,7 @@ const PhysicalPersonContactFormComponent = ({
                     }
                     onBlur={onBlur}
                     onChangeText={(text: string): void => {
-                      const digits = text.replace(/[^0-9]/g, '');
+                      const digits = sanitizeNumericDigits(text);
                       onChange(digits === '' ? undefined : Number(digits));
                     }}
                     onFocus={onInputFocus}
@@ -592,7 +577,7 @@ const PhysicalPersonContactFormComponent = ({
                     }
                     onBlur={onBlur}
                     onChangeText={(text: string): void => {
-                      const digits = text.replace(/[^0-9]/g, '');
+                      const digits = sanitizeNumericDigits(text);
                       onChange(digits === '' ? undefined : Number(digits));
                     }}
                     onFocus={onInputFocus}
@@ -648,7 +633,7 @@ const PhysicalPersonContactFormComponent = ({
                 }
                 onBlur={onBlur}
                 onChangeText={(text: string): void => {
-                  const digits = text.replace(/[^0-9]/g, '');
+                  const digits = sanitizeNumericDigits(text);
                   onChange(digits === '' ? undefined : Number(digits));
                 }}
                 onFocus={onInputFocus}

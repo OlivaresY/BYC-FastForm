@@ -103,3 +103,18 @@ export const formatDateDisplay = (text: string): string => {
   }
   return result;
 };
+
+export const sanitizeNumericDigits = (text: string): string =>
+  text.replace(/\D/g, '');
+
+export const formatCorporateIdDisplay = (text: string): string => {
+  const digits = sanitizeNumericDigits(text).slice(0, 10);
+  if (digits.length <= 1) {
+    return digits;
+  }
+  if (digits.length <= 4) {
+    return `${digits.slice(0, 1)}-${digits.slice(1)}`;
+  }
+  return `${digits.slice(0, 1)}-${digits.slice(1, 4)}-${digits.slice(4, 10)}`;
+};
+

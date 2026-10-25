@@ -15,7 +15,7 @@ import {
   PhysicalIdentificationNumberSchema,
   StrictThirdPartyBeneficiarySchema,
   THIRD_PARTY_BENEFICIARY_FIELDS,
-} from '../types/ApplicantStepView.schema';
+} from '../schemas/ApplicantStepView.schema';
 import type { LegalEntityType } from '../types/LegalEntitySelector.types';
 import type {
   LegalEntityFormField,
