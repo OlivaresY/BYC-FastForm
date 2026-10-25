@@ -11,15 +11,15 @@ import {
 import type {
   LegalEntityFormField,
   LegalEntityFormValues,
-} from './LegalEntityForm.types';
+} from '../types/LegalEntityForm.types';
 import type {
   PhysicalPersonFormField,
   PhysicalPersonFormValues,
-} from './PhysicalPersonForm.types';
+} from '../types/PhysicalPersonForm.types';
 import type {
   ThirdPartyBeneficiaryField,
   ThirdPartyBeneficiaryValues,
-} from './ApplicantStepView.types';
+} from '../types/ApplicantStepView.types';
 
 export { isValidCalendarDate, isValidDateDDMMYYYY };
 
@@ -265,13 +265,13 @@ export const ApplicantStepFormSchema = z.object({
 
 export const ApplicantStepFormStateSchema = z
   .object({
-      legalValues: z.custom<LegalEntityFormValues>(),
-      physicalValues: z.custom<PhysicalPersonFormValues>(),
-      regime: z.enum(['physical', 'legal']),
-      thirdPartyValues: z.custom<ThirdPartyBeneficiaryValues>(),
-      vehicleBeneficiary: z.enum(['same_holder', 'third_party']),
-    })
-    .superRefine((data, ctx) => {
+    legalValues: z.custom<LegalEntityFormValues>(),
+    physicalValues: z.custom<PhysicalPersonFormValues>(),
+    regime: z.enum(['physical', 'legal']),
+    thirdPartyValues: z.custom<ThirdPartyBeneficiaryValues>(),
+    vehicleBeneficiary: z.enum(['same_holder', 'third_party']),
+  })
+  .superRefine((data, ctx) => {
     if (data.regime === 'physical') {
       const result = PhysicalApplicantSchema.safeParse(data.physicalValues);
       if (!result.success) {

@@ -11,6 +11,7 @@ export {
   PhysicalPersonForm,
   VehicleBeneficiarySection,
   WizardProgressHeader,
+  WizardStepLayout,
 } from './components';
 
 export {
@@ -42,7 +43,7 @@ export {
   ThirdPartyBeneficiaryFieldsSchema,
   ThirdPartyBeneficiarySchema,
   ThirdPartyBeneficiaryStrictFieldsSchema,
-} from './types/ApplicantStepView.schema';
+} from './schemas/ApplicantStepView.schema';
 
 export type {
   ApplicantStepData,

@@ -1,11 +1,12 @@
 import React, { useMemo } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import {
   ClockIcon as SharedClockIcon,
-  IdCardIcon as SharedIdCardIcon,
-  UserIcon as SharedUserIcon,
   CustomSelect,
   CustomTextInput,
+  IdCardIcon as SharedIdCardIcon,
+  SectionHeader,
+  UserIcon as SharedUserIcon,
 } from '@/shared/ui';
 import {
   PHYSICAL_PERSON_FORM_COLORS,
@@ -16,12 +17,6 @@ import {
   PHYSICAL_PERSON_FORM_TEST_IDS,
 } from '../constants/PhysicalPersonForm.constants';
 import type { PhysicalPersonFormProps } from '../types/PhysicalPersonForm.types';
-
-interface SectionHeaderProps {
-  icon: React.JSX.Element;
-  testID: string;
-  title: string;
-}
 
 const IdCardIcon = (): React.JSX.Element => (
   <View testID={PHYSICAL_PERSON_FORM_TEST_IDS.SECTION_1_ICON}>
@@ -50,22 +45,6 @@ const ClockIcon = (): React.JSX.Element => (
       size={PHYSICAL_PERSON_FORM_ICON_DIMENSIONS.SIZE_PX}
       strokeWidth={PHYSICAL_PERSON_FORM_ICON_DIMENSIONS.STROKE_WIDTH_PX}
     />
-  </View>
-);
-
-const SectionHeader = ({
-  icon,
-  testID,
-  title,
-}: SectionHeaderProps): React.JSX.Element => (
-  <View
-    className={PHYSICAL_PERSON_FORM_STYLES.SECTION_HEADER_ROW}
-    testID={testID}
-  >
-    {icon}
-    <Text className={PHYSICAL_PERSON_FORM_STYLES.SECTION_HEADER_TITLE}>
-      {title}
-    </Text>
   </View>
 );
 

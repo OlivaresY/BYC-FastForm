@@ -10,6 +10,8 @@ export {
   FORMATTERS_PATTERNS,
   FORMATTERS_SYMBOLS,
   INTERNATIONAL_PHONE_REGEX,
+  formatCorporateIdDisplay,
   formatCurrencyDisplay,
   formatDateDisplay,
+  sanitizeNumericDigits,
 } from './formatters.utils';

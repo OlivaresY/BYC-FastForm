@@ -7,7 +7,7 @@ import {
   isValidDateDDMMYYYY,
   StrictThirdPartyBeneficiarySchema,
   ThirdPartyBeneficiaryFieldsSchema,
-} from '../types/ApplicantStepView.schema';
+} from '../schemas/ApplicantStepView.schema';
 import { FinalBeneficiaryModalPageObject } from './FinalBeneficiaryModal.po';
 
 describe('FinalBeneficiaryModal Component', () => {

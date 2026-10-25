@@ -1,14 +1,20 @@
 import React from 'react';
 import { Controller } from 'react-hook-form';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import {
   BanknoteIcon,
   BuildingIcon,
   CustomTextInput,
   PhoneIcon,
+  SectionHeader,
   UserIcon,
 } from '@/shared/ui';
-import { formatCurrencyDisplay, formatDateDisplay } from '@/shared/utils';
+import {
+  formatCorporateIdDisplay,
+  formatCurrencyDisplay,
+  formatDateDisplay,
+  sanitizeNumericDigits,
+} from '@/shared/utils';
 import {
   LEGAL_ENTITY_CONTACT_FORM_COLORS,
   LEGAL_ENTITY_CONTACT_FORM_COPY,
@@ -19,22 +25,6 @@ import {
 } from '../constants/LegalEntityContactForm.constants';
 import type { LegalEntityContactFormProps } from '../types/LegalEntityContactForm.types';
 
-const formatCorporateIdDisplay = (text: string): string => {
-  const digits = text.replace(/[^0-9]/g, '').slice(0, 10);
-  if (digits.length <= 1) {
-    return digits;
-  }
-  if (digits.length <= 4) {
-    return `${digits.slice(0, 1)}-${digits.slice(1)}`;
-  }
-  return `${digits.slice(0, 1)}-${digits.slice(1, 4)}-${digits.slice(4, 10)}`;
-};
-
-interface SectionHeaderProps {
-  icon: React.JSX.Element;
-  testID: string;
-  title: string;
-}
 
 const CorporateSectionIcon = (): React.JSX.Element => (
   <View testID={LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.SECTION_1_ICON}>
@@ -76,24 +66,6 @@ const FinancialSectionIcon = (): React.JSX.Element => (
   </View>
 );
 
-const SectionHeader = ({
-  icon,
-  testID,
-  title,
-}: SectionHeaderProps): React.JSX.Element => (
-  <View
-    className={LEGAL_ENTITY_CONTACT_FORM_STYLES.SECTION_HEADER_ROW}
-    testID={testID}
-  >
-    {icon}
-    <Text
-      accessibilityRole='header'
-      className={LEGAL_ENTITY_CONTACT_FORM_STYLES.SECTION_HEADER_TITLE}
-    >
-      {title}
-    </Text>
-  </View>
-);
 
 export const LegalEntityContactForm = ({
   control,
@@ -397,7 +369,7 @@ export const LegalEntityContactForm = ({
                     }
                     onBlur={onBlur}
                     onChangeText={(text: string): void => {
-                      const digits = text.replace(/[^0-9]/g, '');
+                      const digits = sanitizeNumericDigits(text);
                       onChange(digits === '' ? undefined : Number(digits));
                     }}
                     onFocus={onInputFocus}
@@ -440,7 +412,7 @@ export const LegalEntityContactForm = ({
                     }
                     onBlur={onBlur}
                     onChangeText={(text: string): void => {
-                      const digits = text.replace(/[^0-9]/g, '');
+                      const digits = sanitizeNumericDigits(text);
                       onChange(digits === '' ? undefined : Number(digits));
                     }}
                     onFocus={onInputFocus}

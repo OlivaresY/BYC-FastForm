@@ -1,11 +1,12 @@
 import React, { useMemo } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import {
   BuildingIcon as SharedBuildingIcon,
-  DocumentIcon as SharedDocumentIcon,
-  UserIcon as SharedUserIcon,
   CustomSelect,
   CustomTextInput,
+  DocumentIcon as SharedDocumentIcon,
+  SectionHeader,
+  UserIcon as SharedUserIcon,
 } from '@/shared/ui';
 import {
   LEGAL_ENTITY_FORM_COLORS,
@@ -16,12 +17,6 @@ import {
   LEGAL_ENTITY_FORM_TEST_IDS,
 } from '../constants/LegalEntityForm.constants';
 import type { LegalEntityFormProps } from '../types/LegalEntityForm.types';
-
-interface SectionHeaderProps {
-  icon: React.JSX.Element;
-  testID: string;
-  title: string;
-}
 
 const BuildingIcon = (): React.JSX.Element => (
   <View testID={LEGAL_ENTITY_FORM_TEST_IDS.SECTION_1_ICON}>
@@ -50,22 +45,6 @@ const UserIcon = (): React.JSX.Element => (
       size={LEGAL_ENTITY_FORM_ICON_DIMENSIONS.SIZE_PX}
       strokeWidth={LEGAL_ENTITY_FORM_ICON_DIMENSIONS.STROKE_WIDTH_PX}
     />
-  </View>
-);
-
-const SectionHeader = ({
-  icon,
-  testID,
-  title,
-}: SectionHeaderProps): React.JSX.Element => (
-  <View className={LEGAL_ENTITY_FORM_STYLES.SECTION_HEADER_ROW} testID={testID}>
-    {icon}
-    <Text
-      accessibilityRole='header'
-      className={LEGAL_ENTITY_FORM_STYLES.SECTION_HEADER_TITLE}
-    >
-      {title}
-    </Text>
   </View>
 );
 
