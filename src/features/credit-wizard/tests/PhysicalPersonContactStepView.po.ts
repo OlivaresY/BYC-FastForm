@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -494,10 +495,18 @@ export class PhysicalPersonContactStepViewPageObject {
     callback: () => void | Promise<void>,
     options?: { interval?: number; timeout?: number },
   ): Promise<this> {
-    await waitFor(callback, {
-      interval: options?.interval ?? 50,
-      timeout: options?.timeout ?? 10000,
-    });
+    await waitFor(
+      async () => {
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+        await callback();
+      },
+      {
+        interval: options?.interval ?? 50,
+        timeout: options?.timeout ?? 10000,
+      },
+    );
     return this;
   }
 }

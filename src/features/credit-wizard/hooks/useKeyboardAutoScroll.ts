@@ -3,7 +3,6 @@ import {
   Dimensions,
   Keyboard,
   Platform,
-  ScrollView,
   TextInput,
   findNodeHandle,
 } from 'react-native';
@@ -11,6 +10,7 @@ import type {
   KeyboardEvent,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  ScrollViewInstance,
 } from 'react-native';
 
 interface MeasurableNode {
@@ -32,7 +32,7 @@ export interface UseKeyboardAutoScrollReturn {
   handleScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
   keyboardHeight: number;
   onInputFocus: () => void;
-  scrollViewRef: React.RefObject<ScrollView | null>;
+  scrollViewRef: React.RefObject<ScrollViewInstance | null>;
   scrollToFocusedInput: (customKeyboardHeight?: number) => void;
 }
 
@@ -51,7 +51,7 @@ export const useKeyboardAutoScroll = (
   const keyboardHeightRef = useRef<number>(0);
   const rafIdRef = useRef<number | null>(null);
   const scrollYRef = useRef<number>(0);
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<ScrollViewInstance | null>(null);
 
   const scrollToFocusedInput = useCallback(
     (customKeyboardHeight?: number): void => {
