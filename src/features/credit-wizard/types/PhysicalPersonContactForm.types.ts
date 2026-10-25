@@ -13,7 +13,7 @@ export interface PhysicalPersonContactFormOptions {
 export interface PhysicalPersonContactFormProps {
   control: Control<PhysicalPersonContact>;
   disabled?: boolean;
-  onInputFocus?: () => void;
+  onInputFocus?: (event?: unknown) => void;
   options?: PhysicalPersonContactFormOptions;
   testID?: string;
 }

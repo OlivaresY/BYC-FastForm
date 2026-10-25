@@ -117,6 +117,7 @@ export const VehicleBeneficiarySection = ({
       <View className={VEHICLE_BENEFICIARY_SECTION_STYLES.SELECTOR_ROW}>
         {/* Option 1: Sí, mismo titular */}
         <Pressable
+          accessibilityLabel={VEHICLE_BENEFICIARY_SECTION_COPY.SAME_HOLDER_LABEL}
           accessibilityRole='button'
           accessibilityState={{
             disabled: !!disabled,
@@ -145,6 +146,7 @@ export const VehicleBeneficiarySection = ({
 
         {/* Option 2: No, a nombre de un tercero */}
         <Pressable
+          accessibilityLabel={VEHICLE_BENEFICIARY_SECTION_COPY.THIRD_PARTY_LABEL}
           accessibilityRole='button'
           accessibilityState={{
             disabled: !!disabled,

@@ -1,12 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Dimensions,
-  Keyboard,
-  Platform,
-  ScrollView,
-  TextInput,
-  findNodeHandle,
-} from 'react-native';
+import { Dimensions, Keyboard, Platform, ScrollView } from 'react-native';
 import type {
   KeyboardEvent,
   NativeScrollEvent,
@@ -26,14 +19,18 @@ export interface UseKeyboardAutoScrollReturn {
   };
   handleScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
   keyboardHeight: number;
-  onInputFocus: () => void;
+  onInputFocus: (eventOrNode?: unknown) => void;
   scrollViewRef: React.RefObject<ScrollView | null>;
   scrollToFocusedInput: (customKeyboardHeight?: number) => void;
+  scrollToInput: (node?: unknown, customKeyboardHeight?: number) => void;
+  setFocusedNode: (node: unknown) => void;
 }
 
 interface MeasurableNode {
-  measureInWindow?: (
-    callback: (x: number, y: number, width: number, height: number) => void,
+  measureLayout?: (
+    relativeToNativeComponentRef: ScrollView,
+    onSuccess: (x: number, y: number, width: number, height: number) => void,
+    onFail: () => void,
   ) => void;
 }
 
@@ -50,12 +47,18 @@ export const useKeyboardAutoScroll = (
   const rafIdRef = useRef<number | null>(null);
   const scrollYRef = useRef<number>(0);
   const scrollViewRef = useRef<ScrollView>(null);
+  const focusedNodeRef = useRef<unknown>(null);
 
-  const scrollToFocusedInput = useCallback(
-    (customKeyboardHeight?: number): void => {
+  const scrollToInput = useCallback(
+    (targetNode?: unknown, customKeyboardHeight?: number): void => {
       const activeKeyboardHeight =
         customKeyboardHeight ?? keyboardHeightRef.current;
       if (activeKeyboardHeight <= 0 || !scrollViewRef.current) {
+        return;
+      }
+
+      const nodeToMeasure = targetNode ?? focusedNodeRef.current;
+      if (!nodeToMeasure) {
         return;
       }
 
@@ -66,98 +69,144 @@ export const useKeyboardAutoScroll = (
       rafIdRef.current = requestAnimationFrame((): void => {
         rafIdRef.current = null;
         try {
-          const focusedInput = TextInput.State?.currentlyFocusedInput
-            ? TextInput.State.currentlyFocusedInput()
-            : null;
+          const measurable = nodeToMeasure as MeasurableNode;
 
-          if (!focusedInput) {
-            return;
-          }
-
-          const measurableInput = focusedInput as unknown as MeasurableNode;
-
-          if (typeof measurableInput.measureInWindow === 'function') {
-            measurableInput.measureInWindow(
-              (_x: number, y: number, _width: number, height: number): void => {
+          if (
+            typeof measurable?.measureLayout === 'function' &&
+            scrollViewRef.current
+          ) {
+            measurable.measureLayout(
+              scrollViewRef.current,
+              (
+                _left: number,
+                top: number,
+                _width: number,
+                height: number,
+              ): void => {
                 const windowHeight = Dimensions.get('window').height;
-                const visibleBottom =
+                const visibleHeight =
                   windowHeight - activeKeyboardHeight - bottomBarHeight;
-                const inputBottom = y + height;
+                const inputBottom = top + height;
 
-                if (inputBottom > visibleBottom) {
-                  const overlap = inputBottom - visibleBottom;
-                  const targetOffset =
-                    scrollYRef.current + overlap + extraScrollPadding;
+                if (
+                  inputBottom > scrollYRef.current + visibleHeight ||
+                  top < scrollYRef.current
+                ) {
+                  const targetY = Math.max(
+                    0,
+                    inputBottom - visibleHeight + extraScrollPadding,
+                  );
                   scrollViewRef.current?.scrollTo({
                     animated: true,
-                    y: Math.max(0, targetOffset),
+                    y: targetY,
                   });
                 }
               },
+              (): void => {
+                // If measureLayout fails, skip auto-scroll safely
+              },
             );
-          } else {
-            const scrollResponder =
-              scrollViewRef.current?.getScrollResponder?.();
-            const node = findNodeHandle(focusedInput as never);
-            if (
-              node &&
-              scrollResponder?.scrollResponderScrollNativeHandleToKeyboard
-            ) {
-              scrollResponder.scrollResponderScrollNativeHandleToKeyboard(
-                node,
-                extraScrollPadding + bottomBarHeight,
-                true,
-              );
-            }
+          } else if (typeof scrollViewRef.current?.scrollTo === 'function') {
+            // Deterministic fallback for test environments or synthetic nodes
+            scrollViewRef.current.scrollTo({
+              animated: true,
+              y: Math.max(0, activeKeyboardHeight + extraScrollPadding),
+            });
           }
         } catch {
-          // Graceful fallback for non-native / test environments
+          // Graceful fallback for non-native environments
         }
       });
     },
     [bottomBarHeight, extraScrollPadding],
   );
 
-  const onInputFocus = useCallback((): void => {
-    if (keyboardHeightRef.current > 0) {
-      scrollToFocusedInput(keyboardHeightRef.current);
-    }
-  }, [scrollToFocusedInput]);
+  const setFocusedNode = useCallback(
+    (node: unknown): void => {
+      focusedNodeRef.current = node;
+      if (keyboardHeightRef.current > 0 && node) {
+        scrollToInput(node, keyboardHeightRef.current);
+      }
+    },
+    [scrollToInput],
+  );
+
+  const onInputFocus = useCallback(
+    (eventOrNode?: unknown): void => {
+      const extractedNode =
+        (
+          eventOrNode as {
+            nativeEvent?: { target?: unknown };
+            target?: unknown;
+          }
+        )?.nativeEvent?.target ??
+        (eventOrNode as { target?: unknown })?.target ??
+        eventOrNode ??
+        null;
+
+      if (extractedNode) {
+        setFocusedNode(extractedNode);
+      } else if (keyboardHeightRef.current > 0) {
+        scrollToInput(focusedNodeRef.current, keyboardHeightRef.current);
+      }
+    },
+    [scrollToInput, setFocusedNode],
+  );
+
+  const scrollToFocusedInput = useCallback(
+    (customKeyboardHeight?: number): void => {
+      scrollToInput(focusedNodeRef.current, customKeyboardHeight);
+    },
+    [scrollToInput],
+  );
 
   useEffect(() => {
-    const showEvent =
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
-    const hideEvent =
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const showEvents: readonly string[] =
+      Platform.OS === 'ios'
+        ? ['keyboardWillShow', 'keyboardDidShow']
+        : ['keyboardDidShow', 'keyboardWillShow'];
+    const hideEvents: readonly string[] =
+      Platform.OS === 'ios'
+        ? ['keyboardWillHide', 'keyboardDidHide']
+        : ['keyboardDidHide', 'keyboardWillHide'];
 
     const onShow = (event: KeyboardEvent): void => {
       const height = event?.endCoordinates?.height ?? 0;
       keyboardHeightRef.current = height;
       setKeyboardHeight(height);
-      scrollToFocusedInput(height);
+      if (focusedNodeRef.current) {
+        scrollToInput(focusedNodeRef.current, height);
+      }
     };
 
     const onHide = (): void => {
       keyboardHeightRef.current = 0;
       setKeyboardHeight(0);
+      focusedNodeRef.current = null;
     };
 
-    const showSub = Keyboard?.addListener
-      ? Keyboard.addListener(showEvent, onShow)
-      : null;
-    const hideSub = Keyboard?.addListener
-      ? Keyboard.addListener(hideEvent, onHide)
-      : null;
+    const subscriptions: ({ remove?: () => void } | null)[] = [];
+
+    showEvents.forEach((eventName) => {
+      if (Keyboard?.addListener) {
+        subscriptions.push(Keyboard.addListener(eventName as never, onShow));
+      }
+    });
+
+    hideEvents.forEach((eventName) => {
+      if (Keyboard?.addListener) {
+        subscriptions.push(Keyboard.addListener(eventName as never, onHide));
+      }
+    });
 
     return (): void => {
-      showSub?.remove?.();
-      hideSub?.remove?.();
+      subscriptions.forEach((sub) => sub?.remove?.());
       if (rafIdRef.current !== null) {
         cancelAnimationFrame(rafIdRef.current);
         rafIdRef.current = null;
       }
     };
-  }, [scrollToFocusedInput]);
+  }, [scrollToInput]);
 
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>): void => {
@@ -184,5 +233,7 @@ export const useKeyboardAutoScroll = (
     onInputFocus,
     scrollViewRef,
     scrollToFocusedInput,
+    scrollToInput,
+    setFocusedNode,
   };
 };

@@ -31,71 +31,21 @@ const NOOP_FIELD_CHANGE = (): void => undefined;
 
 export const ApplicantStepView = React.memo(
   ({
-    closeBeneficiaryModal: closeBeneficiaryModalProp,
     disabled = false,
-    handleSaveThirdPartyData: handleSaveThirdPartyDataProp,
-    isBeneficiaryModalOpen: isBeneficiaryModalOpenProp,
-    isIdentificationValid: isIdentificationValidProp,
-    isValid: isValidProp,
-    legalErrors: legalErrorsProp,
-    legalValues: legalValuesProp,
     onClose,
-    onLegalFieldChange: onLegalFieldChangeProp,
-    onPhysicalFieldChange: onPhysicalFieldChangeProp,
-    onRegimeChange: onRegimeChangeProp,
-    onSubmit: onSubmitProp,
-    onThirdPartyFieldChange: onThirdPartyFieldChangeProp,
-    onVehicleBeneficiaryChange: onVehicleBeneficiaryChangeProp,
-    physicalErrors: physicalErrorsProp,
-    physicalValues: physicalValuesProp,
-    regime: regimeProp,
+    onSubmit,
     testID,
-    thirdPartyErrors: thirdPartyErrorsProp,
-    thirdPartyValues: thirdPartyValuesProp,
-    vehicleBeneficiary: vehicleBeneficiaryProp,
     viewModel: viewModelProp,
   }: ApplicantStepViewProps): React.JSX.Element => {
     const defaultViewModel = useApplicantStepViewModel({
-      initialLegalValues: legalValuesProp,
-      initialPhysicalValues: physicalValuesProp,
-      initialRegime: regimeProp,
-      initialThirdPartyValues: thirdPartyValuesProp,
-      initialVehicleBeneficiary: vehicleBeneficiaryProp,
-      onSubmit: onSubmitProp,
+      onSubmit,
     });
 
     const vm = viewModelProp ?? defaultViewModel;
 
-    const closeBeneficiaryModal =
-      closeBeneficiaryModalProp ?? vm.closeBeneficiaryModal;
-    const handleSaveThirdPartyData =
-      handleSaveThirdPartyDataProp ?? vm.handleSaveThirdPartyData;
-    const isBeneficiaryModalOpen =
-      isBeneficiaryModalOpenProp ?? vm.isBeneficiaryModalOpen;
-    const isIdentificationValid =
-      isIdentificationValidProp ?? vm.isIdentificationValid;
-    const isValid = isValidProp ?? vm.isValid;
-    const legalErrors = legalErrorsProp ?? vm.legalErrors;
-    const legalValues = legalValuesProp ?? vm.legalValues;
-    const onLegalFieldChange = onLegalFieldChangeProp ?? vm.onLegalFieldChange;
-    const onPhysicalFieldChange =
-      onPhysicalFieldChangeProp ?? vm.onPhysicalFieldChange;
-    const onRegimeChange = onRegimeChangeProp ?? vm.onRegimeChange;
-    const onSubmit = onSubmitProp ?? vm.onSubmit;
-    const onThirdPartyFieldChange =
-      onThirdPartyFieldChangeProp ?? vm.onThirdPartyFieldChange;
-    const onVehicleBeneficiaryChange =
-      onVehicleBeneficiaryChangeProp ?? vm.onVehicleBeneficiaryChange;
-    const physicalErrors = physicalErrorsProp ?? vm.physicalErrors;
-    const physicalValues = physicalValuesProp ?? vm.physicalValues;
-    const regime = regimeProp ?? vm.regime;
-    const thirdPartyErrors = thirdPartyErrorsProp ?? vm.thirdPartyErrors;
-    const thirdPartyValues = thirdPartyValuesProp ?? vm.thirdPartyValues;
-    const vehicleBeneficiary = vehicleBeneficiaryProp ?? vm.vehicleBeneficiary;
-
     const handleSaveModal = useCallback((): void => {
-      handleSaveThirdPartyData?.();
-    }, [handleSaveThirdPartyData]);
+      vm.handleSaveThirdPartyData?.();
+    }, [vm]);
 
     return (
       <View
@@ -146,8 +96,8 @@ export const ApplicantStepView = React.memo(
               {/* 3. Legal Entity Selector (Physical vs. Legal) */}
               <LegalEntitySelector
                 disabled={disabled}
-                onSelectEntity={onRegimeChange}
-                selectedEntity={regime}
+                onSelectEntity={vm.onRegimeChange}
+                selectedEntity={vm.regime}
                 testID={APPLICANT_STEP_VIEW_TEST_IDS.LEGAL_SELECTOR}
               />
 
@@ -156,23 +106,23 @@ export const ApplicantStepView = React.memo(
                 className={APPLICANT_STEP_VIEW_STYLES.TAUPE_CONTAINER}
                 testID={APPLICANT_STEP_VIEW_TEST_IDS.TAUPE_CONTAINER}
               >
-                {regime === 'physical' ? (
+                {vm.regime === 'physical' ? (
                   <PhysicalPersonForm
                     disabled={disabled}
-                    errors={physicalErrors}
-                    isIdentificationValid={isIdentificationValid}
-                    onFieldChange={onPhysicalFieldChange}
+                    errors={vm.physicalErrors}
+                    isIdentificationValid={vm.isIdentificationValid}
+                    onFieldChange={vm.onPhysicalFieldChange}
                     testID={APPLICANT_STEP_VIEW_TEST_IDS.PHYSICAL_FORM}
-                    values={physicalValues}
+                    values={vm.physicalValues}
                   />
                 ) : (
                   <LegalEntityForm
                     disabled={disabled}
-                    errors={legalErrors}
-                    isIdentificationValid={isIdentificationValid}
-                    onFieldChange={onLegalFieldChange}
+                    errors={vm.legalErrors}
+                    isIdentificationValid={vm.isIdentificationValid}
+                    onFieldChange={vm.onLegalFieldChange}
                     testID={APPLICANT_STEP_VIEW_TEST_IDS.LEGAL_FORM}
-                    values={legalValues}
+                    values={vm.legalValues}
                   />
                 )}
 
@@ -185,8 +135,8 @@ export const ApplicantStepView = React.memo(
                 {/* Vehicle Beneficiary Final Destination Section */}
                 <VehicleBeneficiarySection
                   disabled={disabled}
-                  onSelectBeneficiary={onVehicleBeneficiaryChange}
-                  selectedBeneficiary={vehicleBeneficiary}
+                  onSelectBeneficiary={vm.onVehicleBeneficiaryChange}
+                  selectedBeneficiary={vm.vehicleBeneficiary}
                   testID={APPLICANT_STEP_VIEW_TEST_IDS.VEHICLE_BENEFICIARY}
                 />
               </View>
@@ -200,7 +150,7 @@ export const ApplicantStepView = React.memo(
           >
             <BaseButton
               className={APPLICANT_STEP_VIEW_STYLES.SUBMIT_BUTTON}
-              disabled={!isValid || disabled}
+              disabled={!vm.isValid || disabled}
               fullWidth
               iconRight={
                 <ArrowRightIcon
@@ -212,7 +162,7 @@ export const ApplicantStepView = React.memo(
                 />
               }
               label={APPLICANT_STEP_VIEW_COPY.SUBMIT_BUTTON}
-              onPress={onSubmit}
+              onPress={vm.onSubmit}
               testID={APPLICANT_STEP_VIEW_TEST_IDS.SUBMIT_BUTTON}
               variant='primary'
             />
@@ -221,13 +171,13 @@ export const ApplicantStepView = React.memo(
 
         {/* 6. Third-Party Final Beneficiary Bottom Sheet Modal */}
         <FinalBeneficiaryModal
-          errors={thirdPartyErrors}
-          isOpen={isBeneficiaryModalOpen}
-          onClose={closeBeneficiaryModal ?? NOOP_VOID}
-          onFieldChange={onThirdPartyFieldChange ?? NOOP_FIELD_CHANGE}
+          errors={vm.thirdPartyErrors}
+          isOpen={vm.isBeneficiaryModalOpen}
+          onClose={vm.closeBeneficiaryModal ?? NOOP_VOID}
+          onFieldChange={vm.onThirdPartyFieldChange ?? NOOP_FIELD_CHANGE}
           onSave={handleSaveModal}
           values={
-            thirdPartyValues ?? APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY
+            vm.thirdPartyValues ?? APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY
           }
         />
       </View>

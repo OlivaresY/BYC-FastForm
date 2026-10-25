@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { ScrollView, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ArrowRightIcon,
   BaseButton,
@@ -25,26 +26,38 @@ import { WizardProgressHeader } from './WizardProgressHeader';
 const NOOP_VOID = (): void => undefined;
 
 export const LegalEntityContactStepView = ({
-  currentStep = LEGAL_ENTITY_CONTACT_STEP_VIEW_NUMERICAL.DEFAULT_CURRENT_STEP,
+  currentStep,
   disabled = false,
   onClose,
   onSubmit,
   testID,
-  totalSteps = LEGAL_ENTITY_CONTACT_STEP_VIEW_NUMERICAL.DEFAULT_TOTAL_STEPS,
+  totalSteps,
   viewModel: viewModelProp,
 }: LegalEntityContactStepViewProps): React.JSX.Element => {
+  const insets = useSafeAreaInsets();
   const defaultViewModel = useLegalEntityContactViewModel({ onSubmit });
   const viewModel = viewModelProp ?? defaultViewModel;
   const { control, handleNextStep, isSubmitting, isValid, submitError } =
     viewModel;
 
+  const dynamicBottomPadding =
+    Math.max(insets.bottom, 16) +
+    LEGAL_ENTITY_CONTACT_STEP_VIEW_DIMENSIONS.BASE_FOOTER_HEIGHT;
+
   const { contentContainerStyle, handleScroll, onInputFocus, scrollViewRef } =
     useKeyboardAutoScroll({
-      bottomBarHeight:
-        LEGAL_ENTITY_CONTACT_STEP_VIEW_DIMENSIONS.BOTTOM_BAR_HEIGHT,
+      bottomBarHeight: dynamicBottomPadding,
       extraScrollPadding:
         LEGAL_ENTITY_CONTACT_STEP_VIEW_DIMENSIONS.EXTRA_KEYBOARD_SCROLL_OFFSET,
     });
+
+  const handleSubmitPress = useCallback((): void => {
+    void handleNextStep();
+  }, [handleNextStep]);
+
+  const handleBackPress = useCallback((): void => {
+    onClose?.();
+  }, [onClose]);
 
   return (
     <View
@@ -119,6 +132,7 @@ export const LegalEntityContactStepView = ({
         {/* 4. Fixed Bottom CTA Bar */}
         <View
           className={LEGAL_ENTITY_CONTACT_STEP_VIEW_STYLES.BOTTOM_BAR}
+          style={{ paddingBottom: Math.max(insets.bottom, 16) }}
           testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.BOTTOM_BAR}
         >
           <BaseButton
@@ -134,7 +148,7 @@ export const LegalEntityContactStepView = ({
               />
             }
             label={LEGAL_ENTITY_CONTACT_STEP_VIEW_COPY.BACK_BUTTON}
-            onPress={onClose ?? NOOP_VOID}
+            onPress={handleBackPress}
             testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.BACK_BUTTON}
             variant='neutral'
           />
@@ -155,9 +169,7 @@ export const LegalEntityContactStepView = ({
             }
             label={LEGAL_ENTITY_CONTACT_STEP_VIEW_COPY.SUBMIT_BUTTON}
             loading={isSubmitting}
-            onPress={(): void => {
-              void handleNextStep();
-            }}
+            onPress={handleSubmitPress}
             testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.SUBMIT_BUTTON}
             variant='primary'
           />

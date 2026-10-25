@@ -1,3 +1,4 @@
+import { esCR } from '@/shared/i18n';
 import type { CustomSelectOption } from '@/shared/ui';
 import { EMPLOYMENT_STATUSES } from './PhysicalPersonContact.constants';
 
@@ -33,8 +34,8 @@ export const PHYSICAL_PERSON_CONTACT_FORM_COPY = {
   NET_INCOME_PLACEHOLDER: '1200000',
   OFFICE_PHONE_LABEL: 'TEL. OFICINA',
   OFFICE_PHONE_PLACEHOLDER: '+506 2200-0000',
-  OPTIONAL_BADGE: 'Opcional',
-  OTHER_INCOMES_BADGE: 'Opcional',
+  OPTIONAL_BADGE: esCR.common.badges.optional,
+  OTHER_INCOMES_BADGE: esCR.common.badges.optional,
   OTHER_INCOMES_HELPER:
     'Ingresos demostrables con constancia salarial adicional o certificación de CPA.',
   OTHER_INCOMES_LABEL: 'OTROS INGRESOS MENSUALES',

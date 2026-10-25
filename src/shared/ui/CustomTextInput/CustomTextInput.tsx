@@ -129,7 +129,8 @@ const ValidCheckmarkIcon = ({ testID }: ValidIconProps): React.JSX.Element => (
   </View>
 );
 
-export const CustomTextInput = ({
+export const CustomTextInput = React.memo(
+  ({
   error,
   helperText,
   isPassword = false,
@@ -262,4 +263,6 @@ export const CustomTextInput = ({
       ) : null}
     </View>
   );
-};
+});
+
+CustomTextInput.displayName = 'CustomTextInput';

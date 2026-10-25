@@ -22,7 +22,11 @@ export const FORMATTERS_SYMBOLS = {
 export const formatCurrencyDisplay = (
   value: number | undefined | null,
 ): string => {
-  if (value === undefined || value === null) {
+  if (
+    value === undefined ||
+    value === null ||
+    (typeof value === 'number' && Number.isNaN(value))
+  ) {
     return FORMATTERS_SYMBOLS.EMPTY;
   }
   return String(value).replace(

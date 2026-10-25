@@ -29,8 +29,8 @@ export const PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES = {
   },
   financialCapacity: {
     currency: FINANCIAL_CURRENCIES.CRC,
-    grossIncome: 0,
-    netIncome: 0,
+    grossIncome: undefined,
+    netIncome: undefined,
     otherIncomes: undefined,
   },
   residentialAddress: {

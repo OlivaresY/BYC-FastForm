@@ -5,12 +5,12 @@ import type {
 import type { PhysicalPersonContactFormOptions } from './PhysicalPersonContactForm.types';
 
 export interface PhysicalPersonContactStepViewProps {
-  currentStep?: number;
+  currentStep: number;
   disabled?: boolean;
   onClose?: () => void;
   onSubmit?: (data: PhysicalPersonContact) => void;
   options?: PhysicalPersonContactFormOptions;
   testID?: string;
-  totalSteps?: number;
+  totalSteps: number;
   viewModel?: UsePhysicalPersonContactViewModelReturn;
 }

@@ -123,6 +123,8 @@ export const LegalEntityForm = ({
         />
 
         <CustomTextInput
+          autoCapitalize='none'
+          autoCorrect={false}
           editable={!disabled}
           error={errors?.identificationNumber}
           helperText={LEGAL_ENTITY_FORM_COPY.IDENTIFICATION_NUMBER_HELPER}
@@ -146,6 +148,7 @@ export const LegalEntityForm = ({
         />
 
         <CustomTextInput
+          autoCapitalize='words'
           editable={!disabled}
           error={errors?.legalName}
           label={LEGAL_ENTITY_FORM_COPY.LEGAL_NAME_LABEL}
@@ -166,6 +169,8 @@ export const LegalEntityForm = ({
         />
 
         <CustomTextInput
+          autoCapitalize='none'
+          autoCorrect={false}
           editable={!disabled}
           error={errors?.representativeIdentification}
           label={LEGAL_ENTITY_FORM_COPY.REPRESENTATIVE_IDENTIFICATION_LABEL}
@@ -181,6 +186,7 @@ export const LegalEntityForm = ({
         />
 
         <CustomTextInput
+          autoCapitalize='words'
           editable={!disabled}
           error={errors?.representativeName}
           label={LEGAL_ENTITY_FORM_COPY.REPRESENTATIVE_NAME_LABEL}

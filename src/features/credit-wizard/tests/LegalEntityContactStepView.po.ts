@@ -11,6 +11,7 @@ import { LegalEntityContactStepView } from '../components/LegalEntityContactStep
 import { LEGAL_ENTITY_CONTACT_FORM_TEST_IDS } from '../constants/LegalEntityContactForm.constants';
 import { LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS } from '../constants/LegalEntityContactStepView.constants';
 import { useLegalEntityContactViewModel } from '../hooks/useLegalEntityContactViewModel';
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import type { UseLegalEntityContactViewModelProps } from '../types/LegalEntityContact.types';
 
 export interface LegalEntityContactStepViewTestContainerProps extends UseLegalEntityContactViewModelProps {
@@ -22,22 +23,26 @@ export interface LegalEntityContactStepViewTestContainerProps extends UseLegalEn
 }
 
 const LegalEntityContactStepViewTestContainer = ({
-  currentStep,
+  currentStep = 2,
   disabled,
   onClose = jest.fn(),
   testID,
-  totalSteps,
+  totalSteps = 4,
   ...hookProps
 }: LegalEntityContactStepViewTestContainerProps): React.JSX.Element => {
   const viewModel = useLegalEntityContactViewModel(hookProps);
-  return React.createElement(LegalEntityContactStepView, {
-    currentStep,
-    disabled,
-    onClose,
-    testID,
-    totalSteps,
-    viewModel,
-  });
+  return React.createElement(
+    SafeAreaInsetsContext.Provider,
+    { value: { bottom: 0, left: 0, right: 0, top: 0 } },
+    React.createElement(LegalEntityContactStepView, {
+      currentStep,
+      disabled,
+      onClose,
+      testID,
+      totalSteps,
+      viewModel,
+    }),
+  );
 };
 
 export class LegalEntityContactStepViewPageObject {

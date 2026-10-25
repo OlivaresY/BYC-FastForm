@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-native';
 import { View } from 'react-native';
-import { ModalStoryWrapper } from '@/shared/components/ModalStoryWrapper';
+import { ModalStoryWrapper } from '@/shared/components';
 import { FinalBeneficiaryModalMemo as FinalBeneficiaryModal } from './FinalBeneficiaryModal';
 
 const meta = {

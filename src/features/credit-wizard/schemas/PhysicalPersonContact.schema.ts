@@ -39,7 +39,7 @@ export const ContactInfoSchema = z.object({
   homePhone: z
     .string()
     .trim()
-    .optional()
+    .nullish()
     .refine((value) => !value || INTERNATIONAL_PHONE_REGEX.test(value), {
       message: PHYSICAL_PERSON_CONTACT_ERRORS.CONTACT_INFO.HOME_PHONE_INVALID,
     }),
@@ -156,7 +156,7 @@ export const FinancialCapacitySchema = z.object({
   currency: z.enum([FINANCIAL_CURRENCIES.CRC, FINANCIAL_CURRENCIES.USD], {
     error: PHYSICAL_PERSON_CONTACT_ERRORS.FINANCIAL_CAPACITY.CURRENCY_INVALID,
   }),
-  grossIncome: z
+  grossIncome: z.coerce
     .number({
       error:
         PHYSICAL_PERSON_CONTACT_ERRORS.FINANCIAL_CAPACITY.GROSS_INCOME_REQUIRED,
@@ -165,7 +165,7 @@ export const FinancialCapacitySchema = z.object({
       0,
       PHYSICAL_PERSON_CONTACT_ERRORS.FINANCIAL_CAPACITY.GROSS_INCOME_POSITIVE,
     ),
-  netIncome: z
+  netIncome: z.coerce
     .number({
       error:
         PHYSICAL_PERSON_CONTACT_ERRORS.FINANCIAL_CAPACITY.NET_INCOME_REQUIRED,
@@ -174,14 +174,14 @@ export const FinancialCapacitySchema = z.object({
       0,
       PHYSICAL_PERSON_CONTACT_ERRORS.FINANCIAL_CAPACITY.NET_INCOME_POSITIVE,
     ),
-  otherIncomes: z
+  otherIncomes: z.coerce
     .number({
       error:
         PHYSICAL_PERSON_CONTACT_ERRORS.FINANCIAL_CAPACITY
           .OTHER_INCOMES_REQUIRED,
     })
     .min(0, PHYSICAL_PERSON_CONTACT_ERRORS.FINANCIAL_CAPACITY.OTHER_INCOMES_MIN)
-    .optional(),
+    .nullish(),
 });
 
 export const PhysicalPersonContactSchema = z.object({

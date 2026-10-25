@@ -11,13 +11,14 @@ import {
 import type { CustomSelectProps } from './CustomSelect.types';
 import { useCustomSelect } from './hooks/useCustomSelect';
 
-export const CustomSelect = ({
+export const CustomSelect = React.memo(({
   disabled = false,
   errorMessage,
   helperText,
   label,
   leftIcon,
   modalTitle,
+  onFocus,
   onValueChange,
   options,
   placeholder = CUSTOM_SELECT_COPY.DEFAULT_PLACEHOLDER,
@@ -102,12 +103,17 @@ export const CustomSelect = ({
 
       {/* Trigger Button */}
       <Pressable
+        accessibilityLabel={label ? `${label}, ${displayText}` : displayText}
         accessibilityRole='button'
         accessibilityState={{ disabled: !!disabled, expanded: isOpen }}
         aria-invalid={Boolean(errorMessage)}
         className={`${CUSTOM_SELECT_STYLES.TRIGGER_BASE} ${borderClass}${disabledClass}`}
         disabled={disabled}
-        onPress={openModal}
+        onFocus={onFocus}
+        onPress={(event) => {
+          onFocus?.(event);
+          openModal();
+        }}
         testID={triggerTestId}
       >
         {leftIcon === 'globe' ? (
@@ -176,6 +182,7 @@ export const CustomSelect = ({
         >
           <Pressable
             accessibilityViewIsModal
+            accessible={false}
             className={CUSTOM_SELECT_STYLES.MODAL_CARD}
             onPress={(event) => {
               event?.stopPropagation?.();
@@ -225,6 +232,7 @@ export const CustomSelect = ({
 
                   return (
                     <Pressable
+                      accessibilityLabel={option.label}
                       accessibilityRole='button'
                       accessibilityState={{ selected: isOptionActive }}
                       className={
@@ -269,4 +277,6 @@ export const CustomSelect = ({
       </Modal>
     </View>
   );
-};
+});
+
+CustomSelect.displayName = 'CustomSelect';

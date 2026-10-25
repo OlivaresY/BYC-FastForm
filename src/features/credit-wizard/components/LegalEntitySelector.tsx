@@ -89,6 +89,7 @@ export const LegalEntitySelector = ({
       <View className={LEGAL_ENTITY_SELECTOR_STYLES.GRID}>
         {/* Card 1: Persona Física */}
         <Pressable
+          accessibilityLabel={`${LEGAL_ENTITY_SELECTOR_COPY.PHYSICAL_TITLE}, ${LEGAL_ENTITY_SELECTOR_COPY.PHYSICAL_SUBTITLE}`}
           accessibilityRole='button'
           accessibilityState={{
             disabled: !!disabled,
@@ -142,6 +143,7 @@ export const LegalEntitySelector = ({
 
         {/* Card 2: Persona Jurídica */}
         <Pressable
+          accessibilityLabel={`${LEGAL_ENTITY_SELECTOR_COPY.LEGAL_TITLE}, ${LEGAL_ENTITY_SELECTOR_COPY.LEGAL_SUBTITLE}`}
           accessibilityRole='button'
           accessibilityState={{
             disabled: !!disabled,

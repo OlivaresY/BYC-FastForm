@@ -48,6 +48,7 @@ export const CloseProcessModal = ({
     >
       <Pressable
         accessibilityViewIsModal
+        accessible={false}
         className={CLOSE_PROCESS_MODAL_STYLES.CONTAINER}
         onPress={(event) => event?.stopPropagation?.()}
         testID={CLOSE_PROCESS_MODAL_TEST_IDS.CONTAINER}

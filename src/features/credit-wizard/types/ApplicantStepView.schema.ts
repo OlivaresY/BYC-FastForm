@@ -78,7 +78,7 @@ export const PhysicalApplicantSchema = z.object({
     ['single', 'married', 'divorced', 'widowed', 'common_law'],
     { error: APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.MARITAL_STATUS },
   ),
-  middleName: z.string().trim().optional(),
+  middleName: z.string().trim().nullish(),
   nationality: requiredText(APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.NATIONALITY),
   secondLastName: requiredText(
     APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.SECOND_LAST_NAME,
@@ -163,7 +163,7 @@ export const StrictThirdPartyBeneficiarySchema = z.object(
 export const optionalBeneficiaryEmailSchema = z
   .string()
   .trim()
-  .optional()
+  .nullish()
   .refine((val) => !val || z.email().safeParse(val).success, {
     message: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL,
   });
@@ -171,21 +171,21 @@ export const optionalBeneficiaryEmailSchema = z
 export const optionalBeneficiaryPhoneSchema = z
   .string()
   .trim()
-  .optional()
+  .nullish()
   .refine((val) => !val || (val.length >= 8 && PHONE_PATTERN.test(val)), {
     message: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.PHONE,
   });
 
 export const ThirdPartyBeneficiaryFieldsSchema = {
-  isThirdPartyRegistration: z.boolean().optional(),
-  thirdPartyBirthDate: z.string().optional(),
-  thirdPartyDocNumber: z.string().optional(),
-  thirdPartyDocType: z.string().optional(),
+  isThirdPartyRegistration: z.boolean().nullish(),
+  thirdPartyBirthDate: z.string().nullish(),
+  thirdPartyDocNumber: z.string().nullish(),
+  thirdPartyDocType: z.string().nullish(),
   thirdPartyEmail: optionalBeneficiaryEmailSchema,
-  thirdPartyFullName: z.string().optional(),
-  thirdPartyNationality: z.string().optional(),
+  thirdPartyFullName: z.string().nullish(),
+  thirdPartyNationality: z.string().nullish(),
   thirdPartyPhone: optionalBeneficiaryPhoneSchema,
-  thirdPartyRelationship: z.string().optional(),
+  thirdPartyRelationship: z.string().nullish(),
 };
 
 export const ThirdPartyBeneficiarySchema = StrictThirdPartyBeneficiarySchema;
@@ -246,8 +246,8 @@ export const ApplicantStepSchema = ApplicantStepSubmissionSchema;
 
 export const ApplicantStepFormSchema = z.object({
   ...ThirdPartyBeneficiaryFieldsSchema,
-  regime: z.enum(['physical', 'legal']).optional(),
-  vehicleBeneficiary: z.enum(['same_holder', 'third_party']).optional(),
+  regime: z.enum(['physical', 'legal']).nullish(),
+  vehicleBeneficiary: z.enum(['same_holder', 'third_party']).nullish(),
 });
 
 // =============================================================================

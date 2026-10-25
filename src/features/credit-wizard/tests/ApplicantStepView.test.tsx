@@ -284,20 +284,29 @@ describe('ApplicantStepView Integration', () => {
       // Arrange
       const page = ApplicantStepViewPageObject.renderDirect({
         disabled: true,
-        isIdentificationValid: true,
-        isValid: true,
-        legalErrors: {},
-        legalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
-        onLegalFieldChange: jest.fn(),
-        onPhysicalFieldChange: jest.fn(),
-        onRegimeChange: jest.fn(),
-        onSubmit: jest.fn(),
-        onVehicleBeneficiaryChange: jest.fn(),
-        physicalErrors: {},
-        physicalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.PHYSICAL,
-        regime: 'physical',
         testID: 'custom-applicant-step-view',
-        vehicleBeneficiary: 'same_holder',
+        viewModel: {
+          closeBeneficiaryModal: jest.fn(),
+          handleSaveThirdPartyData: jest.fn().mockReturnValue(true),
+          isBeneficiaryModalOpen: false,
+          isIdentificationValid: true,
+          isValid: true,
+          legalErrors: {},
+          legalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
+          onLegalFieldChange: jest.fn(),
+          onPhysicalFieldChange: jest.fn(),
+          onRegimeChange: jest.fn(),
+          onSubmit: jest.fn(),
+          onThirdPartyFieldChange: jest.fn(),
+          onVehicleBeneficiaryChange: jest.fn(),
+          openBeneficiaryModal: jest.fn(),
+          physicalErrors: {},
+          physicalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.PHYSICAL,
+          regime: 'physical',
+          thirdPartyErrors: {},
+          thirdPartyValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
+          vehicleBeneficiary: 'same_holder',
+        },
       });
 
       // Assert
@@ -307,17 +316,7 @@ describe('ApplicantStepView Integration', () => {
 
     it('uses default values for isIdentificationValid, isValid, and disabled when omitted', () => {
       // Arrange
-      const page = ApplicantStepViewPageObject.renderDirect({
-        legalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
-        onLegalFieldChange: jest.fn(),
-        onPhysicalFieldChange: jest.fn(),
-        onRegimeChange: jest.fn(),
-        onSubmit: jest.fn(),
-        onVehicleBeneficiaryChange: jest.fn(),
-        physicalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.PHYSICAL,
-        regime: 'physical',
-        vehicleBeneficiary: 'same_holder',
-      });
+      const page = ApplicantStepViewPageObject.renderDirect({});
 
       // Assert - isSubmitButtonDisabled is true because isValid defaults to false
       expect(page.isSubmitButtonDisabled()).toBe(true);

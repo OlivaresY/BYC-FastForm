@@ -6,7 +6,7 @@ import {
 } from './constants/ErrorBanner.constants';
 import type { ErrorBannerProps } from './ErrorBanner.types';
 
-export const ErrorBanner = ({
+export const ErrorBanner = React.memo(({
   message,
   style,
   testID,
@@ -35,4 +35,6 @@ export const ErrorBanner = ({
       </Text>
     </View>
   );
-};
+});
+
+ErrorBanner.displayName = 'ErrorBanner';

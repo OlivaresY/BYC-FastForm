@@ -62,12 +62,12 @@ export const LegalEntityContactSchema = z
           error: LEGAL_ENTITY_CONTACT_ERRORS.EMAIL_INVALID,
         }),
       ),
-    grossIncome: z
+    grossIncome: z.coerce
       .number({
         error: LEGAL_ENTITY_CONTACT_ERRORS.GROSS_INCOME_REQUIRED,
       })
       .gt(0, LEGAL_ENTITY_CONTACT_ERRORS.GROSS_INCOME_POSITIVE),
-    netIncome: z
+    netIncome: z.coerce
       .number({
         error: LEGAL_ENTITY_CONTACT_ERRORS.NET_INCOME_REQUIRED,
       })

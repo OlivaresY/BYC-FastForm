@@ -79,18 +79,13 @@ export {
   KEYBOARD_AWARE_STEP_LAYOUT_DIMENSIONS,
   KEYBOARD_AWARE_STEP_LAYOUT_STYLES,
   KEYBOARD_AWARE_STEP_LAYOUT_TEST_IDS,
-  KeyboardAwareStepContext,
-  KeyboardAwareStepLayout,
   useKeyboardAutoScroll,
-  useKeyboardAwareStepContext,
 } from './KeyboardAwareStepLayout';
 export type {
-  KeyboardAwareStepContextValue,
-  KeyboardAwareStepLayoutChildren,
-  KeyboardAwareStepLayoutProps,
   UseKeyboardAutoScrollOptions,
   UseKeyboardAutoScrollReturn,
 } from './KeyboardAwareStepLayout';
+
 
 export {
   PROCESS_TOP_BAR_COLORS,
