@@ -1,5 +1,5 @@
 import type { Control } from 'react-hook-form';
-import type { CustomSelectOption } from '@/shared/ui/CustomSelect';
+import type { CustomSelectOption } from '@/shared/ui';
 import type { PhysicalPersonContact } from './PhysicalPersonContact.types';
 
 export interface PhysicalPersonContactFormOptions {

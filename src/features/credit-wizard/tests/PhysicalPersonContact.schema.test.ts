@@ -30,12 +30,12 @@ describe('PhysicalPersonContactSchema custom error messages', () => {
 
     // Assert
     expect(result.success).toBe(false);
-    expect(
-      getMessages(result, ['employmentData', 'employmentStatus']),
-    ).toEqual([
-      PHYSICAL_PERSON_CONTACT_ERRORS.EMPLOYMENT_DATA
-        .EMPLOYMENT_STATUS_REQUIRED,
-    ]);
+    expect(getMessages(result, ['employmentData', 'employmentStatus'])).toEqual(
+      [
+        PHYSICAL_PERSON_CONTACT_ERRORS.EMPLOYMENT_DATA
+          .EMPLOYMENT_STATUS_REQUIRED,
+      ],
+    );
   });
 
   it('returns the Spanish message for an unknown employmentStatus value', () => {
@@ -74,9 +74,7 @@ describe('PhysicalPersonContactSchema custom error messages', () => {
     expect(getMessages(result, ['employmentData', 'employer'])).toContain(
       PHYSICAL_PERSON_CONTACT_ERRORS.EMPLOYMENT_DATA.EMPLOYER_REQUIRED,
     );
-    expect(
-      getMessages(result, ['residentialAddress', 'province']),
-    ).toContain(
+    expect(getMessages(result, ['residentialAddress', 'province'])).toContain(
       PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.PROVINCE_REQUIRED,
     );
   });

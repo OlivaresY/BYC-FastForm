@@ -6,9 +6,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { BaseButton } from '@/shared/ui/BaseButton';
-import { ArrowRightIcon } from '@/shared/ui/Icons';
-import { ProcessTopBar } from '@/shared/ui/ProcessTopBar';
+import { BaseButton, ArrowRightIcon, ProcessTopBar } from '@/shared/ui';
 import {
   APPLICANT_STEP_VIEW_COLORS,
   APPLICANT_STEP_VIEW_CONSTANTS,
@@ -79,8 +77,7 @@ export const ApplicantStepView = React.memo(
     const isValid = isValidProp ?? vm.isValid;
     const legalErrors = legalErrorsProp ?? vm.legalErrors;
     const legalValues = legalValuesProp ?? vm.legalValues;
-    const onLegalFieldChange =
-      onLegalFieldChangeProp ?? vm.onLegalFieldChange;
+    const onLegalFieldChange = onLegalFieldChangeProp ?? vm.onLegalFieldChange;
     const onPhysicalFieldChange =
       onPhysicalFieldChangeProp ?? vm.onPhysicalFieldChange;
     const onRegimeChange = onRegimeChangeProp ?? vm.onRegimeChange;
@@ -94,8 +91,7 @@ export const ApplicantStepView = React.memo(
     const regime = regimeProp ?? vm.regime;
     const thirdPartyErrors = thirdPartyErrorsProp ?? vm.thirdPartyErrors;
     const thirdPartyValues = thirdPartyValuesProp ?? vm.thirdPartyValues;
-    const vehicleBeneficiary =
-      vehicleBeneficiaryProp ?? vm.vehicleBeneficiary;
+    const vehicleBeneficiary = vehicleBeneficiaryProp ?? vm.vehicleBeneficiary;
 
     const handleSaveModal = useCallback((): void => {
       handleSaveThirdPartyData?.();

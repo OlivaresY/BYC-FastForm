@@ -1,14 +1,14 @@
 import React from 'react';
 import { Controller } from 'react-hook-form';
 import { Text, View } from 'react-native';
-import { CustomSelect } from '@/shared/ui/CustomSelect';
-import { CustomTextInput } from '@/shared/ui/CustomTextInput';
 import {
   BanknoteIcon,
+  CustomSelect,
+  CustomTextInput,
   IdCardIcon,
   MapPinIcon,
-} from '@/shared/ui/Icons';
-import { PHYSICAL_PERSON_CONTACT_PATTERNS } from '../constants/PhysicalPersonContact.constants';
+} from '@/shared/ui';
+import { formatCurrencyDisplay, formatDateDisplay } from '@/shared/utils';
 import {
   PHYSICAL_PERSON_CONTACT_FORM_COLORS,
   PHYSICAL_PERSON_CONTACT_FORM_COPY,
@@ -19,69 +19,6 @@ import {
   PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS,
 } from '../constants/PhysicalPersonContactForm.constants';
 import type { PhysicalPersonContactFormProps } from '../types/PhysicalPersonContactForm.types';
-
-const formatCurrencyDisplay = (value: number | undefined | null): string => {
-  if (value === undefined || value === null) {
-    return '';
-  }
-  return String(value).replace(
-    PHYSICAL_PERSON_CONTACT_PATTERNS.CURRENCY_THOUSANDS_SEPARATOR,
-    '.',
-  );
-};
-
-const formatDateDisplay = (text: string): string => {
-  // If no separators, do standard digit slicing
-  if (!text.includes('-') && !text.includes('/')) {
-    const digits = text.replace(/[^0-9]/g, '');
-    if (digits.length <= 2) {
-      return digits;
-    }
-    if (digits.length <= 4) {
-      return `${digits.slice(0, 2)}-${digits.slice(2)}`;
-    }
-    return `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4, 8)}`;
-  }
-
-  // Preserve slots if separators exist
-  const parts = text.split(/[-/]/);
-  let day = (parts[0] || '').replace(/[^0-9]/g, '');
-  let month = (parts[1] || '').replace(/[^0-9]/g, '');
-  let year = (parts[2] || '').replace(/[^0-9]/g, '');
-  let slots = Math.min(parts.length, 3);
-
-  // Digits typed past a full slot spill into the next slot only when it is
-  // empty, so sequential typing keeps working after a separator is inserted
-  if (day.length > 2 && month === '') {
-    month = day.slice(2);
-    slots = Math.max(slots, 2);
-  }
-  if (month.length > 2 && year === '') {
-    year = month.slice(2);
-    slots = 3;
-  }
-
-  day = day.slice(0, 2);
-  month = month.slice(0, 2);
-  year = year.slice(0, 4);
-
-  // Pad single digits if the user has moved to the next segment
-  if (slots > 1 && day.length === 1) {
-    day = `0${day}`;
-  }
-  if (slots > 2 && month.length === 1) {
-    month = `0${month}`;
-  }
-
-  let result = day;
-  if (slots > 1) {
-    result += `-${month}`;
-  }
-  if (slots > 2) {
-    result += `-${year}`;
-  }
-  return result;
-};
 
 interface SectionHeaderProps {
   icon: React.JSX.Element;
@@ -285,10 +222,7 @@ const PhysicalPersonContactFormComponent = ({
         <Controller
           control={control}
           name='residentialAddress.province'
-          render={({
-            field: { onChange, value },
-            fieldState: { error },
-          }) => (
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
             <CustomSelect
               disabled={disabled}
               errorMessage={error?.message}
@@ -371,7 +305,9 @@ const PhysicalPersonContactFormComponent = ({
               error={error?.message}
               label={PHYSICAL_PERSON_CONTACT_FORM_COPY.EXACT_ADDRESS_LABEL}
               multiline
-              numberOfLines={3}
+              numberOfLines={
+                PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL.EXACT_ADDRESS_NUMBER_OF_LINES
+              }
               onBlur={onBlur}
               onChangeText={onChange}
               onFocus={onInputFocus}

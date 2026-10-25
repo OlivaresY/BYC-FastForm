@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
-import { BaseButton } from '@/shared/ui/BaseButton';
+import { BaseButton } from '@/shared/ui';
 
 export const MODAL_STORY_WRAPPER_CONSTANTS = {
   DEFAULT_TITLE: 'Abrir Modal',

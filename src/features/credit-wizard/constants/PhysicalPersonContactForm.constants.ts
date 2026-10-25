@@ -1,4 +1,4 @@
-import type { CustomSelectOption } from '@/shared/ui/CustomSelect';
+import type { CustomSelectOption } from '@/shared/ui';
 import { EMPLOYMENT_STATUSES } from './PhysicalPersonContact.constants';
 
 export const PHYSICAL_PERSON_CONTACT_FORM_COLORS = {
@@ -56,6 +56,7 @@ export const PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS = {
 } as const;
 
 export const PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL = {
+  EXACT_ADDRESS_NUMBER_OF_LINES: 3,
   MAX_LENGTH_DATE: 14,
   MAX_LENGTH_INCOME: 15,
 } as const;

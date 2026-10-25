@@ -6,15 +6,14 @@ import {
   waitFor,
 } from '@testing-library/react-native';
 import type { ReactTestInstance } from 'react-test-renderer';
-import { PROCESS_TOP_BAR_TEST_IDS } from '@/shared/ui/ProcessTopBar';
+import { PROCESS_TOP_BAR_TEST_IDS } from '@/shared/ui';
 import { LegalEntityContactStepView } from '../components/LegalEntityContactStepView';
 import { LEGAL_ENTITY_CONTACT_FORM_TEST_IDS } from '../constants/LegalEntityContactForm.constants';
 import { LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS } from '../constants/LegalEntityContactStepView.constants';
 import { useLegalEntityContactViewModel } from '../hooks/useLegalEntityContactViewModel';
 import type { UseLegalEntityContactViewModelProps } from '../types/LegalEntityContact.types';
 
-export interface LegalEntityContactStepViewTestContainerProps
-  extends UseLegalEntityContactViewModelProps {
+export interface LegalEntityContactStepViewTestContainerProps extends UseLegalEntityContactViewModelProps {
   currentStep?: number;
   disabled?: boolean;
   onClose?: () => void;
@@ -52,10 +51,7 @@ export class LegalEntityContactStepViewPageObject {
     props?: LegalEntityContactStepViewTestContainerProps,
   ): LegalEntityContactStepViewPageObject {
     render(
-      React.createElement(
-        LegalEntityContactStepViewTestContainer,
-        props ?? {},
-      ),
+      React.createElement(LegalEntityContactStepViewTestContainer, props ?? {}),
     );
     return new LegalEntityContactStepViewPageObject(props?.testID);
   }
@@ -301,7 +297,7 @@ export class LegalEntityContactStepViewPageObject {
   public isSubmitButtonDisabled(): boolean {
     return Boolean(
       this.submitButton.props.accessibilityState?.disabled ??
-        this.submitButton.props.disabled,
+      this.submitButton.props.disabled,
     );
   }
 
@@ -316,4 +312,3 @@ export class LegalEntityContactStepViewPageObject {
     return this;
   }
 }
-

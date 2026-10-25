@@ -79,9 +79,9 @@ describe('LegalEntityContactSchema', () => {
       };
 
       // Act & Assert
-      expect(LegalEntityContactSchema.safeParse(dataWithLocalPhone).success).toBe(
-        true,
-      );
+      expect(
+        LegalEntityContactSchema.safeParse(dataWithLocalPhone).success,
+      ).toBe(true);
     });
   });
 

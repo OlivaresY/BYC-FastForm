@@ -71,5 +71,3 @@ export const isNotFutureDateDDMMYYYY = (value: unknown): boolean => {
   );
   return inputDate <= endOfToday;
 };
-
-

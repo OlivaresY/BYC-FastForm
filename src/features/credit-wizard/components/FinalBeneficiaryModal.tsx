@@ -10,16 +10,16 @@ import {
   View,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { BaseButton } from '@/shared/ui/BaseButton';
-import { CustomSelect } from '@/shared/ui/CustomSelect';
-import { CustomTextInput } from '@/shared/ui/CustomTextInput';
 import {
+  BaseButton,
+  CustomSelect,
+  CustomTextInput,
   ClockIcon,
   CloseIcon,
   IdCardIcon,
   PhoneIcon,
   UserIcon,
-} from '@/shared/ui/Icons';
+} from '@/shared/ui';
 import {
   BENEFICIARY_MODAL_COLORS,
   BENEFICIARY_MODAL_COPY,

@@ -5,10 +5,7 @@ import {
   PHYSICAL_PERSON_CONTACT_ERRORS,
   PHYSICAL_PERSON_CONTACT_PATTERNS,
 } from '../constants/PhysicalPersonContact.constants';
-import {
-  isNotFutureDateDDMMYYYY,
-  isValidDateDDMMYYYY,
-} from '@/shared/utils';
+import { isNotFutureDateDDMMYYYY, isValidDateDDMMYYYY } from '@/shared/utils';
 
 export const INTERNATIONAL_PHONE_REGEX =
   PHYSICAL_PERSON_CONTACT_PATTERNS.INTERNATIONAL_PHONE;
@@ -101,8 +98,7 @@ export const EmploymentDataSchema = z.object({
     })
     .trim()
     .min(1, {
-      message:
-        PHYSICAL_PERSON_CONTACT_ERRORS.EMPLOYMENT_DATA.EMPLOYER_REQUIRED,
+      message: PHYSICAL_PERSON_CONTACT_ERRORS.EMPLOYMENT_DATA.EMPLOYER_REQUIRED,
     }),
   employmentStatus: z.enum(
     [
@@ -147,8 +143,7 @@ export const EmploymentDataSchema = z.object({
     ),
   profession: z
     .string({
-      error:
-        PHYSICAL_PERSON_CONTACT_ERRORS.EMPLOYMENT_DATA.PROFESSION_REQUIRED,
+      error: PHYSICAL_PERSON_CONTACT_ERRORS.EMPLOYMENT_DATA.PROFESSION_REQUIRED,
     })
     .trim()
     .min(1, {

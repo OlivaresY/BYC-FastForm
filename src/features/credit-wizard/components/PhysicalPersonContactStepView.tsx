@@ -1,12 +1,12 @@
 import React from 'react';
+import { ScrollView, Text, View } from 'react-native';
 import {
-  ScrollView,
-  Text,
-  View,
-} from 'react-native';
-import { BaseButton } from '@/shared/ui/BaseButton';
-import { ArrowRightIcon, ChevronLeftIcon } from '@/shared/ui/Icons';
-import { ProcessTopBar } from '@/shared/ui/ProcessTopBar';
+  ArrowRightIcon,
+  BaseButton,
+  ChevronLeftIcon,
+  ErrorBanner,
+  ProcessTopBar,
+} from '@/shared/ui';
 import {
   PHYSICAL_PERSON_CONTACT_STEP_VIEW_COLORS,
   PHYSICAL_PERSON_CONTACT_STEP_VIEW_CONSTANTS,
@@ -36,19 +36,16 @@ export const PhysicalPersonContactStepView = ({
 }: PhysicalPersonContactStepViewProps): React.JSX.Element => {
   const defaultViewModel = usePhysicalPersonContactViewModel({ onSubmit });
   const viewModel = viewModelProp ?? defaultViewModel;
-  const { control, handleNextStep, isValid } = viewModel;
+  const { control, handleNextStep, isSubmitting, isValid, submitError } =
+    viewModel;
 
-  const {
-    contentContainerStyle,
-    handleScroll,
-    onInputFocus,
-    scrollViewRef,
-  } = useKeyboardAutoScroll({
-    bottomBarHeight:
-      PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.BOTTOM_BAR_HEIGHT,
-    extraScrollPadding:
-      PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.EXTRA_KEYBOARD_SCROLL_OFFSET,
-  });
+  const { contentContainerStyle, handleScroll, onInputFocus, scrollViewRef } =
+    useKeyboardAutoScroll({
+      bottomBarHeight:
+        PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.BOTTOM_BAR_HEIGHT,
+      extraScrollPadding:
+        PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.EXTRA_KEYBOARD_SCROLL_OFFSET,
+    });
 
   return (
     <View
@@ -75,7 +72,9 @@ export const PhysicalPersonContactStepView = ({
           keyboardShouldPersistTaps='handled'
           onScroll={handleScroll}
           ref={scrollViewRef}
-          scrollEventThrottle={16}
+          scrollEventThrottle={
+            PHYSICAL_PERSON_CONTACT_STEP_VIEW_NUMERICAL.SCROLL_EVENT_THROTTLE_MS
+          }
           showsVerticalScrollIndicator={false}
           testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.SCROLL_VIEW}
         >
@@ -108,10 +107,12 @@ export const PhysicalPersonContactStepView = ({
               </Text>
             </View>
 
+            {submitError ? <ErrorBanner message={submitError} /> : null}
+
             {/* 3. Physical Person Contact Form (4 Card Sections) */}
             <PhysicalPersonContactForm
               control={control}
-              disabled={disabled}
+              disabled={disabled || isSubmitting}
               onInputFocus={onInputFocus}
               options={options}
               testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.FORM}
@@ -126,7 +127,7 @@ export const PhysicalPersonContactStepView = ({
         >
           <BaseButton
             className={PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.BACK_BUTTON}
-            disabled={disabled}
+            disabled={disabled || isSubmitting}
             icon={
               <ChevronLeftIcon
                 color={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COLORS.BACK_ICON}
@@ -146,7 +147,7 @@ export const PhysicalPersonContactStepView = ({
 
           <BaseButton
             className={PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.SUBMIT_BUTTON}
-            disabled={!isValid || disabled}
+            disabled={!isValid || disabled || isSubmitting}
             iconRight={
               <ArrowRightIcon
                 color={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COLORS.SUBMIT_ICON}
@@ -159,6 +160,7 @@ export const PhysicalPersonContactStepView = ({
               />
             }
             label={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COPY.SUBMIT_BUTTON}
+            loading={isSubmitting}
             onPress={(): void => {
               void handleNextStep();
             }}

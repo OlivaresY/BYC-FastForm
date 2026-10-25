@@ -6,8 +6,7 @@ import {
   within,
 } from '@testing-library/react-native';
 import type { ReactTestInstance } from 'react-test-renderer';
-import { CUSTOM_SELECT_TEST_IDS } from '@/shared/ui/CustomSelect';
-import { PROCESS_TOP_BAR_TEST_IDS } from '@/shared/ui/ProcessTopBar';
+import { CUSTOM_SELECT_TEST_IDS, PROCESS_TOP_BAR_TEST_IDS } from '@/shared/ui';
 import { ApplicantStepView } from '../components/ApplicantStepView';
 import { APPLICANT_STEP_VIEW_TEST_IDS } from '../constants/ApplicantStepView.constants';
 import { LEGAL_ENTITY_FORM_TEST_IDS } from '../constants/LegalEntityForm.constants';

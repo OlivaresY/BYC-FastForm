@@ -1,3 +1,4 @@
+import { LEGAL_ENTITY_CONTACT_ERRORS } from '../constants/LegalEntityContact.constants';
 import { LegalEntityContactViewModelPageObject } from './useLegalEntityContactViewModel.po';
 import type { LegalEntityContact } from '../types/LegalEntityContact.types';
 
@@ -38,7 +39,7 @@ describe('useLegalEntityContactViewModel', () => {
     expect(page.isValid).toBe(true);
   });
 
-  it('re-throws error when onSubmitProp fails asynchronously', async () => {
+  it('sets submitError when onSubmitProp fails asynchronously', async () => {
     // Arrange
     const expectedError = new Error('Async network rejection');
     const onSubmitMock = jest.fn().mockRejectedValue(expectedError);
@@ -47,14 +48,18 @@ describe('useLegalEntityContactViewModel', () => {
       onSubmit: onSubmitMock,
     });
 
-    // Act & Assert
-    await expect(page.handleNextStep(validData)).rejects.toThrow(
-      expectedError,
-    );
+    // Act
+    await page.handleNextStep(validData);
+
+    // Assert
     expect(onSubmitMock).toHaveBeenCalledWith(validData);
+    expect(page.current.submitError).toBe(
+      LEGAL_ENTITY_CONTACT_ERRORS.SUBMIT_FAILED,
+    );
+    expect(page.current.isSubmitting).toBe(false);
   });
 
-  it('throws validation error when programmatic submission fails validation', async () => {
+  it('sets submitError when programmatic submission fails validation', async () => {
     // Arrange
     const onSubmitMock = jest.fn();
     const page = LegalEntityContactViewModelPageObject.render({
@@ -66,11 +71,15 @@ describe('useLegalEntityContactViewModel', () => {
       corporateName: '',
     };
 
-    // Act & Assert
-    await expect(page.handleNextStep(invalidData)).rejects.toThrow(
-      'Programmatic validation failed',
-    );
+    // Act
+    await page.handleNextStep(invalidData);
+
+    // Assert
     expect(onSubmitMock).not.toHaveBeenCalled();
+    expect(page.current.submitError).toBe(
+      LEGAL_ENTITY_CONTACT_ERRORS.SUBMIT_FAILED,
+    );
+    expect(page.current.isSubmitting).toBe(false);
   });
 
   it('executes onSubmit when programmatic submission passes validation', async () => {

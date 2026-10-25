@@ -48,7 +48,6 @@ export const useKeyboardAutoScroll = (
   } = options ?? {};
 
   const [keyboardHeight, setKeyboardHeight] = useState<number>(0);
-  const hasWarnedRef = useRef<boolean>(false);
   const keyboardHeightRef = useRef<number>(0);
   const rafIdRef = useRef<number | null>(null);
   const scrollYRef = useRef<number>(0);
@@ -113,11 +112,8 @@ export const useKeyboardAutoScroll = (
               );
             }
           }
-        } catch (error) {
-          if (!hasWarnedRef.current) {
-            console.warn('Keyboard auto-scroll measurement failed:', error);
-            hasWarnedRef.current = true;
-          }
+        } catch {
+          // Measurement failures are non-critical; skip auto-scroll silently.
         }
       });
     },
@@ -146,7 +142,6 @@ export const useKeyboardAutoScroll = (
     const onHide = (): void => {
       keyboardHeightRef.current = 0;
       setKeyboardHeight(0);
-      hasWarnedRef.current = false;
     };
 
     const showSub = Keyboard?.addListener

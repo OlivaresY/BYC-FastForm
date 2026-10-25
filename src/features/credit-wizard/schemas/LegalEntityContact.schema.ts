@@ -3,10 +3,7 @@ import {
   LEGAL_ENTITY_CONTACT_ERRORS,
   LEGAL_ENTITY_CONTACT_PATTERNS,
 } from '../constants/LegalEntityContact.constants';
-import {
-  isNotFutureDateDDMMYYYY,
-  isValidDateDDMMYYYY,
-} from '@/shared/utils';
+import { isNotFutureDateDDMMYYYY, isValidDateDDMMYYYY } from '@/shared/utils';
 
 export const LegalEntityContactSchema = z
   .object({

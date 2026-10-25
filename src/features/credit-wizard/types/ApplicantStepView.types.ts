@@ -114,8 +114,7 @@ export interface UseApplicantStepViewModelReturn {
 // Orchestrator Component Props
 // =============================================================================
 
-export interface ApplicantStepViewProps
-  extends Partial<UseApplicantStepViewModelReturn> {
+export interface ApplicantStepViewProps extends Partial<UseApplicantStepViewModelReturn> {
   disabled?: boolean;
   onClose?: () => void;
   testID?: string;

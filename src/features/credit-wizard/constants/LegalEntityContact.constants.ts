@@ -35,11 +35,12 @@ export const LEGAL_ENTITY_CONTACT_ERRORS = {
   REPRESENTATIVE_ID_REQUIRED: 'La cédula del representante es obligatoria.',
   REPRESENTATIVE_NAME_REQUIRED:
     'El nombre del representante legal es obligatorio.',
+  SUBMIT_FAILED:
+    'Ocurrió un error al procesar la solicitud. Intente nuevamente.',
 } as const;
 
 export const LEGAL_ENTITY_CONTACT_PATTERNS = {
   CORPORATE_ID: /^3-?\d{3}-?\d{6}$/,
-  CURRENCY_THOUSANDS_SEPARATOR: /\B(?=(\d{3})+(?!\d))/g,
   DATE_DD_MM_YYYY,
   PHONE: /^(\+?[1-9]\d{0,3}|\([1-9]\d{0,3}\))?\s?[\d\-\s()]{6,16}$/,
 } as const;

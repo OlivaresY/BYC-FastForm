@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { CheckmarkIcon } from '@/shared/ui/Icons';
+import { CheckmarkIcon } from '@/shared/ui';
 import {
   WIZARD_PROGRESS_HEADER_CHECK_ICON,
   WIZARD_PROGRESS_HEADER_SEGMENT_CLASSES,

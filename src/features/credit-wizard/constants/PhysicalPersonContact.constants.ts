@@ -74,10 +74,11 @@ export const PHYSICAL_PERSON_CONTACT_ERRORS = {
     EXACT_ADDRESS_REQUIRED: 'La dirección exacta es obligatoria.',
     PROVINCE_REQUIRED: 'La provincia es obligatoria.',
   },
+  SUBMIT_FAILED:
+    'Ocurrió un error al procesar la solicitud. Intente nuevamente.',
 } as const;
 
 export const PHYSICAL_PERSON_CONTACT_PATTERNS = {
-  CURRENCY_THOUSANDS_SEPARATOR: /\B(?=(\d{3})+(?!\d))/g,
   DATE_DD_MM_YYYY,
   INTERNATIONAL_PHONE:
     /^(\+?[1-9]\d{0,3}|\([1-9]\d{0,3}\))?\s?[\d\-\s()]{6,16}$/,

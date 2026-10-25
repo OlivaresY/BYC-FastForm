@@ -21,7 +21,7 @@ export interface UseLegalEntityContactViewModelReturn {
   errors: FieldErrors<LegalEntityContact>;
   handleNextStep: (dataOrEvent?: unknown) => Promise<void> | void;
   handleSubmit: UseFormHandleSubmit<LegalEntityContact>;
+  isSubmitting: boolean;
   isValid: boolean;
+  submitError: string | null;
 }
-
-

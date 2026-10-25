@@ -3,10 +3,7 @@ import {
   APPLICANT_STEP_VIEW_ERRORS,
   APPLICANT_STEP_VIEW_NUMERICAL,
 } from '../constants/ApplicantStepView.constants';
-import {
-  isValidCalendarDate,
-  isValidDateDDMMYYYY,
-} from '@/shared/utils';
+import { isValidCalendarDate, isValidDateDDMMYYYY } from '@/shared/utils';
 import type { LegalEntityFormField } from './LegalEntityForm.types';
 import type { PhysicalPersonFormField } from './PhysicalPersonForm.types';
 import type { ThirdPartyBeneficiaryField } from './ApplicantStepView.types';

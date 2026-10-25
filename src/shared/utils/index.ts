@@ -5,3 +5,10 @@ export {
   isValidCalendarDate,
   isValidDateDDMMYYYY,
 } from './date.utils';
+export {
+  FORMATTERS_NUMERICAL,
+  FORMATTERS_PATTERNS,
+  FORMATTERS_SYMBOLS,
+  formatCurrencyDisplay,
+  formatDateDisplay,
+} from './formatters.utils';

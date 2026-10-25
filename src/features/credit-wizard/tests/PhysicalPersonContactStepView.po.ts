@@ -6,8 +6,7 @@ import {
   waitFor,
 } from '@testing-library/react-native';
 import type { ReactTestInstance } from 'react-test-renderer';
-import { CUSTOM_SELECT_TEST_IDS } from '@/shared/ui/CustomSelect';
-import { PROCESS_TOP_BAR_TEST_IDS } from '@/shared/ui/ProcessTopBar';
+import { CUSTOM_SELECT_TEST_IDS, PROCESS_TOP_BAR_TEST_IDS } from '@/shared/ui';
 import { PhysicalPersonContactStepView } from '../components/PhysicalPersonContactStepView';
 import { PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS } from '../constants/PhysicalPersonContactForm.constants';
 import { PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS } from '../constants/PhysicalPersonContactStepView.constants';

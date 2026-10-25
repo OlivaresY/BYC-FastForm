@@ -1,14 +1,14 @@
 import React from 'react';
 import { Controller } from 'react-hook-form';
 import { Text, View } from 'react-native';
-import { CustomTextInput } from '@/shared/ui/CustomTextInput';
 import {
   BanknoteIcon,
   BuildingIcon,
+  CustomTextInput,
   PhoneIcon,
   UserIcon,
-} from '@/shared/ui/Icons';
-import { LEGAL_ENTITY_CONTACT_PATTERNS } from '../constants/LegalEntityContact.constants';
+} from '@/shared/ui';
+import { formatCurrencyDisplay, formatDateDisplay } from '@/shared/utils';
 import {
   LEGAL_ENTITY_CONTACT_FORM_COLORS,
   LEGAL_ENTITY_CONTACT_FORM_COPY,
@@ -19,16 +19,6 @@ import {
 } from '../constants/LegalEntityContactForm.constants';
 import type { LegalEntityContactFormProps } from '../types/LegalEntityContactForm.types';
 
-const formatCurrencyDisplay = (value: number | undefined | null): string => {
-  if (value === undefined || value === null) {
-    return '';
-  }
-  return String(value).replace(
-    LEGAL_ENTITY_CONTACT_PATTERNS.CURRENCY_THOUSANDS_SEPARATOR,
-    '.',
-  );
-};
-
 const formatCorporateIdDisplay = (text: string): string => {
   const digits = text.replace(/[^0-9]/g, '').slice(0, 10);
   if (digits.length <= 1) {
@@ -38,54 +28,6 @@ const formatCorporateIdDisplay = (text: string): string => {
     return `${digits.slice(0, 1)}-${digits.slice(1)}`;
   }
   return `${digits.slice(0, 1)}-${digits.slice(1, 4)}-${digits.slice(4, 10)}`;
-};
-
-const formatDateDisplay = (text: string): string => {
-  if (!text.includes('-') && !text.includes('/')) {
-    const digits = text.replace(/[^0-9]/g, '');
-    if (digits.length <= 2) {
-      return digits;
-    }
-    if (digits.length <= 4) {
-      return `${digits.slice(0, 2)}-${digits.slice(2)}`;
-    }
-    return `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4, 8)}`;
-  }
-
-  const parts = text.split(/[-/]/);
-  let day = (parts[0] || '').replace(/[^0-9]/g, '');
-  let month = (parts[1] || '').replace(/[^0-9]/g, '');
-  let year = (parts[2] || '').replace(/[^0-9]/g, '');
-  let slots = Math.min(parts.length, 3);
-
-  if (day.length > 2 && month === '') {
-    month = day.slice(2);
-    slots = Math.max(slots, 2);
-  }
-  if (month.length > 2 && year === '') {
-    year = month.slice(2);
-    slots = 3;
-  }
-
-  day = day.slice(0, 2);
-  month = month.slice(0, 2);
-  year = year.slice(0, 4);
-
-  if (slots > 1 && day.length === 1) {
-    day = `0${day}`;
-  }
-  if (slots > 2 && month.length === 1) {
-    month = `0${month}`;
-  }
-
-  let result = day;
-  if (slots > 1) {
-    result += `-${month}`;
-  }
-  if (slots > 2) {
-    result += `-${year}`;
-  }
-  return result;
 };
 
 interface SectionHeaderProps {
@@ -312,9 +254,7 @@ export const LegalEntityContactForm = ({
                   onBlur={onBlur}
                   onChangeText={onChange}
                   onFocus={onInputFocus}
-                  placeholder={
-                    LEGAL_ENTITY_CONTACT_FORM_COPY.PHONE_PLACEHOLDER
-                  }
+                  placeholder={LEGAL_ENTITY_CONTACT_FORM_COPY.PHONE_PLACEHOLDER}
                   required
                   testID={LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.PHONE_INPUT}
                   value={value ?? ''}
@@ -341,9 +281,7 @@ export const LegalEntityContactForm = ({
                   onBlur={onBlur}
                   onChangeText={onChange}
                   onFocus={onInputFocus}
-                  placeholder={
-                    LEGAL_ENTITY_CONTACT_FORM_COPY.EMAIL_PLACEHOLDER
-                  }
+                  placeholder={LEGAL_ENTITY_CONTACT_FORM_COPY.EMAIL_PLACEHOLDER}
                   required
                   testID={LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.EMAIL_INPUT}
                   value={value ?? ''}
@@ -376,9 +314,7 @@ export const LegalEntityContactForm = ({
             <CustomTextInput
               editable={!disabled}
               error={error?.message}
-              label={
-                LEGAL_ENTITY_CONTACT_FORM_COPY.REPRESENTATIVE_NAME_LABEL
-              }
+              label={LEGAL_ENTITY_CONTACT_FORM_COPY.REPRESENTATIVE_NAME_LABEL}
               onBlur={onBlur}
               onChangeText={onChange}
               onFocus={onInputFocus}
@@ -512,9 +448,7 @@ export const LegalEntityContactForm = ({
                       LEGAL_ENTITY_CONTACT_FORM_COPY.NET_INCOME_PLACEHOLDER
                     }
                     required
-                    testID={
-                      LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.NET_INCOME_INPUT
-                    }
+                    testID={LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.NET_INCOME_INPUT}
                     value={displayValue}
                   />
                 );

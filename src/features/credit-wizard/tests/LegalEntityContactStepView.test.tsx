@@ -111,7 +111,9 @@ describe('LegalEntityContactStepView Integration', () => {
 
       // Assert
       await page.waitFor(() => {
-        expect(page.submitButton.props.accessibilityState?.disabled).toBe(false);
+        expect(page.submitButton.props.accessibilityState?.disabled).toBe(
+          false,
+        );
       });
 
       page.pressSubmit();

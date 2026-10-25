@@ -1,4 +1,4 @@
-import type { CustomSelectOption } from '@/shared/ui/CustomSelect';
+import type { CustomSelectOption } from '@/shared/ui';
 import type { LegalEntityFormValues } from '../types/LegalEntityForm.types';
 import type { PhysicalPersonFormValues } from '../types/PhysicalPersonForm.types';
 import type { ThirdPartyBeneficiaryValues } from '../types/ApplicantStepView.types';

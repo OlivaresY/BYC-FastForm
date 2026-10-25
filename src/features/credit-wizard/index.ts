@@ -171,4 +171,3 @@ export type {
 export type { LegalEntityContactFormProps } from './types/LegalEntityContactForm.types';
 
 export type { LegalEntityContactStepViewProps } from './types/LegalEntityContactStepView.types';
-

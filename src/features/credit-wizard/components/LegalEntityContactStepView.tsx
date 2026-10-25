@@ -1,12 +1,12 @@
 import React from 'react';
+import { ScrollView, Text, View } from 'react-native';
 import {
-  ScrollView,
-  Text,
-  View,
-} from 'react-native';
-import { BaseButton } from '@/shared/ui/BaseButton';
-import { ArrowRightIcon, ChevronLeftIcon } from '@/shared/ui/Icons';
-import { ProcessTopBar } from '@/shared/ui/ProcessTopBar';
+  ArrowRightIcon,
+  BaseButton,
+  ChevronLeftIcon,
+  ErrorBanner,
+  ProcessTopBar,
+} from '@/shared/ui';
 import {
   LEGAL_ENTITY_CONTACT_STEP_VIEW_COLORS,
   LEGAL_ENTITY_CONTACT_STEP_VIEW_CONSTANTS,
@@ -35,19 +35,16 @@ export const LegalEntityContactStepView = ({
 }: LegalEntityContactStepViewProps): React.JSX.Element => {
   const defaultViewModel = useLegalEntityContactViewModel({ onSubmit });
   const viewModel = viewModelProp ?? defaultViewModel;
-  const { control, handleNextStep, isValid } = viewModel;
+  const { control, handleNextStep, isSubmitting, isValid, submitError } =
+    viewModel;
 
-  const {
-    contentContainerStyle,
-    handleScroll,
-    onInputFocus,
-    scrollViewRef,
-  } = useKeyboardAutoScroll({
-    bottomBarHeight:
-      LEGAL_ENTITY_CONTACT_STEP_VIEW_DIMENSIONS.BOTTOM_BAR_HEIGHT,
-    extraScrollPadding:
-      LEGAL_ENTITY_CONTACT_STEP_VIEW_DIMENSIONS.EXTRA_KEYBOARD_SCROLL_OFFSET,
-  });
+  const { contentContainerStyle, handleScroll, onInputFocus, scrollViewRef } =
+    useKeyboardAutoScroll({
+      bottomBarHeight:
+        LEGAL_ENTITY_CONTACT_STEP_VIEW_DIMENSIONS.BOTTOM_BAR_HEIGHT,
+      extraScrollPadding:
+        LEGAL_ENTITY_CONTACT_STEP_VIEW_DIMENSIONS.EXTRA_KEYBOARD_SCROLL_OFFSET,
+    });
 
   return (
     <View
@@ -63,9 +60,7 @@ export const LegalEntityContactStepView = ({
       />
 
       <View
-        className={
-          LEGAL_ENTITY_CONTACT_STEP_VIEW_STYLES.KEYBOARD_AVOIDING_VIEW
-        }
+        className={LEGAL_ENTITY_CONTACT_STEP_VIEW_STYLES.KEYBOARD_AVOIDING_VIEW}
       >
         <ScrollView
           className={LEGAL_ENTITY_CONTACT_STEP_VIEW_STYLES.SCROLL_VIEW}
@@ -74,7 +69,9 @@ export const LegalEntityContactStepView = ({
           keyboardShouldPersistTaps='handled'
           onScroll={handleScroll}
           ref={scrollViewRef}
-          scrollEventThrottle={16}
+          scrollEventThrottle={
+            LEGAL_ENTITY_CONTACT_STEP_VIEW_NUMERICAL.SCROLL_EVENT_THROTTLE_MS
+          }
           showsVerticalScrollIndicator={false}
           testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.SCROLL_VIEW}
         >
@@ -107,10 +104,12 @@ export const LegalEntityContactStepView = ({
               </Text>
             </View>
 
+            {submitError ? <ErrorBanner message={submitError} /> : null}
+
             {/* 3. Legal Entity Contact Form (4 Card Sections) */}
             <LegalEntityContactForm
               control={control}
-              disabled={disabled}
+              disabled={disabled || isSubmitting}
               onInputFocus={onInputFocus}
               testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.FORM}
             />
@@ -124,13 +123,11 @@ export const LegalEntityContactStepView = ({
         >
           <BaseButton
             className={LEGAL_ENTITY_CONTACT_STEP_VIEW_STYLES.BACK_BUTTON}
-            disabled={disabled}
+            disabled={disabled || isSubmitting}
             icon={
               <ChevronLeftIcon
                 color={LEGAL_ENTITY_CONTACT_STEP_VIEW_COLORS.BACK_ICON}
-                size={
-                  LEGAL_ENTITY_CONTACT_STEP_VIEW_DIMENSIONS.BACK_ICON_SIZE
-                }
+                size={LEGAL_ENTITY_CONTACT_STEP_VIEW_DIMENSIONS.BACK_ICON_SIZE}
                 strokeWidth={
                   LEGAL_ENTITY_CONTACT_STEP_VIEW_DIMENSIONS.BACK_ICON_STROKE_WIDTH
                 }
@@ -144,7 +141,7 @@ export const LegalEntityContactStepView = ({
 
           <BaseButton
             className={LEGAL_ENTITY_CONTACT_STEP_VIEW_STYLES.SUBMIT_BUTTON}
-            disabled={!isValid || disabled}
+            disabled={!isValid || disabled || isSubmitting}
             iconRight={
               <ArrowRightIcon
                 color={LEGAL_ENTITY_CONTACT_STEP_VIEW_COLORS.SUBMIT_ICON}
@@ -157,6 +154,7 @@ export const LegalEntityContactStepView = ({
               />
             }
             label={LEGAL_ENTITY_CONTACT_STEP_VIEW_COPY.SUBMIT_BUTTON}
+            loading={isSubmitting}
             onPress={(): void => {
               void handleNextStep();
             }}

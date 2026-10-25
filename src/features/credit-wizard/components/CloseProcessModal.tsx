@@ -1,7 +1,12 @@
 import React from 'react';
 import { Modal, Pressable, Text, View } from 'react-native';
-import { BookmarkIcon, CloseIcon, SaveIcon } from '@/shared/ui/Icons';
-import { BaseButton, BASE_BUTTON_VARIANTS } from '@/shared/ui/BaseButton';
+import {
+  BookmarkIcon,
+  CloseIcon,
+  SaveIcon,
+  BaseButton,
+  BASE_BUTTON_VARIANTS,
+} from '@/shared/ui';
 import {
   CLOSE_PROCESS_MODAL_COLORS,
   CLOSE_PROCESS_MODAL_COPY,
