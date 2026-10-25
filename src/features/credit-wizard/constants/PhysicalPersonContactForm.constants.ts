@@ -1,4 +1,5 @@
-import type { CustomSelectOption } from '@/shared/ui/CustomSelect';
+import type { CustomSelectOption } from '@/shared/ui';
+import { EMPLOYMENT_STATUSES } from './PhysicalPersonContact.constants';
 
 export const PHYSICAL_PERSON_CONTACT_FORM_COLORS = {
   HEADER_ICON_STROKE: '#111111',
@@ -54,6 +55,12 @@ export const PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS = {
   VIEW_BOX: '0 0 24 24',
 } as const;
 
+export const PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL = {
+  EXACT_ADDRESS_NUMBER_OF_LINES: 3,
+  MAX_LENGTH_DATE: 14,
+  MAX_LENGTH_INCOME: 15,
+} as const;
+
 export const PHYSICAL_PERSON_CONTACT_FORM_OPTIONS = {
   CANTON: [
     { label: 'Central', value: 'Central' },
@@ -77,12 +84,30 @@ export const PHYSICAL_PERSON_CONTACT_FORM_OPTIONS = {
     { label: 'Otro', value: 'Otro' },
   ] as const satisfies readonly CustomSelectOption[],
   EMPLOYMENT_STATUS: [
-    { label: 'Asalariado (Planilla CCSS)', value: 'Asalariado (Planilla CCSS)' },
-    { label: 'Asalariado (Sector Privado)', value: 'salaried_private' },
-    { label: 'Asalariado (Sector Público)', value: 'salaried_public' },
-    { label: 'Empresario / Negocio Propio', value: 'business_owner' },
-    { label: 'Jubilado / Pensionado', value: 'retired' },
-    { label: 'Trabajador Independiente', value: 'independent' },
+    {
+      label: 'Asalariado (Planilla CCSS)',
+      value: EMPLOYMENT_STATUSES.SALARIED_CCSS,
+    },
+    {
+      label: 'Asalariado (Sector Privado)',
+      value: EMPLOYMENT_STATUSES.SALARIED_PRIVATE,
+    },
+    {
+      label: 'Asalariado (Sector Público)',
+      value: EMPLOYMENT_STATUSES.SALARIED_PUBLIC,
+    },
+    {
+      label: 'Empresario / Negocio Propio',
+      value: EMPLOYMENT_STATUSES.BUSINESS_OWNER,
+    },
+    {
+      label: 'Jubilado / Pensionado',
+      value: EMPLOYMENT_STATUSES.RETIRED,
+    },
+    {
+      label: 'Trabajador Independiente',
+      value: EMPLOYMENT_STATUSES.INDEPENDENT,
+    },
   ] as const satisfies readonly CustomSelectOption[],
   PROVINCE: [
     { label: 'Alajuela', value: 'Alajuela' },

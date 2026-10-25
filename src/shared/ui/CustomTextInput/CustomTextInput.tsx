@@ -198,10 +198,8 @@ export const CustomTextInput = ({
       testID={containerTestId}
     >
       {label || labelRight ? (
-        <View
-          className={`${CUSTOM_TEXT_INPUT_STYLES.LABEL_ROW} justify-between items-center w-full`}
-        >
-          <View className='flex-row items-center gap-1'>
+        <View className={CUSTOM_TEXT_INPUT_STYLES.LABEL_ROW}>
+          <View className={CUSTOM_TEXT_INPUT_STYLES.LABEL_LEFT_CONTAINER}>
             {label ? (
               <Text
                 className={CUSTOM_TEXT_INPUT_STYLES.LABEL_TEXT}

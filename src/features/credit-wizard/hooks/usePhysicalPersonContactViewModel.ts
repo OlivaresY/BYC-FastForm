@@ -1,7 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES } from '../constants/PhysicalPersonContact.constants';
+import {
+  PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES,
+  PHYSICAL_PERSON_CONTACT_ERRORS,
+} from '../constants/PhysicalPersonContact.constants';
 import { PhysicalPersonContactSchema } from '../schemas/PhysicalPersonContact.schema';
 import type {
   PhysicalPersonContact,
@@ -17,6 +20,9 @@ export const usePhysicalPersonContactViewModel = (
     mode = 'onChange',
     onSubmit: onSubmitProp,
   } = props ?? {};
+
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     control,
@@ -48,24 +54,36 @@ export const usePhysicalPersonContactViewModel = (
   });
 
   const onValidSubmit = useCallback(
-    (data: PhysicalPersonContact): void => {
-      onSubmitProp?.(data);
+    async (data: PhysicalPersonContact): Promise<void> => {
+      await onSubmitProp?.(data);
     },
     [onSubmitProp],
   );
 
   const handleNextStep = useCallback(
-    (dataOrEvent?: unknown): Promise<void> | void => {
-      if (
-        dataOrEvent &&
-        typeof dataOrEvent === 'object' &&
-        'contactInfo' in dataOrEvent &&
-        'residentialAddress' in dataOrEvent
-      ) {
-        onValidSubmit(dataOrEvent as PhysicalPersonContact);
-        return;
+    async (dataOrEvent?: unknown): Promise<void> => {
+      setIsSubmitting(true);
+      setSubmitError(null);
+      try {
+        if (
+          dataOrEvent &&
+          typeof dataOrEvent === 'object' &&
+          'contactInfo' in dataOrEvent &&
+          'residentialAddress' in dataOrEvent
+        ) {
+          const parseResult = PhysicalPersonContactSchema.safeParse(dataOrEvent);
+          if (!parseResult.success) {
+            throw new Error('Programmatic validation failed');
+          }
+          await onValidSubmit(parseResult.data);
+          return;
+        }
+        await handleSubmit(onValidSubmit)(dataOrEvent as never);
+      } catch {
+        setSubmitError(PHYSICAL_PERSON_CONTACT_ERRORS.SUBMIT_FAILED);
+      } finally {
+        setIsSubmitting(false);
       }
-      return handleSubmit(onValidSubmit)(dataOrEvent as never);
     },
     [handleSubmit, onValidSubmit],
   );
@@ -75,6 +93,8 @@ export const usePhysicalPersonContactViewModel = (
     errors,
     handleNextStep,
     handleSubmit,
+    isSubmitting,
     isValid,
+    submitError,
   };
 };

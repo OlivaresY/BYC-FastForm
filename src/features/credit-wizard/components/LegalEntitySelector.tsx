@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { BuildingIcon, UserIcon } from '@/shared/ui/Icons';
+import { BuildingIcon, UserIcon } from '@/shared/ui';
 import {
   LEGAL_ENTITY_SELECTOR_COLORS,
   LEGAL_ENTITY_SELECTOR_COPY,

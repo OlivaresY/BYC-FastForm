@@ -50,7 +50,8 @@ export const CUSTOM_TEXT_INPUT_STYLES = {
   INPUT: 'flex-1 text-base text-text-primary py-0',
   INPUT_WRAPPER_BASE:
     'min-h-[48px] w-full flex-row items-center rounded-lg border bg-surface px-3.5 py-2.5 gap-2.5',
-  LABEL_ROW: 'mb-1.5 flex-row items-center',
+  LABEL_LEFT_CONTAINER: 'flex-row items-center gap-1',
+  LABEL_ROW: 'mb-1.5 flex-row items-center justify-between w-full',
   LABEL_TEXT: 'text-sm font-medium text-text-primary',
   REQUIRED_ASTERISK: 'ml-0.5 text-sm font-bold text-brand-red',
 } as const;

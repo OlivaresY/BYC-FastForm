@@ -1,7 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import {
-  BASE_BUTTON_LOADER_COLORS,
   BASE_BUTTON_STYLES,
   BASE_BUTTON_TEST_IDS,
   BASE_BUTTON_VARIANTS,
@@ -25,62 +24,16 @@ export const BaseButton = ({
 }: BaseButtonProps): React.JSX.Element => {
   const isInteractionDisabled = disabled || loading;
 
-  const getVariantStyles = (): {
-    container: string;
-    loaderColor: string;
-    text: string;
-  } => {
-    switch (variant) {
-      case BASE_BUTTON_VARIANTS.NEUTRAL:
-        return {
-          container: 'border border-gray-300 bg-white active:bg-gray-100',
-          loaderColor: BASE_BUTTON_LOADER_COLORS.NEUTRAL,
-          text: 'text-text-primary font-semibold text-base',
-        };
-      case BASE_BUTTON_VARIANTS.SECONDARY:
-        return {
-          container: 'bg-primary-dark active:opacity-90',
-          loaderColor: BASE_BUTTON_LOADER_COLORS.SECONDARY,
-          text: 'text-surface font-semibold text-base',
-        };
-      case BASE_BUTTON_VARIANTS.GHOST:
-        return {
-          container: 'bg-transparent active:bg-brand-red/10',
-          loaderColor: BASE_BUTTON_LOADER_COLORS.GHOST,
-          text: 'text-brand-red font-semibold text-base',
-        };
-      case BASE_BUTTON_VARIANTS.OUTLINE:
-        return {
-          container:
-            'border-2 border-brand-red bg-transparent active:bg-brand-red/10',
-          loaderColor: BASE_BUTTON_LOADER_COLORS.OUTLINE,
-          text: 'text-brand-red font-semibold text-base',
-        };
-      case BASE_BUTTON_VARIANTS.PRIMARY:
-      default:
-        return {
-          container: 'bg-brand-red active:opacity-90',
-          loaderColor: BASE_BUTTON_LOADER_COLORS.PRIMARY,
-          text: 'text-surface font-semibold text-base',
-        };
-    }
-  };
-
-  const { container, loaderColor, text } = getVariantStyles();
+  const variantConfig =
+    BASE_BUTTON_STYLES.VARIANTS[variant] ??
+    BASE_BUTTON_STYLES.VARIANTS[BASE_BUTTON_VARIANTS.PRIMARY];
+  const { container, loaderColor, text } = variantConfig;
 
   const containerClasses = [
-    'min-h-[48px]',
-    'min-w-[48px]',
-    fullWidth ? 'w-full self-stretch' : '',
-    'flex-row',
-    'items-center',
-    'justify-center',
-    'gap-2',
-    'rounded-xl',
-    'px-4',
-    'py-3',
+    BASE_BUTTON_STYLES.BASE_CONTAINER,
+    fullWidth ? BASE_BUTTON_STYLES.FULL_WIDTH : '',
     container,
-    isInteractionDisabled ? 'opacity-40' : '',
+    isInteractionDisabled ? BASE_BUTTON_STYLES.DISABLED : '',
     className,
   ]
     .filter(Boolean)
@@ -108,7 +61,7 @@ export const BaseButton = ({
         <View className={BASE_BUTTON_STYLES.CONTENT_CONTAINER}>
           {icon ?? null}
           <Text
-            className={`${textClassName ?? text} text-center flex-shrink`}
+            className={`${textClassName ?? text} ${BASE_BUTTON_STYLES.LABEL_BASE}`}
             testID={BASE_BUTTON_TEST_IDS.LABEL}
           >
             {label}

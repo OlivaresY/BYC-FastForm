@@ -1,17 +1,19 @@
 import React from 'react';
 import { Controller } from 'react-hook-form';
 import { Text, View } from 'react-native';
-import { CustomSelect } from '@/shared/ui/CustomSelect';
-import { CustomTextInput } from '@/shared/ui/CustomTextInput';
 import {
   BanknoteIcon,
+  CustomSelect,
+  CustomTextInput,
   IdCardIcon,
   MapPinIcon,
-} from '@/shared/ui/Icons';
+} from '@/shared/ui';
+import { formatCurrencyDisplay, formatDateDisplay } from '@/shared/utils';
 import {
   PHYSICAL_PERSON_CONTACT_FORM_COLORS,
   PHYSICAL_PERSON_CONTACT_FORM_COPY,
   PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS,
+  PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL,
   PHYSICAL_PERSON_CONTACT_FORM_OPTIONS,
   PHYSICAL_PERSON_CONTACT_FORM_STYLES,
   PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS,
@@ -80,14 +82,12 @@ const SectionHeader = ({
   </View>
 );
 
-export const PhysicalPersonContactForm = ({
+const PhysicalPersonContactFormComponent = ({
   control,
   disabled = false,
-  errors: _errorsProp,
   onInputFocus,
   options,
   testID,
-  viewModel: _viewModelProp,
 }: PhysicalPersonContactFormProps): React.JSX.Element => {
   const provinceOptions =
     options?.provinceOptions ?? PHYSICAL_PERSON_CONTACT_FORM_OPTIONS.PROVINCE;
@@ -222,10 +222,7 @@ export const PhysicalPersonContactForm = ({
         <Controller
           control={control}
           name='residentialAddress.province'
-          render={({
-            field: { onChange, value },
-            fieldState: { error },
-          }) => (
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
             <CustomSelect
               disabled={disabled}
               errorMessage={error?.message}
@@ -308,7 +305,9 @@ export const PhysicalPersonContactForm = ({
               error={error?.message}
               label={PHYSICAL_PERSON_CONTACT_FORM_COPY.EXACT_ADDRESS_LABEL}
               multiline
-              numberOfLines={3}
+              numberOfLines={
+                PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL.EXACT_ADDRESS_NUMBER_OF_LINES
+              }
               onBlur={onBlur}
               onChangeText={onChange}
               onFocus={onInputFocus}
@@ -429,8 +428,14 @@ export const PhysicalPersonContactForm = ({
                   error={error?.message}
                   label={PHYSICAL_PERSON_CONTACT_FORM_COPY.ENTRY_DATE_LABEL}
                   leftIcon='calendar'
+                  maxLength={
+                    PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL.MAX_LENGTH_DATE
+                  }
                   onBlur={onBlur}
-                  onChangeText={onChange}
+                  onChangeText={(text: string): void => {
+                    const maskedDate = formatDateDisplay(text);
+                    onChange(maskedDate);
+                  }}
                   onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.ENTRY_DATE_PLACEHOLDER
@@ -519,9 +524,9 @@ export const PhysicalPersonContactForm = ({
                 field: { onBlur, onChange, value },
                 fieldState: { error },
               }) => {
-                const stringValue =
-                  value !== undefined && value !== null && value !== 0
-                    ? String(value)
+                const displayValue =
+                  value !== undefined && value !== null
+                    ? formatCurrencyDisplay(value)
                     : '';
 
                 return (
@@ -531,10 +536,13 @@ export const PhysicalPersonContactForm = ({
                     keyboardType='numeric'
                     label={PHYSICAL_PERSON_CONTACT_FORM_COPY.GROSS_INCOME_LABEL}
                     leftIcon='banknote'
+                    maxLength={
+                      PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL.MAX_LENGTH_INCOME
+                    }
                     onBlur={onBlur}
                     onChangeText={(text: string): void => {
                       const digits = text.replace(/[^0-9]/g, '');
-                      onChange(digits === '' ? 0 : Number(digits));
+                      onChange(digits === '' ? undefined : Number(digits));
                     }}
                     onFocus={onInputFocus}
                     placeholder={
@@ -544,7 +552,7 @@ export const PhysicalPersonContactForm = ({
                     testID={
                       PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.GROSS_INCOME_INPUT
                     }
-                    value={stringValue}
+                    value={displayValue}
                   />
                 );
               }}
@@ -559,9 +567,9 @@ export const PhysicalPersonContactForm = ({
                 field: { onBlur, onChange, value },
                 fieldState: { error },
               }) => {
-                const stringValue =
-                  value !== undefined && value !== null && value !== 0
-                    ? String(value)
+                const displayValue =
+                  value !== undefined && value !== null
+                    ? formatCurrencyDisplay(value)
                     : '';
 
                 return (
@@ -571,10 +579,13 @@ export const PhysicalPersonContactForm = ({
                     keyboardType='numeric'
                     label={PHYSICAL_PERSON_CONTACT_FORM_COPY.NET_INCOME_LABEL}
                     leftIcon='banknote'
+                    maxLength={
+                      PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL.MAX_LENGTH_INCOME
+                    }
                     onBlur={onBlur}
                     onChangeText={(text: string): void => {
                       const digits = text.replace(/[^0-9]/g, '');
-                      onChange(digits === '' ? 0 : Number(digits));
+                      onChange(digits === '' ? undefined : Number(digits));
                     }}
                     onFocus={onInputFocus}
                     placeholder={
@@ -584,7 +595,7 @@ export const PhysicalPersonContactForm = ({
                     testID={
                       PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.NET_INCOME_INPUT
                     }
-                    value={stringValue}
+                    value={displayValue}
                   />
                 );
               }}
@@ -600,9 +611,9 @@ export const PhysicalPersonContactForm = ({
             field: { onBlur, onChange, value },
             fieldState: { error },
           }) => {
-            const stringValue =
-              value !== undefined && value !== null && value !== 0
-                ? String(value)
+            const displayValue =
+              value !== undefined && value !== null
+                ? formatCurrencyDisplay(value)
                 : '';
 
             return (
@@ -624,6 +635,9 @@ export const PhysicalPersonContactForm = ({
                   </Text>
                 }
                 leftIcon='banknote'
+                maxLength={
+                  PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL.MAX_LENGTH_INCOME
+                }
                 onBlur={onBlur}
                 onChangeText={(text: string): void => {
                   const digits = text.replace(/[^0-9]/g, '');
@@ -637,7 +651,7 @@ export const PhysicalPersonContactForm = ({
                 testID={
                   PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.OTHER_INCOMES_INPUT
                 }
-                value={stringValue}
+                value={displayValue}
               />
             );
           }}
@@ -646,3 +660,7 @@ export const PhysicalPersonContactForm = ({
     </View>
   );
 };
+
+export const PhysicalPersonContactForm = React.memo(
+  PhysicalPersonContactFormComponent,
+);

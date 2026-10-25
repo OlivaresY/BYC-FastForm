@@ -1,9 +1,6 @@
-import type { Control, FieldErrors } from 'react-hook-form';
-import type { CustomSelectOption } from '@/shared/ui/CustomSelect';
-import type {
-  PhysicalPersonContact,
-  UsePhysicalPersonContactViewModelReturn,
-} from './PhysicalPersonContact.types';
+import type { Control } from 'react-hook-form';
+import type { CustomSelectOption } from '@/shared/ui';
+import type { PhysicalPersonContact } from './PhysicalPersonContact.types';
 
 export interface PhysicalPersonContactFormOptions {
   cantonOptions?: readonly CustomSelectOption[];
@@ -16,9 +13,7 @@ export interface PhysicalPersonContactFormOptions {
 export interface PhysicalPersonContactFormProps {
   control: Control<PhysicalPersonContact>;
   disabled?: boolean;
-  errors?: FieldErrors<PhysicalPersonContact>;
   onInputFocus?: () => void;
   options?: PhysicalPersonContactFormOptions;
   testID?: string;
-  viewModel?: UsePhysicalPersonContactViewModelReturn;
 }

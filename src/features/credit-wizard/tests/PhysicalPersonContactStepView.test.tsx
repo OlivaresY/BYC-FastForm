@@ -89,6 +89,17 @@ describe('PhysicalPersonContactStepView Integration', () => {
       // Assert
       expect(handleClose).toHaveBeenCalledTimes(1);
     });
+
+    it('renders with custom dynamic currentStep and totalSteps props', () => {
+      // Arrange & Act
+      const page = PhysicalPersonContactStepViewPageObject.render({
+        currentStep: 3,
+        totalSteps: 5,
+      });
+
+      // Assert
+      expect(page.wizardHeader).toBeTruthy();
+    });
   });
 
   describe('Zod Validation: International Phones & Strict Dates', () => {
@@ -138,8 +149,8 @@ describe('PhysicalPersonContactStepView Integration', () => {
       // Arrange
       const page = PhysicalPersonContactStepViewPageObject.render();
 
-      // Act - Enter invalid slash format
-      page.setEntryDate('15/05/2019');
+      // Act - Enter invalid calendar date
+      page.setEntryDate('32-05-2019');
 
       // Assert - Error should appear
       await page.waitFor(() => {

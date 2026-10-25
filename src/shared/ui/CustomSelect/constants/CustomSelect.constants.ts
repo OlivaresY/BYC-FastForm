@@ -69,6 +69,7 @@ export const CUSTOM_SELECT_STYLES = {
     'min-h-[48px] flex-row items-center justify-between rounded-xl border border-transparent bg-transparent px-4 py-3 active:bg-gray-50',
   OPTION_INACTIVE_TEXT: 'flex-1 text-sm font-medium text-[#111111]',
   OPTION_LIST: 'gap-1.5',
+  OPTIONS_SCROLL: 'max-h-80',
   REQUIRED_ASTERISK: 'text-sm font-bold text-[#B91C1C]',
   TRIGGER_BASE:
     'min-h-[48px] min-w-[48px] w-full flex-row items-center justify-between rounded-lg border bg-white px-4 py-3 gap-2.5',

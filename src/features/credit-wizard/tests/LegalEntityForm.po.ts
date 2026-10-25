@@ -6,7 +6,7 @@ import {
   within,
 } from '@testing-library/react-native';
 import type { ReactTestInstance } from 'react-test-renderer';
-import { CUSTOM_SELECT_TEST_IDS } from '@/shared/ui/CustomSelect';
+import { CUSTOM_SELECT_TEST_IDS } from '@/shared/ui';
 import { LegalEntityForm } from '../components/LegalEntityForm';
 import { LEGAL_ENTITY_FORM_TEST_IDS } from '../constants/LegalEntityForm.constants';
 import type {

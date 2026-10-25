@@ -6,11 +6,10 @@ import {
   Text,
   View,
 } from 'react-native';
-import { BaseButton } from '@/shared/ui/BaseButton';
-import { ArrowRightIcon } from '@/shared/ui/Icons';
-import { ProcessTopBar } from '@/shared/ui/ProcessTopBar';
+import { BaseButton, ArrowRightIcon, ProcessTopBar } from '@/shared/ui';
 import {
   APPLICANT_STEP_VIEW_COLORS,
+  APPLICANT_STEP_VIEW_CONSTANTS,
   APPLICANT_STEP_VIEW_COPY,
   APPLICANT_STEP_VIEW_DEFAULT_VALUES,
   APPLICANT_STEP_VIEW_ICON_DIMENSIONS,
@@ -18,6 +17,7 @@ import {
   APPLICANT_STEP_VIEW_STYLES,
   APPLICANT_STEP_VIEW_TEST_IDS,
 } from '../constants/ApplicantStepView.constants';
+import { useApplicantStepViewModel } from '../hooks/useApplicantStepViewModel';
 import type { ApplicantStepViewProps } from '../types/ApplicantStepView.types';
 import { FinalBeneficiaryModal } from './FinalBeneficiaryModal';
 import { LegalEntityForm } from './LegalEntityForm';
@@ -31,29 +31,68 @@ const NOOP_FIELD_CHANGE = (): void => undefined;
 
 export const ApplicantStepView = React.memo(
   ({
-    closeBeneficiaryModal,
+    closeBeneficiaryModal: closeBeneficiaryModalProp,
     disabled = false,
-    handleSaveThirdPartyData,
-    isBeneficiaryModalOpen = false,
-    isIdentificationValid = false,
-    isValid = false,
-    legalErrors,
-    legalValues,
+    handleSaveThirdPartyData: handleSaveThirdPartyDataProp,
+    isBeneficiaryModalOpen: isBeneficiaryModalOpenProp,
+    isIdentificationValid: isIdentificationValidProp,
+    isValid: isValidProp,
+    legalErrors: legalErrorsProp,
+    legalValues: legalValuesProp,
     onClose,
-    onLegalFieldChange,
-    onPhysicalFieldChange,
-    onRegimeChange,
-    onSubmit,
-    onThirdPartyFieldChange,
-    onVehicleBeneficiaryChange,
-    physicalErrors,
-    physicalValues,
-    regime,
+    onLegalFieldChange: onLegalFieldChangeProp,
+    onPhysicalFieldChange: onPhysicalFieldChangeProp,
+    onRegimeChange: onRegimeChangeProp,
+    onSubmit: onSubmitProp,
+    onThirdPartyFieldChange: onThirdPartyFieldChangeProp,
+    onVehicleBeneficiaryChange: onVehicleBeneficiaryChangeProp,
+    physicalErrors: physicalErrorsProp,
+    physicalValues: physicalValuesProp,
+    regime: regimeProp,
     testID,
-    thirdPartyErrors,
-    thirdPartyValues,
-    vehicleBeneficiary,
+    thirdPartyErrors: thirdPartyErrorsProp,
+    thirdPartyValues: thirdPartyValuesProp,
+    vehicleBeneficiary: vehicleBeneficiaryProp,
+    viewModel: viewModelProp,
   }: ApplicantStepViewProps): React.JSX.Element => {
+    const defaultViewModel = useApplicantStepViewModel({
+      initialLegalValues: legalValuesProp,
+      initialPhysicalValues: physicalValuesProp,
+      initialRegime: regimeProp,
+      initialThirdPartyValues: thirdPartyValuesProp,
+      initialVehicleBeneficiary: vehicleBeneficiaryProp,
+      onSubmit: onSubmitProp,
+    });
+
+    const vm = viewModelProp ?? defaultViewModel;
+
+    const closeBeneficiaryModal =
+      closeBeneficiaryModalProp ?? vm.closeBeneficiaryModal;
+    const handleSaveThirdPartyData =
+      handleSaveThirdPartyDataProp ?? vm.handleSaveThirdPartyData;
+    const isBeneficiaryModalOpen =
+      isBeneficiaryModalOpenProp ?? vm.isBeneficiaryModalOpen;
+    const isIdentificationValid =
+      isIdentificationValidProp ?? vm.isIdentificationValid;
+    const isValid = isValidProp ?? vm.isValid;
+    const legalErrors = legalErrorsProp ?? vm.legalErrors;
+    const legalValues = legalValuesProp ?? vm.legalValues;
+    const onLegalFieldChange = onLegalFieldChangeProp ?? vm.onLegalFieldChange;
+    const onPhysicalFieldChange =
+      onPhysicalFieldChangeProp ?? vm.onPhysicalFieldChange;
+    const onRegimeChange = onRegimeChangeProp ?? vm.onRegimeChange;
+    const onSubmit = onSubmitProp ?? vm.onSubmit;
+    const onThirdPartyFieldChange =
+      onThirdPartyFieldChangeProp ?? vm.onThirdPartyFieldChange;
+    const onVehicleBeneficiaryChange =
+      onVehicleBeneficiaryChangeProp ?? vm.onVehicleBeneficiaryChange;
+    const physicalErrors = physicalErrorsProp ?? vm.physicalErrors;
+    const physicalValues = physicalValuesProp ?? vm.physicalValues;
+    const regime = regimeProp ?? vm.regime;
+    const thirdPartyErrors = thirdPartyErrorsProp ?? vm.thirdPartyErrors;
+    const thirdPartyValues = thirdPartyValuesProp ?? vm.thirdPartyValues;
+    const vehicleBeneficiary = vehicleBeneficiaryProp ?? vm.vehicleBeneficiary;
+
     const handleSaveModal = useCallback((): void => {
       handleSaveThirdPartyData?.();
     }, [handleSaveThirdPartyData]);
@@ -64,9 +103,9 @@ export const ApplicantStepView = React.memo(
         testID={testID ?? APPLICANT_STEP_VIEW_TEST_IDS.CONTAINER}
       >
         <ProcessTopBar
-          onClose={onClose}
+          onClose={onClose ?? NOOP_VOID}
           testID={APPLICANT_STEP_VIEW_TEST_IDS.PROCESS_TOP_BAR}
-          userInitials='YO'
+          userInitials={APPLICANT_STEP_VIEW_CONSTANTS.MOCK_USER_INITIALS}
         />
 
         <KeyboardAvoidingView
@@ -186,7 +225,7 @@ export const ApplicantStepView = React.memo(
           isOpen={isBeneficiaryModalOpen}
           onClose={closeBeneficiaryModal ?? NOOP_VOID}
           onFieldChange={onThirdPartyFieldChange ?? NOOP_FIELD_CHANGE}
-          onSave={handleSaveThirdPartyData ? handleSaveModal : undefined}
+          onSave={handleSaveModal}
           values={
             thirdPartyValues ?? APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY
           }

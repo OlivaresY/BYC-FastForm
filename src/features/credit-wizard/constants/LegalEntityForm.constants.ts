@@ -1,4 +1,4 @@
-import type { CustomSelectOption } from '@/shared/ui/CustomSelect';
+import type { CustomSelectOption } from '@/shared/ui';
 
 export const LEGAL_ENTITY_FORM_COLORS = {
   HEADER_ICON_STROKE: '#111111',

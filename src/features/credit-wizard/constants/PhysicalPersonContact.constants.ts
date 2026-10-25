@@ -1,3 +1,14 @@
+import { DATE_DD_MM_YYYY } from '@/shared/utils';
+
+export const EMPLOYMENT_STATUSES = {
+  BUSINESS_OWNER: 'business_owner',
+  INDEPENDENT: 'independent',
+  RETIRED: 'retired',
+  SALARIED_CCSS: 'salaried_ccss',
+  SALARIED_PRIVATE: 'salaried_private',
+  SALARIED_PUBLIC: 'salaried_public',
+} as const;
+
 export const FINANCIAL_CURRENCIES = {
   CRC: 'CRC',
   USD: 'USD',
@@ -11,7 +22,7 @@ export const PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES = {
   },
   employmentData: {
     employer: '',
-    employmentStatus: '',
+    employmentStatus: undefined,
     entryDate: '',
     officePhone: '',
     profession: '',
@@ -20,7 +31,7 @@ export const PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES = {
     currency: FINANCIAL_CURRENCIES.CRC,
     grossIncome: 0,
     netIncome: 0,
-    otherIncomes: 0,
+    otherIncomes: undefined,
   },
   residentialAddress: {
     canton: '',
@@ -50,12 +61,10 @@ export const PHYSICAL_PERSON_CONTACT_ERRORS = {
   },
   FINANCIAL_CAPACITY: {
     CURRENCY_INVALID: 'Seleccione una moneda válida (CRC o USD).',
-    GROSS_INCOME_MIN: 'El ingreso bruto no puede ser negativo.',
     GROSS_INCOME_POSITIVE: 'El ingreso bruto debe ser mayor a 0.',
-    GROSS_INCOME_REQUIRED: 'El ingreso bruto debe ser un valor numérico.',
-    NET_INCOME_MIN: 'El ingreso neto no puede ser negativo.',
+    GROSS_INCOME_REQUIRED: 'El ingreso bruto es obligatorio.',
     NET_INCOME_POSITIVE: 'El ingreso neto debe ser mayor a 0.',
-    NET_INCOME_REQUIRED: 'El ingreso neto debe ser un valor numérico.',
+    NET_INCOME_REQUIRED: 'El ingreso neto es obligatorio.',
     OTHER_INCOMES_MIN: 'Otros ingresos no puede ser negativo.',
     OTHER_INCOMES_REQUIRED: 'Otros ingresos debe ser un valor numérico.',
   },
@@ -65,10 +74,12 @@ export const PHYSICAL_PERSON_CONTACT_ERRORS = {
     EXACT_ADDRESS_REQUIRED: 'La dirección exacta es obligatoria.',
     PROVINCE_REQUIRED: 'La provincia es obligatoria.',
   },
+  SUBMIT_FAILED:
+    'Ocurrió un error al procesar la solicitud. Intente nuevamente.',
 } as const;
 
 export const PHYSICAL_PERSON_CONTACT_PATTERNS = {
-  DATE_DD_MM_YYYY: /^(0[1-9]|[12]\d|3[01])-(0[1-9]|1[0-2])-(\d{4})$/,
+  DATE_DD_MM_YYYY,
   INTERNATIONAL_PHONE:
     /^(\+?[1-9]\d{0,3}|\([1-9]\d{0,3}\))?\s?[\d\-\s()]{6,16}$/,
 } as const;

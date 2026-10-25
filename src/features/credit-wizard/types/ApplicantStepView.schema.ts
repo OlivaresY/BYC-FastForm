@@ -3,9 +3,12 @@ import {
   APPLICANT_STEP_VIEW_ERRORS,
   APPLICANT_STEP_VIEW_NUMERICAL,
 } from '../constants/ApplicantStepView.constants';
+import { isValidCalendarDate, isValidDateDDMMYYYY } from '@/shared/utils';
 import type { LegalEntityFormField } from './LegalEntityForm.types';
 import type { PhysicalPersonFormField } from './PhysicalPersonForm.types';
 import type { ThirdPartyBeneficiaryField } from './ApplicantStepView.types';
+
+export { isValidCalendarDate, isValidDateDDMMYYYY };
 
 // =============================================================================
 // Shared Helpers & Date Validation
@@ -13,8 +16,6 @@ import type { ThirdPartyBeneficiaryField } from './ApplicantStepView.types';
 
 const NON_DIGIT_PATTERN = /\D/g;
 const PHONE_PATTERN = /^[0-9+()\s-]{7,20}$/;
-const DATE_DD_MM_YYYY_PATTERN =
-  /^(0[1-9]|[12]\d|3[01])-(0[1-9]|1[0-2])-(\d{4})$/;
 
 /**
  * Strips every non-digit character so masked IDs (e.g. `1-1234-0567`) are
@@ -38,50 +39,6 @@ const identificationNumberSchema = (
         error: message,
       },
     );
-
-export const isValidCalendarDate = (
-  year: number,
-  month: number,
-  day: number,
-): boolean => {
-  if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1) {
-    return false;
-  }
-
-  const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-
-  const daysInMonth = [
-    31,
-    isLeapYear ? 29 : 28,
-    31,
-    30,
-    31,
-    30,
-    31,
-    31,
-    30,
-    31,
-    30,
-    31,
-  ];
-
-  const maxDays = daysInMonth[month - 1] ?? 31;
-  return day <= maxDays;
-};
-
-export const isValidDateDDMMYYYY = (value: unknown): value is string => {
-  if (typeof value !== 'string') {
-    return false;
-  }
-  const match = DATE_DD_MM_YYYY_PATTERN.exec(value.trim());
-  if (!match) {
-    return false;
-  }
-  const day = Number(match[1]);
-  const month = Number(match[2]);
-  const year = Number(match[3]);
-  return isValidCalendarDate(year, month, day);
-};
 
 export const createDateDDMMYYYYSchema = (errorMessage: string) =>
   z.string({ error: errorMessage }).trim().refine(isValidDateDDMMYYYY, {
@@ -182,7 +139,7 @@ export const ThirdPartyBeneficiaryStrictFieldsSchema = {
     .string({ error: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL })
     .trim()
     .min(1, APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL)
-    .email(APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL),
+    .pipe(z.email({ error: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL })),
   thirdPartyFullName: requiredText(
     APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.FULL_NAME,
   ),
@@ -207,7 +164,7 @@ export const optionalBeneficiaryEmailSchema = z
   .string()
   .trim()
   .optional()
-  .refine((val) => !val || z.string().email().safeParse(val).success, {
+  .refine((val) => !val || z.email().safeParse(val).success, {
     message: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL,
   });
 

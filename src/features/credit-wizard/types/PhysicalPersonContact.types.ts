@@ -31,5 +31,7 @@ export interface UsePhysicalPersonContactViewModelReturn {
   errors: FieldErrors<PhysicalPersonContact>;
   handleNextStep: (dataOrEvent?: unknown) => Promise<void> | void;
   handleSubmit: UseFormHandleSubmit<PhysicalPersonContact>;
+  isSubmitting: boolean;
   isValid: boolean;
+  submitError: string | null;
 }
