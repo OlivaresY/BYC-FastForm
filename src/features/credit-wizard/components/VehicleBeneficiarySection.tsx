@@ -4,7 +4,7 @@ import {
   CarIcon as SharedCarIcon,
   CheckmarkIcon as SharedCheckmarkIcon,
   CircleIcon as SharedCircleIcon,
-} from '@/shared/ui/Icons';
+} from '@/shared/ui';
 import {
   VEHICLE_BENEFICIARY_SECTION_COLORS,
   VEHICLE_BENEFICIARY_SECTION_COPY,

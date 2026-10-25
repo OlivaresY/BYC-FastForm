@@ -4,9 +4,9 @@ import {
   BuildingIcon as SharedBuildingIcon,
   DocumentIcon as SharedDocumentIcon,
   UserIcon as SharedUserIcon,
-} from '@/shared/ui/Icons';
-import { CustomSelect } from '@/shared/ui/CustomSelect';
-import { CustomTextInput } from '@/shared/ui/CustomTextInput';
+  CustomSelect,
+  CustomTextInput,
+} from '@/shared/ui';
 import {
   LEGAL_ENTITY_FORM_COLORS,
   LEGAL_ENTITY_FORM_COPY,

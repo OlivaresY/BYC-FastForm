@@ -1,6 +1,13 @@
 import type { TextInputProps } from 'react-native';
 
-export type CustomTextInputPresetIcon = 'calendar' | 'hash' | 'mail' | 'phone';
+export type CustomTextInputPresetIcon =
+  | 'banknote'
+  | 'calendar'
+  | 'hash'
+  | 'mail'
+  | 'phone'
+  | 'phone-call'
+  | 'smartphone';
 
 export interface CustomTextInputProps extends Omit<
   TextInputProps,
@@ -11,7 +18,8 @@ export interface CustomTextInputProps extends Omit<
   isPassword?: boolean;
   isValid?: boolean;
   label?: string;
-  leftIcon?: CustomTextInputPresetIcon;
+  labelRight?: React.ReactNode;
+  leftIcon?: CustomTextInputPresetIcon | React.ReactNode;
   required?: boolean;
   testID?: string;
 }

@@ -18,61 +18,22 @@ export const BaseButton = ({
   onPress,
   style,
   testID,
+  textClassName,
   variant = BASE_BUTTON_VARIANTS.PRIMARY,
   ...rest
 }: BaseButtonProps): React.JSX.Element => {
   const isInteractionDisabled = disabled || loading;
 
-  const getVariantStyles = (): {
-    container: string;
-    loaderColor: string;
-    text: string;
-  } => {
-    switch (variant) {
-      case BASE_BUTTON_VARIANTS.SECONDARY:
-        return {
-          container: 'bg-primary-dark active:opacity-90',
-          loaderColor: '#FFFFFF',
-          text: 'text-surface font-semibold text-base',
-        };
-      case BASE_BUTTON_VARIANTS.GHOST:
-        return {
-          container: 'bg-transparent active:bg-brand-red/10',
-          loaderColor: '#B91C1C',
-          text: 'text-brand-red font-semibold text-base',
-        };
-      case BASE_BUTTON_VARIANTS.OUTLINE:
-        return {
-          container:
-            'border-2 border-brand-red bg-transparent active:bg-brand-red/10',
-          loaderColor: '#B91C1C',
-          text: 'text-brand-red font-semibold text-base',
-        };
-      case BASE_BUTTON_VARIANTS.PRIMARY:
-      default:
-        return {
-          container: 'bg-brand-red active:opacity-90',
-          loaderColor: '#FFFFFF',
-          text: 'text-surface font-semibold text-base',
-        };
-    }
-  };
-
-  const { container, loaderColor, text } = getVariantStyles();
+  const variantConfig =
+    BASE_BUTTON_STYLES.VARIANTS[variant] ??
+    BASE_BUTTON_STYLES.VARIANTS[BASE_BUTTON_VARIANTS.PRIMARY];
+  const { container, loaderColor, text } = variantConfig;
 
   const containerClasses = [
-    'min-h-[48px]',
-    'min-w-[48px]',
-    fullWidth ? 'w-full self-stretch' : '',
-    'flex-row',
-    'items-center',
-    'justify-center',
-    'gap-2',
-    'rounded-xl',
-    'px-4',
-    'py-3',
+    BASE_BUTTON_STYLES.BASE_CONTAINER,
+    fullWidth ? BASE_BUTTON_STYLES.FULL_WIDTH : '',
     container,
-    isInteractionDisabled ? 'opacity-40' : '',
+    isInteractionDisabled ? BASE_BUTTON_STYLES.DISABLED : '',
     className,
   ]
     .filter(Boolean)
@@ -100,7 +61,7 @@ export const BaseButton = ({
         <View className={BASE_BUTTON_STYLES.CONTENT_CONTAINER}>
           {icon ?? null}
           <Text
-            className={`${text} text-center flex-shrink`}
+            className={`${textClassName ?? text} ${BASE_BUTTON_STYLES.LABEL_BASE}`}
             testID={BASE_BUTTON_TEST_IDS.LABEL}
           >
             {label}

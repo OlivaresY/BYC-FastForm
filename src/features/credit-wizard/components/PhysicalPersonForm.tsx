@@ -4,9 +4,9 @@ import {
   ClockIcon as SharedClockIcon,
   IdCardIcon as SharedIdCardIcon,
   UserIcon as SharedUserIcon,
-} from '@/shared/ui/Icons';
-import { CustomSelect } from '@/shared/ui/CustomSelect';
-import { CustomTextInput } from '@/shared/ui/CustomTextInput';
+  CustomSelect,
+  CustomTextInput,
+} from '@/shared/ui';
 import {
   PHYSICAL_PERSON_FORM_COLORS,
   PHYSICAL_PERSON_FORM_COPY,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { CarIcon, CloseIcon } from '@/shared/ui/Icons';
+import { CarIcon, CloseIcon } from '../Icons';
 import {
   PROCESS_TOP_BAR_COLORS,
   PROCESS_TOP_BAR_COPY,

@@ -114,37 +114,11 @@ export interface UseApplicantStepViewModelReturn {
 // Orchestrator Component Props
 // =============================================================================
 
-export interface ApplicantStepViewProps extends Omit<
-  UseApplicantStepViewModelReturn,
-  | 'closeBeneficiaryModal'
-  | 'handleSaveThirdPartyData'
-  | 'isBeneficiaryModalOpen'
-  | 'isIdentificationValid'
-  | 'isValid'
-  | 'legalErrors'
-  | 'onThirdPartyFieldChange'
-  | 'openBeneficiaryModal'
-  | 'physicalErrors'
-  | 'thirdPartyErrors'
-  | 'thirdPartyValues'
-> {
-  closeBeneficiaryModal?: () => void;
+export interface ApplicantStepViewProps extends Partial<UseApplicantStepViewModelReturn> {
   disabled?: boolean;
-  handleSaveThirdPartyData?: () => boolean | void;
-  isBeneficiaryModalOpen?: boolean;
-  isIdentificationValid?: boolean;
-  isValid?: boolean;
-  legalErrors?: Partial<Record<LegalEntityFormField, string>>;
-  onClose: () => void;
-  onThirdPartyFieldChange?: <K extends ThirdPartyBeneficiaryField>(
-    field: K,
-    value: ThirdPartyBeneficiaryValues[K],
-  ) => void;
-  openBeneficiaryModal?: () => void;
-  physicalErrors?: Partial<Record<PhysicalPersonFormField, string>>;
+  onClose?: () => void;
   testID?: string;
-  thirdPartyErrors?: Partial<Record<ThirdPartyBeneficiaryField, string>>;
-  thirdPartyValues?: ThirdPartyBeneficiaryValues;
+  viewModel?: UseApplicantStepViewModelReturn;
 }
 
 // =============================================================================

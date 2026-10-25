@@ -214,7 +214,7 @@ export const CustomSelect = ({
 
             {/* Modal Options List */}
             <ScrollView
-              className='max-h-80'
+              className={CUSTOM_SELECT_STYLES.OPTIONS_SCROLL}
               showsVerticalScrollIndicator={false}
             >
               <View className={CUSTOM_SELECT_STYLES.OPTION_LIST}>
