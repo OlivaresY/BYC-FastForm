@@ -48,7 +48,9 @@ export const useKeyboardAutoScroll = (
   } = options ?? {};
 
   const [keyboardHeight, setKeyboardHeight] = useState<number>(0);
+  const hasWarnedRef = useRef<boolean>(false);
   const keyboardHeightRef = useRef<number>(0);
+  const rafIdRef = useRef<number | null>(null);
   const scrollYRef = useRef<number>(0);
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -60,7 +62,12 @@ export const useKeyboardAutoScroll = (
         return;
       }
 
-      requestAnimationFrame((): void => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+
+      rafIdRef.current = requestAnimationFrame((): void => {
+        rafIdRef.current = null;
         try {
           const focusedInput = TextInput.State?.currentlyFocusedInput
             ? TextInput.State.currentlyFocusedInput()
@@ -106,8 +113,11 @@ export const useKeyboardAutoScroll = (
               );
             }
           }
-        } catch {
-          // Graceful fallback for non-native / test environments
+        } catch (error) {
+          if (!hasWarnedRef.current) {
+            console.warn('Keyboard auto-scroll measurement failed:', error);
+            hasWarnedRef.current = true;
+          }
         }
       });
     },
@@ -136,6 +146,7 @@ export const useKeyboardAutoScroll = (
     const onHide = (): void => {
       keyboardHeightRef.current = 0;
       setKeyboardHeight(0);
+      hasWarnedRef.current = false;
     };
 
     const showSub = Keyboard?.addListener
@@ -146,6 +157,10 @@ export const useKeyboardAutoScroll = (
       : null;
 
     return (): void => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
       showSub?.remove?.();
       hideSub?.remove?.();
     };

@@ -76,10 +76,10 @@ const ApplicantStepViewTestContainer = ({
 }: ApplicantStepViewTestContainerProps): React.JSX.Element => {
   const viewModel = useApplicantStepViewModel(hookProps);
   return React.createElement(ApplicantStepView, {
-    ...viewModel,
     disabled,
     onClose,
     testID,
+    viewModel,
   });
 };
 

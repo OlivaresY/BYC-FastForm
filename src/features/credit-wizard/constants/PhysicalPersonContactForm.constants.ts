@@ -55,6 +55,11 @@ export const PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS = {
   VIEW_BOX: '0 0 24 24',
 } as const;
 
+export const PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL = {
+  MAX_LENGTH_DATE: 14,
+  MAX_LENGTH_INCOME: 15,
+} as const;
+
 export const PHYSICAL_PERSON_CONTACT_FORM_OPTIONS = {
   CANTON: [
     { label: 'Central', value: 'Central' },

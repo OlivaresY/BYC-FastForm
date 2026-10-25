@@ -146,7 +146,7 @@ export const FinalBeneficiaryModal = ({
             >
               {/* SECTION 1: DOCUMENTO DE IDENTIDAD */}
               <View
-                className='mb-2 flex-row items-center gap-2'
+                className={BENEFICIARY_MODAL_STYLES.SECTION_HEADER_ROW_FIRST}
                 testID={BENEFICIARY_MODAL_TEST_IDS.SECTION_1_HEADER}
               >
                 <IdCardIcon
@@ -156,7 +156,7 @@ export const FinalBeneficiaryModal = ({
                     BENEFICIARY_MODAL_DIMENSIONS.SECTION_ICON_STROKE_WIDTH
                   }
                 />
-                <Text className='text-sm font-bold uppercase text-slate-800'>
+                <Text className={BENEFICIARY_MODAL_STYLES.SECTION_HEADER_TITLE}>
                   {BENEFICIARY_MODAL_COPY.SECTION_1_TITLE}
                 </Text>
               </View>
@@ -189,7 +189,7 @@ export const FinalBeneficiaryModal = ({
 
               {/* SECTION 2: NOMBRES Y APELLIDOS OFICIALES */}
               <View
-                className='mb-2 mt-6 flex-row items-center gap-2'
+                className={BENEFICIARY_MODAL_STYLES.SECTION_HEADER_ROW}
                 testID={BENEFICIARY_MODAL_TEST_IDS.SECTION_2_HEADER}
               >
                 <UserIcon
@@ -199,7 +199,7 @@ export const FinalBeneficiaryModal = ({
                     BENEFICIARY_MODAL_DIMENSIONS.SECTION_ICON_STROKE_WIDTH
                   }
                 />
-                <Text className='text-sm font-bold uppercase text-slate-800'>
+                <Text className={BENEFICIARY_MODAL_STYLES.SECTION_HEADER_TITLE}>
                   {BENEFICIARY_MODAL_COPY.SECTION_2_TITLE}
                 </Text>
               </View>
@@ -216,7 +216,7 @@ export const FinalBeneficiaryModal = ({
 
               {/* SECTION 3: DATOS DE CONTACTO */}
               <View
-                className='mb-2 mt-6 flex-row items-center gap-2'
+                className={BENEFICIARY_MODAL_STYLES.SECTION_HEADER_ROW}
                 testID={BENEFICIARY_MODAL_TEST_IDS.SECTION_3_HEADER}
               >
                 <PhoneIcon
@@ -226,7 +226,7 @@ export const FinalBeneficiaryModal = ({
                     BENEFICIARY_MODAL_DIMENSIONS.SECTION_ICON_STROKE_WIDTH
                   }
                 />
-                <Text className='text-sm font-bold uppercase text-slate-800'>
+                <Text className={BENEFICIARY_MODAL_STYLES.SECTION_HEADER_TITLE}>
                   {BENEFICIARY_MODAL_COPY.SECTION_3_TITLE}
                 </Text>
               </View>
@@ -256,7 +256,7 @@ export const FinalBeneficiaryModal = ({
 
               {/* SECTION 4: DATOS DEMOGRÁFICOS */}
               <View
-                className='mb-2 mt-6 flex-row items-center gap-2'
+                className={BENEFICIARY_MODAL_STYLES.SECTION_HEADER_ROW}
                 testID={BENEFICIARY_MODAL_TEST_IDS.SECTION_4_HEADER}
               >
                 <ClockIcon
@@ -266,7 +266,7 @@ export const FinalBeneficiaryModal = ({
                     BENEFICIARY_MODAL_DIMENSIONS.SECTION_ICON_STROKE_WIDTH
                   }
                 />
-                <Text className='text-sm font-bold uppercase text-slate-800'>
+                <Text className={BENEFICIARY_MODAL_STYLES.SECTION_HEADER_TITLE}>
                   {BENEFICIARY_MODAL_COPY.SECTION_4_TITLE}
                 </Text>
               </View>

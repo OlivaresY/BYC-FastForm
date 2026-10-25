@@ -13,6 +13,7 @@ import {
   PHYSICAL_PERSON_CONTACT_FORM_COLORS,
   PHYSICAL_PERSON_CONTACT_FORM_COPY,
   PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS,
+  PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL,
   PHYSICAL_PERSON_CONTACT_FORM_OPTIONS,
   PHYSICAL_PERSON_CONTACT_FORM_STYLES,
   PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS,
@@ -30,35 +31,56 @@ const formatCurrencyDisplay = (value: number | undefined | null): string => {
 };
 
 const formatDateDisplay = (text: string): string => {
-  let workingText = text;
-
-  // If the user types a separator, split by it to auto-pad
-  if (text.includes('-') || text.includes('/')) {
-    const parts = text.split(/[-/]/);
-    let day = parts[0].replace(/[^0-9]/g, '');
-    let month = parts.length > 1 ? parts[1].replace(/[^0-9]/g, '') : '';
-    const year = parts.length > 2 ? parts[2].replace(/[^0-9]/g, '') : '';
-
-    if (parts.length > 1 && day.length === 1) {
-      day = `0${day}`;
+  // If no separators, do standard digit slicing
+  if (!text.includes('-') && !text.includes('/')) {
+    const digits = text.replace(/[^0-9]/g, '');
+    if (digits.length <= 2) {
+      return digits;
     }
-    if (parts.length > 2 && month.length === 1) {
-      month = `0${month}`;
+    if (digits.length <= 4) {
+      return `${digits.slice(0, 2)}-${digits.slice(2)}`;
     }
-
-    const combined = [day, month, year].filter(Boolean).join('');
-    workingText = combined;
+    return `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4, 8)}`;
   }
 
-  // Fallback to strict digit formatting
-  const cleaned = workingText.replace(/[^0-9]/g, '');
-  if (cleaned.length <= 2) {
-    return cleaned;
+  // Preserve slots if separators exist
+  const parts = text.split(/[-/]/);
+  let day = (parts[0] || '').replace(/[^0-9]/g, '');
+  let month = (parts[1] || '').replace(/[^0-9]/g, '');
+  let year = (parts[2] || '').replace(/[^0-9]/g, '');
+  let slots = Math.min(parts.length, 3);
+
+  // Digits typed past a full slot spill into the next slot only when it is
+  // empty, so sequential typing keeps working after a separator is inserted
+  if (day.length > 2 && month === '') {
+    month = day.slice(2);
+    slots = Math.max(slots, 2);
   }
-  if (cleaned.length <= 4) {
-    return `${cleaned.slice(0, 2)}-${cleaned.slice(2)}`;
+  if (month.length > 2 && year === '') {
+    year = month.slice(2);
+    slots = 3;
   }
-  return `${cleaned.slice(0, 2)}-${cleaned.slice(2, 4)}-${cleaned.slice(4, 8)}`;
+
+  day = day.slice(0, 2);
+  month = month.slice(0, 2);
+  year = year.slice(0, 4);
+
+  // Pad single digits if the user has moved to the next segment
+  if (slots > 1 && day.length === 1) {
+    day = `0${day}`;
+  }
+  if (slots > 2 && month.length === 1) {
+    month = `0${month}`;
+  }
+
+  let result = day;
+  if (slots > 1) {
+    result += `-${month}`;
+  }
+  if (slots > 2) {
+    result += `-${year}`;
+  }
+  return result;
 };
 
 interface SectionHeaderProps {
@@ -123,14 +145,12 @@ const SectionHeader = ({
   </View>
 );
 
-export const PhysicalPersonContactForm = ({
+const PhysicalPersonContactFormComponent = ({
   control,
   disabled = false,
-  errors: _errorsProp,
   onInputFocus,
   options,
   testID,
-  viewModel: _viewModelProp,
 }: PhysicalPersonContactFormProps): React.JSX.Element => {
   const provinceOptions =
     options?.provinceOptions ?? PHYSICAL_PERSON_CONTACT_FORM_OPTIONS.PROVINCE;
@@ -472,7 +492,9 @@ export const PhysicalPersonContactForm = ({
                   error={error?.message}
                   label={PHYSICAL_PERSON_CONTACT_FORM_COPY.ENTRY_DATE_LABEL}
                   leftIcon='calendar'
-                  maxLength={10}
+                  maxLength={
+                    PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL.MAX_LENGTH_DATE
+                  }
                   onBlur={onBlur}
                   onChangeText={(text: string): void => {
                     const maskedDate = formatDateDisplay(text);
@@ -578,6 +600,9 @@ export const PhysicalPersonContactForm = ({
                     keyboardType='numeric'
                     label={PHYSICAL_PERSON_CONTACT_FORM_COPY.GROSS_INCOME_LABEL}
                     leftIcon='banknote'
+                    maxLength={
+                      PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL.MAX_LENGTH_INCOME
+                    }
                     onBlur={onBlur}
                     onChangeText={(text: string): void => {
                       const digits = text.replace(/[^0-9]/g, '');
@@ -618,6 +643,9 @@ export const PhysicalPersonContactForm = ({
                     keyboardType='numeric'
                     label={PHYSICAL_PERSON_CONTACT_FORM_COPY.NET_INCOME_LABEL}
                     leftIcon='banknote'
+                    maxLength={
+                      PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL.MAX_LENGTH_INCOME
+                    }
                     onBlur={onBlur}
                     onChangeText={(text: string): void => {
                       const digits = text.replace(/[^0-9]/g, '');
@@ -671,6 +699,9 @@ export const PhysicalPersonContactForm = ({
                   </Text>
                 }
                 leftIcon='banknote'
+                maxLength={
+                  PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL.MAX_LENGTH_INCOME
+                }
                 onBlur={onBlur}
                 onChangeText={(text: string): void => {
                   const digits = text.replace(/[^0-9]/g, '');
@@ -693,3 +724,7 @@ export const PhysicalPersonContactForm = ({
     </View>
   );
 };
+
+export const PhysicalPersonContactForm = React.memo(
+  PhysicalPersonContactFormComponent,
+);

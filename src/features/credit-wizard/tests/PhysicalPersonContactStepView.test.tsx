@@ -89,6 +89,17 @@ describe('PhysicalPersonContactStepView Integration', () => {
       // Assert
       expect(handleClose).toHaveBeenCalledTimes(1);
     });
+
+    it('renders with custom dynamic currentStep and totalSteps props', () => {
+      // Arrange & Act
+      const page = PhysicalPersonContactStepViewPageObject.render({
+        currentStep: 3,
+        totalSteps: 5,
+      });
+
+      // Assert
+      expect(page.wizardHeader).toBeTruthy();
+    });
   });
 
   describe('Zod Validation: International Phones & Strict Dates', () => {

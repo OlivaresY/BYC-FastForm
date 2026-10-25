@@ -48,24 +48,32 @@ export const usePhysicalPersonContactViewModel = (
   });
 
   const onValidSubmit = useCallback(
-    (data: PhysicalPersonContact): void => {
-      onSubmitProp?.(data);
+    async (data: PhysicalPersonContact): Promise<void> => {
+      try {
+        await onSubmitProp?.(data);
+      } catch (error) {
+        throw error;
+      }
     },
     [onSubmitProp],
   );
 
   const handleNextStep = useCallback(
-    (dataOrEvent?: unknown): Promise<void> | void => {
+    async (dataOrEvent?: unknown): Promise<void> => {
       if (
         dataOrEvent &&
         typeof dataOrEvent === 'object' &&
         'contactInfo' in dataOrEvent &&
         'residentialAddress' in dataOrEvent
       ) {
-        onValidSubmit(dataOrEvent as PhysicalPersonContact);
+        const parseResult = PhysicalPersonContactSchema.safeParse(dataOrEvent);
+        if (!parseResult.success) {
+          throw new Error('Programmatic validation failed');
+        }
+        await onValidSubmit(parseResult.data);
         return;
       }
-      return handleSubmit(onValidSubmit)(dataOrEvent as never);
+      await handleSubmit(onValidSubmit)(dataOrEvent as never);
     },
     [handleSubmit, onValidSubmit],
   );

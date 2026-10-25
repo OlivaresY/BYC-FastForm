@@ -8,8 +8,20 @@ export type {
   CustomSelectProps,
 } from './CustomSelect';
 
-export { CustomTextInput } from './CustomTextInput';
-export type { CustomTextInputProps } from './CustomTextInput';
+export {
+  CustomTextInput,
+  CUSTOM_TEXT_INPUT_COLORS,
+  CUSTOM_TEXT_INPUT_COPY,
+  CUSTOM_TEXT_INPUT_ICON_DIMENSIONS,
+  CUSTOM_TEXT_INPUT_ICONS,
+  CUSTOM_TEXT_INPUT_STYLES,
+  CUSTOM_TEXT_INPUT_SVG_ATTRIBUTES,
+  CUSTOM_TEXT_INPUT_TEST_IDS,
+} from './CustomTextInput';
+export type {
+  CustomTextInputPresetIcon,
+  CustomTextInputProps,
+} from './CustomTextInput';
 
 export { ErrorBanner } from './ErrorBanner';
 export type { ErrorBannerProps } from './ErrorBanner';

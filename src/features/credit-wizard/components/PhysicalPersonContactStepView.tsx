@@ -1,7 +1,5 @@
 import React from 'react';
 import {
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Text,
   View,
@@ -27,16 +25,18 @@ import { WizardProgressHeader } from './WizardProgressHeader';
 const NOOP_VOID = (): void => undefined;
 
 export const PhysicalPersonContactStepView = ({
+  currentStep = PHYSICAL_PERSON_CONTACT_STEP_VIEW_NUMERICAL.DEFAULT_CURRENT_STEP,
   disabled = false,
   onClose,
   onSubmit,
   options,
   testID,
+  totalSteps = PHYSICAL_PERSON_CONTACT_STEP_VIEW_NUMERICAL.DEFAULT_TOTAL_STEPS,
   viewModel: viewModelProp,
 }: PhysicalPersonContactStepViewProps): React.JSX.Element => {
   const defaultViewModel = usePhysicalPersonContactViewModel({ onSubmit });
   const viewModel = viewModelProp ?? defaultViewModel;
-  const { control, errors, handleNextStep, isValid } = viewModel;
+  const { control, handleNextStep, isValid } = viewModel;
 
   const {
     contentContainerStyle,
@@ -63,19 +63,12 @@ export const PhysicalPersonContactStepView = ({
         }
       />
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      <View
         className={
           PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.KEYBOARD_AVOIDING_VIEW
         }
-        keyboardVerticalOffset={
-          Platform.OS === 'ios'
-            ? PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.KEYBOARD_VERTICAL_OFFSET_IOS
-            : 0
-        }
       >
         <ScrollView
-          automaticallyAdjustKeyboardInsets={true}
           className={PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.SCROLL_VIEW}
           contentContainerStyle={contentContainerStyle}
           keyboardDismissMode='on-drag'
@@ -89,15 +82,11 @@ export const PhysicalPersonContactStepView = ({
           <View
             className={PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.SCROLL_CONTENT}
           >
-            {/* 1. Wizard Progress Header (Step 2 of 4) */}
+            {/* 1. Wizard Progress Header */}
             <WizardProgressHeader
-              currentStep={
-                PHYSICAL_PERSON_CONTACT_STEP_VIEW_NUMERICAL.CURRENT_STEP
-              }
+              currentStep={currentStep}
               testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.WIZARD_HEADER}
-              totalSteps={
-                PHYSICAL_PERSON_CONTACT_STEP_VIEW_NUMERICAL.TOTAL_STEPS
-              }
+              totalSteps={totalSteps}
             />
 
             {/* 2. Step Title & Description Block */}
@@ -123,11 +112,9 @@ export const PhysicalPersonContactStepView = ({
             <PhysicalPersonContactForm
               control={control}
               disabled={disabled}
-              errors={errors}
               onInputFocus={onInputFocus}
               options={options}
               testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.FORM}
-              viewModel={viewModel}
             />
           </View>
         </ScrollView>
@@ -179,7 +166,7 @@ export const PhysicalPersonContactStepView = ({
             variant='primary'
           />
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </View>
   );
 };

@@ -15,7 +15,6 @@ import {
   CUSTOM_TEXT_INPUT_COLORS,
   CUSTOM_TEXT_INPUT_COPY,
   CUSTOM_TEXT_INPUT_ICON_DIMENSIONS,
-  CUSTOM_TEXT_INPUT_SELECTION,
   CUSTOM_TEXT_INPUT_STYLES,
   CUSTOM_TEXT_INPUT_TEST_IDS,
 } from './constants/CustomTextInput.constants';
@@ -142,7 +141,6 @@ export const CustomTextInput = ({
   onFocus,
   placeholder,
   required = false,
-  selection,
   testID,
   ...rest
 }: CustomTextInputProps): React.JSX.Element => {
@@ -200,10 +198,8 @@ export const CustomTextInput = ({
       testID={containerTestId}
     >
       {label || labelRight ? (
-        <View
-          className={`${CUSTOM_TEXT_INPUT_STYLES.LABEL_ROW} justify-between items-center w-full`}
-        >
-          <View className='flex-row items-center gap-1'>
+        <View className={CUSTOM_TEXT_INPUT_STYLES.LABEL_ROW}>
+          <View className={CUSTOM_TEXT_INPUT_STYLES.LABEL_LEFT_CONTAINER}>
             {label ? (
               <Text
                 className={CUSTOM_TEXT_INPUT_STYLES.LABEL_TEXT}
@@ -242,10 +238,6 @@ export const CustomTextInput = ({
           placeholder={placeholder}
           placeholderTextColor={CUSTOM_TEXT_INPUT_COLORS.PLACEHOLDER}
           secureTextEntry={isPassword}
-          selection={
-            selection ??
-            (isFocused ? undefined : CUSTOM_TEXT_INPUT_SELECTION.BLURRED)
-          }
           testID={inputTestId}
           {...rest}
         />

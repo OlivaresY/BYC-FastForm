@@ -22,6 +22,10 @@ export const APPLICANT_STEP_VIEW_COPY = {
   TITLE: 'ENTIDAD Y PERSONAL',
 } as const;
 
+export const APPLICANT_STEP_VIEW_CONSTANTS = {
+  MOCK_USER_INITIALS: 'YO',
+} as const;
+
 export const APPLICANT_STEP_VIEW_DEFAULT_VALUES: {
   LEGAL: LegalEntityFormValues;
   PHYSICAL: PhysicalPersonFormValues;
@@ -211,9 +215,9 @@ export const BENEFICIARY_MODAL_STYLES = {
     'flex-1 w-full max-h-[85%] min-h-[500px] rounded-t-[2rem] bg-white p-6 gap-4',
   SAVE_BUTTON: 'w-full self-stretch',
   SCROLL_VIEW: 'flex-1 w-full',
-  SECTION_HEADER_ROW: 'flex-row items-center gap-2 mb-1',
-  SECTION_HEADER_TITLE:
-    'text-xs font-bold text-slate-800 uppercase tracking-wide',
+  SECTION_HEADER_ROW: 'mb-2 mt-6 flex-row items-center gap-2',
+  SECTION_HEADER_ROW_FIRST: 'mb-2 flex-row items-center gap-2',
+  SECTION_HEADER_TITLE: 'text-sm font-bold uppercase text-slate-800',
   SUBTITLE: 'mt-1 text-xs text-text-secondary leading-relaxed',
   TITLE: 'text-lg font-bold text-text-primary',
 } as const;
