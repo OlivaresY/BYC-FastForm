@@ -1,10 +1,15 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useMemo, useState } from 'react';
-import { APPLICANT_STEP_VIEW_DEFAULT_VALUES } from '../constants/ApplicantStepView.constants';
+import { useForm, useWatch } from 'react-hook-form';
 import {
+  APPLICANT_STEP_VIEW_DEFAULT_VALUES,
+  APPLICANT_STEP_VIEW_ERRORS,
+} from '../constants/ApplicantStepView.constants';
+import {
+  ApplicantStepFormStateSchema,
   LEGAL_APPLICANT_FIELDS,
   LegalApplicantSchema,
   LegalIdentificationNumberSchema,
-  mapIssuesToFieldErrors,
   PHYSICAL_APPLICANT_FIELDS,
   PhysicalApplicantSchema,
   PhysicalIdentificationNumberSchema,
@@ -22,11 +27,15 @@ import type {
 } from '../types/PhysicalPersonForm.types';
 import type { VehicleBeneficiaryType } from '../types/VehicleBeneficiarySection.types';
 import type {
+  ApplicantStepData,
+  ApplicantStepFormValues,
   ThirdPartyBeneficiaryField,
   ThirdPartyBeneficiaryValues,
   UseApplicantStepViewModelProps,
   UseApplicantStepViewModelReturn,
 } from '../types/ApplicantStepView.types';
+
+export type { ApplicantStepFormValues };
 
 export const useApplicantStepViewModel = (
   props?: UseApplicantStepViewModelProps,
@@ -37,31 +46,14 @@ export const useApplicantStepViewModel = (
     initialRegime,
     initialThirdPartyValues,
     initialVehicleBeneficiary,
+    mode,
     onSubmit: onSubmitProp,
   } = props ?? {};
 
-  const [regime, setRegime] = useState<LegalEntityType>(
-    initialRegime ?? 'physical',
-  );
-
-  const [physicalValues, setPhysicalValues] =
-    useState<PhysicalPersonFormValues>({
-      ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.PHYSICAL,
-      ...initialPhysicalValues,
-    });
-
-  const [legalValues, setLegalValues] = useState<LegalEntityFormValues>({
-    ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
-    ...initialLegalValues,
-  });
-
-  const [vehicleBeneficiary, setVehicleBeneficiary] =
-    useState<VehicleBeneficiaryType>(
-      initialVehicleBeneficiary ?? 'same_holder',
-    );
-
   const [isBeneficiaryModalOpen, setIsBeneficiaryModalOpen] =
     useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const [savedThirdPartyValues, setSavedThirdPartyValues] =
     useState<ThirdPartyBeneficiaryValues | null>(() => {
@@ -81,26 +73,68 @@ export const useApplicantStepViewModel = (
       return null;
     });
 
-  const [thirdPartyValues, setThirdPartyValues] =
-    useState<ThirdPartyBeneficiaryValues>({
+  const {
+    clearErrors,
+    control,
+    formState: { errors, isValid: isFormValid },
+    getValues,
+    setError,
+    setValue,
+  } = useForm<ApplicantStepFormValues>({
+    defaultValues: {
+      legalValues: {
+        ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
+        ...initialLegalValues,
+      },
+      physicalValues: {
+        ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.PHYSICAL,
+        ...initialPhysicalValues,
+      },
+      regime: initialRegime ?? 'physical',
+      thirdPartyValues: {
+        ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
+        ...(initialVehicleBeneficiary === 'third_party'
+          ? { isThirdPartyRegistration: true }
+          : {}),
+        ...initialThirdPartyValues,
+      },
+      vehicleBeneficiary: initialVehicleBeneficiary ?? 'same_holder',
+    },
+    mode: mode ?? 'onSubmit',
+    resolver: zodResolver(ApplicantStepFormStateSchema),
+  });
+
+  const currentValues = useWatch({ control });
+
+  const regime = currentValues.regime ?? (initialRegime ?? 'physical');
+  const vehicleBeneficiary =
+    currentValues.vehicleBeneficiary ??
+    (initialVehicleBeneficiary ?? 'same_holder');
+  const physicalValues = useMemo<PhysicalPersonFormValues>(
+    () =>
+      ({
+        ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.PHYSICAL,
+        ...currentValues.physicalValues,
+      }) as PhysicalPersonFormValues,
+    [currentValues.physicalValues],
+  );
+
+  const legalValues = useMemo<LegalEntityFormValues>(
+    () =>
+      ({
+        ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
+        ...currentValues.legalValues,
+      }) as LegalEntityFormValues,
+    [currentValues.legalValues],
+  );
+
+  const thirdPartyValues = useMemo<ThirdPartyBeneficiaryValues>(
+    () => ({
       ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
-      ...(initialVehicleBeneficiary === 'third_party'
-        ? { isThirdPartyRegistration: true }
-        : {}),
-      ...initialThirdPartyValues,
-    });
-
-  const [physicalErrors, setPhysicalErrors] = useState<
-    Partial<Record<PhysicalPersonFormField, string>>
-  >({});
-
-  const [legalErrors, setLegalErrors] = useState<
-    Partial<Record<LegalEntityFormField, string>>
-  >({});
-
-  const [thirdPartyErrors, setThirdPartyErrors] = useState<
-    Partial<Record<ThirdPartyBeneficiaryField, string>>
-  >({});
+      ...currentValues.thirdPartyValues,
+    }),
+    [currentValues.thirdPartyValues],
+  );
 
   // ===========================================================================
   // Validation Computations
@@ -151,7 +185,48 @@ export const useApplicantStepViewModel = (
     }).success;
   }, [thirdPartyValues, vehicleBeneficiary]);
 
-  const isValid = isApplicantValid && isThirdPartyValid;
+  const isValid =
+    (isFormValid || (isApplicantValid && isThirdPartyValid)) &&
+    isApplicantValid &&
+    isThirdPartyValid;
+
+  const physicalErrors: Partial<Record<PhysicalPersonFormField, string>> = {};
+  if (errors.physicalValues) {
+    const raw = errors.physicalValues as Partial<
+      Record<PhysicalPersonFormField, { message?: string }>
+    >;
+    PHYSICAL_APPLICANT_FIELDS.forEach((field) => {
+      if (raw[field]?.message) {
+        physicalErrors[field] = raw[field]!.message;
+      }
+    });
+  }
+
+  const legalErrors: Partial<Record<LegalEntityFormField, string>> = {};
+  if (errors.legalValues) {
+    const raw = errors.legalValues as Partial<
+      Record<LegalEntityFormField, { message?: string }>
+    >;
+    LEGAL_APPLICANT_FIELDS.forEach((field) => {
+      if (raw[field]?.message) {
+        legalErrors[field] = raw[field]!.message;
+      }
+    });
+  }
+
+  const thirdPartyErrors: Partial<
+    Record<ThirdPartyBeneficiaryField, string>
+  > = {};
+  if (errors.thirdPartyValues) {
+    const raw = errors.thirdPartyValues as Partial<
+      Record<ThirdPartyBeneficiaryField, { message?: string }>
+    >;
+    THIRD_PARTY_BENEFICIARY_FIELDS.forEach((field) => {
+      if (raw[field]?.message) {
+        thirdPartyErrors[field] = raw[field]!.message;
+      }
+    });
+  }
 
   // ===========================================================================
   // Modal Handlers
@@ -163,65 +238,99 @@ export const useApplicantStepViewModel = (
 
   const closeBeneficiaryModal = useCallback((): void => {
     if (savedThirdPartyValues !== null) {
-      setThirdPartyValues(savedThirdPartyValues);
-      setThirdPartyErrors({});
+      setValue('thirdPartyValues', savedThirdPartyValues, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      });
+      clearErrors('thirdPartyValues');
       setIsBeneficiaryModalOpen(false);
     } else {
-      setVehicleBeneficiary('same_holder');
-      setThirdPartyValues(APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY);
-      setThirdPartyErrors({});
+      setValue('vehicleBeneficiary', 'same_holder', {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      });
+      setValue(
+        'thirdPartyValues',
+        APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
+        {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        },
+      );
+      clearErrors('thirdPartyValues');
       setIsBeneficiaryModalOpen(false);
     }
-  }, [savedThirdPartyValues]);
+  }, [clearErrors, savedThirdPartyValues, setValue]);
 
   const handleSaveThirdPartyData = useCallback((): boolean => {
+    const currentThirdParty = getValues('thirdPartyValues');
     const candidate: ThirdPartyBeneficiaryValues = {
-      ...thirdPartyValues,
+      ...currentThirdParty,
       isThirdPartyRegistration: true,
     };
     const result = StrictThirdPartyBeneficiarySchema.safeParse(candidate);
 
     if (!result.success) {
-      setThirdPartyErrors(
-        mapIssuesToFieldErrors(
-          result.error.issues,
-          THIRD_PARTY_BENEFICIARY_FIELDS,
-        ),
-      );
+      result.error.issues.forEach((issue) => {
+        const [field] = issue.path;
+        if (typeof field === 'string') {
+          setError(
+            `thirdPartyValues.${field as ThirdPartyBeneficiaryField}` as const,
+            {
+              message: issue.message,
+              type: 'manual',
+            },
+          );
+        }
+      });
       return false;
     }
 
-    setThirdPartyValues(candidate);
+    clearErrors('thirdPartyValues');
+    setValue('thirdPartyValues', candidate, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
     setSavedThirdPartyValues(candidate);
-    setThirdPartyErrors({});
     setIsBeneficiaryModalOpen(false);
     return true;
-  }, [thirdPartyValues]);
+  }, [clearErrors, getValues, setError, setValue]);
 
   // ===========================================================================
   // Form Handlers
   // ===========================================================================
 
-  const onRegimeChange = useCallback((newRegime: LegalEntityType): void => {
-    setRegime(newRegime);
-  }, []);
+  const onRegimeChange = useCallback(
+    (newRegime: LegalEntityType): void => {
+      setValue('regime', newRegime, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      });
+    },
+    [setValue],
+  );
 
   const onPhysicalFieldChange = useCallback(
     <K extends PhysicalPersonFormField>(
       field: K,
       value: PhysicalPersonFormValues[K],
     ): void => {
-      setPhysicalValues((prev) => ({ ...prev, [field]: value }));
-      setPhysicalErrors((prev) => {
-        if (prev[field]) {
-          const next = { ...prev };
-          delete next[field];
-          return next;
-        }
-        return prev;
+      const next = {
+        ...getValues('physicalValues'),
+        [field]: value,
+      };
+      setValue('physicalValues', next, {
+        shouldDirty: true,
+        shouldTouch: true,
       });
+      clearErrors(`physicalValues.${field}` as const);
     },
-    [],
+    [clearErrors, getValues, setValue],
   );
 
   const onLegalFieldChange = useCallback(
@@ -229,17 +338,17 @@ export const useApplicantStepViewModel = (
       field: K,
       value: LegalEntityFormValues[K],
     ): void => {
-      setLegalValues((prev) => ({ ...prev, [field]: value }));
-      setLegalErrors((prev) => {
-        if (prev[field]) {
-          const next = { ...prev };
-          delete next[field];
-          return next;
-        }
-        return prev;
+      const next = {
+        ...getValues('legalValues'),
+        [field]: value,
+      };
+      setValue('legalValues', next, {
+        shouldDirty: true,
+        shouldTouch: true,
       });
+      clearErrors(`legalValues.${field}` as const);
     },
-    [],
+    [clearErrors, getValues, setValue],
   );
 
   const onThirdPartyFieldChange = useCallback(
@@ -247,146 +356,192 @@ export const useApplicantStepViewModel = (
       field: K,
       value: ThirdPartyBeneficiaryValues[K],
     ): void => {
-      setThirdPartyValues((prev) => ({ ...prev, [field]: value }));
-      setThirdPartyErrors((prev) => {
-        if (prev[field]) {
-          const next = { ...prev };
-          delete next[field];
-          return next;
-        }
-        return prev;
+      const next = {
+        ...getValues('thirdPartyValues'),
+        [field]: value,
+      };
+      setValue('thirdPartyValues', next, {
+        shouldDirty: true,
+        shouldTouch: true,
       });
+      clearErrors(`thirdPartyValues.${field}` as const);
     },
-    [],
+    [clearErrors, getValues, setValue],
   );
 
   const onVehicleBeneficiaryChange = useCallback(
     (beneficiary: VehicleBeneficiaryType): void => {
-      setVehicleBeneficiary(beneficiary);
+      setValue('vehicleBeneficiary', beneficiary, {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
 
       if (beneficiary === 'third_party') {
         if (savedThirdPartyValues !== null) {
-          setThirdPartyValues(savedThirdPartyValues);
+          setValue('thirdPartyValues', savedThirdPartyValues, {
+            shouldDirty: true,
+            shouldTouch: true,
+          });
         } else {
-          setThirdPartyValues((prev) => ({
-            ...prev,
-            isThirdPartyRegistration: true,
-          }));
+          setValue(
+            'thirdPartyValues',
+            {
+              ...getValues('thirdPartyValues'),
+              isThirdPartyRegistration: true,
+            },
+            {
+              shouldDirty: true,
+              shouldTouch: true,
+            },
+          );
         }
         setIsBeneficiaryModalOpen(true);
       } else {
         setSavedThirdPartyValues(null);
-        setThirdPartyValues(APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY);
-        setThirdPartyErrors({});
+        setValue(
+          'thirdPartyValues',
+          APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
+          {
+            shouldDirty: true,
+            shouldTouch: true,
+          },
+        );
+        clearErrors('thirdPartyValues');
         setIsBeneficiaryModalOpen(false);
       }
     },
-    [savedThirdPartyValues],
+    [clearErrors, getValues, savedThirdPartyValues, setValue],
+  );
+
+  const handleNextStep = useCallback(
+    async (_dataOrEvent?: unknown): Promise<void> => {
+      const activeValues = getValues();
+      const isThirdParty = activeValues.vehicleBeneficiary === 'third_party';
+      let hasValidationErrors = false;
+
+      if (isThirdParty) {
+        const candidate: ThirdPartyBeneficiaryValues = {
+          ...activeValues.thirdPartyValues,
+          isThirdPartyRegistration: true,
+        };
+        const thirdPartyResult =
+          StrictThirdPartyBeneficiarySchema.safeParse(candidate);
+
+        if (!thirdPartyResult.success) {
+          thirdPartyResult.error.issues.forEach((issue) => {
+            const [key] = issue.path;
+            if (typeof key === 'string') {
+              setError(
+                `thirdPartyValues.${key as ThirdPartyBeneficiaryField}` as const,
+                {
+                  message: issue.message,
+                  type: 'manual',
+                },
+              );
+            }
+          });
+          setIsBeneficiaryModalOpen(true);
+          hasValidationErrors = true;
+        }
+      }
+
+      if (activeValues.regime === 'physical') {
+        const physicalResult = PhysicalApplicantSchema.safeParse(
+          activeValues.physicalValues,
+        );
+
+        if (!physicalResult.success) {
+          physicalResult.error.issues.forEach((issue) => {
+            const [key] = issue.path;
+            if (typeof key === 'string') {
+              setError(
+                `physicalValues.${key as PhysicalPersonFormField}` as const,
+                {
+                  message: issue.message,
+                  type: 'manual',
+                },
+              );
+            }
+          });
+          hasValidationErrors = true;
+        }
+      } else {
+        const legalResult = LegalApplicantSchema.safeParse(
+          activeValues.legalValues,
+        );
+
+        if (!legalResult.success) {
+          legalResult.error.issues.forEach((issue) => {
+            const [key] = issue.path;
+            if (typeof key === 'string') {
+              setError(
+                `legalValues.${key as LegalEntityFormField}` as const,
+                {
+                  message: issue.message,
+                  type: 'manual',
+                },
+              );
+            }
+          });
+          hasValidationErrors = true;
+        }
+      }
+
+      if (hasValidationErrors) {
+        return;
+      }
+
+      const payload: ApplicantStepData = isThirdParty
+        ? ({
+            regime: activeValues.regime,
+            values:
+              activeValues.regime === 'physical'
+                ? activeValues.physicalValues
+                : activeValues.legalValues,
+            vehicleBeneficiary: 'third_party',
+            ...activeValues.thirdPartyValues,
+            isThirdPartyRegistration: true,
+          } as ApplicantStepData)
+        : ({
+            regime: activeValues.regime,
+            values:
+              activeValues.regime === 'physical'
+                ? activeValues.physicalValues
+                : activeValues.legalValues,
+            vehicleBeneficiary: 'same_holder',
+          } as ApplicantStepData);
+
+      setIsSubmitting(true);
+      setSubmitError(null);
+
+      try {
+        const maybePromise = onSubmitProp?.(payload);
+        if (
+          maybePromise &&
+          typeof (maybePromise as Promise<void>).then === 'function'
+        ) {
+          await maybePromise;
+        }
+      } catch {
+        setSubmitError(APPLICANT_STEP_VIEW_ERRORS.SUBMIT_FAILED);
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [getValues, onSubmitProp, setError],
   );
 
   const onSubmit = useCallback((): void => {
-    const isThirdParty = vehicleBeneficiary === 'third_party';
-    let hasValidationErrors = false;
-
-    if (isThirdParty) {
-      const candidate: ThirdPartyBeneficiaryValues = {
-        ...thirdPartyValues,
-        isThirdPartyRegistration: true,
-      };
-      const thirdPartyResult =
-        StrictThirdPartyBeneficiarySchema.safeParse(candidate);
-
-      if (!thirdPartyResult.success) {
-        setThirdPartyErrors(
-          mapIssuesToFieldErrors(
-            thirdPartyResult.error.issues,
-            THIRD_PARTY_BENEFICIARY_FIELDS,
-          ),
-        );
-        setIsBeneficiaryModalOpen(true);
-        hasValidationErrors = true;
-      }
-    }
-
-    if (regime === 'physical') {
-      const physicalResult = PhysicalApplicantSchema.safeParse(physicalValues);
-
-      if (!physicalResult.success) {
-        setPhysicalErrors(
-          mapIssuesToFieldErrors(
-            physicalResult.error.issues,
-            PHYSICAL_APPLICANT_FIELDS,
-          ),
-        );
-        hasValidationErrors = true;
-      }
-    } else {
-      const legalResult = LegalApplicantSchema.safeParse(legalValues);
-
-      if (!legalResult.success) {
-        setLegalErrors(
-          mapIssuesToFieldErrors(
-            legalResult.error.issues,
-            LEGAL_APPLICANT_FIELDS,
-          ),
-        );
-        hasValidationErrors = true;
-      }
-    }
-
-    if (hasValidationErrors) {
-      return;
-    }
-
-    if (isThirdParty) {
-      const thirdPartyPayload = {
-        ...thirdPartyValues,
-        isThirdPartyRegistration: true,
-      };
-      onSubmitProp?.(
-        regime === 'physical'
-          ? {
-              regime: 'physical',
-              values: physicalValues,
-              vehicleBeneficiary: 'third_party',
-              ...thirdPartyPayload,
-            }
-          : {
-              regime: 'legal',
-              values: legalValues,
-              vehicleBeneficiary: 'third_party',
-              ...thirdPartyPayload,
-            },
-      );
-    } else {
-      onSubmitProp?.(
-        regime === 'physical'
-          ? {
-              regime: 'physical',
-              values: physicalValues,
-              vehicleBeneficiary: 'same_holder',
-            }
-          : {
-              regime: 'legal',
-              values: legalValues,
-              vehicleBeneficiary: 'same_holder',
-            },
-      );
-    }
-  }, [
-    legalValues,
-    onSubmitProp,
-    physicalValues,
-    regime,
-    thirdPartyValues,
-    vehicleBeneficiary,
-  ]);
+    void handleNextStep();
+  }, [handleNextStep]);
 
   return {
     closeBeneficiaryModal,
+    handleNextStep,
     handleSaveThirdPartyData,
     isBeneficiaryModalOpen,
     isIdentificationValid,
+    isSubmitting,
     isValid,
     legalErrors,
     legalValues,
@@ -400,6 +555,7 @@ export const useApplicantStepViewModel = (
     physicalErrors,
     physicalValues,
     regime,
+    submitError,
     thirdPartyErrors,
     thirdPartyValues,
     vehicleBeneficiary,

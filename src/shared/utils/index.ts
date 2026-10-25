@@ -9,6 +9,7 @@ export {
   FORMATTERS_NUMERICAL,
   FORMATTERS_PATTERNS,
   FORMATTERS_SYMBOLS,
+  INTERNATIONAL_PHONE_REGEX,
   formatCurrencyDisplay,
   formatDateDisplay,
 } from './formatters.utils';

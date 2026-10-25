@@ -1,4 +1,4 @@
-import { DATE_DD_MM_YYYY } from '@/shared/utils';
+import { DATE_DD_MM_YYYY, INTERNATIONAL_PHONE_REGEX } from '@/shared/utils';
 
 export const LEGAL_ENTITY_CONTACT_DEFAULT_VALUES = {
   constitutionDate: '',
@@ -42,5 +42,5 @@ export const LEGAL_ENTITY_CONTACT_ERRORS = {
 export const LEGAL_ENTITY_CONTACT_PATTERNS = {
   CORPORATE_ID: /^3-?\d{3}-?\d{6}$/,
   DATE_DD_MM_YYYY,
-  PHONE: /^(\+?[1-9]\d{0,3}|\([1-9]\d{0,3}\))?\s?[\d\-\s()]{6,16}$/,
+  PHONE: INTERNATIONAL_PHONE_REGEX,
 } as const;

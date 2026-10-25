@@ -6,7 +6,12 @@ import {
   Text,
   View,
 } from 'react-native';
-import { BaseButton, ArrowRightIcon, ProcessTopBar } from '@/shared/ui';
+import {
+  ArrowRightIcon,
+  BaseButton,
+  ErrorBanner,
+  ProcessTopBar,
+} from '@/shared/ui';
 import {
   APPLICANT_STEP_VIEW_COLORS,
   APPLICANT_STEP_VIEW_CONSTANTS,
@@ -32,8 +37,30 @@ const NOOP_FIELD_CHANGE = (): void => undefined;
 export const ApplicantStepView = React.memo(
   ({
     disabled = false,
+<<<<<<< HEAD
     onClose,
     onSubmit,
+=======
+    handleNextStep: handleNextStepProp,
+    handleSaveThirdPartyData: handleSaveThirdPartyDataProp,
+    isBeneficiaryModalOpen: isBeneficiaryModalOpenProp,
+    isIdentificationValid: isIdentificationValidProp,
+    isSubmitting: isSubmittingProp,
+    isValid: isValidProp,
+    legalErrors: legalErrorsProp,
+    legalValues: legalValuesProp,
+    onClose,
+    onLegalFieldChange: onLegalFieldChangeProp,
+    onPhysicalFieldChange: onPhysicalFieldChangeProp,
+    onRegimeChange: onRegimeChangeProp,
+    onSubmit: onSubmitProp,
+    onThirdPartyFieldChange: onThirdPartyFieldChangeProp,
+    onVehicleBeneficiaryChange: onVehicleBeneficiaryChangeProp,
+    physicalErrors: physicalErrorsProp,
+    physicalValues: physicalValuesProp,
+    regime: regimeProp,
+    submitError: submitErrorProp,
+>>>>>>> df4ba36 (refactor(credit-wizard): migrate ApplicantStepView to react-hook-form and resolve validation deadlock (Phase 1))
     testID,
     viewModel: viewModelProp,
   }: ApplicantStepViewProps): React.JSX.Element => {
@@ -43,6 +70,39 @@ export const ApplicantStepView = React.memo(
 
     const vm = viewModelProp ?? defaultViewModel;
 
+<<<<<<< HEAD
+=======
+    const closeBeneficiaryModal =
+      closeBeneficiaryModalProp ?? vm.closeBeneficiaryModal;
+    const handleNextStep =
+      handleNextStepProp ?? vm.handleNextStep ?? vm.onSubmit;
+    const handleSaveThirdPartyData =
+      handleSaveThirdPartyDataProp ?? vm.handleSaveThirdPartyData;
+    const isBeneficiaryModalOpen =
+      isBeneficiaryModalOpenProp ?? vm.isBeneficiaryModalOpen;
+    const isIdentificationValid =
+      isIdentificationValidProp ?? vm.isIdentificationValid;
+    const isSubmitting = isSubmittingProp ?? vm.isSubmitting ?? false;
+    const isValid = isValidProp ?? vm.isValid;
+    const legalErrors = legalErrorsProp ?? vm.legalErrors;
+    const legalValues = legalValuesProp ?? vm.legalValues;
+    const onLegalFieldChange = onLegalFieldChangeProp ?? vm.onLegalFieldChange;
+    const onPhysicalFieldChange =
+      onPhysicalFieldChangeProp ?? vm.onPhysicalFieldChange;
+    const onRegimeChange = onRegimeChangeProp ?? vm.onRegimeChange;
+    const onThirdPartyFieldChange =
+      onThirdPartyFieldChangeProp ?? vm.onThirdPartyFieldChange;
+    const onVehicleBeneficiaryChange =
+      onVehicleBeneficiaryChangeProp ?? vm.onVehicleBeneficiaryChange;
+    const physicalErrors = physicalErrorsProp ?? vm.physicalErrors;
+    const physicalValues = physicalValuesProp ?? vm.physicalValues;
+    const regime = regimeProp ?? vm.regime;
+    const submitError = submitErrorProp ?? vm.submitError ?? null;
+    const thirdPartyErrors = thirdPartyErrorsProp ?? vm.thirdPartyErrors;
+    const thirdPartyValues = thirdPartyValuesProp ?? vm.thirdPartyValues;
+    const vehicleBeneficiary = vehicleBeneficiaryProp ?? vm.vehicleBeneficiary;
+
+>>>>>>> df4ba36 (refactor(credit-wizard): migrate ApplicantStepView to react-hook-form and resolve validation deadlock (Phase 1))
     const handleSaveModal = useCallback((): void => {
       vm.handleSaveThirdPartyData?.();
     }, [vm]);
@@ -93,11 +153,19 @@ export const ApplicantStepView = React.memo(
                 </Text>
               </View>
 
+              {submitError ? <ErrorBanner message={submitError} /> : null}
+
               {/* 3. Legal Entity Selector (Physical vs. Legal) */}
               <LegalEntitySelector
+<<<<<<< HEAD
                 disabled={disabled}
                 onSelectEntity={vm.onRegimeChange}
                 selectedEntity={vm.regime}
+=======
+                disabled={disabled || isSubmitting}
+                onSelectEntity={onRegimeChange}
+                selectedEntity={regime}
+>>>>>>> df4ba36 (refactor(credit-wizard): migrate ApplicantStepView to react-hook-form and resolve validation deadlock (Phase 1))
                 testID={APPLICANT_STEP_VIEW_TEST_IDS.LEGAL_SELECTOR}
               />
 
@@ -108,19 +176,33 @@ export const ApplicantStepView = React.memo(
               >
                 {vm.regime === 'physical' ? (
                   <PhysicalPersonForm
+<<<<<<< HEAD
                     disabled={disabled}
                     errors={vm.physicalErrors}
                     isIdentificationValid={vm.isIdentificationValid}
                     onFieldChange={vm.onPhysicalFieldChange}
+=======
+                    disabled={disabled || isSubmitting}
+                    errors={physicalErrors}
+                    isIdentificationValid={isIdentificationValid}
+                    onFieldChange={onPhysicalFieldChange}
+>>>>>>> df4ba36 (refactor(credit-wizard): migrate ApplicantStepView to react-hook-form and resolve validation deadlock (Phase 1))
                     testID={APPLICANT_STEP_VIEW_TEST_IDS.PHYSICAL_FORM}
                     values={vm.physicalValues}
                   />
                 ) : (
                   <LegalEntityForm
+<<<<<<< HEAD
                     disabled={disabled}
                     errors={vm.legalErrors}
                     isIdentificationValid={vm.isIdentificationValid}
                     onFieldChange={vm.onLegalFieldChange}
+=======
+                    disabled={disabled || isSubmitting}
+                    errors={legalErrors}
+                    isIdentificationValid={isIdentificationValid}
+                    onFieldChange={onLegalFieldChange}
+>>>>>>> df4ba36 (refactor(credit-wizard): migrate ApplicantStepView to react-hook-form and resolve validation deadlock (Phase 1))
                     testID={APPLICANT_STEP_VIEW_TEST_IDS.LEGAL_FORM}
                     values={vm.legalValues}
                   />
@@ -134,9 +216,15 @@ export const ApplicantStepView = React.memo(
 
                 {/* Vehicle Beneficiary Final Destination Section */}
                 <VehicleBeneficiarySection
+<<<<<<< HEAD
                   disabled={disabled}
                   onSelectBeneficiary={vm.onVehicleBeneficiaryChange}
                   selectedBeneficiary={vm.vehicleBeneficiary}
+=======
+                  disabled={disabled || isSubmitting}
+                  onSelectBeneficiary={onVehicleBeneficiaryChange}
+                  selectedBeneficiary={vehicleBeneficiary}
+>>>>>>> df4ba36 (refactor(credit-wizard): migrate ApplicantStepView to react-hook-form and resolve validation deadlock (Phase 1))
                   testID={APPLICANT_STEP_VIEW_TEST_IDS.VEHICLE_BENEFICIARY}
                 />
               </View>
@@ -150,7 +238,11 @@ export const ApplicantStepView = React.memo(
           >
             <BaseButton
               className={APPLICANT_STEP_VIEW_STYLES.SUBMIT_BUTTON}
+<<<<<<< HEAD
               disabled={!vm.isValid || disabled}
+=======
+              disabled={!isValid || disabled || isSubmitting}
+>>>>>>> df4ba36 (refactor(credit-wizard): migrate ApplicantStepView to react-hook-form and resolve validation deadlock (Phase 1))
               fullWidth
               iconRight={
                 <ArrowRightIcon
@@ -162,7 +254,14 @@ export const ApplicantStepView = React.memo(
                 />
               }
               label={APPLICANT_STEP_VIEW_COPY.SUBMIT_BUTTON}
+<<<<<<< HEAD
               onPress={vm.onSubmit}
+=======
+              loading={isSubmitting}
+              onPress={(): void => {
+                void handleNextStep();
+              }}
+>>>>>>> df4ba36 (refactor(credit-wizard): migrate ApplicantStepView to react-hook-form and resolve validation deadlock (Phase 1))
               testID={APPLICANT_STEP_VIEW_TEST_IDS.SUBMIT_BUTTON}
               variant='primary'
             />

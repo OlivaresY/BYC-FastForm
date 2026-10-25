@@ -62,6 +62,14 @@ export interface ApplicantStepFormData extends ThirdPartyBeneficiaryValues {
   vehicleBeneficiary: VehicleBeneficiaryType;
 }
 
+export interface ApplicantStepFormValues {
+  legalValues: LegalEntityFormValues;
+  physicalValues: PhysicalPersonFormValues;
+  regime: LegalEntityType;
+  thirdPartyValues: ThirdPartyBeneficiaryValues;
+  vehicleBeneficiary: VehicleBeneficiaryType;
+}
+
 // =============================================================================
 // ViewModel Hook Options & Return Interface
 // =============================================================================
@@ -72,25 +80,29 @@ export interface UseApplicantStepViewModelProps {
   initialRegime?: LegalEntityType;
   initialThirdPartyValues?: Partial<ThirdPartyBeneficiaryValues>;
   initialVehicleBeneficiary?: VehicleBeneficiaryType;
-  onSubmit?: (data: ApplicantStepData) => void;
+  mode?: 'onChange' | 'onBlur' | 'onSubmit' | 'onTouched' | 'all';
+  onSubmit?: (data: ApplicantStepData) => void | Promise<void>;
 }
 
 export interface UseApplicantStepViewModelReturn {
   // State
   isBeneficiaryModalOpen: boolean;
   isIdentificationValid: boolean;
+  isSubmitting: boolean;
   isValid: boolean;
   legalErrors: Partial<Record<LegalEntityFormField, string>>;
   legalValues: LegalEntityFormValues;
   physicalErrors: Partial<Record<PhysicalPersonFormField, string>>;
   physicalValues: PhysicalPersonFormValues;
   regime: LegalEntityType;
+  submitError: string | null;
   thirdPartyErrors: Partial<Record<ThirdPartyBeneficiaryField, string>>;
   thirdPartyValues: ThirdPartyBeneficiaryValues;
   vehicleBeneficiary: VehicleBeneficiaryType;
 
   // Handlers
   closeBeneficiaryModal: () => void;
+  handleNextStep: (dataOrEvent?: unknown) => Promise<void>;
   handleSaveThirdPartyData: () => boolean;
   onLegalFieldChange: <K extends LegalEntityFormField>(
     field: K,
@@ -101,7 +113,7 @@ export interface UseApplicantStepViewModelReturn {
     value: PhysicalPersonFormValues[K],
   ) => void;
   onRegimeChange: (regime: LegalEntityType) => void;
-  onSubmit: () => void;
+  onSubmit: () => void | Promise<void>;
   onThirdPartyFieldChange: <K extends ThirdPartyBeneficiaryField>(
     field: K,
     value: ThirdPartyBeneficiaryValues[K],

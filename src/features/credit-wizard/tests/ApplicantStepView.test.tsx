@@ -360,4 +360,46 @@ describe('ApplicantStepView Integration', () => {
       expect(onClose).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('Async Execution & Loading Lifecycle (CRIT-02)', () => {
+    it('renders ErrorBanner when submitError exists', () => {
+      // Arrange
+      const page = ApplicantStepViewPageObject.renderDirect({
+        legalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
+        onLegalFieldChange: jest.fn(),
+        onPhysicalFieldChange: jest.fn(),
+        onRegimeChange: jest.fn(),
+        onSubmit: jest.fn(),
+        onVehicleBeneficiaryChange: jest.fn(),
+        physicalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.PHYSICAL,
+        regime: 'physical',
+        submitError: 'Error al enviar la solicitud',
+        vehicleBeneficiary: 'same_holder',
+      });
+
+      // Assert
+      expect(page.errorBanner).toBeTruthy();
+    });
+
+    it('sets submit button loading prop when isSubmitting is true', () => {
+      // Arrange
+      const page = ApplicantStepViewPageObject.renderDirect({
+        isSubmitting: true,
+        isValid: true,
+        legalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
+        onLegalFieldChange: jest.fn(),
+        onPhysicalFieldChange: jest.fn(),
+        onRegimeChange: jest.fn(),
+        onSubmit: jest.fn(),
+        onVehicleBeneficiaryChange: jest.fn(),
+        physicalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.PHYSICAL,
+        regime: 'physical',
+        vehicleBeneficiary: 'same_holder',
+      });
+
+      // Assert
+      expect(page.isSubmitButtonLoading()).toBe(true);
+      expect(page.isSubmitButtonDisabled()).toBe(true);
+    });
+  });
 });
