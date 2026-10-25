@@ -3,10 +3,23 @@ import {
   APPLICANT_STEP_VIEW_ERRORS,
   APPLICANT_STEP_VIEW_NUMERICAL,
 } from '../constants/ApplicantStepView.constants';
-import { isValidCalendarDate, isValidDateDDMMYYYY } from '@/shared/utils';
-import type { LegalEntityFormField } from './LegalEntityForm.types';
-import type { PhysicalPersonFormField } from './PhysicalPersonForm.types';
-import type { ThirdPartyBeneficiaryField } from './ApplicantStepView.types';
+import {
+  INTERNATIONAL_PHONE_REGEX,
+  isValidCalendarDate,
+  isValidDateDDMMYYYY,
+} from '@/shared/utils';
+import type {
+  LegalEntityFormField,
+  LegalEntityFormValues,
+} from './LegalEntityForm.types';
+import type {
+  PhysicalPersonFormField,
+  PhysicalPersonFormValues,
+} from './PhysicalPersonForm.types';
+import type {
+  ThirdPartyBeneficiaryField,
+  ThirdPartyBeneficiaryValues,
+} from './ApplicantStepView.types';
 
 export { isValidCalendarDate, isValidDateDDMMYYYY };
 
@@ -15,7 +28,7 @@ export { isValidCalendarDate, isValidDateDDMMYYYY };
 // =============================================================================
 
 const NON_DIGIT_PATTERN = /\D/g;
-const PHONE_PATTERN = /^[0-9+()\s-]{7,20}$/;
+const PHONE_PATTERN = INTERNATIONAL_PHONE_REGEX;
 
 /**
  * Strips every non-digit character so masked IDs (e.g. `1-1234-0567`) are
@@ -249,6 +262,55 @@ export const ApplicantStepFormSchema = z.object({
   regime: z.enum(['physical', 'legal']).optional(),
   vehicleBeneficiary: z.enum(['same_holder', 'third_party']).optional(),
 });
+
+export const ApplicantStepFormStateSchema = z
+  .object({
+      legalValues: z.custom<LegalEntityFormValues>(),
+      physicalValues: z.custom<PhysicalPersonFormValues>(),
+      regime: z.enum(['physical', 'legal']),
+      thirdPartyValues: z.custom<ThirdPartyBeneficiaryValues>(),
+      vehicleBeneficiary: z.enum(['same_holder', 'third_party']),
+    })
+    .superRefine((data, ctx) => {
+    if (data.regime === 'physical') {
+      const result = PhysicalApplicantSchema.safeParse(data.physicalValues);
+      if (!result.success) {
+        result.error.issues.forEach((issue) => {
+          ctx.addIssue({
+            ...issue,
+            path: ['physicalValues', ...issue.path],
+          });
+        });
+      }
+    } else {
+      const result = LegalApplicantSchema.safeParse(data.legalValues);
+      if (!result.success) {
+        result.error.issues.forEach((issue) => {
+          ctx.addIssue({
+            ...issue,
+            path: ['legalValues', ...issue.path],
+          });
+        });
+      }
+    }
+
+    if (data.vehicleBeneficiary === 'third_party') {
+      const candidate: ThirdPartyBeneficiaryValues = {
+        ...data.thirdPartyValues,
+        isThirdPartyRegistration: true,
+      };
+      const thirdPartyResult =
+        StrictThirdPartyBeneficiarySchema.safeParse(candidate);
+      if (!thirdPartyResult.success) {
+        thirdPartyResult.error.issues.forEach((issue) => {
+          ctx.addIssue({
+            ...issue,
+            path: ['thirdPartyValues', ...issue.path],
+          });
+        });
+      }
+    }
+  });
 
 // =============================================================================
 // Issue -> Field Error Mapping

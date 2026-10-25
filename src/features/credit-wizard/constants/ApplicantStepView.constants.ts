@@ -93,6 +93,8 @@ export const APPLICANT_STEP_VIEW_ERRORS = {
     PHONE: 'El teléfono del beneficiario es obligatorio.',
     RELATIONSHIP: 'Seleccione el parentesco con el beneficiario.',
   },
+  SUBMIT_FAILED:
+    'Ocurrió un error al procesar la solicitud. Intente nuevamente.',
 } as const;
 
 export const APPLICANT_STEP_VIEW_ICON_DIMENSIONS = {

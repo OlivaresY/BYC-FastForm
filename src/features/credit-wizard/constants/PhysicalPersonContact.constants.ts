@@ -1,4 +1,4 @@
-import { DATE_DD_MM_YYYY } from '@/shared/utils';
+import { DATE_DD_MM_YYYY, INTERNATIONAL_PHONE_REGEX } from '@/shared/utils';
 
 export const EMPLOYMENT_STATUSES = {
   BUSINESS_OWNER: 'business_owner',
@@ -80,6 +80,5 @@ export const PHYSICAL_PERSON_CONTACT_ERRORS = {
 
 export const PHYSICAL_PERSON_CONTACT_PATTERNS = {
   DATE_DD_MM_YYYY,
-  INTERNATIONAL_PHONE:
-    /^(\+?[1-9]\d{0,3}|\([1-9]\d{0,3}\))?\s?[\d\-\s()]{6,16}$/,
+  INTERNATIONAL_PHONE: INTERNATIONAL_PHONE_REGEX,
 } as const;

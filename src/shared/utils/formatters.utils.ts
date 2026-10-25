@@ -1,5 +1,9 @@
+export const INTERNATIONAL_PHONE_REGEX =
+  /^(\+?[1-9]\d{0,3}|\([1-9]\d{0,3}\))?\s?[\d\-\s()]{6,16}$/;
+
 export const FORMATTERS_PATTERNS = {
   DATE_SEPARATOR: /[-/]/,
+  INTERNATIONAL_PHONE: INTERNATIONAL_PHONE_REGEX,
   NON_DIGITS: /[^0-9]/g,
   THOUSANDS_SEPARATOR: /\B(?=(\d{3})+(?!\d))/g,
 } as const;
