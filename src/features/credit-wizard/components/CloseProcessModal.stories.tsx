@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-native';
-import { ModalStoryWrapper } from '@/shared/components/ModalStoryWrapper';
+import { ModalStoryWrapper } from '@/shared/components';
 import { CloseProcessModal } from './CloseProcessModal';
 
 const meta = {

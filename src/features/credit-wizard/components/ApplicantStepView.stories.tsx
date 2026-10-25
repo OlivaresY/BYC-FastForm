@@ -1,26 +1,53 @@
 import React from 'react';
 import { View } from 'react-native';
 import type { Meta, StoryObj } from '@storybook/react-native';
-import { APPLICANT_STEP_VIEW_DEFAULT_VALUES } from '../constants/ApplicantStepView.constants';
+import { useApplicantStepViewModel } from '../hooks/useApplicantStepViewModel';
+import type { ApplicantStepViewProps } from '../types/ApplicantStepView.types';
+import type { LegalEntityFormValues } from '../types/LegalEntityForm.types';
+import type { LegalEntityType } from '../types/LegalEntitySelector.types';
+import type { PhysicalPersonFormValues } from '../types/PhysicalPersonForm.types';
 import { ApplicantStepView } from './ApplicantStepView';
+
+interface StoryWrapperProps extends ApplicantStepViewProps {
+  initialLegalValues?: Partial<LegalEntityFormValues>;
+  initialPhysicalValues?: Partial<PhysicalPersonFormValues>;
+  initialRegime?: LegalEntityType;
+  isValidOverride?: boolean;
+}
+
+const StoryWrapper = ({
+  initialLegalValues,
+  initialPhysicalValues,
+  initialRegime,
+  isValidOverride,
+  ...props
+}: StoryWrapperProps): React.JSX.Element => {
+  const viewModel = useApplicantStepViewModel({
+    initialLegalValues,
+    initialPhysicalValues,
+    initialRegime,
+  });
+
+  return (
+    <ApplicantStepView
+      {...props}
+      viewModel={
+        isValidOverride !== undefined
+          ? {
+              ...viewModel,
+              isValid: isValidOverride,
+            }
+          : viewModel
+      }
+    />
+  );
+};
 
 const meta = {
   args: {
     disabled: false,
-    isIdentificationValid: false,
-    isValid: false,
-    legalErrors: {},
-    legalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
-    onClose: () => {},
-    onLegalFieldChange: () => {},
-    onPhysicalFieldChange: () => {},
-    onRegimeChange: () => {},
-    onSubmit: () => {},
-    onVehicleBeneficiaryChange: () => {},
-    physicalErrors: {},
-    physicalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.PHYSICAL,
-    regime: 'physical',
-    vehicleBeneficiary: 'same_holder',
+    onClose: (): void => undefined,
+    onSubmit: (): void => undefined,
   },
   component: ApplicantStepView,
   decorators: [
@@ -38,54 +65,60 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  args: {
-    isIdentificationValid: true,
-    isValid: true,
-    physicalValues: {
-      birthDate: '15 / 08 / 1988',
-      firstLastName: 'Rodríguez',
-      firstName: 'Carlos',
-      gender: 'male',
-      identificationNumber: '1-1234-0567',
-      identificationType: 'national_id',
-      maritalStatus: 'married',
-      middleName: 'Alberto',
-      nationality: 'CR',
-      secondLastName: 'Castro',
-    },
-    regime: 'physical',
-    vehicleBeneficiary: 'same_holder',
-  },
+  render: (args): React.JSX.Element => (
+    <StoryWrapper
+      {...args}
+      initialPhysicalValues={{
+        birthDate: '15 / 08 / 1988',
+        firstLastName: 'Rodríguez',
+        firstName: 'Carlos',
+        gender: 'male',
+        identificationNumber: '1-1234-0567',
+        identificationType: 'national_id',
+        maritalStatus: 'married',
+        middleName: 'Alberto',
+        nationality: 'CR',
+        secondLastName: 'Castro',
+      }}
+      initialRegime='physical'
+      isValidOverride={true}
+    />
+  ),
 };
 
 export const PhysicalDisabled: Story = {
-  args: {
-    isIdentificationValid: false,
-    isValid: false,
-    regime: 'physical',
-  },
+  render: (args): React.JSX.Element => (
+    <StoryWrapper
+      {...args}
+      disabled={true}
+      initialRegime='physical'
+    />
+  ),
 };
 
 export const LegalValid: Story = {
-  args: {
-    isIdentificationValid: true,
-    isValid: true,
-    legalValues: {
-      identificationNumber: '3-101-123456',
-      identificationType: 'legal_id',
-      legalName: 'Inversiones Tecnológicas S.A.',
-      representativeIdentification: '1-1150-0222',
-      representativeName: 'Juan Alberto Pérez Rojas',
-    },
-    regime: 'legal',
-    vehicleBeneficiary: 'same_holder',
-  },
+  render: (args): React.JSX.Element => (
+    <StoryWrapper
+      {...args}
+      initialLegalValues={{
+        identificationNumber: '3-101-123456',
+        identificationType: 'legal_id',
+        legalName: 'Inversiones Tecnológicas S.A.',
+        representativeIdentification: '1-1150-0222',
+        representativeName: 'Juan Alberto Pérez Rojas',
+      }}
+      initialRegime='legal'
+      isValidOverride={true}
+    />
+  ),
 };
 
 export const LegalDisabled: Story = {
-  args: {
-    isIdentificationValid: false,
-    isValid: false,
-    regime: 'legal',
-  },
+  render: (args): React.JSX.Element => (
+    <StoryWrapper
+      {...args}
+      disabled={true}
+      initialRegime='legal'
+    />
+  ),
 };

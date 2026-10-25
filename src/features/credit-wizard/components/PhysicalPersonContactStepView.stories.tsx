@@ -57,9 +57,11 @@ const ValidCompletedFormWrapper = (
 
 const meta = {
   args: {
+    currentStep: 2,
     disabled: false,
     onClose: (): void => undefined,
     onSubmit: (): void => undefined,
+    totalSteps: 4,
   },
   component: PhysicalPersonContactStepView,
   decorators: [

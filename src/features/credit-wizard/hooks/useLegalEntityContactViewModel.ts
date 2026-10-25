@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useState } from 'react';
+import type { Resolver } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 import {
   LEGAL_ENTITY_CONTACT_DEFAULT_VALUES,
@@ -34,7 +35,9 @@ export const useLegalEntityContactViewModel = (
       ...defaultValuesProp,
     },
     mode,
-    resolver: zodResolver(LegalEntityContactSchema),
+    resolver: zodResolver(
+      LegalEntityContactSchema,
+    ) as unknown as Resolver<LegalEntityContact>,
   });
 
   const onValidSubmit = useCallback(

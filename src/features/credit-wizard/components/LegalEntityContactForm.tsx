@@ -126,6 +126,7 @@ export const LegalEntityContactForm = ({
             fieldState: { error },
           }) => (
             <CustomTextInput
+              autoCapitalize='words'
               editable={!disabled}
               error={error?.message}
               label={LEGAL_ENTITY_CONTACT_FORM_COPY.CORPORATE_NAME_LABEL}
@@ -153,6 +154,8 @@ export const LegalEntityContactForm = ({
                 fieldState: { error },
               }) => (
                 <CustomTextInput
+                  autoCapitalize='none'
+                  autoCorrect={false}
                   editable={!disabled}
                   error={error?.message}
                   helperText={
@@ -312,6 +315,7 @@ export const LegalEntityContactForm = ({
             fieldState: { error },
           }) => (
             <CustomTextInput
+              autoCapitalize='words'
               editable={!disabled}
               error={error?.message}
               label={LEGAL_ENTITY_CONTACT_FORM_COPY.REPRESENTATIVE_NAME_LABEL}
@@ -339,6 +343,8 @@ export const LegalEntityContactForm = ({
             fieldState: { error },
           }) => (
             <CustomTextInput
+              autoCapitalize='none'
+              autoCorrect={false}
               editable={!disabled}
               error={error?.message}
               label={LEGAL_ENTITY_CONTACT_FORM_COPY.REPRESENTATIVE_ID_LABEL}

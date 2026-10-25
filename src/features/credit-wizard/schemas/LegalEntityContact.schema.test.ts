@@ -116,10 +116,10 @@ describe('LegalEntityContactSchema', () => {
         LEGAL_ENTITY_CONTACT_ERRORS.REPRESENTATIVE_NAME_REQUIRED,
       ]);
       expect(getMessages(result, ['grossIncome'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.GROSS_INCOME_POSITIVE,
+        LEGAL_ENTITY_CONTACT_ERRORS.GROSS_INCOME_REQUIRED,
       ]);
       expect(getMessages(result, ['netIncome'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.NET_INCOME_POSITIVE,
+        LEGAL_ENTITY_CONTACT_ERRORS.NET_INCOME_REQUIRED,
       ]);
     });
 

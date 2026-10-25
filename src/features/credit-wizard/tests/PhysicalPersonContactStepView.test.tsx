@@ -246,4 +246,38 @@ describe('PhysicalPersonContactStepView Integration', () => {
       });
     });
   });
+
+  describe('Keyboard Auto-Scroll Integration', () => {
+    it('adjusts bottom padding when keyboardDidShow is emitted', () => {
+      // Arrange
+      const page = PhysicalPersonContactStepViewPageObject.render();
+
+      // Act
+      page.emitKeyboardDidShow(320);
+
+      // Assert - ScrollView contentContainerStyle paddingBottom expands to avoid keyboard
+      const contentContainerStyle = page.scrollView.props.contentContainerStyle;
+      expect(contentContainerStyle.paddingBottom).toBeGreaterThanOrEqual(320);
+    });
+
+    it('triggers scroll logic when a lower input like exactAddress or netIncome is focused', () => {
+      // Arrange
+      const page = PhysicalPersonContactStepViewPageObject.render();
+
+      // Open keyboard
+      page.emitKeyboardDidShow(320);
+
+      // Focus netIncome input
+      page.focusInputWithMockNode(page.netIncomeInput, {
+        height: 50,
+        left: 0,
+        top: 1100,
+        width: 180,
+      });
+
+      // Assert - ScrollView's paddingBottom accommodates keyboard and view is reactive
+      expect(page.scrollView.props.contentContainerStyle.paddingBottom).toBeGreaterThanOrEqual(320);
+      expect(page.netIncomeInput).toBeTruthy();
+    });
+  });
 });

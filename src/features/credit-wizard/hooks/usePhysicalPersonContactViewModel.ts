@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useState } from 'react';
+import type { Resolver } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 import {
   PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES,
@@ -50,7 +51,9 @@ export const usePhysicalPersonContactViewModel = (
       },
     },
     mode,
-    resolver: zodResolver(PhysicalPersonContactSchema),
+    resolver: zodResolver(
+      PhysicalPersonContactSchema,
+    ) as unknown as Resolver<PhysicalPersonContact>,
   });
 
   const onValidSubmit = useCallback(

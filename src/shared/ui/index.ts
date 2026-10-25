@@ -76,6 +76,18 @@ export {
 export type { IconProps } from './Icons';
 
 export {
+  KEYBOARD_AWARE_STEP_LAYOUT_DIMENSIONS,
+  KEYBOARD_AWARE_STEP_LAYOUT_STYLES,
+  KEYBOARD_AWARE_STEP_LAYOUT_TEST_IDS,
+  useKeyboardAutoScroll,
+} from './KeyboardAwareStepLayout';
+export type {
+  UseKeyboardAutoScrollOptions,
+  UseKeyboardAutoScrollReturn,
+} from './KeyboardAwareStepLayout';
+
+
+export {
   PROCESS_TOP_BAR_COLORS,
   PROCESS_TOP_BAR_COPY,
   PROCESS_TOP_BAR_DIMENSIONS,

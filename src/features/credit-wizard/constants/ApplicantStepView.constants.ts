@@ -1,3 +1,4 @@
+import { esCR } from '@/shared/i18n';
 import type { CustomSelectOption } from '@/shared/ui';
 import type { LegalEntityFormValues } from '../types/LegalEntityForm.types';
 import type { PhysicalPersonFormValues } from '../types/PhysicalPersonForm.types';
@@ -15,7 +16,7 @@ export const APPLICANT_STEP_VIEW_COPY = {
   DESCRIPTION:
     'Ingresa los datos básicos del solicitante para iniciar la gestión y perfilado de crédito multi-banco.',
   HEADER_SUBTITLE: 'Ingrese la información básica del solicitante.',
-  HEADER_TITLE: 'Datos del Solicitante',
+  HEADER_TITLE: esCR.creditWizard.steps.applicant,
   SUBMIT_BUTTON: 'Siguiente: Información de Contacto',
   SUBTITLE:
     'Ingresa los datos básicos del solicitante para iniciar la gestión y perfilado de crédito multi-banco.',
@@ -23,7 +24,7 @@ export const APPLICANT_STEP_VIEW_COPY = {
 } as const;
 
 export const APPLICANT_STEP_VIEW_CONSTANTS = {
-  MOCK_USER_INITIALS: 'YO',
+  MOCK_USER_INITIALS: esCR.creditWizard.mockUserInitials,
 } as const;
 
 export const APPLICANT_STEP_VIEW_DEFAULT_VALUES: {

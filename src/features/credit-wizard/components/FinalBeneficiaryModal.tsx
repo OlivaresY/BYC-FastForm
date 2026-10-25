@@ -179,6 +179,8 @@ export const FinalBeneficiaryModal = ({
               />
 
               <CustomTextInput
+                autoCapitalize='none'
+                autoCorrect={false}
                 error={errors?.thirdPartyDocNumber}
                 onChangeText={handlers.thirdPartyDocNumber}
                 placeholder={BENEFICIARY_MODAL_COPY.DOC_NUMBER_PLACEHOLDER}
@@ -205,6 +207,7 @@ export const FinalBeneficiaryModal = ({
               </View>
 
               <CustomTextInput
+                autoCapitalize='words'
                 error={errors?.thirdPartyFullName}
                 label={BENEFICIARY_MODAL_COPY.FULL_NAME_LABEL}
                 onChangeText={handlers.thirdPartyFullName}

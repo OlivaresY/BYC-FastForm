@@ -1,3 +1,5 @@
+import { esCR } from '@/shared/i18n';
+
 export const CUSTOM_SELECT_COLORS = {
   BORDER_BASE: '#A39F97',
   BORDER_ERROR: '#B91C1C',
@@ -16,7 +18,7 @@ export const CUSTOM_SELECT_COLORS = {
 export const CUSTOM_SELECT_COPY = {
   CLOSE_MODAL_ACCESSIBILITY_LABEL: 'Cerrar opciones',
   DEFAULT_MODAL_TITLE: 'Seleccionar opción',
-  DEFAULT_PLACEHOLDER: 'Seleccionar...',
+  DEFAULT_PLACEHOLDER: esCR.common.placeholders.select,
   REQUIRED_ASTERISK: '*',
 } as const;
 

@@ -140,6 +140,8 @@ export const PhysicalPersonForm = ({
         />
 
         <CustomTextInput
+          autoCapitalize='none'
+          autoCorrect={false}
           editable={!disabled}
           error={errors?.identificationNumber}
           helperText={PHYSICAL_PERSON_FORM_COPY.IDENTIFICATION_NUMBER_HELPER}
@@ -168,6 +170,7 @@ export const PhysicalPersonForm = ({
         <View className={PHYSICAL_PERSON_FORM_STYLES.GRID_ROW}>
           <View className={PHYSICAL_PERSON_FORM_STYLES.GRID_COLUMN}>
             <CustomTextInput
+              autoCapitalize='words'
               editable={!disabled}
               error={errors?.firstName}
               label={PHYSICAL_PERSON_FORM_COPY.FIRST_NAME_LABEL}
@@ -180,6 +183,7 @@ export const PhysicalPersonForm = ({
           </View>
           <View className={PHYSICAL_PERSON_FORM_STYLES.GRID_COLUMN}>
             <CustomTextInput
+              autoCapitalize='words'
               editable={!disabled}
               error={errors?.middleName}
               label={PHYSICAL_PERSON_FORM_COPY.MIDDLE_NAME_LABEL}
@@ -196,6 +200,7 @@ export const PhysicalPersonForm = ({
         <View className={PHYSICAL_PERSON_FORM_STYLES.GRID_ROW}>
           <View className={PHYSICAL_PERSON_FORM_STYLES.GRID_COLUMN}>
             <CustomTextInput
+              autoCapitalize='words'
               editable={!disabled}
               error={errors?.firstLastName}
               label={PHYSICAL_PERSON_FORM_COPY.FIRST_LAST_NAME_LABEL}
@@ -210,6 +215,7 @@ export const PhysicalPersonForm = ({
           </View>
           <View className={PHYSICAL_PERSON_FORM_STYLES.GRID_COLUMN}>
             <CustomTextInput
+              autoCapitalize='words'
               editable={!disabled}
               error={errors?.secondLastName}
               label={PHYSICAL_PERSON_FORM_COPY.SECOND_LAST_NAME_LABEL}

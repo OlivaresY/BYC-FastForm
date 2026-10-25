@@ -12,6 +12,7 @@ export interface CustomSelectProps {
   label?: string;
   leftIcon?: CustomSelectPresetIcon;
   modalTitle?: string;
+  onFocus?: (event?: unknown) => void;
   onValueChange: (value: string) => void;
   options: readonly CustomSelectOption[];
   placeholder?: string;

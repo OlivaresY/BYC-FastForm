@@ -1,10 +1,13 @@
 import React from 'react';
 import {
+  act,
   fireEvent,
   render,
   screen,
   waitFor,
 } from '@testing-library/react-native';
+import { Keyboard } from 'react-native';
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import type { ReactTestInstance } from 'react-test-renderer';
 import { CUSTOM_SELECT_TEST_IDS, PROCESS_TOP_BAR_TEST_IDS } from '@/shared/ui';
 import { PhysicalPersonContactStepView } from '../components/PhysicalPersonContactStepView';
@@ -13,6 +16,18 @@ import { PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS } from '../constants/Physica
 import { usePhysicalPersonContactViewModel } from '../hooks/usePhysicalPersonContactViewModel';
 import type { UsePhysicalPersonContactViewModelProps } from '../types/PhysicalPersonContact.types';
 import type { PhysicalPersonContactStepViewProps } from '../types/PhysicalPersonContactStepView.types';
+
+type MockKeyboardWithEmitter = typeof Keyboard & {
+  _emitter: { emit: (event: string, ...args: unknown[]) => void };
+  emit: (event: string, ...args: unknown[]) => void;
+};
+
+const mockKeyboard = Keyboard as unknown as MockKeyboardWithEmitter;
+
+if (!mockKeyboard.emit) {
+  mockKeyboard.emit = (event: string, ...args: unknown[]) =>
+    mockKeyboard._emitter.emit(event, ...args);
+}
 
 export interface PhysicalPersonContactStepViewTestContainerProps extends UsePhysicalPersonContactViewModelProps {
   currentStep?: number;
@@ -23,22 +38,26 @@ export interface PhysicalPersonContactStepViewTestContainerProps extends UsePhys
 }
 
 const PhysicalPersonContactStepViewTestContainer = ({
-  currentStep,
+  currentStep = 2,
   disabled,
   onClose = jest.fn(),
   testID,
-  totalSteps,
+  totalSteps = 4,
   ...hookProps
 }: PhysicalPersonContactStepViewTestContainerProps): React.JSX.Element => {
   const viewModel = usePhysicalPersonContactViewModel(hookProps);
-  return React.createElement(PhysicalPersonContactStepView, {
-    currentStep,
-    disabled,
-    onClose,
-    testID,
-    totalSteps,
-    viewModel,
-  });
+  return React.createElement(
+    SafeAreaInsetsContext.Provider,
+    { value: { bottom: 0, left: 0, right: 0, top: 0 } },
+    React.createElement(PhysicalPersonContactStepView, {
+      currentStep,
+      disabled,
+      onClose,
+      testID,
+      totalSteps,
+      viewModel,
+    }),
+  );
 };
 
 export class PhysicalPersonContactStepViewPageObject {
@@ -63,7 +82,13 @@ export class PhysicalPersonContactStepViewPageObject {
   public static renderDirect(
     props: PhysicalPersonContactStepViewProps,
   ): PhysicalPersonContactStepViewPageObject {
-    render(React.createElement(PhysicalPersonContactStepView, props));
+    render(
+      React.createElement(
+        SafeAreaInsetsContext.Provider,
+        { value: { bottom: 0, left: 0, right: 0, top: 0 } },
+        React.createElement(PhysicalPersonContactStepView, props),
+      ),
+    );
     return new PhysicalPersonContactStepViewPageObject(props.testID);
   }
 
@@ -497,6 +522,60 @@ export class PhysicalPersonContactStepViewPageObject {
     await waitFor(callback, {
       interval: options?.interval ?? 50,
       timeout: options?.timeout ?? 10000,
+    });
+    return this;
+  }
+
+  public emitKeyboardDidShow(height = 320): this {
+    act(() => {
+      mockKeyboard.emit('keyboardDidShow', {
+        endCoordinates: { height, screenX: 0, screenY: 500, width: 390 },
+      });
+    });
+    return this;
+  }
+
+  public emitKeyboardDidHide(): this {
+    act(() => {
+      mockKeyboard.emit('keyboardDidHide');
+    });
+    return this;
+  }
+
+  public focusInputWithMockNode(
+    input: ReactTestInstance,
+    nodeMetrics?: {
+      height?: number;
+      left?: number;
+      top?: number;
+      width?: number;
+    },
+  ): this {
+    act(() => {
+      fireEvent(input, 'focus', {
+        nativeEvent: {
+          target: {
+            measureLayout: jest.fn(
+              (
+                _relativeTo: unknown,
+                onSuccess: (
+                  left: number,
+                  top: number,
+                  width: number,
+                  height: number,
+                ) => void,
+              ) => {
+                onSuccess(
+                  nodeMetrics?.left ?? 0,
+                  nodeMetrics?.top ?? 1100,
+                  nodeMetrics?.width ?? 180,
+                  nodeMetrics?.height ?? 50,
+                );
+              },
+            ),
+          },
+        },
+      });
     });
     return this;
   }

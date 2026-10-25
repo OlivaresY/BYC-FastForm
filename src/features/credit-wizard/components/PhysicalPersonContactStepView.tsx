@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { ScrollView, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ArrowRightIcon,
   BaseButton,
@@ -25,27 +26,39 @@ import { WizardProgressHeader } from './WizardProgressHeader';
 const NOOP_VOID = (): void => undefined;
 
 export const PhysicalPersonContactStepView = ({
-  currentStep = PHYSICAL_PERSON_CONTACT_STEP_VIEW_NUMERICAL.DEFAULT_CURRENT_STEP,
+  currentStep,
   disabled = false,
   onClose,
   onSubmit,
   options,
   testID,
-  totalSteps = PHYSICAL_PERSON_CONTACT_STEP_VIEW_NUMERICAL.DEFAULT_TOTAL_STEPS,
+  totalSteps,
   viewModel: viewModelProp,
 }: PhysicalPersonContactStepViewProps): React.JSX.Element => {
+  const insets = useSafeAreaInsets();
   const defaultViewModel = usePhysicalPersonContactViewModel({ onSubmit });
   const viewModel = viewModelProp ?? defaultViewModel;
   const { control, handleNextStep, isSubmitting, isValid, submitError } =
     viewModel;
 
+  const dynamicBottomPadding =
+    Math.max(insets.bottom, 16) +
+    PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.BASE_FOOTER_HEIGHT;
+
   const { contentContainerStyle, handleScroll, onInputFocus, scrollViewRef } =
     useKeyboardAutoScroll({
-      bottomBarHeight:
-        PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.BOTTOM_BAR_HEIGHT,
+      bottomBarHeight: dynamicBottomPadding,
       extraScrollPadding:
         PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS.EXTRA_KEYBOARD_SCROLL_OFFSET,
     });
+
+  const handleSubmitPress = useCallback((): void => {
+    void handleNextStep();
+  }, [handleNextStep]);
+
+  const handleBackPress = useCallback((): void => {
+    onClose?.();
+  }, [onClose]);
 
   return (
     <View
@@ -123,6 +136,7 @@ export const PhysicalPersonContactStepView = ({
         {/* 4. Fixed Bottom CTA Bar */}
         <View
           className={PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES.BOTTOM_BAR}
+          style={{ paddingBottom: Math.max(insets.bottom, 16) }}
           testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.BOTTOM_BAR}
         >
           <BaseButton
@@ -140,7 +154,7 @@ export const PhysicalPersonContactStepView = ({
               />
             }
             label={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COPY.BACK_BUTTON}
-            onPress={onClose ?? NOOP_VOID}
+            onPress={handleBackPress}
             testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.BACK_BUTTON}
             variant='neutral'
           />
@@ -161,9 +175,7 @@ export const PhysicalPersonContactStepView = ({
             }
             label={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COPY.SUBMIT_BUTTON}
             loading={isSubmitting}
-            onPress={(): void => {
-              void handleNextStep();
-            }}
+            onPress={handleSubmitPress}
             testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.SUBMIT_BUTTON}
             variant='primary'
           />
