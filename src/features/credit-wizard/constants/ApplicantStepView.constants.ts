@@ -1,26 +1,18 @@
 import { esCR } from '@/shared/i18n';
 import type { CustomSelectOption } from '@/shared/ui';
+import type { ThirdPartyBeneficiaryValues } from '../types/ApplicantStepView.types';
 import type { LegalEntityFormValues } from '../types/LegalEntityForm.types';
 import type { PhysicalPersonFormValues } from '../types/PhysicalPersonForm.types';
-import type { ThirdPartyBeneficiaryValues } from '../types/ApplicantStepView.types';
+import { WIZARD_COPY } from './WizardCopy.constants';
 
-export const APPLICANT_STEP_VIEW_COLORS = {
-  DIVIDER_BG: '#D6D2CA',
-  FOOTER_BORDER: '#E5E7EB',
-  SCREEN_BG: '#F7F7F6',
-  SUBMIT_ICON: '#FFFFFF',
-  TAUPE_CONTAINER_BG: '#E8E6E1',
-} as const;
 
 export const APPLICANT_STEP_VIEW_COPY = {
-  DESCRIPTION:
-    'Ingresa los datos básicos del solicitante para iniciar la gestión y perfilado de crédito multi-banco.',
-  HEADER_SUBTITLE: 'Ingrese la información básica del solicitante.',
-  HEADER_TITLE: esCR.creditWizard.steps.applicant,
-  SUBMIT_BUTTON: 'Siguiente: Información de Contacto',
-  SUBTITLE:
-    'Ingresa los datos básicos del solicitante para iniciar la gestión y perfilado de crédito multi-banco.',
-  TITLE: 'ENTIDAD Y PERSONAL',
+  DESCRIPTION: WIZARD_COPY.STEP_1_APPLICANT.DESCRIPTION,
+  HEADER_SUBTITLE: WIZARD_COPY.STEP_1_APPLICANT.HEADER_SUBTITLE,
+  HEADER_TITLE: WIZARD_COPY.STEP_1_APPLICANT.HEADER_TITLE,
+  SUBMIT_BUTTON: WIZARD_COPY.STEP_1_APPLICANT.SUBMIT_BUTTON,
+  SUBTITLE: WIZARD_COPY.STEP_1_APPLICANT.SUBTITLE,
+  TITLE: WIZARD_COPY.STEP_1_APPLICANT.TITLE,
 } as const;
 
 export const APPLICANT_STEP_VIEW_CONSTANTS = {
@@ -64,44 +56,8 @@ export const APPLICANT_STEP_VIEW_DEFAULT_VALUES: {
   },
 } as const;
 
-export const APPLICANT_STEP_VIEW_ERRORS = {
-  LEGAL: {
-    IDENTIFICATION_NUMBER: 'Ingrese un número de cédula jurídica válido.',
-    IDENTIFICATION_TYPE: 'Seleccione un tipo de identificación.',
-    LEGAL_NAME: 'La razón social es obligatoria.',
-    REPRESENTATIVE_IDENTIFICATION:
-      'La cédula del representante es obligatoria.',
-    REPRESENTATIVE_NAME: 'El nombre del representante es obligatorio.',
-  },
-  PHYSICAL: {
-    BIRTH_DATE: 'La fecha de nacimiento es obligatoria.',
-    FIRST_LAST_NAME: 'El primer apellido es obligatorio.',
-    FIRST_NAME: 'El primer nombre es obligatorio.',
-    GENDER: 'Seleccione el género.',
-    IDENTIFICATION_NUMBER: 'Ingrese un número de identificación válido.',
-    IDENTIFICATION_TYPE: 'Seleccione un tipo de identificación.',
-    MARITAL_STATUS: 'Seleccione el estado civil.',
-    NATIONALITY: 'Seleccione la nacionalidad.',
-    SECOND_LAST_NAME: 'El segundo apellido es obligatorio.',
-  },
-  THIRD_PARTY: {
-    BIRTH_DATE: 'La fecha de nacimiento del beneficiario es obligatoria.',
-    DOC_NUMBER: 'El número de identificación del beneficiario es obligatorio.',
-    DOC_TYPE: 'Seleccione el tipo de identificación del beneficiario.',
-    EMAIL: 'El correo electrónico del beneficiario es obligatorio.',
-    FULL_NAME: 'El nombre completo del beneficiario es obligatorio.',
-    NATIONALITY: 'Seleccione la nacionalidad del beneficiario.',
-    PHONE: 'El teléfono del beneficiario es obligatorio.',
-    RELATIONSHIP: 'Seleccione el parentesco con el beneficiario.',
-  },
-  SUBMIT_FAILED:
-    'Ocurrió un error al procesar la solicitud. Intente nuevamente.',
-} as const;
+export const APPLICANT_STEP_VIEW_ERRORS = WIZARD_COPY.STEP_1_APPLICANT.ERRORS;
 
-export const APPLICANT_STEP_VIEW_ICON_DIMENSIONS = {
-  SUBMIT_ICON_SIZE: 20,
-  SUBMIT_ICON_STROKE_WIDTH: 2,
-} as const;
 
 export const APPLICANT_STEP_VIEW_NUMERICAL = {
   CURRENT_STEP: 1,
@@ -142,35 +98,8 @@ export const APPLICANT_STEP_VIEW_TEST_IDS = {
   WIZARD_HEADER: 'applicant-step-wizard-header',
 } as const;
 
-export const BENEFICIARY_MODAL_COPY = {
-  BACKDROP_ACCESSIBILITY_LABEL: 'Cerrar modal de beneficiario',
-  BIRTH_DATE_LABEL: 'Fecha de Nacimiento *',
-  BIRTH_DATE_PLACEHOLDER: 'DD-MM-AAAA',
-  CLOSE_ACCESSIBILITY_LABEL: 'Cerrar',
-  DOC_NUMBER_LABEL: 'Número de Identificación *',
-  DOC_NUMBER_PLACEHOLDER: 'Ingrese el número de documento',
-  DOC_TYPE_LABEL: 'Tipo y Número de Identificación *',
-  DOC_TYPE_PLACEHOLDER: 'Seleccione tipo de documento',
-  EMAIL_LABEL: 'Correo Electrónico *',
-  EMAIL_PLACEHOLDER: 'ejemplo@correo.com',
-  FULL_NAME_LABEL: 'Nombre Completo del Tercero *',
-  FULL_NAME_PLACEHOLDER: 'Ingrese nombre completo del tercero',
-  IDENTIFICATION_LABEL: 'Tipo y Número de Identificación *',
-  NATIONALITY_LABEL: 'Nacionalidad *',
-  NATIONALITY_PLACEHOLDER: 'Seleccione nacionalidad',
-  PHONE_LABEL: 'Teléfono Principal *',
-  PHONE_PLACEHOLDER: '8888-8888',
-  RELATIONSHIP_LABEL: 'Parentesco o Relación *',
-  RELATIONSHIP_PLACEHOLDER: 'Seleccione parentesco',
-  SAVE_BUTTON: 'Guardar Datos',
-  SECTION_1_TITLE: 'DOCUMENTO DE IDENTIDAD',
-  SECTION_2_TITLE: 'NOMBRES Y APELLIDOS OFICIALES',
-  SECTION_3_TITLE: 'DATOS DE CONTACTO',
-  SECTION_4_TITLE: 'DATOS DEMOGRÁFICOS',
-  SUBTITLE:
-    'Complete la información de la persona a cuyo nombre se registrará el vehículo.',
-  TITLE: 'Beneficiario Final (Tercero)',
-} as const;
+export const BENEFICIARY_MODAL_COPY =
+  WIZARD_COPY.STEP_1_APPLICANT.BENEFICIARY_MODAL;
 
 export const BENEFICIARY_MODAL_COLORS = {
   SECTION_ICON_STROKE: '#1E293B',

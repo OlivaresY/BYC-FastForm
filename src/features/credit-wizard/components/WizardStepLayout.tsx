@@ -7,10 +7,10 @@ import {
   ErrorBanner,
   ProcessTopBar,
 } from '@/shared/ui';
+import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import {
   WIZARD_STEP_LAYOUT_COLORS,
   WIZARD_STEP_LAYOUT_CONSTANTS,
-  WIZARD_STEP_LAYOUT_COPY,
   WIZARD_STEP_LAYOUT_DIMENSIONS,
   WIZARD_STEP_LAYOUT_NUMERICAL,
   WIZARD_STEP_LAYOUT_STYLES,
@@ -24,7 +24,7 @@ const NOOP_VOID = (): void => undefined;
 
 export const WizardStepLayout = ({
   backButtonIcon,
-  backButtonLabel = WIZARD_STEP_LAYOUT_COPY.BACK_BUTTON,
+  backButtonLabel = WIZARD_COPY.BUTTONS.BACK,
   children,
   currentStep = WIZARD_STEP_LAYOUT_NUMERICAL.DEFAULT_CURRENT_STEP,
   description,
@@ -37,7 +37,7 @@ export const WizardStepLayout = ({
   onClose,
   onSubmit,
   submitButtonIcon,
-  submitButtonLabel = WIZARD_STEP_LAYOUT_COPY.SUBMIT_BUTTON,
+  submitButtonLabel = WIZARD_COPY.BUTTONS.NEXT,
   submitError,
   testID,
   testIds,
@@ -75,7 +75,9 @@ export const WizardStepLayout = ({
   return (
     <View
       className={WIZARD_STEP_LAYOUT_STYLES.CONTAINER}
-      testID={testID ?? testIds?.container ?? WIZARD_STEP_LAYOUT_TEST_IDS.CONTAINER}
+      testID={
+        testID ?? testIds?.container ?? WIZARD_STEP_LAYOUT_TEST_IDS.CONTAINER
+      }
     >
       <ProcessTopBar
         onClose={onClose ?? NOOP_VOID}
@@ -97,7 +99,9 @@ export const WizardStepLayout = ({
             WIZARD_STEP_LAYOUT_NUMERICAL.SCROLL_EVENT_THROTTLE_MS
           }
           showsVerticalScrollIndicator={false}
-          testID={testIds?.scrollView ?? WIZARD_STEP_LAYOUT_TEST_IDS.SCROLL_VIEW}
+          testID={
+            testIds?.scrollView ?? WIZARD_STEP_LAYOUT_TEST_IDS.SCROLL_VIEW
+          }
         >
           <View className={WIZARD_STEP_LAYOUT_STYLES.SCROLL_CONTENT}>
             {/* 1. Wizard Progress Header */}

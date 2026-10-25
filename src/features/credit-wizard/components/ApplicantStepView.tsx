@@ -2,12 +2,12 @@ import React, { useCallback } from 'react';
 import { View } from 'react-native';
 import {
   APPLICANT_STEP_VIEW_CONSTANTS,
-  APPLICANT_STEP_VIEW_COPY,
   APPLICANT_STEP_VIEW_DEFAULT_VALUES,
   APPLICANT_STEP_VIEW_NUMERICAL,
   APPLICANT_STEP_VIEW_STYLES,
   APPLICANT_STEP_VIEW_TEST_IDS,
 } from '../constants/ApplicantStepView.constants';
+import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import { useApplicantStepViewModel } from '../hooks/useApplicantStepViewModel';
 import type { ApplicantStepViewProps } from '../types/ApplicantStepView.types';
 import { FinalBeneficiaryModal } from './FinalBeneficiaryModal';
@@ -65,7 +65,7 @@ export const ApplicantStepView = React.memo(
     return (
       <WizardStepLayout
         currentStep={APPLICANT_STEP_VIEW_NUMERICAL.CURRENT_STEP}
-        description={APPLICANT_STEP_VIEW_COPY.DESCRIPTION}
+        description={WIZARD_COPY.STEP_1_APPLICANT.DESCRIPTION}
         disabled={disabled}
         isSubmitDisabled={!isValid}
         isSubmitting={isSubmitting}
@@ -98,7 +98,7 @@ export const ApplicantStepView = React.memo(
           title: APPLICANT_STEP_VIEW_TEST_IDS.TITLE,
           wizardHeader: APPLICANT_STEP_VIEW_TEST_IDS.WIZARD_HEADER,
         }}
-        title={APPLICANT_STEP_VIEW_COPY.TITLE}
+        title={WIZARD_COPY.STEP_1_APPLICANT.TITLE}
         totalSteps={APPLICANT_STEP_VIEW_NUMERICAL.TOTAL_STEPS}
         userInitials={APPLICANT_STEP_VIEW_CONSTANTS.MOCK_USER_INITIALS}
       >

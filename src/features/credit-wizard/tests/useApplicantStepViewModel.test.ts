@@ -257,7 +257,7 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
       expect(page.thirdPartyErrors).toEqual({});
     });
 
-    it('includes third-party values in onSubmit payload when third_party is selected and all fields valid', () => {
+    it('includes third-party values in onSubmit payload when third_party is selected and all fields valid', async () => {
       const onSubmitMock = jest.fn();
       const page = ApplicantStepViewModelPageObject.render({
         initialPhysicalValues: {
@@ -284,8 +284,8 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
         .setThirdPartyField('thirdPartyBirthDate', '15-05-1990')
         .setThirdPartyField('thirdPartyNationality', 'Costa Rican')
         .setThirdPartyField('thirdPartyPhone', '8888-8888')
-        .setThirdPartyField('thirdPartyEmail', 'carlos@example.com')
-        .submit();
+        .setThirdPartyField('thirdPartyEmail', 'carlos@example.com');
+      await page.submit();
 
       expect(onSubmitMock).toHaveBeenCalledTimes(1);
       expect(onSubmitMock).toHaveBeenCalledWith(
@@ -305,7 +305,7 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
       );
     });
 
-    it('populates thirdPartyErrors and prevents submission when third-party fields are missing', () => {
+    it('populates thirdPartyErrors and prevents submission when third-party fields are missing', async () => {
       const onSubmitMock = jest.fn();
       const page = ApplicantStepViewModelPageObject.render({
         initialPhysicalValues: {
@@ -323,7 +323,8 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
         onSubmit: onSubmitMock,
       });
 
-      page.setVehicleBeneficiary('third_party').submit();
+      page.setVehicleBeneficiary('third_party');
+      await page.submit();
 
       expect(onSubmitMock).not.toHaveBeenCalled();
       expect(page.thirdPartyErrors.thirdPartyDocType).toBeTruthy();
@@ -334,7 +335,7 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
       expect(page.thirdPartyErrors.thirdPartyNationality).toBeTruthy();
     });
 
-    it('clears specific thirdPartyErrors field when user enters a value', () => {
+    it('clears specific thirdPartyErrors field when user enters a value', async () => {
       const page = ApplicantStepViewModelPageObject.render({
         initialPhysicalValues: {
           birthDate: '01-01-1985',
@@ -350,7 +351,8 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
         initialRegime: 'physical',
       });
 
-      page.setVehicleBeneficiary('third_party').submit();
+      page.setVehicleBeneficiary('third_party');
+      await page.submit();
 
       expect(page.thirdPartyErrors.thirdPartyFullName).toBeTruthy();
 
@@ -507,7 +509,7 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
   };
 
   describe('Submission payload shape', () => {
-    it('submits the raw physical values untouched for same_holder', () => {
+    it('submits the raw physical values untouched for same_holder', async () => {
       const onSubmit = jest.fn();
       const rawValues = {
         ...VALID_PHYSICAL,
@@ -520,7 +522,7 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
         onSubmit,
       });
 
-      page.submit();
+      await page.submit();
 
       expect(onSubmit).toHaveBeenCalledTimes(1);
       expect(onSubmit).toHaveBeenCalledWith({
@@ -530,7 +532,7 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
       });
     });
 
-    it('submits the raw legal values untouched for same_holder', () => {
+    it('submits the raw legal values untouched for same_holder', async () => {
       const onSubmit = jest.fn();
       const page = ApplicantStepViewModelPageObject.render({
         initialLegalValues: VALID_LEGAL,
@@ -538,7 +540,7 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
         onSubmit,
       });
 
-      page.submit();
+      await page.submit();
 
       expect(onSubmit).toHaveBeenCalledWith({
         regime: 'legal',
@@ -547,7 +549,7 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
       });
     });
 
-    it('does not require the optional middle name', () => {
+    it('does not require the optional middle name', async () => {
       const onSubmit = jest.fn();
       const page = ApplicantStepViewModelPageObject.render({
         initialPhysicalValues: { ...VALID_PHYSICAL, middleName: '' },
@@ -555,7 +557,7 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
         onSubmit,
       });
 
-      page.submit();
+      await page.submit();
 
       expect(onSubmit).toHaveBeenCalledTimes(1);
       expect(page.physicalErrors).toEqual({});
@@ -563,7 +565,7 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
   });
 
   describe('Blocking validation', () => {
-    it('blocks a physical submission with a short ID and reports the Spanish message', () => {
+    it('blocks a physical submission with a short ID and reports the Spanish message', async () => {
       const onSubmit = jest.fn();
       const page = ApplicantStepViewModelPageObject.render({
         initialPhysicalValues: {
@@ -574,7 +576,7 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
         onSubmit,
       });
 
-      page.submit();
+      await page.submit();
 
       expect(onSubmit).not.toHaveBeenCalled();
       expect(page.physicalErrors).toEqual({
@@ -583,7 +585,7 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
       });
     });
 
-    it('treats whitespace-only names as empty', () => {
+    it('treats whitespace-only names as empty', async () => {
       const onSubmit = jest.fn();
       const page = ApplicantStepViewModelPageObject.render({
         initialPhysicalValues: { ...VALID_PHYSICAL, firstName: '   ' },
@@ -591,7 +593,7 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
         onSubmit,
       });
 
-      page.submit();
+      await page.submit();
 
       expect(onSubmit).not.toHaveBeenCalled();
       expect(page.physicalErrors.firstName).toBe(
@@ -599,14 +601,14 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
       );
     });
 
-    it('reports every missing legal field with its own message', () => {
+    it('reports every missing legal field with its own message', async () => {
       const onSubmit = jest.fn();
       const page = ApplicantStepViewModelPageObject.render({
         initialRegime: 'legal',
         onSubmit,
       });
 
-      page.submit();
+      await page.submit();
 
       expect(onSubmit).not.toHaveBeenCalled();
       expect(page.legalErrors).toEqual({
@@ -622,7 +624,7 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
       });
     });
 
-    it('reports applicant and third-party errors in the same submission', () => {
+    it('reports applicant and third-party errors in the same submission', async () => {
       const onSubmit = jest.fn();
       const page = ApplicantStepViewModelPageObject.render({
         initialPhysicalValues: { ...VALID_PHYSICAL, gender: '' },
@@ -630,7 +632,8 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
         onSubmit,
       });
 
-      page.setVehicleBeneficiary('third_party').submit();
+      page.setVehicleBeneficiary('third_party');
+      await page.submit();
 
       expect(onSubmit).not.toHaveBeenCalled();
       expect(page.physicalErrors.gender).toBe(
@@ -650,7 +653,7 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
       });
     });
 
-    it('submits third-party data when every field is valid', () => {
+    it('submits third-party data when every field is valid', async () => {
       const onSubmit = jest.fn();
       const page = ApplicantStepViewModelPageObject.render({
         initialPhysicalValues: VALID_PHYSICAL,
@@ -659,7 +662,7 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
       });
 
       fillValidThirdParty(page);
-      page.submit();
+      await page.submit();
 
       expect(onSubmit).toHaveBeenCalledTimes(1);
       expect(page.thirdPartyErrors).toEqual({});
@@ -740,7 +743,7 @@ describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () =>
     thirdPartyRelationship: 'spouse',
   } as const;
 
-  it('reopens the beneficiary modal when third-party errors block submission', () => {
+  it('reopens the beneficiary modal when third-party errors block submission', async () => {
     const onSubmit = jest.fn();
     const page = ApplicantStepViewModelPageObject.render({
       initialPhysicalValues: VALID_PHYSICAL,
@@ -750,7 +753,7 @@ describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () =>
     });
     expect(page.isBeneficiaryModalOpen).toBe(false);
 
-    page.submit();
+    await page.submit();
 
     expect(onSubmit).not.toHaveBeenCalled();
     expect(page.isBeneficiaryModalOpen).toBe(true);
@@ -759,13 +762,13 @@ describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () =>
     );
   });
 
-  it('keeps the modal closed when only applicant fields are invalid', () => {
+  it('keeps the modal closed when only applicant fields are invalid', async () => {
     const page = ApplicantStepViewModelPageObject.render({
       initialPhysicalValues: { ...VALID_PHYSICAL, firstName: '' },
       initialRegime: 'physical',
     });
 
-    page.submit();
+    await page.submit();
 
     expect(page.isBeneficiaryModalOpen).toBe(false);
     expect(page.physicalErrors.firstName).toBe(
@@ -773,7 +776,7 @@ describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () =>
     );
   });
 
-  it('accepts strictly formatted string birth date (DD-MM-YYYY) and validates successfully', () => {
+  it('accepts strictly formatted string birth date (DD-MM-YYYY) and validates successfully', async () => {
     const onSubmit = jest.fn();
     const birthDate = '15-05-1990';
     const page = ApplicantStepViewModelPageObject.render({
@@ -787,7 +790,7 @@ describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () =>
       onSubmit,
     });
 
-    page.submit();
+    await page.submit();
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
     expect(onSubmit).toHaveBeenCalledWith(
@@ -795,7 +798,7 @@ describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () =>
     );
   });
 
-  it('reports an error for an invalid format birth date', () => {
+  it('reports an error for an invalid format birth date', async () => {
     const onSubmit = jest.fn();
     const page = ApplicantStepViewModelPageObject.render({
       initialPhysicalValues: VALID_PHYSICAL,
@@ -808,7 +811,7 @@ describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () =>
       onSubmit,
     });
 
-    page.submit();
+    await page.submit();
 
     expect(onSubmit).not.toHaveBeenCalled();
     expect(page.thirdPartyErrors).toEqual({
@@ -816,7 +819,7 @@ describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () =>
     });
   });
 
-  it('rejects slash string birth date (DD/MM/YYYY) in strict DD-MM-YYYY mode', () => {
+  it('rejects slash string birth date (DD/MM/YYYY) in strict DD-MM-YYYY mode', async () => {
     const onSubmit = jest.fn();
     const page = ApplicantStepViewModelPageObject.render({
       initialPhysicalValues: VALID_PHYSICAL,
@@ -829,13 +832,13 @@ describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () =>
       onSubmit,
     });
 
-    page.submit();
+    await page.submit();
 
     expect(onSubmit).not.toHaveBeenCalled();
     expect(page.isValid).toBe(false);
   });
 
-  it('rejects invalid calendar date (31-02-1990) and populates thirdPartyErrors', () => {
+  it('rejects invalid calendar date (31-02-1990) and populates thirdPartyErrors', async () => {
     const onSubmit = jest.fn();
     const page = ApplicantStepViewModelPageObject.render({
       initialPhysicalValues: VALID_PHYSICAL,
@@ -848,7 +851,7 @@ describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () =>
       onSubmit,
     });
 
-    page.submit();
+    await page.submit();
 
     expect(onSubmit).not.toHaveBeenCalled();
     expect(page.thirdPartyErrors.thirdPartyBirthDate).toBe(

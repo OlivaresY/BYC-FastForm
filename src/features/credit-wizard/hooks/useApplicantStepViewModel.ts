@@ -78,6 +78,7 @@ export const useApplicantStepViewModel = (
     control,
     formState: { errors, isValid: isFormValid },
     getValues,
+    handleSubmit,
     setError,
     setValue,
   } = useForm<ApplicantStepFormValues>({
@@ -106,10 +107,11 @@ export const useApplicantStepViewModel = (
 
   const currentValues = useWatch({ control });
 
-  const regime = currentValues.regime ?? (initialRegime ?? 'physical');
+  const regime = currentValues.regime ?? initialRegime ?? 'physical';
   const vehicleBeneficiary =
     currentValues.vehicleBeneficiary ??
-    (initialVehicleBeneficiary ?? 'same_holder');
+    initialVehicleBeneficiary ??
+    'same_holder';
   const physicalValues = useMemo<PhysicalPersonFormValues>(
     () =>
       ({
@@ -214,9 +216,8 @@ export const useApplicantStepViewModel = (
     });
   }
 
-  const thirdPartyErrors: Partial<
-    Record<ThirdPartyBeneficiaryField, string>
-  > = {};
+  const thirdPartyErrors: Partial<Record<ThirdPartyBeneficiaryField, string>> =
+    {};
   if (errors.thirdPartyValues) {
     const raw = errors.thirdPartyValues as Partial<
       Record<ThirdPartyBeneficiaryField, { message?: string }>
@@ -413,101 +414,27 @@ export const useApplicantStepViewModel = (
     [clearErrors, getValues, savedThirdPartyValues, setValue],
   );
 
-  const handleNextStep = useCallback(
-    async (_dataOrEvent?: unknown): Promise<void> => {
-      const activeValues = getValues();
-      const isThirdParty = activeValues.vehicleBeneficiary === 'third_party';
-      let hasValidationErrors = false;
-
-      if (isThirdParty) {
-        const candidate: ThirdPartyBeneficiaryValues = {
-          ...activeValues.thirdPartyValues,
-          isThirdPartyRegistration: true,
-        };
-        const thirdPartyResult =
-          StrictThirdPartyBeneficiarySchema.safeParse(candidate);
-
-        if (!thirdPartyResult.success) {
-          thirdPartyResult.error.issues.forEach((issue) => {
-            const [key] = issue.path;
-            if (typeof key === 'string') {
-              setError(
-                `thirdPartyValues.${key as ThirdPartyBeneficiaryField}` as const,
-                {
-                  message: issue.message,
-                  type: 'manual',
-                },
-              );
-            }
-          });
-          setIsBeneficiaryModalOpen(true);
-          hasValidationErrors = true;
-        }
-      }
-
-      if (activeValues.regime === 'physical') {
-        const physicalResult = PhysicalApplicantSchema.safeParse(
-          activeValues.physicalValues,
-        );
-
-        if (!physicalResult.success) {
-          physicalResult.error.issues.forEach((issue) => {
-            const [key] = issue.path;
-            if (typeof key === 'string') {
-              setError(
-                `physicalValues.${key as PhysicalPersonFormField}` as const,
-                {
-                  message: issue.message,
-                  type: 'manual',
-                },
-              );
-            }
-          });
-          hasValidationErrors = true;
-        }
-      } else {
-        const legalResult = LegalApplicantSchema.safeParse(
-          activeValues.legalValues,
-        );
-
-        if (!legalResult.success) {
-          legalResult.error.issues.forEach((issue) => {
-            const [key] = issue.path;
-            if (typeof key === 'string') {
-              setError(
-                `legalValues.${key as LegalEntityFormField}` as const,
-                {
-                  message: issue.message,
-                  type: 'manual',
-                },
-              );
-            }
-          });
-          hasValidationErrors = true;
-        }
-      }
-
-      if (hasValidationErrors) {
-        return;
-      }
+  const onValidSubmit = useCallback(
+    async (validData: ApplicantStepFormValues): Promise<void> => {
+      const isThirdParty = validData.vehicleBeneficiary === 'third_party';
 
       const payload: ApplicantStepData = isThirdParty
         ? ({
-            regime: activeValues.regime,
+            regime: validData.regime,
             values:
-              activeValues.regime === 'physical'
-                ? activeValues.physicalValues
-                : activeValues.legalValues,
+              validData.regime === 'physical'
+                ? validData.physicalValues
+                : validData.legalValues,
             vehicleBeneficiary: 'third_party',
-            ...activeValues.thirdPartyValues,
+            ...validData.thirdPartyValues,
             isThirdPartyRegistration: true,
           } as ApplicantStepData)
         : ({
-            regime: activeValues.regime,
+            regime: validData.regime,
             values:
-              activeValues.regime === 'physical'
-                ? activeValues.physicalValues
-                : activeValues.legalValues,
+              validData.regime === 'physical'
+                ? validData.physicalValues
+                : validData.legalValues,
             vehicleBeneficiary: 'same_holder',
           } as ApplicantStepData);
 
@@ -528,11 +455,32 @@ export const useApplicantStepViewModel = (
         setIsSubmitting(false);
       }
     },
-    [getValues, onSubmitProp, setError],
+    [onSubmitProp],
   );
 
-  const onSubmit = useCallback((): void => {
-    void handleNextStep();
+  const handleNextStep = useCallback(
+    async (dataOrEvent?: unknown): Promise<void> => {
+      if (
+        dataOrEvent &&
+        typeof dataOrEvent === 'object' &&
+        'regime' in dataOrEvent &&
+        'vehicleBeneficiary' in dataOrEvent
+      ) {
+        await onValidSubmit(dataOrEvent as ApplicantStepFormValues);
+        return;
+      }
+
+      await handleSubmit(onValidSubmit, (fieldErrors) => {
+        if (fieldErrors.thirdPartyValues) {
+          setIsBeneficiaryModalOpen(true);
+        }
+      })(dataOrEvent as never);
+    },
+    [handleSubmit, onValidSubmit],
+  );
+
+  const onSubmit = useCallback((): Promise<void> => {
+    return handleNextStep();
   }, [handleNextStep]);
 
   return {

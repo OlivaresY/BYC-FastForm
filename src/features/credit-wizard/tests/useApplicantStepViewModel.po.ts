@@ -237,9 +237,9 @@ export class ApplicantStepViewModelPageObject {
     return this;
   }
 
-  public submit(): this {
-    act(() => {
-      this.current.onSubmit();
+  public async submit(): Promise<this> {
+    await act(async () => {
+      await this.current.onSubmit();
     });
     return this;
   }
@@ -250,7 +250,7 @@ export class ApplicantStepViewModelPageObject {
     });
   }
 
-  public onSubmit(): this {
+  public async onSubmit(): Promise<this> {
     return this.submit();
   }
 

@@ -1,8 +1,8 @@
 import React from 'react';
 import {
-  PHYSICAL_PERSON_CONTACT_STEP_VIEW_COPY,
-  PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS,
+  PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS
 } from '../constants/PhysicalPersonContactStepView.constants';
+import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import { usePhysicalPersonContactViewModel } from '../hooks/usePhysicalPersonContactViewModel';
 import type { PhysicalPersonContactStepViewProps } from '../types/PhysicalPersonContactStepView.types';
 import { PhysicalPersonContactForm } from './PhysicalPersonContactForm';
@@ -25,7 +25,7 @@ export const PhysicalPersonContactStepView = ({
   return (
     <WizardStepLayout
       currentStep={currentStep}
-      description={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COPY.DESCRIPTION}
+      description={WIZARD_COPY.STEP_2_PHYSICAL_CONTACT.DESCRIPTION}
       disabled={disabled}
       isSubmitDisabled={!isValid}
       isSubmitting={isSubmitting}
@@ -47,7 +47,7 @@ export const PhysicalPersonContactStepView = ({
         title: PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.TITLE,
         wizardHeader: PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.WIZARD_HEADER,
       }}
-      title={PHYSICAL_PERSON_CONTACT_STEP_VIEW_COPY.TITLE}
+      title={WIZARD_COPY.STEP_2_PHYSICAL_CONTACT.TITLE}
       totalSteps={totalSteps}
     >
       {({ onInputFocus }) => (

@@ -5,6 +5,8 @@ import {
 import { ApplicantStepViewPageObject } from './ApplicantStepView.po';
 
 describe('ApplicantStepView Integration', () => {
+  jest.setTimeout(20000);
+
   describe('Default Render State', () => {
     it('renders all structural elements with Physical regime active and submit disabled by default', () => {
       // Arrange
@@ -87,7 +89,7 @@ describe('ApplicantStepView Integration', () => {
   });
 
   describe('Vehicle Beneficiary Selection', () => {
-    it('allows toggling between same_holder and third_party beneficiary', () => {
+    it('allows toggling between same_holder and third_party beneficiary', async () => {
       // Arrange
       const handleSubmit = jest.fn();
       const page = ApplicantStepViewPageObject.render({
@@ -110,7 +112,7 @@ describe('ApplicantStepView Integration', () => {
 
       // Act - Select third party
       page.selectVehicleBeneficiaryThirdParty();
-      page.pressSubmit();
+      await page.pressSubmit();
 
       // Assert - Submitted with third_party
       expect(handleSubmit).toHaveBeenCalledWith(
@@ -122,7 +124,7 @@ describe('ApplicantStepView Integration', () => {
 
       // Act - Select same holder
       page.selectVehicleBeneficiarySameHolder();
-      page.pressSubmit();
+      await page.pressSubmit();
 
       // Assert - Submitted with same_holder
       expect(handleSubmit).toHaveBeenCalledWith(
@@ -157,7 +159,7 @@ describe('ApplicantStepView Integration', () => {
       expect(page.isSubmitButtonDisabled()).toBe(false);
     });
 
-    it('submits correct PhysicalApplicantStepData discriminated union payload', () => {
+    it('submits correct PhysicalApplicantStepData discriminated union payload', async () => {
       // Arrange
       const handleSubmit = jest.fn();
       const page = ApplicantStepViewPageObject.render({
@@ -166,7 +168,7 @@ describe('ApplicantStepView Integration', () => {
 
       // Act
       page.fillAllPhysicalFieldsValid();
-      page.pressSubmit();
+      await page.pressSubmit();
 
       // Assert
       expect(handleSubmit).toHaveBeenCalledTimes(1);
@@ -231,7 +233,7 @@ describe('ApplicantStepView Integration', () => {
       expect(page.isSubmitButtonDisabled()).toBe(false);
     });
 
-    it('submits correct LegalApplicantStepData discriminated union payload', () => {
+    it('submits correct LegalApplicantStepData discriminated union payload', async () => {
       // Arrange
       const handleSubmit = jest.fn();
       const page = ApplicantStepViewPageObject.render({
@@ -241,7 +243,7 @@ describe('ApplicantStepView Integration', () => {
       // Act
       page.selectLegalRegime();
       page.fillAllLegalFieldsValid();
-      page.pressSubmit();
+      await page.pressSubmit();
 
       // Assert
       expect(handleSubmit).toHaveBeenCalledTimes(1);

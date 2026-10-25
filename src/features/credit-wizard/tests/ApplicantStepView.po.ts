@@ -304,8 +304,8 @@ export class ApplicantStepViewPageObject {
     return this;
   }
 
-  public pressSubmit(): this {
-    act(() => {
+  public async pressSubmit(): Promise<this> {
+    await act(async () => {
       fireEvent.press(this.submitButton);
     });
     return this;

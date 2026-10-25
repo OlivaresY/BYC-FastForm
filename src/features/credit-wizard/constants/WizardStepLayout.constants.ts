@@ -1,3 +1,5 @@
+import { WIZARD_COPY } from './WizardCopy.constants';
+
 export const WIZARD_STEP_LAYOUT_COLORS = {
   BACK_ICON: '#5A6B80',
   SUBMIT_ICON: '#FFFFFF',
@@ -8,8 +10,8 @@ export const WIZARD_STEP_LAYOUT_CONSTANTS = {
 } as const;
 
 export const WIZARD_STEP_LAYOUT_COPY = {
-  BACK_BUTTON: 'Atrás',
-  SUBMIT_BUTTON: 'Siguiente',
+  BACK_BUTTON: WIZARD_COPY.BUTTONS.BACK,
+  SUBMIT_BUTTON: WIZARD_COPY.BUTTONS.NEXT,
 } as const;
 
 export const WIZARD_STEP_LAYOUT_DIMENSIONS = {

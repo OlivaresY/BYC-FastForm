@@ -1,8 +1,8 @@
 import React from 'react';
 import {
-  LEGAL_ENTITY_CONTACT_STEP_VIEW_COPY,
-  LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS,
+  LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS
 } from '../constants/LegalEntityContactStepView.constants';
+import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import { useLegalEntityContactViewModel } from '../hooks/useLegalEntityContactViewModel';
 import type { LegalEntityContactStepViewProps } from '../types/LegalEntityContactStepView.types';
 import { LegalEntityContactForm } from './LegalEntityContactForm';
@@ -24,7 +24,7 @@ export const LegalEntityContactStepView = ({
   return (
     <WizardStepLayout
       currentStep={currentStep}
-      description={LEGAL_ENTITY_CONTACT_STEP_VIEW_COPY.DESCRIPTION}
+      description={WIZARD_COPY.STEP_2_LEGAL_CONTACT.DESCRIPTION}
       disabled={disabled}
       isSubmitDisabled={!isValid}
       isSubmitting={isSubmitting}
@@ -46,7 +46,7 @@ export const LegalEntityContactStepView = ({
         title: LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.TITLE,
         wizardHeader: LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.WIZARD_HEADER,
       }}
-      title={LEGAL_ENTITY_CONTACT_STEP_VIEW_COPY.TITLE}
+      title={WIZARD_COPY.STEP_2_LEGAL_CONTACT.TITLE}
       totalSteps={totalSteps}
     >
       {({ onInputFocus }) => (

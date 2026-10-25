@@ -1,13 +1,15 @@
-import { z } from 'zod';
-import {
-  APPLICANT_STEP_VIEW_ERRORS,
-  APPLICANT_STEP_VIEW_NUMERICAL,
-} from '../constants/ApplicantStepView.constants';
 import {
   INTERNATIONAL_PHONE_REGEX,
   isValidCalendarDate,
   isValidDateDDMMYYYY,
 } from '@/shared/utils';
+import { z } from 'zod';
+import { APPLICANT_STEP_VIEW_NUMERICAL } from '../constants/ApplicantStepView.constants';
+import { WIZARD_COPY } from '../constants/WizardCopy.constants';
+import type {
+  ThirdPartyBeneficiaryField,
+  ThirdPartyBeneficiaryValues,
+} from '../types/ApplicantStepView.types';
 import type {
   LegalEntityFormField,
   LegalEntityFormValues,
@@ -16,12 +18,10 @@ import type {
   PhysicalPersonFormField,
   PhysicalPersonFormValues,
 } from '../types/PhysicalPersonForm.types';
-import type {
-  ThirdPartyBeneficiaryField,
-  ThirdPartyBeneficiaryValues,
-} from '../types/ApplicantStepView.types';
 
 export { isValidCalendarDate, isValidDateDDMMYYYY };
+
+const APPLICANT_ERRORS = WIZARD_COPY.STEP_1_APPLICANT.ERRORS;
 
 // =============================================================================
 // Shared Helpers & Date Validation
@@ -64,52 +64,44 @@ export const createDateDDMMYYYYSchema = (errorMessage: string) =>
 
 export const PhysicalIdentificationNumberSchema = identificationNumberSchema(
   APPLICANT_STEP_VIEW_NUMERICAL.MIN_PHYSICAL_ID_LENGTH,
-  APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.IDENTIFICATION_NUMBER,
+  APPLICANT_ERRORS.PHYSICAL.IDENTIFICATION_NUMBER,
 );
 
 export const LegalIdentificationNumberSchema = identificationNumberSchema(
   APPLICANT_STEP_VIEW_NUMERICAL.MIN_LEGAL_ID_LENGTH,
-  APPLICANT_STEP_VIEW_ERRORS.LEGAL.IDENTIFICATION_NUMBER,
+  APPLICANT_ERRORS.LEGAL.IDENTIFICATION_NUMBER,
 );
 
 export const PhysicalApplicantSchema = z.object({
-  birthDate: createDateDDMMYYYYSchema(
-    APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.BIRTH_DATE,
-  ),
-  firstLastName: requiredText(
-    APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.FIRST_LAST_NAME,
-  ),
-  firstName: requiredText(APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.FIRST_NAME),
+  birthDate: createDateDDMMYYYYSchema(APPLICANT_ERRORS.PHYSICAL.BIRTH_DATE),
+  firstLastName: requiredText(APPLICANT_ERRORS.PHYSICAL.FIRST_LAST_NAME),
+  firstName: requiredText(APPLICANT_ERRORS.PHYSICAL.FIRST_NAME),
   gender: z.enum(['male', 'female', 'other'], {
-    error: APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.GENDER,
+    error: APPLICANT_ERRORS.PHYSICAL.GENDER,
   }),
   identificationNumber: PhysicalIdentificationNumberSchema,
   identificationType: z.enum(['national_id', 'dimex', 'passport'], {
-    error: APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.IDENTIFICATION_TYPE,
+    error: APPLICANT_ERRORS.PHYSICAL.IDENTIFICATION_TYPE,
   }),
   maritalStatus: z.enum(
     ['single', 'married', 'divorced', 'widowed', 'common_law'],
-    { error: APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.MARITAL_STATUS },
+    { error: APPLICANT_ERRORS.PHYSICAL.MARITAL_STATUS },
   ),
-  middleName: z.string().trim().nullish(),
-  nationality: requiredText(APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.NATIONALITY),
-  secondLastName: requiredText(
-    APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.SECOND_LAST_NAME,
-  ),
+  middleName: z.string().trim().optional(),
+  nationality: requiredText(APPLICANT_ERRORS.PHYSICAL.NATIONALITY),
+  secondLastName: requiredText(APPLICANT_ERRORS.PHYSICAL.SECOND_LAST_NAME),
 });
 
 export const LegalApplicantSchema = z.object({
   identificationNumber: LegalIdentificationNumberSchema,
   identificationType: z.enum(['legal_id', 'dimex', 'nite'], {
-    error: APPLICANT_STEP_VIEW_ERRORS.LEGAL.IDENTIFICATION_TYPE,
+    error: APPLICANT_ERRORS.LEGAL.IDENTIFICATION_TYPE,
   }),
-  legalName: requiredText(APPLICANT_STEP_VIEW_ERRORS.LEGAL.LEGAL_NAME),
+  legalName: requiredText(APPLICANT_ERRORS.LEGAL.LEGAL_NAME),
   representativeIdentification: requiredText(
-    APPLICANT_STEP_VIEW_ERRORS.LEGAL.REPRESENTATIVE_IDENTIFICATION,
+    APPLICANT_ERRORS.LEGAL.REPRESENTATIVE_IDENTIFICATION,
   ),
-  representativeName: requiredText(
-    APPLICANT_STEP_VIEW_ERRORS.LEGAL.REPRESENTATIVE_NAME,
-  ),
+  representativeName: requiredText(APPLICANT_ERRORS.LEGAL.REPRESENTATIVE_NAME),
 });
 
 export const PHYSICAL_APPLICANT_FIELDS = [
@@ -140,32 +132,24 @@ export const LEGAL_APPLICANT_FIELDS = [
 export const ThirdPartyBeneficiaryStrictFieldsSchema = {
   isThirdPartyRegistration: z.literal(true),
   thirdPartyBirthDate: createDateDDMMYYYYSchema(
-    APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.BIRTH_DATE,
+    APPLICANT_ERRORS.THIRD_PARTY.BIRTH_DATE,
   ),
-  thirdPartyDocNumber: requiredText(
-    APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.DOC_NUMBER,
-  ),
-  thirdPartyDocType: requiredText(
-    APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.DOC_TYPE,
-  ),
+  thirdPartyDocNumber: requiredText(APPLICANT_ERRORS.THIRD_PARTY.DOC_NUMBER),
+  thirdPartyDocType: requiredText(APPLICANT_ERRORS.THIRD_PARTY.DOC_TYPE),
   thirdPartyEmail: z
-    .string({ error: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL })
+    .string({ error: APPLICANT_ERRORS.THIRD_PARTY.EMAIL })
     .trim()
-    .min(1, APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL)
-    .pipe(z.email({ error: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL })),
-  thirdPartyFullName: requiredText(
-    APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.FULL_NAME,
-  ),
-  thirdPartyNationality: requiredText(
-    APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.NATIONALITY,
-  ),
+    .min(1, APPLICANT_ERRORS.THIRD_PARTY.EMAIL)
+    .pipe(z.email({ error: APPLICANT_ERRORS.THIRD_PARTY.EMAIL })),
+  thirdPartyFullName: requiredText(APPLICANT_ERRORS.THIRD_PARTY.FULL_NAME),
+  thirdPartyNationality: requiredText(APPLICANT_ERRORS.THIRD_PARTY.NATIONALITY),
   thirdPartyPhone: z
-    .string({ error: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.PHONE })
+    .string({ error: APPLICANT_ERRORS.THIRD_PARTY.PHONE })
     .trim()
-    .min(8, APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.PHONE)
-    .regex(PHONE_PATTERN, APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.PHONE),
+    .min(8, APPLICANT_ERRORS.THIRD_PARTY.PHONE)
+    .regex(PHONE_PATTERN, APPLICANT_ERRORS.THIRD_PARTY.PHONE),
   thirdPartyRelationship: requiredText(
-    APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.RELATIONSHIP,
+    APPLICANT_ERRORS.THIRD_PARTY.RELATIONSHIP,
   ),
 };
 
@@ -178,7 +162,7 @@ export const optionalBeneficiaryEmailSchema = z
   .trim()
   .nullish()
   .refine((val) => !val || z.email().safeParse(val).success, {
-    message: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL,
+    message: APPLICANT_ERRORS.THIRD_PARTY.EMAIL,
   });
 
 export const optionalBeneficiaryPhoneSchema = z
@@ -186,7 +170,7 @@ export const optionalBeneficiaryPhoneSchema = z
   .trim()
   .nullish()
   .refine((val) => !val || (val.length >= 8 && PHONE_PATTERN.test(val)), {
-    message: APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.PHONE,
+    message: APPLICANT_ERRORS.THIRD_PARTY.PHONE,
   });
 
 export const ThirdPartyBeneficiaryFieldsSchema = {
