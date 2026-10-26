@@ -11,6 +11,7 @@ export {
   PhysicalPersonForm,
   VehicleBeneficiarySection,
   WizardProgressHeader,
+  WizardStepLayout,
 } from './components';
 
 export {
@@ -42,7 +43,7 @@ export {
   ThirdPartyBeneficiaryFieldsSchema,
   ThirdPartyBeneficiarySchema,
   ThirdPartyBeneficiaryStrictFieldsSchema,
-} from './types/ApplicantStepView.schema';
+} from './schemas/ApplicantStepView.schema';
 
 export type {
   ApplicantStepData,
@@ -99,11 +100,8 @@ export {
 } from './constants/PhysicalPersonContactForm.constants';
 
 export {
-  PHYSICAL_PERSON_CONTACT_STEP_VIEW_COLORS,
   PHYSICAL_PERSON_CONTACT_STEP_VIEW_COPY,
-  PHYSICAL_PERSON_CONTACT_STEP_VIEW_DIMENSIONS,
   PHYSICAL_PERSON_CONTACT_STEP_VIEW_NUMERICAL,
-  PHYSICAL_PERSON_CONTACT_STEP_VIEW_STYLES,
   PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS,
 } from './constants/PhysicalPersonContactStepView.constants';
 
@@ -150,12 +148,8 @@ export {
 } from './constants/LegalEntityContactForm.constants';
 
 export {
-  LEGAL_ENTITY_CONTACT_STEP_VIEW_COLORS,
-  LEGAL_ENTITY_CONTACT_STEP_VIEW_CONSTANTS,
   LEGAL_ENTITY_CONTACT_STEP_VIEW_COPY,
-  LEGAL_ENTITY_CONTACT_STEP_VIEW_DIMENSIONS,
   LEGAL_ENTITY_CONTACT_STEP_VIEW_NUMERICAL,
-  LEGAL_ENTITY_CONTACT_STEP_VIEW_STYLES,
   LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS,
 } from './constants/LegalEntityContactStepView.constants';
 

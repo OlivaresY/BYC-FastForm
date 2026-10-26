@@ -1,4 +1,5 @@
-import { DATE_DD_MM_YYYY } from '@/shared/utils';
+import { DATE_DD_MM_YYYY, INTERNATIONAL_PHONE_REGEX } from '@/shared/utils';
+import { WIZARD_COPY } from './WizardCopy.constants';
 
 export const EMPLOYMENT_STATUSES = {
   BUSINESS_OWNER: 'business_owner',
@@ -41,45 +42,10 @@ export const PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES = {
   },
 } as const;
 
-export const PHYSICAL_PERSON_CONTACT_ERRORS = {
-  CONTACT_INFO: {
-    CELL_PHONE_INVALID: 'El formato del teléfono celular no es válido.',
-    CELL_PHONE_REQUIRED: 'El teléfono celular es obligatorio.',
-    EMAIL_INVALID: 'El formato del correo electrónico no es válido.',
-    EMAIL_REQUIRED: 'El correo electrónico es obligatorio.',
-    HOME_PHONE_INVALID: 'El formato del teléfono fijo no es válido.',
-  },
-  EMPLOYMENT_DATA: {
-    EMPLOYER_REQUIRED: 'El nombre del patrono o empresa es obligatorio.',
-    EMPLOYMENT_STATUS_REQUIRED: 'La situación laboral es obligatoria.',
-    ENTRY_DATE_FUTURE: 'La fecha de ingreso no puede ser una fecha futura.',
-    ENTRY_DATE_INVALID:
-      'La fecha de ingreso debe tener un formato DD-MM-YYYY válido.',
-    OFFICE_PHONE_INVALID: 'El formato del teléfono de oficina no es válido.',
-    OFFICE_PHONE_REQUIRED: 'El teléfono de oficina es obligatorio.',
-    PROFESSION_REQUIRED: 'La profesión u ocupación es obligatoria.',
-  },
-  FINANCIAL_CAPACITY: {
-    CURRENCY_INVALID: 'Seleccione una moneda válida (CRC o USD).',
-    GROSS_INCOME_POSITIVE: 'El ingreso bruto debe ser mayor a 0.',
-    GROSS_INCOME_REQUIRED: 'El ingreso bruto es obligatorio.',
-    NET_INCOME_POSITIVE: 'El ingreso neto debe ser mayor a 0.',
-    NET_INCOME_REQUIRED: 'El ingreso neto es obligatorio.',
-    OTHER_INCOMES_MIN: 'Otros ingresos no puede ser negativo.',
-    OTHER_INCOMES_REQUIRED: 'Otros ingresos debe ser un valor numérico.',
-  },
-  RESIDENTIAL_ADDRESS: {
-    CANTON_REQUIRED: 'El cantón es obligatorio.',
-    DISTRICT_REQUIRED: 'El distrito es obligatorio.',
-    EXACT_ADDRESS_REQUIRED: 'La dirección exacta es obligatoria.',
-    PROVINCE_REQUIRED: 'La provincia es obligatoria.',
-  },
-  SUBMIT_FAILED:
-    'Ocurrió un error al procesar la solicitud. Intente nuevamente.',
-} as const;
+export const PHYSICAL_PERSON_CONTACT_ERRORS =
+  WIZARD_COPY.STEP_2_PHYSICAL_CONTACT.ERRORS;
 
 export const PHYSICAL_PERSON_CONTACT_PATTERNS = {
   DATE_DD_MM_YYYY,
-  INTERNATIONAL_PHONE:
-    /^(\+?[1-9]\d{0,3}|\([1-9]\d{0,3}\))?\s?[\d\-\s()]{6,16}$/,
+  INTERNATIONAL_PHONE: INTERNATIONAL_PHONE_REGEX,
 } as const;

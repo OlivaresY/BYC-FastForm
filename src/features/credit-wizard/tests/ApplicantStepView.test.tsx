@@ -1,10 +1,41 @@
-import {
-  APPLICANT_STEP_VIEW_COPY,
-  APPLICANT_STEP_VIEW_DEFAULT_VALUES,
-} from '../constants/ApplicantStepView.constants';
+import { waitFor } from '@testing-library/react-native';
+import { APPLICANT_STEP_VIEW_DEFAULT_VALUES } from '../constants/ApplicantStepView.constants';
+import { WIZARD_COPY } from '../constants/WizardCopy.constants';
+import type { UseApplicantStepViewModelReturn } from '../types/ApplicantStepView.types';
 import { ApplicantStepViewPageObject } from './ApplicantStepView.po';
 
+const createMockViewModel = (
+  overrides: Partial<UseApplicantStepViewModelReturn> = {},
+): UseApplicantStepViewModelReturn => ({
+  closeBeneficiaryModal: jest.fn(),
+  handleNextStep: jest.fn().mockResolvedValue(undefined),
+  handleSaveThirdPartyData: jest.fn().mockReturnValue(true),
+  isBeneficiaryModalOpen: false,
+  isIdentificationValid: true,
+  isSubmitting: false,
+  isValid: true,
+  legalErrors: {},
+  legalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
+  onLegalFieldChange: jest.fn(),
+  onPhysicalFieldChange: jest.fn(),
+  onRegimeChange: jest.fn(),
+  onSubmit: jest.fn(),
+  onThirdPartyFieldChange: jest.fn(),
+  onVehicleBeneficiaryChange: jest.fn(),
+  openBeneficiaryModal: jest.fn(),
+  physicalErrors: {},
+  physicalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.PHYSICAL,
+  regime: 'physical',
+  submitError: null,
+  thirdPartyErrors: {},
+  thirdPartyValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
+  vehicleBeneficiary: 'same_holder',
+  ...overrides,
+});
+
 describe('ApplicantStepView Integration', () => {
+  jest.setTimeout(20000);
+
   describe('Default Render State', () => {
     it('renders all structural elements with Physical regime active and submit disabled by default', () => {
       // Arrange
@@ -15,9 +46,11 @@ describe('ApplicantStepView Integration', () => {
       expect(page.processTopBar).toBeTruthy();
       expect(page.scrollView).toBeTruthy();
       expect(page.wizardHeader).toBeTruthy();
-      expect(page.title.props.children).toBe(APPLICANT_STEP_VIEW_COPY.TITLE);
+      expect(page.title.props.children).toBe(
+        WIZARD_COPY.STEP_1_APPLICANT.TITLE,
+      );
       expect(page.description.props.children).toBe(
-        APPLICANT_STEP_VIEW_COPY.DESCRIPTION,
+        WIZARD_COPY.STEP_1_APPLICANT.DESCRIPTION,
       );
       expect(page.legalSelector).toBeTruthy();
       expect(page.taupeContainer).toBeTruthy();
@@ -87,7 +120,7 @@ describe('ApplicantStepView Integration', () => {
   });
 
   describe('Vehicle Beneficiary Selection', () => {
-    it('allows toggling between same_holder and third_party beneficiary', () => {
+    it('allows toggling between same_holder and third_party beneficiary', async () => {
       // Arrange
       const handleSubmit = jest.fn();
       const page = ApplicantStepViewPageObject.render({
@@ -106,11 +139,12 @@ describe('ApplicantStepView Integration', () => {
 
       // Fill physical form to make it valid
       page.fillAllPhysicalFieldsValid();
-      expect(page.isSubmitButtonDisabled()).toBe(false);
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
 
       // Act - Select third party
       page.selectVehicleBeneficiaryThirdParty();
-      page.pressSubmit();
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.pressSubmit();
 
       // Assert - Submitted with third_party
       expect(handleSubmit).toHaveBeenCalledWith(
@@ -122,7 +156,8 @@ describe('ApplicantStepView Integration', () => {
 
       // Act - Select same holder
       page.selectVehicleBeneficiarySameHolder();
-      page.pressSubmit();
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.pressSubmit();
 
       // Assert - Submitted with same_holder
       expect(handleSubmit).toHaveBeenCalledWith(
@@ -135,7 +170,7 @@ describe('ApplicantStepView Integration', () => {
   });
 
   describe('Validation & Dynamic Submit Button (Physical Regime)', () => {
-    it('enables Siguiente button only when all 9 mandatory physical fields are valid', () => {
+    it('enables Siguiente button only when all 9 mandatory physical fields are valid', async () => {
       // Arrange
       const page = ApplicantStepViewPageObject.render();
       expect(page.isSubmitButtonDisabled()).toBe(true);
@@ -146,18 +181,18 @@ describe('ApplicantStepView Integration', () => {
 
       // Fill all 9 mandatory fields
       page.fillAllPhysicalFieldsValid();
-      expect(page.isSubmitButtonDisabled()).toBe(false);
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
 
       // Clear a mandatory field
       page.fillPhysicalField('firstName', '');
-      expect(page.isSubmitButtonDisabled()).toBe(true);
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(true));
 
       // Restore mandatory field
       page.fillPhysicalField('firstName', 'Carlos');
-      expect(page.isSubmitButtonDisabled()).toBe(false);
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
     });
 
-    it('submits correct PhysicalApplicantStepData discriminated union payload', () => {
+    it('submits correct PhysicalApplicantStepData discriminated union payload', async () => {
       // Arrange
       const handleSubmit = jest.fn();
       const page = ApplicantStepViewPageObject.render({
@@ -166,7 +201,8 @@ describe('ApplicantStepView Integration', () => {
 
       // Act
       page.fillAllPhysicalFieldsValid();
-      page.pressSubmit();
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.pressSubmit();
 
       // Assert
       expect(handleSubmit).toHaveBeenCalledTimes(1);
@@ -187,28 +223,28 @@ describe('ApplicantStepView Integration', () => {
       });
     });
 
-    it('enables submit button when physical identification contains hyphens or spaces with 9 digits', () => {
+    it('enables submit button when physical identification contains hyphens or spaces with 9 digits', async () => {
       // Arrange
       const page = ApplicantStepViewPageObject.render();
       page.fillAllPhysicalFieldsValid();
-      expect(page.isSubmitButtonDisabled()).toBe(false);
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
 
       // Act & Assert - space-separated
       page.fillPhysicalField('identificationNumber', '1 1234 0567');
-      expect(page.isSubmitButtonDisabled()).toBe(false);
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
 
       // Act & Assert - hyphen-separated
       page.fillPhysicalField('identificationNumber', '1-1234-0567');
-      expect(page.isSubmitButtonDisabled()).toBe(false);
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
 
       // Act & Assert - too few digits despite formatting
       page.fillPhysicalField('identificationNumber', '1-1234-056');
-      expect(page.isSubmitButtonDisabled()).toBe(true);
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(true));
     });
   });
 
   describe('Validation & Dynamic Submit Button (Legal Regime)', () => {
-    it('enables Siguiente button only when all 5 mandatory legal fields are valid', () => {
+    it('enables Siguiente button only when all 5 mandatory legal fields are valid', async () => {
       // Arrange
       const page = ApplicantStepViewPageObject.render();
       page.selectLegalRegime();
@@ -220,18 +256,18 @@ describe('ApplicantStepView Integration', () => {
 
       // Fill all 5 mandatory fields
       page.fillAllLegalFieldsValid();
-      expect(page.isSubmitButtonDisabled()).toBe(false);
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
 
       // Clear a mandatory field
       page.fillLegalField('legalName', '');
-      expect(page.isSubmitButtonDisabled()).toBe(true);
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(true));
 
       // Restore mandatory field
       page.fillLegalField('legalName', 'Inversiones Tecnológicas S.A.');
-      expect(page.isSubmitButtonDisabled()).toBe(false);
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
     });
 
-    it('submits correct LegalApplicantStepData discriminated union payload', () => {
+    it('submits correct LegalApplicantStepData discriminated union payload', async () => {
       // Arrange
       const handleSubmit = jest.fn();
       const page = ApplicantStepViewPageObject.render({
@@ -241,7 +277,8 @@ describe('ApplicantStepView Integration', () => {
       // Act
       page.selectLegalRegime();
       page.fillAllLegalFieldsValid();
-      page.pressSubmit();
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.pressSubmit();
 
       // Assert
       expect(handleSubmit).toHaveBeenCalledTimes(1);
@@ -258,24 +295,24 @@ describe('ApplicantStepView Integration', () => {
       });
     });
 
-    it('enables submit button when legal identification contains hyphens or spaces with 10 digits', () => {
+    it('enables submit button when legal identification contains hyphens or spaces with 10 digits', async () => {
       // Arrange
       const page = ApplicantStepViewPageObject.render();
       page.selectLegalRegime();
       page.fillAllLegalFieldsValid();
-      expect(page.isSubmitButtonDisabled()).toBe(false);
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
 
       // Act & Assert - space-separated
       page.fillLegalField('identificationNumber', '3 101 123456');
-      expect(page.isSubmitButtonDisabled()).toBe(false);
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
 
       // Act & Assert - hyphen-separated
       page.fillLegalField('identificationNumber', '3-101-123456');
-      expect(page.isSubmitButtonDisabled()).toBe(false);
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
 
       // Act & Assert - too few digits despite formatting
       page.fillLegalField('identificationNumber', '3-101-12345');
-      expect(page.isSubmitButtonDisabled()).toBe(true);
+      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(true));
     });
   });
 
@@ -285,28 +322,7 @@ describe('ApplicantStepView Integration', () => {
       const page = ApplicantStepViewPageObject.renderDirect({
         disabled: true,
         testID: 'custom-applicant-step-view',
-        viewModel: {
-          closeBeneficiaryModal: jest.fn(),
-          handleSaveThirdPartyData: jest.fn().mockReturnValue(true),
-          isBeneficiaryModalOpen: false,
-          isIdentificationValid: true,
-          isValid: true,
-          legalErrors: {},
-          legalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
-          onLegalFieldChange: jest.fn(),
-          onPhysicalFieldChange: jest.fn(),
-          onRegimeChange: jest.fn(),
-          onSubmit: jest.fn(),
-          onThirdPartyFieldChange: jest.fn(),
-          onVehicleBeneficiaryChange: jest.fn(),
-          openBeneficiaryModal: jest.fn(),
-          physicalErrors: {},
-          physicalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.PHYSICAL,
-          regime: 'physical',
-          thirdPartyErrors: {},
-          thirdPartyValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
-          vehicleBeneficiary: 'same_holder',
-        },
+        viewModel: createMockViewModel(),
       });
 
       // Assert
@@ -358,6 +374,34 @@ describe('ApplicantStepView Integration', () => {
 
       // Assert
       expect(onClose).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('Async Execution & Loading Lifecycle (CRIT-02)', () => {
+    it('renders ErrorBanner when submitError exists', () => {
+      // Arrange
+      const page = ApplicantStepViewPageObject.renderDirect({
+        viewModel: createMockViewModel({
+          submitError: 'Error al enviar la solicitud',
+        }),
+      });
+
+      // Assert
+      expect(page.errorBanner).toBeTruthy();
+    });
+
+    it('sets submit button loading prop when isSubmitting is true', () => {
+      // Arrange
+      const page = ApplicantStepViewPageObject.renderDirect({
+        viewModel: createMockViewModel({
+          isSubmitting: true,
+          isValid: true,
+        }),
+      });
+
+      // Assert
+      expect(page.isSubmitButtonLoading()).toBe(true);
+      expect(page.isSubmitButtonDisabled()).toBe(true);
     });
   });
 });

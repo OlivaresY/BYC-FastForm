@@ -60,6 +60,10 @@ export class ApplicantStepViewModelPageObject {
     return this.current.isIdentificationValid;
   }
 
+  public get isSubmitting(): boolean {
+    return this.current.isSubmitting;
+  }
+
   public get isValid(): boolean {
     return this.current.isValid;
   }
@@ -84,6 +88,10 @@ export class ApplicantStepViewModelPageObject {
 
   public get regime(): LegalEntityType {
     return this.current.regime;
+  }
+
+  public get submitError(): string | null {
+    return this.current.submitError;
   }
 
   public get thirdPartyErrors(): Partial<
@@ -229,26 +237,32 @@ export class ApplicantStepViewModelPageObject {
     return this;
   }
 
-  public submit(): this {
-    act(() => {
-      this.current.onSubmit();
+  public async submit(): Promise<this> {
+    await act(async () => {
+      await this.current.onSubmit();
     });
     return this;
   }
 
-  public onSubmit(): this {
+  public async handleNextStep(dataOrEvent?: unknown): Promise<void> {
+    await act(async () => {
+      await this.current.handleNextStep(dataOrEvent);
+    });
+  }
+
+  public async onSubmit(): Promise<this> {
     return this.submit();
   }
 
-  public saveThirdPartyData(): boolean {
-    let result = false;
+  public saveThirdPartyData(): boolean | Promise<boolean> {
+    let result: boolean | Promise<boolean> = false;
     act(() => {
       result = this.current.handleSaveThirdPartyData();
     });
     return result;
   }
 
-  public handleSaveThirdPartyData(): boolean {
+  public handleSaveThirdPartyData(): boolean | Promise<boolean> {
     return this.saveThirdPartyData();
   }
 }

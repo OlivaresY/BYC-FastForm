@@ -1,22 +1,13 @@
 import React, { useCallback } from 'react';
+import { View } from 'react-native';
 import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  View,
-} from 'react-native';
-import { BaseButton, ArrowRightIcon, ProcessTopBar } from '@/shared/ui';
-import {
-  APPLICANT_STEP_VIEW_COLORS,
   APPLICANT_STEP_VIEW_CONSTANTS,
-  APPLICANT_STEP_VIEW_COPY,
   APPLICANT_STEP_VIEW_DEFAULT_VALUES,
-  APPLICANT_STEP_VIEW_ICON_DIMENSIONS,
   APPLICANT_STEP_VIEW_NUMERICAL,
   APPLICANT_STEP_VIEW_STYLES,
   APPLICANT_STEP_VIEW_TEST_IDS,
 } from '../constants/ApplicantStepView.constants';
+import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import { useApplicantStepViewModel } from '../hooks/useApplicantStepViewModel';
 import type { ApplicantStepViewProps } from '../types/ApplicantStepView.types';
 import { FinalBeneficiaryModal } from './FinalBeneficiaryModal';
@@ -24,7 +15,7 @@ import { LegalEntityForm } from './LegalEntityForm';
 import { LegalEntitySelector } from './LegalEntitySelector';
 import { PhysicalPersonForm } from './PhysicalPersonForm';
 import { VehicleBeneficiarySection } from './VehicleBeneficiarySection';
-import { WizardProgressHeader } from './WizardProgressHeader';
+import { WizardStepLayout } from './WizardStepLayout';
 
 const NOOP_VOID = (): void => undefined;
 const NOOP_FIELD_CHANGE = (): void => undefined;
@@ -43,144 +34,118 @@ export const ApplicantStepView = React.memo(
 
     const vm = viewModelProp ?? defaultViewModel;
 
+    const {
+      closeBeneficiaryModal,
+      handleNextStep,
+      handleSaveThirdPartyData,
+      isBeneficiaryModalOpen,
+      isIdentificationValid,
+      isSubmitting = false,
+      isValid,
+      legalErrors,
+      legalValues,
+      onLegalFieldChange,
+      onPhysicalFieldChange,
+      onRegimeChange,
+      onThirdPartyFieldChange,
+      onVehicleBeneficiaryChange,
+      physicalErrors,
+      physicalValues,
+      regime,
+      submitError,
+      thirdPartyErrors,
+      thirdPartyValues,
+      vehicleBeneficiary,
+    } = vm;
+
     const handleSaveModal = useCallback((): void => {
-      vm.handleSaveThirdPartyData?.();
-    }, [vm]);
+      handleSaveThirdPartyData?.();
+    }, [handleSaveThirdPartyData]);
 
     return (
-      <View
-        className={APPLICANT_STEP_VIEW_STYLES.CONTAINER}
-        testID={testID ?? APPLICANT_STEP_VIEW_TEST_IDS.CONTAINER}
+      <WizardStepLayout
+        currentStep={APPLICANT_STEP_VIEW_NUMERICAL.CURRENT_STEP}
+        description={WIZARD_COPY.STEP_1_APPLICANT.DESCRIPTION}
+        disabled={disabled}
+        isSubmitDisabled={!isValid}
+        isSubmitting={isSubmitting}
+        modal={
+          <FinalBeneficiaryModal
+            errors={thirdPartyErrors}
+            isOpen={isBeneficiaryModalOpen}
+            onClose={closeBeneficiaryModal ?? NOOP_VOID}
+            onFieldChange={onThirdPartyFieldChange ?? NOOP_FIELD_CHANGE}
+            onSave={handleSaveModal}
+            values={
+              thirdPartyValues ?? APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY
+            }
+          />
+        }
+        onClose={onClose}
+        onSubmit={(): void => {
+          void handleNextStep?.();
+        }}
+        submitButtonLabel={WIZARD_COPY.STEP_1_APPLICANT.SUBMIT_BUTTON}
+        submitError={submitError ?? null}
+        testID={testID}
+        testIds={{
+          bottomBar: APPLICANT_STEP_VIEW_TEST_IDS.BOTTOM_BAR,
+          container: testID ?? APPLICANT_STEP_VIEW_TEST_IDS.CONTAINER,
+          description: APPLICANT_STEP_VIEW_TEST_IDS.DESCRIPTION,
+          processTopBar: APPLICANT_STEP_VIEW_TEST_IDS.PROCESS_TOP_BAR,
+          scrollView: APPLICANT_STEP_VIEW_TEST_IDS.SCROLL_VIEW,
+          submitButton: APPLICANT_STEP_VIEW_TEST_IDS.SUBMIT_BUTTON,
+          title: APPLICANT_STEP_VIEW_TEST_IDS.TITLE,
+          wizardHeader: APPLICANT_STEP_VIEW_TEST_IDS.WIZARD_HEADER,
+        }}
+        title={WIZARD_COPY.STEP_1_APPLICANT.TITLE}
+        totalSteps={APPLICANT_STEP_VIEW_NUMERICAL.TOTAL_STEPS}
+        userInitials={APPLICANT_STEP_VIEW_CONSTANTS.MOCK_USER_INITIALS}
       >
-        <ProcessTopBar
-          onClose={onClose ?? NOOP_VOID}
-          testID={APPLICANT_STEP_VIEW_TEST_IDS.PROCESS_TOP_BAR}
-          userInitials={APPLICANT_STEP_VIEW_CONSTANTS.MOCK_USER_INITIALS}
+        <LegalEntitySelector
+          disabled={disabled || isSubmitting}
+          onSelectEntity={onRegimeChange}
+          selectedEntity={regime}
+          testID={APPLICANT_STEP_VIEW_TEST_IDS.LEGAL_SELECTOR}
         />
 
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          className={APPLICANT_STEP_VIEW_STYLES.KEYBOARD_AVOIDING_VIEW}
+        <View
+          className={APPLICANT_STEP_VIEW_STYLES.TAUPE_CONTAINER}
+          testID={APPLICANT_STEP_VIEW_TEST_IDS.TAUPE_CONTAINER}
         >
-          <ScrollView
-            className={APPLICANT_STEP_VIEW_STYLES.SCROLL_VIEW}
-            keyboardShouldPersistTaps='handled'
-            showsVerticalScrollIndicator={false}
-            testID={APPLICANT_STEP_VIEW_TEST_IDS.SCROLL_VIEW}
-          >
-            <View className={APPLICANT_STEP_VIEW_STYLES.SCROLL_CONTENT}>
-              {/* 1. Wizard Progress Header */}
-              <WizardProgressHeader
-                currentStep={APPLICANT_STEP_VIEW_NUMERICAL.CURRENT_STEP}
-                testID={APPLICANT_STEP_VIEW_TEST_IDS.WIZARD_HEADER}
-                totalSteps={APPLICANT_STEP_VIEW_NUMERICAL.TOTAL_STEPS}
-              />
-
-              {/* 2. Step Title & Description Block */}
-              <View className={APPLICANT_STEP_VIEW_STYLES.HEADER_BLOCK}>
-                <Text
-                  accessibilityRole='header'
-                  className={APPLICANT_STEP_VIEW_STYLES.TITLE}
-                  testID={APPLICANT_STEP_VIEW_TEST_IDS.TITLE}
-                >
-                  {APPLICANT_STEP_VIEW_COPY.TITLE}
-                </Text>
-                <Text
-                  className={APPLICANT_STEP_VIEW_STYLES.DESCRIPTION}
-                  testID={APPLICANT_STEP_VIEW_TEST_IDS.DESCRIPTION}
-                >
-                  {APPLICANT_STEP_VIEW_COPY.DESCRIPTION}
-                </Text>
-              </View>
-
-              {/* 3. Legal Entity Selector (Physical vs. Legal) */}
-              <LegalEntitySelector
-                disabled={disabled}
-                onSelectEntity={vm.onRegimeChange}
-                selectedEntity={vm.regime}
-                testID={APPLICANT_STEP_VIEW_TEST_IDS.LEGAL_SELECTOR}
-              />
-
-              {/* 4. Taupe Container Wrapping Form & Vehicle Beneficiary */}
-              <View
-                className={APPLICANT_STEP_VIEW_STYLES.TAUPE_CONTAINER}
-                testID={APPLICANT_STEP_VIEW_TEST_IDS.TAUPE_CONTAINER}
-              >
-                {vm.regime === 'physical' ? (
-                  <PhysicalPersonForm
-                    disabled={disabled}
-                    errors={vm.physicalErrors}
-                    isIdentificationValid={vm.isIdentificationValid}
-                    onFieldChange={vm.onPhysicalFieldChange}
-                    testID={APPLICANT_STEP_VIEW_TEST_IDS.PHYSICAL_FORM}
-                    values={vm.physicalValues}
-                  />
-                ) : (
-                  <LegalEntityForm
-                    disabled={disabled}
-                    errors={vm.legalErrors}
-                    isIdentificationValid={vm.isIdentificationValid}
-                    onFieldChange={vm.onLegalFieldChange}
-                    testID={APPLICANT_STEP_VIEW_TEST_IDS.LEGAL_FORM}
-                    values={vm.legalValues}
-                  />
-                )}
-
-                {/* Divider between Applicant Form and Vehicle Beneficiary Section */}
-                <View
-                  className={APPLICANT_STEP_VIEW_STYLES.DIVIDER}
-                  testID={APPLICANT_STEP_VIEW_TEST_IDS.DIVIDER}
-                />
-
-                {/* Vehicle Beneficiary Final Destination Section */}
-                <VehicleBeneficiarySection
-                  disabled={disabled}
-                  onSelectBeneficiary={vm.onVehicleBeneficiaryChange}
-                  selectedBeneficiary={vm.vehicleBeneficiary}
-                  testID={APPLICANT_STEP_VIEW_TEST_IDS.VEHICLE_BENEFICIARY}
-                />
-              </View>
-            </View>
-          </ScrollView>
-
-          {/* 5. Fixed Bottom CTA Bar */}
-          <View
-            className={APPLICANT_STEP_VIEW_STYLES.BOTTOM_BAR}
-            testID={APPLICANT_STEP_VIEW_TEST_IDS.BOTTOM_BAR}
-          >
-            <BaseButton
-              className={APPLICANT_STEP_VIEW_STYLES.SUBMIT_BUTTON}
-              disabled={!vm.isValid || disabled}
-              fullWidth
-              iconRight={
-                <ArrowRightIcon
-                  color={APPLICANT_STEP_VIEW_COLORS.SUBMIT_ICON}
-                  size={APPLICANT_STEP_VIEW_ICON_DIMENSIONS.SUBMIT_ICON_SIZE}
-                  strokeWidth={
-                    APPLICANT_STEP_VIEW_ICON_DIMENSIONS.SUBMIT_ICON_STROKE_WIDTH
-                  }
-                />
-              }
-              label={APPLICANT_STEP_VIEW_COPY.SUBMIT_BUTTON}
-              onPress={vm.onSubmit}
-              testID={APPLICANT_STEP_VIEW_TEST_IDS.SUBMIT_BUTTON}
-              variant='primary'
+          {regime === 'physical' ? (
+            <PhysicalPersonForm
+              disabled={disabled || isSubmitting}
+              errors={physicalErrors}
+              isIdentificationValid={isIdentificationValid}
+              onFieldChange={onPhysicalFieldChange}
+              testID={APPLICANT_STEP_VIEW_TEST_IDS.PHYSICAL_FORM}
+              values={physicalValues}
             />
-          </View>
-        </KeyboardAvoidingView>
+          ) : (
+            <LegalEntityForm
+              disabled={disabled || isSubmitting}
+              errors={legalErrors}
+              isIdentificationValid={isIdentificationValid}
+              onFieldChange={onLegalFieldChange}
+              testID={APPLICANT_STEP_VIEW_TEST_IDS.LEGAL_FORM}
+              values={legalValues}
+            />
+          )}
 
-        {/* 6. Third-Party Final Beneficiary Bottom Sheet Modal */}
-        <FinalBeneficiaryModal
-          errors={vm.thirdPartyErrors}
-          isOpen={vm.isBeneficiaryModalOpen}
-          onClose={vm.closeBeneficiaryModal ?? NOOP_VOID}
-          onFieldChange={vm.onThirdPartyFieldChange ?? NOOP_FIELD_CHANGE}
-          onSave={handleSaveModal}
-          values={
-            vm.thirdPartyValues ?? APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY
-          }
-        />
-      </View>
+          <View
+            className={APPLICANT_STEP_VIEW_STYLES.DIVIDER}
+            testID={APPLICANT_STEP_VIEW_TEST_IDS.DIVIDER}
+          />
+
+          <VehicleBeneficiarySection
+            disabled={disabled || isSubmitting}
+            onSelectBeneficiary={onVehicleBeneficiaryChange}
+            selectedBeneficiary={vehicleBeneficiary}
+            testID={APPLICANT_STEP_VIEW_TEST_IDS.VEHICLE_BENEFICIARY}
+          />
+        </View>
+      </WizardStepLayout>
     );
   },
 );

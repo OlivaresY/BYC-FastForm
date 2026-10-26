@@ -1,12 +1,18 @@
 import React from 'react';
 import {
+  act,
   fireEvent,
   render,
   screen,
   within,
 } from '@testing-library/react-native';
 import type { ReactTestInstance } from 'react-test-renderer';
-import { CUSTOM_SELECT_TEST_IDS, PROCESS_TOP_BAR_TEST_IDS } from '@/shared/ui';
+import {
+  BASE_BUTTON_TEST_IDS,
+  CUSTOM_SELECT_TEST_IDS,
+  ERROR_BANNER_TEST_IDS,
+  PROCESS_TOP_BAR_TEST_IDS,
+} from '@/shared/ui';
 import { ApplicantStepView } from '../components/ApplicantStepView';
 import { APPLICANT_STEP_VIEW_TEST_IDS } from '../constants/ApplicantStepView.constants';
 import { LEGAL_ENTITY_FORM_TEST_IDS } from '../constants/LegalEntityForm.constants';
@@ -168,64 +174,84 @@ export class ApplicantStepViewPageObject {
     return screen.queryByTestId(APPLICANT_STEP_VIEW_TEST_IDS.LEGAL_FORM);
   }
 
+  public get errorBanner(): ReactTestInstance | null {
+    return screen.queryByTestId(ERROR_BANNER_TEST_IDS.CONTAINER);
+  }
+
   // =========================================================================
   // Actions
   // =========================================================================
 
   public selectPhysicalRegime(): this {
-    fireEvent.press(
-      screen.getByTestId(LEGAL_ENTITY_SELECTOR_TEST_IDS.PHYSICAL_CARD),
-    );
+    act(() => {
+      fireEvent.press(
+        screen.getByTestId(LEGAL_ENTITY_SELECTOR_TEST_IDS.PHYSICAL_CARD),
+      );
+    });
     return this;
   }
 
   public selectLegalRegime(): this {
-    fireEvent.press(
-      screen.getByTestId(LEGAL_ENTITY_SELECTOR_TEST_IDS.LEGAL_CARD),
-    );
+    act(() => {
+      fireEvent.press(
+        screen.getByTestId(LEGAL_ENTITY_SELECTOR_TEST_IDS.LEGAL_CARD),
+      );
+    });
     return this;
   }
 
   public selectVehicleBeneficiarySameHolder(): this {
-    fireEvent.press(
-      screen.getByTestId(
-        VEHICLE_BENEFICIARY_SECTION_TEST_IDS.SAME_HOLDER_BUTTON,
-      ),
-    );
+    act(() => {
+      fireEvent.press(
+        screen.getByTestId(
+          VEHICLE_BENEFICIARY_SECTION_TEST_IDS.SAME_HOLDER_BUTTON,
+        ),
+      );
+    });
     return this;
   }
 
   public selectVehicleBeneficiaryThirdParty(): this {
-    fireEvent.press(
-      screen.getByTestId(
-        VEHICLE_BENEFICIARY_SECTION_TEST_IDS.THIRD_PARTY_BUTTON,
-      ),
-    );
+    act(() => {
+      fireEvent.press(
+        screen.getByTestId(
+          VEHICLE_BENEFICIARY_SECTION_TEST_IDS.THIRD_PARTY_BUTTON,
+        ),
+      );
+    });
     return this;
   }
 
   public fillPhysicalField(field: PhysicalTextInputField, text: string): this {
     const inputId = PHYSICAL_TEXT_MAP[field];
     const input = screen.getByTestId(inputId);
-    fireEvent.changeText(input, text);
+    act(() => {
+      fireEvent.changeText(input, text);
+    });
     return this;
   }
 
   public selectPhysicalOption(field: PhysicalSelectField, value: string): this {
     const baseId = PHYSICAL_SELECT_MAP[field];
     const trigger = screen.getByTestId(`${baseId}-trigger`);
-    fireEvent.press(trigger);
+    act(() => {
+      fireEvent.press(trigger);
+    });
     const option = screen.getByTestId(
       `${CUSTOM_SELECT_TEST_IDS.OPTION_ITEM_PREFIX}${value}`,
     );
-    fireEvent.press(option);
+    act(() => {
+      fireEvent.press(option);
+    });
     return this;
   }
 
   public fillLegalField(field: LegalTextInputField, text: string): this {
     const inputId = LEGAL_TEXT_MAP[field];
     const input = screen.getByTestId(inputId);
-    fireEvent.changeText(input, text);
+    act(() => {
+      fireEvent.changeText(input, text);
+    });
     return this;
   }
 
@@ -233,11 +259,15 @@ export class ApplicantStepViewPageObject {
     const trigger = screen.getByTestId(
       `${LEGAL_ENTITY_FORM_TEST_IDS.IDENTIFICATION_TYPE_SELECT}-trigger`,
     );
-    fireEvent.press(trigger);
+    act(() => {
+      fireEvent.press(trigger);
+    });
     const option = screen.getByTestId(
       `${CUSTOM_SELECT_TEST_IDS.OPTION_ITEM_PREFIX}${value}`,
     );
-    fireEvent.press(option);
+    act(() => {
+      fireEvent.press(option);
+    });
     return this;
   }
 
@@ -264,16 +294,20 @@ export class ApplicantStepViewPageObject {
   }
 
   public pressCloseButton(): this {
-    fireEvent.press(
-      within(this.processTopBar).getByTestId(
-        PROCESS_TOP_BAR_TEST_IDS.CLOSE_BUTTON,
-      ),
-    );
+    act(() => {
+      fireEvent.press(
+        within(this.processTopBar).getByTestId(
+          PROCESS_TOP_BAR_TEST_IDS.CLOSE_BUTTON,
+        ),
+      );
+    });
     return this;
   }
 
-  public pressSubmit(): this {
-    fireEvent.press(this.submitButton);
+  public async pressSubmit(): Promise<this> {
+    await act(async () => {
+      fireEvent.press(this.submitButton);
+    });
     return this;
   }
 
@@ -283,6 +317,10 @@ export class ApplicantStepViewPageObject {
 
   public isSubmitButtonDisabled(): boolean {
     return this.submitButton.props.accessibilityState?.disabled === true;
+  }
+
+  public isSubmitButtonLoading(): boolean {
+    return screen.queryByTestId(BASE_BUTTON_TEST_IDS.LOADER) !== null;
   }
 
   public isPhysicalFormVisible(): boolean {

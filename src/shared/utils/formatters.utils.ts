@@ -1,5 +1,9 @@
+export const INTERNATIONAL_PHONE_REGEX =
+  /^(\+?[1-9]\d{0,3}|\([1-9]\d{0,3}\))?\s?[\d\-\s()]{6,16}$/;
+
 export const FORMATTERS_PATTERNS = {
   DATE_SEPARATOR: /[-/]/,
+  INTERNATIONAL_PHONE: INTERNATIONAL_PHONE_REGEX,
   NON_DIGITS: /[^0-9]/g,
   THOUSANDS_SEPARATOR: /\B(?=(\d{3})+(?!\d))/g,
 } as const;
@@ -99,3 +103,18 @@ export const formatDateDisplay = (text: string): string => {
   }
   return result;
 };
+
+export const sanitizeNumericDigits = (text: string): string =>
+  text.replace(/\D/g, '');
+
+export const formatCorporateIdDisplay = (text: string): string => {
+  const digits = sanitizeNumericDigits(text).slice(0, 10);
+  if (digits.length <= 1) {
+    return digits;
+  }
+  if (digits.length <= 4) {
+    return `${digits.slice(0, 1)}-${digits.slice(1)}`;
+  }
+  return `${digits.slice(0, 1)}-${digits.slice(1, 4)}-${digits.slice(4, 10)}`;
+};
+

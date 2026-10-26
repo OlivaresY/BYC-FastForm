@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import {
-  LEGAL_ENTITY_CONTACT_ERRORS,
-  LEGAL_ENTITY_CONTACT_PATTERNS,
-} from '../constants/LegalEntityContact.constants';
 import { isNotFutureDateDDMMYYYY, isValidDateDDMMYYYY } from '@/shared/utils';
+import { LEGAL_ENTITY_CONTACT_PATTERNS } from '../constants/LegalEntityContact.constants';
+import { WIZARD_COPY } from '../constants/WizardCopy.constants';
+
+const LEGAL_ENTITY_CONTACT_ERRORS = WIZARD_COPY.STEP_2_LEGAL_CONTACT.ERRORS;
 
 export const LegalEntityContactSchema = z
   .object({

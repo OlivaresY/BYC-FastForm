@@ -10,3 +10,5 @@ export { PhysicalPersonContactStepView } from './PhysicalPersonContactStepView';
 export { PhysicalPersonForm } from './PhysicalPersonForm';
 export { VehicleBeneficiarySection } from './VehicleBeneficiarySection';
 export { WizardProgressHeader } from './WizardProgressHeader';
+export { WizardStepLayout } from './WizardStepLayout';
+

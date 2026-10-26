@@ -1,3 +1,5 @@
+import { WIZARD_COPY } from './WizardCopy.constants';
+
 export const CLOSE_PROCESS_MODAL_COLORS = {
   BADGE_ICON: '#3A5C45',
   CLOSE_ICON: '#5A6B80',
@@ -5,12 +7,13 @@ export const CLOSE_PROCESS_MODAL_COLORS = {
 } as const;
 
 export const CLOSE_PROCESS_MODAL_COPY = {
-  BACKDROP_ACCESSIBILITY_LABEL: 'Cerrar diálogo tocando el fondo',
-  BODY: '¿Deseas guardar los datos ingresados como borrador para continuar después, o prefieres descartar este trámite?',
-  CLOSE_ACCESSIBILITY_LABEL: 'Cerrar ventana',
-  DISCARD: 'Descartar',
-  SAVE_DRAFT: 'Guardar Borrador',
-  TITLE: 'Cerrar Trámite',
+  BACKDROP_ACCESSIBILITY_LABEL:
+    WIZARD_COPY.CLOSE_MODAL.BACKDROP_ACCESSIBILITY_LABEL,
+  BODY: WIZARD_COPY.CLOSE_MODAL.BODY,
+  CLOSE_ACCESSIBILITY_LABEL: WIZARD_COPY.CLOSE_MODAL.CLOSE_ACCESSIBILITY_LABEL,
+  DISCARD: WIZARD_COPY.CLOSE_MODAL.DISCARD,
+  SAVE_DRAFT: WIZARD_COPY.CLOSE_MODAL.SAVE_DRAFT,
+  TITLE: WIZARD_COPY.CLOSE_MODAL.TITLE,
 } as const;
 
 export const CLOSE_PROCESS_MODAL_ICON_SIZES = {

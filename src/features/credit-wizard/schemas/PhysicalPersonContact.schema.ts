@@ -1,11 +1,14 @@
 import { z } from 'zod';
+import { isNotFutureDateDDMMYYYY, isValidDateDDMMYYYY } from '@/shared/utils';
 import {
   EMPLOYMENT_STATUSES,
   FINANCIAL_CURRENCIES,
-  PHYSICAL_PERSON_CONTACT_ERRORS,
   PHYSICAL_PERSON_CONTACT_PATTERNS,
 } from '../constants/PhysicalPersonContact.constants';
-import { isNotFutureDateDDMMYYYY, isValidDateDDMMYYYY } from '@/shared/utils';
+import { WIZARD_COPY } from '../constants/WizardCopy.constants';
+
+const PHYSICAL_PERSON_CONTACT_ERRORS =
+  WIZARD_COPY.STEP_2_PHYSICAL_CONTACT.ERRORS;
 
 export const INTERNATIONAL_PHONE_REGEX =
   PHYSICAL_PERSON_CONTACT_PATTERNS.INTERNATIONAL_PHONE;

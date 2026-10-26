@@ -97,3 +97,10 @@ export {
   ProcessTopBar,
 } from './ProcessTopBar';
 export type { ProcessTopBarProps } from './ProcessTopBar';
+
+export {
+  SECTION_HEADER_STYLES,
+  SectionHeader,
+} from './SectionHeader';
+export type { SectionHeaderProps } from './SectionHeader';
+
