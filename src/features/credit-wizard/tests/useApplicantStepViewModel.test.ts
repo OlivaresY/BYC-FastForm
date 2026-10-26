@@ -6,7 +6,7 @@ import { ApplicantStepViewModelPageObject } from './useApplicantStepViewModel.po
 
 describe('useApplicantStepViewModel - Identification Normalization', () => {
   describe('Physical Person ID Normalization', () => {
-    it('validates physical identification containing hyphens when digit count meets minimum', () => {
+    it('validates physical identification containing hyphens when digit count meets minimum', async () => {
       const page = ApplicantStepViewModelPageObject.render({
         initialRegime: 'physical',
       });
@@ -14,10 +14,12 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
       // '1-1234-0567' has 9 digits
       page.setPhysicalField('identificationNumber', '1-1234-0567');
 
-      expect(page.isIdentificationValid).toBe(true);
+      await page.waitFor(() => {
+        expect(page.isIdentificationValid).toBe(true);
+      });
     });
 
-    it('validates physical identification containing spaces when digit count meets minimum', () => {
+    it('validates physical identification containing spaces when digit count meets minimum', async () => {
       const page = ApplicantStepViewModelPageObject.render({
         initialRegime: 'physical',
       });
@@ -25,10 +27,12 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
       // '1 1234 0567' has 9 digits
       page.setPhysicalField('identificationNumber', '1 1234 0567');
 
-      expect(page.isIdentificationValid).toBe(true);
+      await page.waitFor(() => {
+        expect(page.isIdentificationValid).toBe(true);
+      });
     });
 
-    it('validates physical identification containing mixed formatting (hyphens and spaces)', () => {
+    it('validates physical identification containing mixed formatting (hyphens and spaces)', async () => {
       const page = ApplicantStepViewModelPageObject.render({
         initialRegime: 'physical',
       });
@@ -36,10 +40,12 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
       // ' 1 - 1234 - 0567 ' has 9 digits
       page.setPhysicalField('identificationNumber', ' 1 - 1234 - 0567 ');
 
-      expect(page.isIdentificationValid).toBe(true);
+      await page.waitFor(() => {
+        expect(page.isIdentificationValid).toBe(true);
+      });
     });
 
-    it('invalidates physical identification when stripped digit count is less than 9', () => {
+    it('invalidates physical identification when stripped digit count is less than 9', async () => {
       const page = ApplicantStepViewModelPageObject.render({
         initialRegime: 'physical',
       });
@@ -47,10 +53,12 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
       // '1-1234-056' has 8 digits
       page.setPhysicalField('identificationNumber', '1-1234-056');
 
-      expect(page.isIdentificationValid).toBe(false);
+      await page.waitFor(() => {
+        expect(page.isIdentificationValid).toBe(false);
+      });
     });
 
-    it('invalidates physical identification with non-digit characters only having few digits', () => {
+    it('invalidates physical identification with non-digit characters only having few digits', async () => {
       const page = ApplicantStepViewModelPageObject.render({
         initialRegime: 'physical',
       });
@@ -58,12 +66,14 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
       // '1-2-3-4-5-6-7-8' has only 8 digits
       page.setPhysicalField('identificationNumber', '1-2-3-4-5-6-7-8');
 
-      expect(page.isIdentificationValid).toBe(false);
+      await page.waitFor(() => {
+        expect(page.isIdentificationValid).toBe(false);
+      });
     });
   });
 
   describe('Legal Entity ID Normalization', () => {
-    it('validates legal entity identification containing hyphens when digit count meets minimum (10 digits)', () => {
+    it('validates legal entity identification containing hyphens when digit count meets minimum (10 digits)', async () => {
       const page = ApplicantStepViewModelPageObject.render({
         initialRegime: 'legal',
       });
@@ -71,10 +81,12 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
       // '3-101-123456' has 10 digits
       page.setLegalField('identificationNumber', '3-101-123456');
 
-      expect(page.isIdentificationValid).toBe(true);
+      await page.waitFor(() => {
+        expect(page.isIdentificationValid).toBe(true);
+      });
     });
 
-    it('validates legal entity identification containing spaces when digit count meets minimum', () => {
+    it('validates legal entity identification containing spaces when digit count meets minimum', async () => {
       const page = ApplicantStepViewModelPageObject.render({
         initialRegime: 'legal',
       });
@@ -82,10 +94,12 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
       // '3 101 123456' has 10 digits
       page.setLegalField('identificationNumber', '3 101 123456');
 
-      expect(page.isIdentificationValid).toBe(true);
+      await page.waitFor(() => {
+        expect(page.isIdentificationValid).toBe(true);
+      });
     });
 
-    it('invalidates legal entity identification when stripped digit count is less than 10', () => {
+    it('invalidates legal entity identification when stripped digit count is less than 10', async () => {
       const page = ApplicantStepViewModelPageObject.render({
         initialRegime: 'legal',
       });
@@ -93,7 +107,9 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
       // '3-101-12345' has 9 digits
       page.setLegalField('identificationNumber', '3-101-12345');
 
-      expect(page.isIdentificationValid).toBe(false);
+      await page.waitFor(() => {
+        expect(page.isIdentificationValid).toBe(false);
+      });
     });
   });
 
@@ -115,17 +131,21 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
       });
     });
 
-    it('opens and closes the beneficiary modal via explicit handlers', () => {
+    it('opens and closes the beneficiary modal via explicit handlers', async () => {
       const page = ApplicantStepViewModelPageObject.render();
 
       page.openBeneficiaryModal();
-      expect(page.isBeneficiaryModalOpen).toBe(true);
+      await page.waitFor(() => {
+        expect(page.isBeneficiaryModalOpen).toBe(true);
+      });
 
       page.closeBeneficiaryModal();
-      expect(page.isBeneficiaryModalOpen).toBe(false);
+      await page.waitFor(() => {
+        expect(page.isBeneficiaryModalOpen).toBe(false);
+      });
     });
 
-    it('updates third-party fields immutably via onThirdPartyFieldChange', () => {
+    it('updates third-party fields immutably via onThirdPartyFieldChange', async () => {
       const page = ApplicantStepViewModelPageObject.render();
 
       page
@@ -136,30 +156,34 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
         .setThirdPartyField('thirdPartyBirthDate', '15-05-1990')
         .setThirdPartyField('thirdPartyNationality', 'Costa Rican');
 
-      expect(page.thirdPartyValues).toEqual({
-        isThirdPartyRegistration: false,
-        thirdPartyBirthDate: '15-05-1990',
-        thirdPartyDocNumber: '2-0345-0678',
-        thirdPartyDocType: 'national_id',
-        thirdPartyEmail: '',
-        thirdPartyFullName: 'María González',
-        thirdPartyNationality: 'Costa Rican',
-        thirdPartyPhone: '',
-        thirdPartyRelationship: 'Spouse',
+      await page.waitFor(() => {
+        expect(page.thirdPartyValues).toEqual({
+          isThirdPartyRegistration: false,
+          thirdPartyBirthDate: '15-05-1990',
+          thirdPartyDocNumber: '2-0345-0678',
+          thirdPartyDocType: 'national_id',
+          thirdPartyEmail: '',
+          thirdPartyFullName: 'María González',
+          thirdPartyNationality: 'Costa Rican',
+          thirdPartyPhone: '',
+          thirdPartyRelationship: 'Spouse',
+        });
       });
     });
 
-    it('automatically opens modal and marks registration when selecting third_party', () => {
+    it('automatically opens modal and marks registration when selecting third_party', async () => {
       const page = ApplicantStepViewModelPageObject.render();
 
       page.setVehicleBeneficiary('third_party');
 
-      expect(page.vehicleBeneficiary).toBe('third_party');
-      expect(page.isBeneficiaryModalOpen).toBe(true);
-      expect(page.thirdPartyValues.isThirdPartyRegistration).toBe(true);
+      await page.waitFor(() => {
+        expect(page.vehicleBeneficiary).toBe('third_party');
+        expect(page.isBeneficiaryModalOpen).toBe(true);
+        expect(page.thirdPartyValues.isThirdPartyRegistration).toBe(true);
+      });
     });
 
-    it('clears/resets thirdPartyValues and closes modal when switching back to same_holder', () => {
+    it('clears/resets thirdPartyValues and closes modal when switching back to same_holder', async () => {
       const page = ApplicantStepViewModelPageObject.render();
 
       // Select third_party and fill values
@@ -168,33 +192,39 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
         .setThirdPartyField('thirdPartyFullName', 'Juan Pérez')
         .setThirdPartyField('thirdPartyDocNumber', '1-2345-6789');
 
-      expect(page.thirdPartyValues.thirdPartyFullName).toBe('Juan Pérez');
+      await page.waitFor(() => {
+        expect(page.thirdPartyValues.thirdPartyFullName).toBe('Juan Pérez');
+      });
 
       // Switch back to same_holder
       page.setVehicleBeneficiary('same_holder');
 
-      expect(page.vehicleBeneficiary).toBe('same_holder');
-      expect(page.isBeneficiaryModalOpen).toBe(false);
-      expect(page.thirdPartyValues).toEqual({
-        isThirdPartyRegistration: false,
-        thirdPartyBirthDate: '',
-        thirdPartyDocNumber: '',
-        thirdPartyDocType: '',
-        thirdPartyEmail: '',
-        thirdPartyFullName: '',
-        thirdPartyNationality: '',
-        thirdPartyPhone: '',
-        thirdPartyRelationship: '',
+      await page.waitFor(() => {
+        expect(page.vehicleBeneficiary).toBe('same_holder');
+        expect(page.isBeneficiaryModalOpen).toBe(false);
+        expect(page.thirdPartyValues).toEqual({
+          isThirdPartyRegistration: false,
+          thirdPartyBirthDate: '',
+          thirdPartyDocNumber: '',
+          thirdPartyDocType: '',
+          thirdPartyEmail: '',
+          thirdPartyFullName: '',
+          thirdPartyNationality: '',
+          thirdPartyPhone: '',
+          thirdPartyRelationship: '',
+        });
       });
     });
 
-    it('rolls back to same_holder and resets values when canceling a new third-party entry without saved snapshot', () => {
+    it('rolls back to same_holder and resets values when canceling a new third-party entry without saved snapshot', async () => {
       const page = ApplicantStepViewModelPageObject.render();
 
       // User selects third_party, modal opens automatically
       page.setVehicleBeneficiary('third_party');
-      expect(page.vehicleBeneficiary).toBe('third_party');
-      expect(page.isBeneficiaryModalOpen).toBe(true);
+      await page.waitFor(() => {
+        expect(page.vehicleBeneficiary).toBe('third_party');
+        expect(page.isBeneficiaryModalOpen).toBe(true);
+      });
 
       // User fills partial uncommitted data
       page.setThirdPartyField('thirdPartyFullName', 'Temp Unsaved Name');
@@ -204,15 +234,17 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
       page.closeBeneficiaryModal();
 
       // Assert rollback to same_holder and cleared values
-      expect(page.isBeneficiaryModalOpen).toBe(false);
-      expect(page.vehicleBeneficiary).toBe('same_holder');
-      expect(page.thirdPartyValues).toEqual(
-        APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
-      );
-      expect(page.thirdPartyErrors).toEqual({});
+      await page.waitFor(() => {
+        expect(page.isBeneficiaryModalOpen).toBe(false);
+        expect(page.vehicleBeneficiary).toBe('same_holder');
+        expect(page.thirdPartyValues).toEqual(
+          APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
+        );
+        expect(page.thirdPartyErrors).toEqual({});
+      });
     });
 
-    it('restores snapshot values and keeps third_party beneficiary when canceling an aborted edit', () => {
+    it('restores snapshot values and keeps third_party beneficiary when canceling an aborted edit', async () => {
       const page = ApplicantStepViewModelPageObject.render();
 
       // User selects third_party
@@ -230,7 +262,7 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
         .setThirdPartyField('thirdPartyEmail', 'carlos@example.com');
 
       // Save valid data -> creates savedThirdPartyValues snapshot
-      const saveSuccess = page.saveThirdPartyData();
+      const saveSuccess = await page.saveThirdPartyData();
       expect(saveSuccess).toBe(true);
       expect(page.isBeneficiaryModalOpen).toBe(false);
       expect(page.vehicleBeneficiary).toBe('third_party');
@@ -251,10 +283,12 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
       // Assert: modal closes, vehicleBeneficiary stays third_party, values restored from snapshot
       expect(page.isBeneficiaryModalOpen).toBe(false);
       expect(page.vehicleBeneficiary).toBe('third_party');
-      expect(page.thirdPartyValues).toEqual(savedSnapshot);
-      expect(page.thirdPartyValues.thirdPartyFullName).toBe('Carlos Mora');
-      expect(page.thirdPartyValues.thirdPartyEmail).toBe('carlos@example.com');
-      expect(page.thirdPartyErrors).toEqual({});
+      await page.waitFor(() => {
+        expect(page.thirdPartyValues).toEqual(savedSnapshot);
+        expect(page.thirdPartyValues.thirdPartyFullName).toBe('Carlos Mora');
+        expect(page.thirdPartyValues.thirdPartyEmail).toBe('carlos@example.com');
+        expect(page.thirdPartyErrors).toEqual({});
+      });
     });
 
     it('includes third-party values in onSubmit payload when third_party is selected and all fields valid', async () => {
@@ -358,10 +392,12 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
 
       page.setThirdPartyField('thirdPartyFullName', 'Elena Castro');
 
-      expect(page.thirdPartyErrors.thirdPartyFullName).toBeUndefined();
+      await page.waitFor(() => {
+        expect(page.thirdPartyErrors.thirdPartyFullName).toBeUndefined();
+      });
     });
 
-    it('sets isValid to false when vehicleBeneficiary is third_party and third-party values are incomplete', () => {
+    it('sets isValid to false when vehicleBeneficiary is third_party and third-party values are incomplete', async () => {
       const page = ApplicantStepViewModelPageObject.render({
         initialPhysicalValues: {
           birthDate: '01-01-1985',
@@ -378,13 +414,17 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
       });
 
       // Initially same_holder and valid applicant
-      expect(page.isValid).toBe(true);
+      await page.waitFor(() => {
+        expect(page.isValid).toBe(true);
+      });
 
       // Select third_party
       page.setVehicleBeneficiary('third_party');
 
       // isValid must become false because third-party data is incomplete
-      expect(page.isValid).toBe(false);
+      await page.waitFor(() => {
+        expect(page.isValid).toBe(false);
+      });
 
       // Fill valid third party data
       page
@@ -398,55 +438,63 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
         .setThirdPartyField('thirdPartyEmail', 'carlos@example.com');
 
       // Now isValid must be true
-      expect(page.isValid).toBe(true);
+      await page.waitFor(() => {
+        expect(page.isValid).toBe(true);
+      });
 
       // If an invalid email is provided, isValid becomes false
       page.setThirdPartyField('thirdPartyEmail', 'not-an-email');
-      expect(page.isValid).toBe(false);
+      await page.waitFor(() => {
+        expect(page.isValid).toBe(false);
+      });
 
       // Switching back to same_holder restores isValid to true
       page.setVehicleBeneficiary('same_holder');
-      expect(page.isValid).toBe(true);
+      await page.waitFor(() => {
+        expect(page.isValid).toBe(true);
+      });
     });
 
-    it('handleSaveThirdPartyData fails validation, sets errors, and keeps modal open when fields are invalid', () => {
+    it('handleSaveThirdPartyData fails validation, sets errors, and keeps modal open when fields are invalid', async () => {
       const page = ApplicantStepViewModelPageObject.render();
 
       page.setVehicleBeneficiary('third_party');
       expect(page.isBeneficiaryModalOpen).toBe(true);
 
       // Attempt to save empty data
-      const success = page.handleSaveThirdPartyData();
+      const success = await page.handleSaveThirdPartyData();
 
       expect(success).toBe(false);
       expect(page.isBeneficiaryModalOpen).toBe(true);
-      expect(page.thirdPartyErrors.thirdPartyDocType).toBe(
-        APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.DOC_TYPE,
-      );
-      expect(page.thirdPartyErrors.thirdPartyDocNumber).toBe(
-        APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.DOC_NUMBER,
-      );
-      expect(page.thirdPartyErrors.thirdPartyFullName).toBe(
-        APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.FULL_NAME,
-      );
-      expect(page.thirdPartyErrors.thirdPartyRelationship).toBe(
-        APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.RELATIONSHIP,
-      );
-      expect(page.thirdPartyErrors.thirdPartyBirthDate).toBe(
-        APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.BIRTH_DATE,
-      );
-      expect(page.thirdPartyErrors.thirdPartyNationality).toBe(
-        APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.NATIONALITY,
-      );
-      expect(page.thirdPartyErrors.thirdPartyPhone).toBe(
-        APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.PHONE,
-      );
-      expect(page.thirdPartyErrors.thirdPartyEmail).toBe(
-        APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL,
-      );
+      await page.waitFor(() => {
+        expect(page.thirdPartyErrors.thirdPartyDocType).toBe(
+          APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.DOC_TYPE,
+        );
+        expect(page.thirdPartyErrors.thirdPartyDocNumber).toBe(
+          APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.DOC_NUMBER,
+        );
+        expect(page.thirdPartyErrors.thirdPartyFullName).toBe(
+          APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.FULL_NAME,
+        );
+        expect(page.thirdPartyErrors.thirdPartyRelationship).toBe(
+          APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.RELATIONSHIP,
+        );
+        expect(page.thirdPartyErrors.thirdPartyBirthDate).toBe(
+          APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.BIRTH_DATE,
+        );
+        expect(page.thirdPartyErrors.thirdPartyNationality).toBe(
+          APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.NATIONALITY,
+        );
+        expect(page.thirdPartyErrors.thirdPartyPhone).toBe(
+          APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.PHONE,
+        );
+        expect(page.thirdPartyErrors.thirdPartyEmail).toBe(
+          APPLICANT_STEP_VIEW_ERRORS.THIRD_PARTY.EMAIL,
+        );
+      });
     });
 
-    it('handleSaveThirdPartyData succeeds, clears errors, and closes modal when all fields are valid', () => {
+    it('handleSaveThirdPartyData succeeds, clears errors, and closes modal when all fields are valid', async () => {
       const page = ApplicantStepViewModelPageObject.render();
 
       page.setVehicleBeneficiary('third_party');
@@ -463,7 +511,7 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
         .setThirdPartyField('thirdPartyPhone', '8888-8888')
         .setThirdPartyField('thirdPartyEmail', 'carlos@example.com');
 
-      const success = page.handleSaveThirdPartyData();
+      const success = await page.handleSaveThirdPartyData();
 
       expect(success).toBe(true);
       expect(page.thirdPartyErrors).toEqual({});
@@ -670,34 +718,42 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
   });
 
   describe('Live validity (isValid)', () => {
-    it('is false for an untouched form and true once the physical form is complete', () => {
+    it('is false for an untouched form and true once the physical form is complete', async () => {
       const page = ApplicantStepViewModelPageObject.render({
         initialRegime: 'physical',
       });
-      expect(page.isValid).toBe(false);
+      await page.waitFor(() => {
+        expect(page.isValid).toBe(false);
+      });
 
       const filled = ApplicantStepViewModelPageObject.render({
         initialPhysicalValues: VALID_PHYSICAL,
         initialRegime: 'physical',
       });
-      expect(filled.isValid).toBe(true);
+      await filled.waitFor(() => {
+        expect(filled.isValid).toBe(true);
+      });
     });
 
-    it('is false when a required physical name is whitespace-only', () => {
+    it('is false when a required physical name is whitespace-only', async () => {
       const page = ApplicantStepViewModelPageObject.render({
         initialPhysicalValues: { ...VALID_PHYSICAL, firstLastName: '  ' },
         initialRegime: 'physical',
       });
 
-      expect(page.isValid).toBe(false);
+      await page.waitFor(() => {
+        expect(page.isValid).toBe(false);
+      });
     });
 
-    it('is true for a complete legal form and false when the ID is short', () => {
+    it('is true for a complete legal form and false when the ID is short', async () => {
       const complete = ApplicantStepViewModelPageObject.render({
         initialLegalValues: VALID_LEGAL,
         initialRegime: 'legal',
       });
-      expect(complete.isValid).toBe(true);
+      await complete.waitFor(() => {
+        expect(complete.isValid).toBe(true);
+      });
 
       const short = ApplicantStepViewModelPageObject.render({
         initialLegalValues: {
@@ -706,16 +762,20 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
         },
         initialRegime: 'legal',
       });
-      expect(short.isValid).toBe(false);
+      await short.waitFor(() => {
+        expect(short.isValid).toBe(false);
+      });
     });
 
-    it('does not require a physical middle name for validity', () => {
+    it('does not require a physical middle name for validity', async () => {
       const page = ApplicantStepViewModelPageObject.render({
         initialPhysicalValues: { ...VALID_PHYSICAL, middleName: '' },
         initialRegime: 'physical',
       });
 
-      expect(page.isValid).toBe(true);
+      await page.waitFor(() => {
+        expect(page.isValid).toBe(true);
+      });
     });
   });
 });

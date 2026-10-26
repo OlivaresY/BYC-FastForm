@@ -151,7 +151,7 @@ export const useApplicantStepViewModel = (
       });
     }
     return fieldErrors;
-  }, [errors.physicalValues]);
+  }, [errors]);
 
   const legalErrors = useMemo<
     Partial<Record<LegalEntityFormField, string>>
@@ -168,7 +168,7 @@ export const useApplicantStepViewModel = (
       });
     }
     return fieldErrors;
-  }, [errors.legalValues]);
+  }, [errors]);
 
   const thirdPartyErrors = useMemo<
     Partial<Record<ThirdPartyBeneficiaryField, string>>
@@ -185,7 +185,7 @@ export const useApplicantStepViewModel = (
       });
     }
     return fieldErrors;
-  }, [errors.thirdPartyValues]);
+  }, [errors]);
 
   const isPhysicalIdentificationValid =
     sanitizeIdentificationNumber(physicalValues.identificationNumber).length >=
@@ -210,7 +210,7 @@ export const useApplicantStepViewModel = (
 
   const closeBeneficiaryModal = useCallback((): void => {
     if (savedThirdPartyValues !== null) {
-      setValue('thirdPartyValues', savedThirdPartyValues, {
+      setValue('thirdPartyValues', { ...savedThirdPartyValues }, {
         shouldDirty: true,
         shouldTouch: true,
         shouldValidate: true,
@@ -240,9 +240,13 @@ export const useApplicantStepViewModel = (
       shouldDirty: true,
       shouldTouch: true,
     });
-    const isThirdPartyValid = await trigger('thirdPartyValues');
+    const isThirdPartyValid = await trigger(
+      THIRD_PARTY_BENEFICIARY_FIELDS.map(
+        (field) => `thirdPartyValues.${field}` as const,
+      ),
+    );
     if (isThirdPartyValid) {
-      setSavedThirdPartyValues(getValues('thirdPartyValues'));
+      setSavedThirdPartyValues({ ...getValues('thirdPartyValues') });
       setIsBeneficiaryModalOpen(false);
       return true;
     }
