@@ -1,12 +1,6 @@
 import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import {
-  ArrowRightIcon,
-  BaseButton,
-  ChevronLeftIcon,
-  ErrorBanner,
-  ProcessTopBar,
-} from '@/shared/ui';
+import { BaseButton, ChevronLeftIcon, ProcessTopBar } from '@/shared/ui';
 import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import {
   WIZARD_STEP_LAYOUT_COLORS,
@@ -30,15 +24,9 @@ export const WizardStepLayout = ({
   description,
   disabled = false,
   extraScrollPadding = WIZARD_STEP_LAYOUT_DIMENSIONS.EXTRA_KEYBOARD_SCROLL_OFFSET,
-  isSubmitDisabled = false,
-  isSubmitting = false,
-  modal,
+  footer,
   onBack,
   onClose,
-  onSubmit,
-  submitButtonIcon,
-  submitButtonLabel = WIZARD_COPY.BUTTONS.NEXT,
-  submitError,
   testID,
   testIds,
   title,
@@ -59,14 +47,6 @@ export const WizardStepLayout = ({
       color={WIZARD_STEP_LAYOUT_COLORS.BACK_ICON}
       size={WIZARD_STEP_LAYOUT_DIMENSIONS.BACK_ICON_SIZE}
       strokeWidth={WIZARD_STEP_LAYOUT_DIMENSIONS.BACK_ICON_STROKE_WIDTH}
-    />
-  );
-
-  const defaultSubmitIcon = (
-    <ArrowRightIcon
-      color={WIZARD_STEP_LAYOUT_COLORS.SUBMIT_ICON}
-      size={WIZARD_STEP_LAYOUT_DIMENSIONS.SUBMIT_ICON_SIZE}
-      strokeWidth={WIZARD_STEP_LAYOUT_DIMENSIONS.SUBMIT_ICON_STROKE_WIDTH}
     />
   );
 
@@ -134,8 +114,6 @@ export const WizardStepLayout = ({
               </Text>
             </View>
 
-            {submitError ? <ErrorBanner message={submitError} /> : null}
-
             {/* 3. Form Content Slot */}
             {resolvedChildren}
           </View>
@@ -153,7 +131,7 @@ export const WizardStepLayout = ({
           {hasBackButton ? (
             <BaseButton
               className={WIZARD_STEP_LAYOUT_STYLES.BACK_BUTTON}
-              disabled={disabled || isSubmitting}
+              disabled={disabled}
               icon={backButtonIcon ?? defaultBackIcon}
               label={backButtonLabel}
               onPress={onBack ?? NOOP_VOID}
@@ -164,27 +142,9 @@ export const WizardStepLayout = ({
             />
           ) : null}
 
-          <BaseButton
-            className={
-              hasBackButton
-                ? WIZARD_STEP_LAYOUT_STYLES.SUBMIT_BUTTON
-                : WIZARD_STEP_LAYOUT_STYLES.SUBMIT_BUTTON_FULL
-            }
-            disabled={isSubmitDisabled || disabled || isSubmitting}
-            fullWidth={!hasBackButton}
-            iconRight={submitButtonIcon ?? defaultSubmitIcon}
-            label={submitButtonLabel}
-            loading={isSubmitting}
-            onPress={onSubmit}
-            testID={
-              testIds?.submitButton ?? WIZARD_STEP_LAYOUT_TEST_IDS.SUBMIT_BUTTON
-            }
-            variant='primary'
-          />
+          {footer}
         </View>
       </View>
-
-      {modal}
     </View>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { View } from 'react-native';
+import { BaseButton, ErrorBanner } from '@/shared/ui';
 import {
   APPLICANT_STEP_VIEW_CONSTANTS,
   APPLICANT_STEP_VIEW_DEFAULT_VALUES,
@@ -63,89 +64,100 @@ export const ApplicantStepView = React.memo(
     }, [handleSaveThirdPartyData]);
 
     return (
-      <WizardStepLayout
-        currentStep={APPLICANT_STEP_VIEW_NUMERICAL.CURRENT_STEP}
-        description={WIZARD_COPY.STEP_1_APPLICANT.DESCRIPTION}
-        disabled={disabled}
-        isSubmitDisabled={!isValid}
-        isSubmitting={isSubmitting}
-        modal={
-          <FinalBeneficiaryModal
-            errors={thirdPartyErrors}
-            isOpen={isBeneficiaryModalOpen}
-            onClose={closeBeneficiaryModal ?? NOOP_VOID}
-            onFieldChange={onThirdPartyFieldChange ?? NOOP_FIELD_CHANGE}
-            onSave={handleSaveModal}
-            values={
-              thirdPartyValues ?? APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY
-            }
-          />
-        }
-        onClose={onClose}
-        onSubmit={(): void => {
-          void handleNextStep?.();
-        }}
-        submitButtonLabel={WIZARD_COPY.STEP_1_APPLICANT.SUBMIT_BUTTON}
-        submitError={submitError ?? null}
-        testID={testID}
-        testIds={{
-          bottomBar: APPLICANT_STEP_VIEW_TEST_IDS.BOTTOM_BAR,
-          container: testID ?? APPLICANT_STEP_VIEW_TEST_IDS.CONTAINER,
-          description: APPLICANT_STEP_VIEW_TEST_IDS.DESCRIPTION,
-          processTopBar: APPLICANT_STEP_VIEW_TEST_IDS.PROCESS_TOP_BAR,
-          scrollView: APPLICANT_STEP_VIEW_TEST_IDS.SCROLL_VIEW,
-          submitButton: APPLICANT_STEP_VIEW_TEST_IDS.SUBMIT_BUTTON,
-          title: APPLICANT_STEP_VIEW_TEST_IDS.TITLE,
-          wizardHeader: APPLICANT_STEP_VIEW_TEST_IDS.WIZARD_HEADER,
-        }}
-        title={WIZARD_COPY.STEP_1_APPLICANT.TITLE}
-        totalSteps={APPLICANT_STEP_VIEW_NUMERICAL.TOTAL_STEPS}
-        userInitials={APPLICANT_STEP_VIEW_CONSTANTS.MOCK_USER_INITIALS}
-      >
-        <LegalEntitySelector
-          disabled={disabled || isSubmitting}
-          onSelectEntity={onRegimeChange}
-          selectedEntity={regime}
-          testID={APPLICANT_STEP_VIEW_TEST_IDS.LEGAL_SELECTOR}
-        />
-
-        <View
-          className={APPLICANT_STEP_VIEW_STYLES.TAUPE_CONTAINER}
-          testID={APPLICANT_STEP_VIEW_TEST_IDS.TAUPE_CONTAINER}
+      <>
+        <WizardStepLayout
+          currentStep={APPLICANT_STEP_VIEW_NUMERICAL.CURRENT_STEP}
+          description={WIZARD_COPY.STEP_1_APPLICANT.DESCRIPTION}
+          disabled={disabled}
+          footer={
+            <BaseButton
+              disabled={!isValid || disabled || isSubmitting}
+              fullWidth
+              label={WIZARD_COPY.STEP_1_APPLICANT.SUBMIT_BUTTON}
+              loading={isSubmitting}
+              onPress={(): void => {
+                void handleNextStep?.();
+              }}
+              testID={APPLICANT_STEP_VIEW_TEST_IDS.SUBMIT_BUTTON}
+              variant='primary'
+            />
+          }
+          onClose={onClose}
+          testID={testID}
+          testIds={{
+            bottomBar: APPLICANT_STEP_VIEW_TEST_IDS.BOTTOM_BAR,
+            container: testID ?? APPLICANT_STEP_VIEW_TEST_IDS.CONTAINER,
+            description: APPLICANT_STEP_VIEW_TEST_IDS.DESCRIPTION,
+            processTopBar: APPLICANT_STEP_VIEW_TEST_IDS.PROCESS_TOP_BAR,
+            scrollView: APPLICANT_STEP_VIEW_TEST_IDS.SCROLL_VIEW,
+            submitButton: APPLICANT_STEP_VIEW_TEST_IDS.SUBMIT_BUTTON,
+            title: APPLICANT_STEP_VIEW_TEST_IDS.TITLE,
+            wizardHeader: APPLICANT_STEP_VIEW_TEST_IDS.WIZARD_HEADER,
+          }}
+          title={WIZARD_COPY.STEP_1_APPLICANT.TITLE}
+          totalSteps={APPLICANT_STEP_VIEW_NUMERICAL.TOTAL_STEPS}
+          userInitials={APPLICANT_STEP_VIEW_CONSTANTS.MOCK_USER_INITIALS}
         >
-          {regime === 'physical' ? (
-            <PhysicalPersonForm
-              disabled={disabled || isSubmitting}
-              errors={physicalErrors}
-              isIdentificationValid={isIdentificationValid}
-              onFieldChange={onPhysicalFieldChange}
-              testID={APPLICANT_STEP_VIEW_TEST_IDS.PHYSICAL_FORM}
-              values={physicalValues}
-            />
-          ) : (
-            <LegalEntityForm
-              disabled={disabled || isSubmitting}
-              errors={legalErrors}
-              isIdentificationValid={isIdentificationValid}
-              onFieldChange={onLegalFieldChange}
-              testID={APPLICANT_STEP_VIEW_TEST_IDS.LEGAL_FORM}
-              values={legalValues}
-            />
-          )}
+          {submitError ? (
+            <ErrorBanner error={submitError} message={submitError} />
+          ) : null}
+
+          <LegalEntitySelector
+            disabled={disabled || isSubmitting}
+            onSelectEntity={onRegimeChange}
+            selectedEntity={regime}
+            testID={APPLICANT_STEP_VIEW_TEST_IDS.LEGAL_SELECTOR}
+          />
 
           <View
-            className={APPLICANT_STEP_VIEW_STYLES.DIVIDER}
-            testID={APPLICANT_STEP_VIEW_TEST_IDS.DIVIDER}
-          />
+            className={APPLICANT_STEP_VIEW_STYLES.TAUPE_CONTAINER}
+            testID={APPLICANT_STEP_VIEW_TEST_IDS.TAUPE_CONTAINER}
+          >
+            {regime === 'physical' ? (
+              <PhysicalPersonForm
+                disabled={disabled || isSubmitting}
+                errors={physicalErrors}
+                isIdentificationValid={isIdentificationValid}
+                onFieldChange={onPhysicalFieldChange}
+                testID={APPLICANT_STEP_VIEW_TEST_IDS.PHYSICAL_FORM}
+                values={physicalValues}
+              />
+            ) : (
+              <LegalEntityForm
+                disabled={disabled || isSubmitting}
+                errors={legalErrors}
+                isIdentificationValid={isIdentificationValid}
+                onFieldChange={onLegalFieldChange}
+                testID={APPLICANT_STEP_VIEW_TEST_IDS.LEGAL_FORM}
+                values={legalValues}
+              />
+            )}
 
-          <VehicleBeneficiarySection
-            disabled={disabled || isSubmitting}
-            onSelectBeneficiary={onVehicleBeneficiaryChange}
-            selectedBeneficiary={vehicleBeneficiary}
-            testID={APPLICANT_STEP_VIEW_TEST_IDS.VEHICLE_BENEFICIARY}
-          />
-        </View>
-      </WizardStepLayout>
+            <View
+              className={APPLICANT_STEP_VIEW_STYLES.DIVIDER}
+              testID={APPLICANT_STEP_VIEW_TEST_IDS.DIVIDER}
+            />
+
+            <VehicleBeneficiarySection
+              disabled={disabled || isSubmitting}
+              onSelectBeneficiary={onVehicleBeneficiaryChange}
+              selectedBeneficiary={vehicleBeneficiary}
+              testID={APPLICANT_STEP_VIEW_TEST_IDS.VEHICLE_BENEFICIARY}
+            />
+          </View>
+        </WizardStepLayout>
+
+        <FinalBeneficiaryModal
+          errors={thirdPartyErrors}
+          isOpen={isBeneficiaryModalOpen}
+          onClose={closeBeneficiaryModal ?? NOOP_VOID}
+          onFieldChange={onThirdPartyFieldChange ?? NOOP_FIELD_CHANGE}
+          onSave={handleSaveModal}
+          values={
+            thirdPartyValues ?? APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY
+          }
+        />
+      </>
     );
   },
 );

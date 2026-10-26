@@ -1,4 +1,3 @@
-import { waitFor } from '@testing-library/react-native';
 import { APPLICANT_STEP_VIEW_DEFAULT_VALUES } from '../constants/ApplicantStepView.constants';
 import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import type { UseApplicantStepViewModelReturn } from '../types/ApplicantStepView.types';
@@ -139,11 +138,15 @@ describe('ApplicantStepView Integration', () => {
 
       // Fill physical form to make it valid
       page.fillAllPhysicalFieldsValid();
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(false),
+      );
 
       // Act - Select third party
       page.selectVehicleBeneficiaryThirdParty();
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(false),
+      );
       await page.pressSubmit();
 
       // Assert - Submitted with third_party
@@ -156,7 +159,9 @@ describe('ApplicantStepView Integration', () => {
 
       // Act - Select same holder
       page.selectVehicleBeneficiarySameHolder();
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(false),
+      );
       await page.pressSubmit();
 
       // Assert - Submitted with same_holder
@@ -181,15 +186,21 @@ describe('ApplicantStepView Integration', () => {
 
       // Fill all 9 mandatory fields
       page.fillAllPhysicalFieldsValid();
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(false),
+      );
 
       // Clear a mandatory field
       page.fillPhysicalField('firstName', '');
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(true));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(true),
+      );
 
       // Restore mandatory field
       page.fillPhysicalField('firstName', 'Carlos');
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(false),
+      );
     });
 
     it('submits correct PhysicalApplicantStepData discriminated union payload', async () => {
@@ -201,7 +212,9 @@ describe('ApplicantStepView Integration', () => {
 
       // Act
       page.fillAllPhysicalFieldsValid();
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(false),
+      );
       await page.pressSubmit();
 
       // Assert
@@ -227,19 +240,27 @@ describe('ApplicantStepView Integration', () => {
       // Arrange
       const page = ApplicantStepViewPageObject.render();
       page.fillAllPhysicalFieldsValid();
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(false),
+      );
 
       // Act & Assert - space-separated
       page.fillPhysicalField('identificationNumber', '1 1234 0567');
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(false),
+      );
 
       // Act & Assert - hyphen-separated
       page.fillPhysicalField('identificationNumber', '1-1234-0567');
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(false),
+      );
 
       // Act & Assert - too few digits despite formatting
       page.fillPhysicalField('identificationNumber', '1-1234-056');
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(true));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(true),
+      );
     });
   });
 
@@ -256,15 +277,21 @@ describe('ApplicantStepView Integration', () => {
 
       // Fill all 5 mandatory fields
       page.fillAllLegalFieldsValid();
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(false),
+      );
 
       // Clear a mandatory field
       page.fillLegalField('legalName', '');
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(true));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(true),
+      );
 
       // Restore mandatory field
       page.fillLegalField('legalName', 'Inversiones Tecnológicas S.A.');
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(false),
+      );
     });
 
     it('submits correct LegalApplicantStepData discriminated union payload', async () => {
@@ -277,7 +304,9 @@ describe('ApplicantStepView Integration', () => {
       // Act
       page.selectLegalRegime();
       page.fillAllLegalFieldsValid();
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(false),
+      );
       await page.pressSubmit();
 
       // Assert
@@ -300,19 +329,27 @@ describe('ApplicantStepView Integration', () => {
       const page = ApplicantStepViewPageObject.render();
       page.selectLegalRegime();
       page.fillAllLegalFieldsValid();
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(false),
+      );
 
       // Act & Assert - space-separated
       page.fillLegalField('identificationNumber', '3 101 123456');
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(false),
+      );
 
       // Act & Assert - hyphen-separated
       page.fillLegalField('identificationNumber', '3-101-123456');
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(false));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(false),
+      );
 
       // Act & Assert - too few digits despite formatting
       page.fillLegalField('identificationNumber', '3-101-12345');
-      await waitFor(() => expect(page.isSubmitButtonDisabled()).toBe(true));
+      await page.waitFor(() =>
+        expect(page.isSubmitButtonDisabled()).toBe(true),
+      );
     });
   });
 
@@ -402,6 +439,18 @@ describe('ApplicantStepView Integration', () => {
       // Assert
       expect(page.isSubmitButtonLoading()).toBe(true);
       expect(page.isSubmitButtonDisabled()).toBe(true);
+    });
+
+    it('renders FinalBeneficiaryModal as a sibling when isBeneficiaryModalOpen is true', () => {
+      // Arrange
+      const page = ApplicantStepViewPageObject.renderDirect({
+        viewModel: createMockViewModel({
+          isBeneficiaryModalOpen: true,
+        }),
+      });
+
+      // Assert
+      expect(page.beneficiaryModal).toBeTruthy();
     });
   });
 });

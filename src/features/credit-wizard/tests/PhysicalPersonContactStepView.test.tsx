@@ -276,8 +276,53 @@ describe('PhysicalPersonContactStepView Integration', () => {
       });
 
       // Assert - ScrollView's paddingBottom accommodates keyboard and view is reactive
-      expect(page.scrollView.props.contentContainerStyle.paddingBottom).toBeGreaterThanOrEqual(320);
+      expect(
+        page.scrollView.props.contentContainerStyle.paddingBottom,
+      ).toBeGreaterThanOrEqual(320);
       expect(page.netIncomeInput).toBeTruthy();
+    });
+  });
+
+  describe('Async Execution & Error State Handling', () => {
+    it('renders ErrorBanner inside layout children when submit fails', async () => {
+      // Arrange
+      const handleSubmit = jest
+        .fn()
+        .mockRejectedValue(new Error('Submission error'));
+      const page = PhysicalPersonContactStepViewPageObject.render({
+        onSubmit: handleSubmit,
+      });
+
+      // Act
+      page.fillAllValidData({
+        canton: 'Central',
+        cellPhone: '+506 8888-8888',
+        currency: 'CRC',
+        district: 'Carmen',
+        email: 'carlos.rodriguez@byc.cr',
+        employer: 'CoriMotors S.A.',
+        employmentStatus: 'salaried_private',
+        entryDate: '15-05-2019',
+        exactAddress: '100 metros norte del Parque Central, Casa #123',
+        grossIncome: 2500000,
+        homePhone: '+506 2222-2222',
+        netIncome: 2000000,
+        officePhone: '+506 2200-0000',
+        otherIncomes: 500000,
+        profession: 'Ingeniero de Software',
+        province: 'San José',
+      });
+
+      await page.waitFor(() => {
+        expect(page.isSubmitButtonDisabled()).toBe(false);
+      });
+
+      page.clickSubmit();
+
+      // Assert
+      await page.waitFor(() => {
+        expect(page.errorBanner).toBeTruthy();
+      });
     });
   });
 });

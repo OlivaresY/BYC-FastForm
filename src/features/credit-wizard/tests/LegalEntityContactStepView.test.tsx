@@ -150,4 +150,32 @@ describe('LegalEntityContactStepView Integration', () => {
       expect(handleClose).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('Async Execution & Error State Handling', () => {
+    it('renders ErrorBanner inside layout children when submit fails', async () => {
+      // Arrange
+      const handleSubmit = jest
+        .fn()
+        .mockRejectedValue(new Error('Submission error'));
+      const page = LegalEntityContactStepViewPageObject.render({
+        onSubmit: handleSubmit,
+      });
+
+      // Act
+      page.fillValidForm();
+
+      await page.waitFor(() => {
+        expect(page.submitButton.props.accessibilityState?.disabled).toBe(
+          false,
+        );
+      });
+
+      page.pressSubmit();
+
+      // Assert
+      await page.waitFor(() => {
+        expect(page.errorBanner).toBeTruthy();
+      });
+    });
+  });
 });

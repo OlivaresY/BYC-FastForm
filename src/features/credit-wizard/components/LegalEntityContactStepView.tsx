@@ -1,7 +1,6 @@
 import React from 'react';
-import {
-  LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS
-} from '../constants/LegalEntityContactStepView.constants';
+import { BaseButton, ErrorBanner } from '@/shared/ui';
+import { LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS } from '../constants/LegalEntityContactStepView.constants';
 import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import { useLegalEntityContactViewModel } from '../hooks/useLegalEntityContactViewModel';
 import type { LegalEntityContactStepViewProps } from '../types/LegalEntityContactStepView.types';
@@ -19,21 +18,29 @@ export const LegalEntityContactStepView = ({
 }: LegalEntityContactStepViewProps): React.JSX.Element => {
   const defaultViewModel = useLegalEntityContactViewModel({ onSubmit });
   const viewModel = viewModelProp ?? defaultViewModel;
-  const { control, handleNextStep, isSubmitting, isValid, submitError } = viewModel;
+  const { control, handleNextStep, isSubmitting, isValid, submitError } =
+    viewModel;
 
   return (
     <WizardStepLayout
       currentStep={currentStep}
       description={WIZARD_COPY.STEP_2_LEGAL_CONTACT.DESCRIPTION}
       disabled={disabled}
-      isSubmitDisabled={!isValid}
-      isSubmitting={isSubmitting}
+      footer={
+        <BaseButton
+          className='flex-1'
+          disabled={!isValid || disabled || isSubmitting}
+          label={WIZARD_COPY.BUTTONS.NEXT}
+          loading={isSubmitting}
+          onPress={(): void => {
+            void handleNextStep();
+          }}
+          testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.SUBMIT_BUTTON}
+          variant='primary'
+        />
+      }
       onBack={onClose}
       onClose={onClose}
-      onSubmit={(): void => {
-        void handleNextStep();
-      }}
-      submitError={submitError}
       testID={testID}
       testIds={{
         backButton: LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.BACK_BUTTON,
@@ -50,12 +57,17 @@ export const LegalEntityContactStepView = ({
       totalSteps={totalSteps}
     >
       {({ onInputFocus }) => (
-        <LegalEntityContactForm
-          control={control}
-          disabled={disabled || isSubmitting}
-          onInputFocus={onInputFocus}
-          testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.FORM}
-        />
+        <>
+          {submitError ? (
+            <ErrorBanner error={submitError} message={submitError} />
+          ) : null}
+          <LegalEntityContactForm
+            control={control}
+            disabled={disabled || isSubmitting}
+            onInputFocus={onInputFocus}
+            testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.FORM}
+          />
+        </>
       )}
     </WizardStepLayout>
   );

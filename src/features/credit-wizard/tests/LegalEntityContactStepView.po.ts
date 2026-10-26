@@ -6,13 +6,16 @@ import {
   waitFor,
 } from '@testing-library/react-native';
 import type { ReactTestInstance } from 'react-test-renderer';
-import { PROCESS_TOP_BAR_TEST_IDS } from '@/shared/ui';
+import { ERROR_BANNER_TEST_IDS, PROCESS_TOP_BAR_TEST_IDS } from '@/shared/ui';
 import { LegalEntityContactStepView } from '../components/LegalEntityContactStepView';
 import { LEGAL_ENTITY_CONTACT_FORM_TEST_IDS } from '../constants/LegalEntityContactForm.constants';
 import { LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS } from '../constants/LegalEntityContactStepView.constants';
 import { useLegalEntityContactViewModel } from '../hooks/useLegalEntityContactViewModel';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
-import type { UseLegalEntityContactViewModelProps } from '../types/LegalEntityContact.types';
+import type {
+  UseLegalEntityContactViewModelProps,
+  UseLegalEntityContactViewModelReturn,
+} from '../types/LegalEntityContact.types';
 
 export interface LegalEntityContactStepViewTestContainerProps extends UseLegalEntityContactViewModelProps {
   currentStep?: number;
@@ -20,6 +23,7 @@ export interface LegalEntityContactStepViewTestContainerProps extends UseLegalEn
   onClose?: () => void;
   testID?: string;
   totalSteps?: number;
+  viewModel?: UseLegalEntityContactViewModelReturn;
 }
 
 const LegalEntityContactStepViewTestContainer = ({
@@ -28,9 +32,11 @@ const LegalEntityContactStepViewTestContainer = ({
   onClose = jest.fn(),
   testID,
   totalSteps = 4,
+  viewModel: viewModelProp,
   ...hookProps
 }: LegalEntityContactStepViewTestContainerProps): React.JSX.Element => {
-  const viewModel = useLegalEntityContactViewModel(hookProps);
+  const defaultViewModel = useLegalEntityContactViewModel(hookProps);
+  const viewModel = viewModelProp ?? defaultViewModel;
   return React.createElement(
     SafeAreaInsetsContext.Provider,
     { value: { bottom: 0, left: 0, right: 0, top: 0 } },
@@ -121,6 +127,10 @@ export class LegalEntityContactStepViewPageObject {
     return screen.getByTestId(
       LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.SUBMIT_BUTTON,
     );
+  }
+
+  public get errorBanner(): ReactTestInstance | null {
+    return screen.queryByTestId(ERROR_BANNER_TEST_IDS.CONTAINER);
   }
 
   // --- Section 1: INFORMACIÓN CORPORATIVA ---

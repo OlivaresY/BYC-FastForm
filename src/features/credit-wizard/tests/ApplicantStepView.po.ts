@@ -4,6 +4,7 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   within,
 } from '@testing-library/react-native';
 import type { ReactTestInstance } from 'react-test-renderer';
@@ -14,7 +15,10 @@ import {
   PROCESS_TOP_BAR_TEST_IDS,
 } from '@/shared/ui';
 import { ApplicantStepView } from '../components/ApplicantStepView';
-import { APPLICANT_STEP_VIEW_TEST_IDS } from '../constants/ApplicantStepView.constants';
+import {
+  APPLICANT_STEP_VIEW_TEST_IDS,
+  BENEFICIARY_MODAL_TEST_IDS,
+} from '../constants/ApplicantStepView.constants';
 import { LEGAL_ENTITY_FORM_TEST_IDS } from '../constants/LegalEntityForm.constants';
 import { LEGAL_ENTITY_SELECTOR_TEST_IDS } from '../constants/LegalEntitySelector.constants';
 import { PHYSICAL_PERSON_FORM_TEST_IDS } from '../constants/PhysicalPersonForm.constants';
@@ -178,6 +182,14 @@ export class ApplicantStepViewPageObject {
     return screen.queryByTestId(ERROR_BANNER_TEST_IDS.CONTAINER);
   }
 
+  public get beneficiaryModal(): ReactTestInstance | null {
+    return screen.queryByTestId(BENEFICIARY_MODAL_TEST_IDS.MODAL_CONTAINER);
+  }
+
+  public get isBeneficiaryModalOpen(): boolean {
+    return this.beneficiaryModal !== null;
+  }
+
   // =========================================================================
   // Actions
   // =========================================================================
@@ -311,9 +323,16 @@ export class ApplicantStepViewPageObject {
     return this;
   }
 
-  // =========================================================================
-  // State Query Helpers
-  // =========================================================================
+  public async waitFor(
+    callback: () => void | Promise<void>,
+    options?: { interval?: number; timeout?: number },
+  ): Promise<this> {
+    await waitFor(callback, {
+      interval: options?.interval ?? 50,
+      timeout: options?.timeout ?? 10000,
+    });
+    return this;
+  }
 
   public isSubmitButtonDisabled(): boolean {
     return this.submitButton.props.accessibilityState?.disabled === true;
