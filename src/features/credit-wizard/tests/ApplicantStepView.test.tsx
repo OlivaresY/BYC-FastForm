@@ -1,6 +1,36 @@
 import { APPLICANT_STEP_VIEW_DEFAULT_VALUES } from '../constants/ApplicantStepView.constants';
 import { WIZARD_COPY } from '../constants/WizardCopy.constants';
+import type { UseApplicantStepViewModelReturn } from '../types/ApplicantStepView.types';
 import { ApplicantStepViewPageObject } from './ApplicantStepView.po';
+
+const createMockViewModel = (
+  overrides: Partial<UseApplicantStepViewModelReturn> = {},
+): UseApplicantStepViewModelReturn => ({
+  closeBeneficiaryModal: jest.fn(),
+  handleNextStep: jest.fn().mockResolvedValue(undefined),
+  handleSaveThirdPartyData: jest.fn().mockReturnValue(true),
+  isBeneficiaryModalOpen: false,
+  isIdentificationValid: true,
+  isSubmitting: false,
+  isValid: true,
+  legalErrors: {},
+  legalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
+  onLegalFieldChange: jest.fn(),
+  onPhysicalFieldChange: jest.fn(),
+  onRegimeChange: jest.fn(),
+  onSubmit: jest.fn(),
+  onThirdPartyFieldChange: jest.fn(),
+  onVehicleBeneficiaryChange: jest.fn(),
+  openBeneficiaryModal: jest.fn(),
+  physicalErrors: {},
+  physicalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.PHYSICAL,
+  regime: 'physical',
+  submitError: null,
+  thirdPartyErrors: {},
+  thirdPartyValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
+  vehicleBeneficiary: 'same_holder',
+  ...overrides,
+});
 
 describe('ApplicantStepView Integration', () => {
   jest.setTimeout(20000);
@@ -285,28 +315,7 @@ describe('ApplicantStepView Integration', () => {
       const page = ApplicantStepViewPageObject.renderDirect({
         disabled: true,
         testID: 'custom-applicant-step-view',
-        viewModel: {
-          closeBeneficiaryModal: jest.fn(),
-          handleSaveThirdPartyData: jest.fn().mockReturnValue(true),
-          isBeneficiaryModalOpen: false,
-          isIdentificationValid: true,
-          isValid: true,
-          legalErrors: {},
-          legalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
-          onLegalFieldChange: jest.fn(),
-          onPhysicalFieldChange: jest.fn(),
-          onRegimeChange: jest.fn(),
-          onSubmit: jest.fn(),
-          onThirdPartyFieldChange: jest.fn(),
-          onVehicleBeneficiaryChange: jest.fn(),
-          openBeneficiaryModal: jest.fn(),
-          physicalErrors: {},
-          physicalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.PHYSICAL,
-          regime: 'physical',
-          thirdPartyErrors: {},
-          thirdPartyValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
-          vehicleBeneficiary: 'same_holder',
-        },
+        viewModel: createMockViewModel(),
       });
 
       // Assert
@@ -365,16 +374,9 @@ describe('ApplicantStepView Integration', () => {
     it('renders ErrorBanner when submitError exists', () => {
       // Arrange
       const page = ApplicantStepViewPageObject.renderDirect({
-        legalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
-        onLegalFieldChange: jest.fn(),
-        onPhysicalFieldChange: jest.fn(),
-        onRegimeChange: jest.fn(),
-        onSubmit: jest.fn(),
-        onVehicleBeneficiaryChange: jest.fn(),
-        physicalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.PHYSICAL,
-        regime: 'physical',
-        submitError: 'Error al enviar la solicitud',
-        vehicleBeneficiary: 'same_holder',
+        viewModel: createMockViewModel({
+          submitError: 'Error al enviar la solicitud',
+        }),
       });
 
       // Assert
@@ -384,17 +386,10 @@ describe('ApplicantStepView Integration', () => {
     it('sets submit button loading prop when isSubmitting is true', () => {
       // Arrange
       const page = ApplicantStepViewPageObject.renderDirect({
-        isSubmitting: true,
-        isValid: true,
-        legalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
-        onLegalFieldChange: jest.fn(),
-        onPhysicalFieldChange: jest.fn(),
-        onRegimeChange: jest.fn(),
-        onSubmit: jest.fn(),
-        onVehicleBeneficiaryChange: jest.fn(),
-        physicalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.PHYSICAL,
-        regime: 'physical',
-        vehicleBeneficiary: 'same_holder',
+        viewModel: createMockViewModel({
+          isSubmitting: true,
+          isValid: true,
+        }),
       });
 
       // Assert
