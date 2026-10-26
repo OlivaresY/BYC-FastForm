@@ -254,15 +254,15 @@ export class ApplicantStepViewModelPageObject {
     return this.submit();
   }
 
-  public saveThirdPartyData(): boolean {
-    let result = false;
+  public saveThirdPartyData(): boolean | Promise<boolean> {
+    let result: boolean | Promise<boolean> = false;
     act(() => {
       result = this.current.handleSaveThirdPartyData();
     });
     return result;
   }
 
-  public handleSaveThirdPartyData(): boolean {
+  public handleSaveThirdPartyData(): boolean | Promise<boolean> {
     return this.saveThirdPartyData();
   }
 }

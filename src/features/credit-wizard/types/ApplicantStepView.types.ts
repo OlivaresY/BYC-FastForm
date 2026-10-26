@@ -102,8 +102,8 @@ export interface UseApplicantStepViewModelReturn {
 
   // Handlers
   closeBeneficiaryModal: () => void;
-  handleNextStep: (dataOrEvent?: unknown) => Promise<void>;
-  handleSaveThirdPartyData: () => boolean;
+  handleNextStep: (e?: any) => Promise<void>;
+  handleSaveThirdPartyData: () => boolean | Promise<boolean>;
   onLegalFieldChange: <K extends LegalEntityFormField>(
     field: K,
     value: LegalEntityFormValues[K],
