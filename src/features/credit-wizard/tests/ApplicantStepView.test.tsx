@@ -1,7 +1,5 @@
-import {
-  APPLICANT_STEP_VIEW_COPY,
-  APPLICANT_STEP_VIEW_DEFAULT_VALUES,
-} from '../constants/ApplicantStepView.constants';
+import { APPLICANT_STEP_VIEW_DEFAULT_VALUES } from '../constants/ApplicantStepView.constants';
+import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import { ApplicantStepViewPageObject } from './ApplicantStepView.po';
 
 describe('ApplicantStepView Integration', () => {
@@ -17,9 +15,9 @@ describe('ApplicantStepView Integration', () => {
       expect(page.processTopBar).toBeTruthy();
       expect(page.scrollView).toBeTruthy();
       expect(page.wizardHeader).toBeTruthy();
-      expect(page.title.props.children).toBe(APPLICANT_STEP_VIEW_COPY.TITLE);
+      expect(page.title.props.children).toBe(WIZARD_COPY.STEP_1_APPLICANT.TITLE);
       expect(page.description.props.children).toBe(
-        APPLICANT_STEP_VIEW_COPY.DESCRIPTION,
+        WIZARD_COPY.STEP_1_APPLICANT.DESCRIPTION,
       );
       expect(page.legalSelector).toBeTruthy();
       expect(page.taupeContainer).toBeTruthy();

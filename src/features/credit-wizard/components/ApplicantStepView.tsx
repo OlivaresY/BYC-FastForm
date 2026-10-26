@@ -85,7 +85,7 @@ export const ApplicantStepView = React.memo(
         onSubmit={(): void => {
           void handleNextStep?.();
         }}
-        submitButtonLabel={APPLICANT_STEP_VIEW_COPY.SUBMIT_BUTTON}
+        submitButtonLabel={WIZARD_COPY.STEP_1_APPLICANT.SUBMIT_BUTTON}
         submitError={submitError ?? null}
         testID={testID}
         testIds={{
