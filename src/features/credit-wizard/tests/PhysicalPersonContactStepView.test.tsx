@@ -108,7 +108,9 @@ describe('PhysicalPersonContactStepView Integration', () => {
       const page = PhysicalPersonContactStepViewPageObject.render();
 
       // Act - Enter invalid phone number
-      page.setCellPhone('1234');
+      await page.act(async () => {
+        page.setCellPhone('1234');
+      });
 
       // Assert - Error should appear
       await page.waitFor(() => {
@@ -116,7 +118,9 @@ describe('PhysicalPersonContactStepView Integration', () => {
       });
 
       // Act - Enter valid international phone number with parentheses
-      page.setCellPhone('+1 (555) 123-4567');
+      await page.act(async () => {
+        page.setCellPhone('+1 (555) 123-4567');
+      });
 
       // Assert - Error should clear
       await page.waitFor(() => {
@@ -129,7 +133,9 @@ describe('PhysicalPersonContactStepView Integration', () => {
       const page = PhysicalPersonContactStepViewPageObject.render();
 
       // Act - Enter invalid office phone
-      page.setOfficePhone('invalid-phone');
+      await page.act(async () => {
+        page.setOfficePhone('invalid-phone');
+      });
 
       // Assert - Error should appear
       await page.waitFor(() => {
@@ -137,7 +143,9 @@ describe('PhysicalPersonContactStepView Integration', () => {
       });
 
       // Act - Enter valid international office phone
-      page.setOfficePhone('+506 2200-0000');
+      await page.act(async () => {
+        page.setOfficePhone('+506 2200-0000');
+      });
 
       // Assert - Error should clear
       await page.waitFor(() => {
@@ -150,7 +158,9 @@ describe('PhysicalPersonContactStepView Integration', () => {
       const page = PhysicalPersonContactStepViewPageObject.render();
 
       // Act - Enter invalid calendar date
-      page.setEntryDate('32-05-2019');
+      await page.act(async () => {
+        page.setEntryDate('32-05-2019');
+      });
 
       // Assert - Error should appear
       await page.waitFor(() => {
@@ -158,7 +168,9 @@ describe('PhysicalPersonContactStepView Integration', () => {
       });
 
       // Act - Enter future date
-      page.setEntryDate('15-05-2099');
+      await page.act(async () => {
+        page.setEntryDate('15-05-2099');
+      });
 
       // Assert - Error should still appear
       await page.waitFor(() => {
@@ -166,7 +178,9 @@ describe('PhysicalPersonContactStepView Integration', () => {
       });
 
       // Act - Enter strict valid past DD-MM-YYYY date
-      page.setEntryDate('15-05-2019');
+      await page.act(async () => {
+        page.setEntryDate('15-05-2019');
+      });
 
       // Assert - Error should clear
       await page.waitFor(() => {
