@@ -1,5 +1,4 @@
 import React from 'react';
-import { BaseButton, ErrorBanner } from '@/shared/ui';
 import { PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS } from '../constants/PhysicalPersonContactStepView.constants';
 import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import { usePhysicalPersonContactViewModel } from '../hooks/usePhysicalPersonContactViewModel';
@@ -27,21 +26,15 @@ export const PhysicalPersonContactStepView = ({
       currentStep={currentStep}
       description={WIZARD_COPY.STEP_2_PHYSICAL_CONTACT.DESCRIPTION}
       disabled={disabled}
-      footer={
-        <BaseButton
-          className='flex-1'
-          disabled={!isValid || disabled || isSubmitting}
-          label={WIZARD_COPY.BUTTONS.NEXT}
-          loading={isSubmitting}
-          onPress={(): void => {
-            void handleNextStep();
-          }}
-          testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.SUBMIT_BUTTON}
-          variant='primary'
-        />
-      }
+      isSubmitDisabled={!isValid}
+      isSubmitting={isSubmitting}
       onBack={onClose}
       onClose={onClose}
+      onNext={(): void => {
+        void handleNextStep();
+      }}
+      submitButtonLabel={WIZARD_COPY.BUTTONS.NEXT}
+      submitError={submitError}
       testID={testID}
       testIds={{
         backButton: PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.BACK_BUTTON,
@@ -60,18 +53,13 @@ export const PhysicalPersonContactStepView = ({
       totalSteps={totalSteps}
     >
       {({ onInputFocus }) => (
-        <>
-          {submitError ? (
-            <ErrorBanner error={submitError} message={submitError} />
-          ) : null}
-          <PhysicalPersonContactForm
-            control={control}
-            disabled={disabled || isSubmitting}
-            onInputFocus={onInputFocus}
-            options={options}
-            testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.FORM}
-          />
-        </>
+        <PhysicalPersonContactForm
+          control={control}
+          disabled={disabled || isSubmitting}
+          onInputFocus={onInputFocus}
+          options={options}
+          testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.FORM}
+        />
       )}
     </WizardStepLayout>
   );

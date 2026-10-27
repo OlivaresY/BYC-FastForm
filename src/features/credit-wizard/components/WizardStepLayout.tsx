@@ -1,6 +1,11 @@
 import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { BaseButton, ChevronLeftIcon, ProcessTopBar } from '@/shared/ui';
+import {
+  BaseButton,
+  ChevronLeftIcon,
+  ErrorBanner,
+  ProcessTopBar,
+} from '@/shared/ui';
 import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import {
   WIZARD_STEP_LAYOUT_COLORS,
@@ -24,9 +29,14 @@ export const WizardStepLayout = ({
   description,
   disabled = false,
   extraScrollPadding = WIZARD_STEP_LAYOUT_DIMENSIONS.EXTRA_KEYBOARD_SCROLL_OFFSET,
-  footer,
+  isSubmitDisabled = false,
+  isSubmitting = false,
   onBack,
   onClose,
+  onNext,
+  onSubmit,
+  submitButtonLabel = WIZARD_COPY.BUTTONS.CONTINUE,
+  submitError,
   testID,
   testIds,
   title,
@@ -51,6 +61,7 @@ export const WizardStepLayout = ({
   );
 
   const hasBackButton = Boolean(onBack);
+  const handleSubmit = onNext ?? onSubmit ?? NOOP_VOID;
 
   return (
     <View
@@ -114,6 +125,10 @@ export const WizardStepLayout = ({
               </Text>
             </View>
 
+            {submitError ? (
+              <ErrorBanner error={submitError} message={submitError} />
+            ) : null}
+
             {/* 3. Form Content Slot */}
             {resolvedChildren}
           </View>
@@ -131,7 +146,7 @@ export const WizardStepLayout = ({
           {hasBackButton ? (
             <BaseButton
               className={WIZARD_STEP_LAYOUT_STYLES.BACK_BUTTON}
-              disabled={disabled}
+              disabled={disabled || isSubmitting}
               icon={backButtonIcon ?? defaultBackIcon}
               label={backButtonLabel}
               onPress={onBack ?? NOOP_VOID}
@@ -142,7 +157,22 @@ export const WizardStepLayout = ({
             />
           ) : null}
 
-          {footer}
+          <BaseButton
+            className={
+              hasBackButton
+                ? WIZARD_STEP_LAYOUT_STYLES.SUBMIT_BUTTON
+                : WIZARD_STEP_LAYOUT_STYLES.SUBMIT_BUTTON_FULL
+            }
+            disabled={isSubmitDisabled || disabled || isSubmitting}
+            fullWidth={!hasBackButton}
+            isLoading={isSubmitting}
+            label={submitButtonLabel}
+            onPress={handleSubmit}
+            testID={
+              testIds?.submitButton ?? WIZARD_STEP_LAYOUT_TEST_IDS.SUBMIT_BUTTON
+            }
+            variant='primary'
+          />
         </View>
       </View>
     </View>

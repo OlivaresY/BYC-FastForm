@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
 import { View } from 'react-native';
-import { BaseButton, ErrorBanner } from '@/shared/ui';
 import {
   APPLICANT_STEP_VIEW_CONSTANTS,
   APPLICANT_STEP_VIEW_DEFAULT_VALUES,
@@ -69,20 +68,14 @@ export const ApplicantStepView = React.memo(
           currentStep={APPLICANT_STEP_VIEW_NUMERICAL.CURRENT_STEP}
           description={WIZARD_COPY.STEP_1_APPLICANT.DESCRIPTION}
           disabled={disabled}
-          footer={
-            <BaseButton
-              disabled={!isValid || disabled || isSubmitting}
-              fullWidth
-              label={WIZARD_COPY.STEP_1_APPLICANT.SUBMIT_BUTTON}
-              loading={isSubmitting}
-              onPress={(): void => {
-                void handleNextStep?.();
-              }}
-              testID={APPLICANT_STEP_VIEW_TEST_IDS.SUBMIT_BUTTON}
-              variant='primary'
-            />
-          }
+          isSubmitDisabled={!isValid}
+          isSubmitting={isSubmitting}
           onClose={onClose}
+          onNext={(): void => {
+            void handleNextStep?.();
+          }}
+          submitButtonLabel={WIZARD_COPY.STEP_1_APPLICANT.SUBMIT_BUTTON}
+          submitError={submitError}
           testID={testID}
           testIds={{
             bottomBar: APPLICANT_STEP_VIEW_TEST_IDS.BOTTOM_BAR,
@@ -98,10 +91,6 @@ export const ApplicantStepView = React.memo(
           totalSteps={APPLICANT_STEP_VIEW_NUMERICAL.TOTAL_STEPS}
           userInitials={APPLICANT_STEP_VIEW_CONSTANTS.MOCK_USER_INITIALS}
         >
-          {submitError ? (
-            <ErrorBanner error={submitError} message={submitError} />
-          ) : null}
-
           <LegalEntitySelector
             disabled={disabled || isSubmitting}
             onSelectEntity={onRegimeChange}

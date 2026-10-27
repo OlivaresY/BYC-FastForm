@@ -14,6 +14,7 @@ export const BaseButton = React.memo(
     fullWidth = false,
     icon,
     iconRight,
+    isLoading = false,
     label,
     loading = false,
     onPress,
@@ -23,7 +24,8 @@ export const BaseButton = React.memo(
     variant = BASE_BUTTON_VARIANTS.PRIMARY,
     ...rest
   }: BaseButtonProps): React.JSX.Element => {
-    const isInteractionDisabled = disabled || loading;
+    const isActuallyLoading = loading || isLoading;
+    const isInteractionDisabled = disabled || isActuallyLoading;
 
     const variantConfig =
       BASE_BUTTON_STYLES.VARIANTS[variant] ??
@@ -53,7 +55,7 @@ export const BaseButton = React.memo(
         style={style}
         testID={testID ?? BASE_BUTTON_TEST_IDS.BUTTON}
       >
-        {loading ? (
+        {isActuallyLoading ? (
           <ActivityIndicator
             color={loaderColor}
             size='small'

@@ -9,8 +9,11 @@ import {
 import {
   ApplicantStepFormStateSchema,
   LEGAL_APPLICANT_FIELDS,
+  LegalApplicantSchema,
   PHYSICAL_APPLICANT_FIELDS,
+  PhysicalApplicantSchema,
   sanitizeIdentificationNumber,
+  StrictThirdPartyBeneficiarySchema,
   THIRD_PARTY_BENEFICIARY_FIELDS,
 } from '../schemas/ApplicantStepView.schema';
 import type { LegalEntityType } from '../types/LegalEntitySelector.types';
@@ -47,33 +50,23 @@ export const useApplicantStepViewModel = (
     onSubmit: onSubmitProp,
   } = props ?? {};
 
-  const [isBeneficiaryModalOpen, setIsBeneficiaryModalOpen] =
-    useState<boolean>(false);
+  const [editingThirdPartyValues, setEditingThirdPartyValues] =
+    useState<ThirdPartyBeneficiaryValues | null>(null);
+  const [draftErrors, setDraftErrors] = useState<
+    Partial<Record<ThirdPartyBeneficiaryField, string>>
+  >({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const [savedThirdPartyValues, setSavedThirdPartyValues] =
-    useState<ThirdPartyBeneficiaryValues | null>(() => {
-      if (
-        initialVehicleBeneficiary === 'third_party' &&
-        initialThirdPartyValues
-      ) {
-        return {
-          ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
-          ...initialThirdPartyValues,
-          isThirdPartyRegistration: true,
-        };
-      }
-      return null;
-    });
+  const isBeneficiaryModalOpen = editingThirdPartyValues !== null;
 
   const {
+    clearErrors,
     control,
-    formState: { errors, isValid },
+    formState: { errors },
     getValues,
     handleSubmit,
     setValue,
-    trigger,
   } = useForm<ApplicantStepFormValues>({
     defaultValues: {
       legalValues: {
@@ -127,10 +120,38 @@ export const useApplicantStepViewModel = (
   const thirdPartyValues = useMemo<ThirdPartyBeneficiaryValues>(
     () => ({
       ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
-      ...currentValues.thirdPartyValues,
+      ...(editingThirdPartyValues ?? currentValues.thirdPartyValues),
     }),
-    [currentValues.thirdPartyValues],
+    [editingThirdPartyValues, currentValues.thirdPartyValues],
   );
+
+  const isApplicantValid = useMemo<boolean>(() => {
+    if (regime === 'physical') {
+      return PhysicalApplicantSchema.safeParse(currentValues.physicalValues)
+        .success;
+    }
+    return LegalApplicantSchema.safeParse(currentValues.legalValues).success;
+  }, [currentValues.legalValues, currentValues.physicalValues, regime]);
+
+  const isValid = useMemo<boolean>(() => {
+    if (!isApplicantValid) {
+      return false;
+    }
+    if (vehicleBeneficiary === 'third_party') {
+      const dataToValidate =
+        editingThirdPartyValues ?? currentValues.thirdPartyValues;
+      return StrictThirdPartyBeneficiarySchema.safeParse({
+        ...dataToValidate,
+        isThirdPartyRegistration: true,
+      }).success;
+    }
+    return true;
+  }, [
+    currentValues.thirdPartyValues,
+    editingThirdPartyValues,
+    isApplicantValid,
+    vehicleBeneficiary,
+  ]);
 
   // ===========================================================================
   // Error Mapping & Identification Validation
@@ -173,6 +194,9 @@ export const useApplicantStepViewModel = (
   const thirdPartyErrors = useMemo<
     Partial<Record<ThirdPartyBeneficiaryField, string>>
   >(() => {
+    if (editingThirdPartyValues !== null) {
+      return draftErrors;
+    }
     const fieldErrors: Partial<Record<ThirdPartyBeneficiaryField, string>> = {};
     if (errors.thirdPartyValues) {
       const raw = errors.thirdPartyValues as Partial<
@@ -185,7 +209,7 @@ export const useApplicantStepViewModel = (
       });
     }
     return fieldErrors;
-  }, [errors]);
+  }, [draftErrors, editingThirdPartyValues, errors.thirdPartyValues]);
 
   const isPhysicalIdentificationValid =
     sanitizeIdentificationNumber(physicalValues.identificationNumber).length >=
@@ -205,18 +229,23 @@ export const useApplicantStepViewModel = (
   // ===========================================================================
 
   const openBeneficiaryModal = useCallback((): void => {
-    setIsBeneficiaryModalOpen(true);
-  }, []);
+    const saved = getValues('thirdPartyValues');
+    const hasSaved = Boolean(saved?.thirdPartyDocNumber);
+    setEditingThirdPartyValues(
+      hasSaved
+        ? { ...saved, isThirdPartyRegistration: true }
+        : {
+            ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
+            isThirdPartyRegistration: true,
+          },
+    );
+  }, [getValues]);
 
   const closeBeneficiaryModal = useCallback((): void => {
-    if (savedThirdPartyValues !== null) {
-      setValue('thirdPartyValues', { ...savedThirdPartyValues }, {
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: true,
-      });
-      setIsBeneficiaryModalOpen(false);
-    } else {
+    const saved = getValues('thirdPartyValues');
+    const hasSaved = Boolean(saved?.thirdPartyDocNumber);
+
+    if (!hasSaved) {
       setValue('vehicleBeneficiary', 'same_holder', {
         shouldDirty: true,
         shouldTouch: true,
@@ -231,27 +260,44 @@ export const useApplicantStepViewModel = (
           shouldValidate: true,
         },
       );
-      setIsBeneficiaryModalOpen(false);
     }
-  }, [savedThirdPartyValues, setValue]);
+
+    setDraftErrors({});
+    clearErrors('thirdPartyValues');
+    setEditingThirdPartyValues(null);
+  }, [clearErrors, getValues, setValue]);
 
   const handleSaveThirdPartyData = useCallback(async (): Promise<boolean> => {
-    setValue('thirdPartyValues.isThirdPartyRegistration', true, {
-      shouldDirty: true,
-      shouldTouch: true,
-    });
-    const isThirdPartyValid = await trigger(
-      THIRD_PARTY_BENEFICIARY_FIELDS.map(
-        (field) => `thirdPartyValues.${field}` as const,
-      ),
-    );
-    if (isThirdPartyValid) {
-      setSavedThirdPartyValues({ ...getValues('thirdPartyValues') });
-      setIsBeneficiaryModalOpen(false);
+    const draft = {
+      ...(editingThirdPartyValues ?? getValues('thirdPartyValues')),
+      isThirdPartyRegistration: true as const,
+    };
+
+    const parseResult = StrictThirdPartyBeneficiarySchema.safeParse(draft);
+
+    if (parseResult.success) {
+      setValue('thirdPartyValues', parseResult.data, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      });
+      setDraftErrors({});
+      clearErrors('thirdPartyValues');
+      setEditingThirdPartyValues(null);
       return true;
     }
+
+    const fieldErrors: Partial<Record<ThirdPartyBeneficiaryField, string>> = {};
+    parseResult.error.issues.forEach((issue) => {
+      const fieldName = issue.path[0] as ThirdPartyBeneficiaryField;
+      if (fieldName && !fieldErrors[fieldName]) {
+        fieldErrors[fieldName] = issue.message;
+      }
+    });
+
+    setDraftErrors(fieldErrors);
     return false;
-  }, [getValues, setValue, trigger]);
+  }, [clearErrors, editingThirdPartyValues, getValues, setValue]);
 
   // ===========================================================================
   // Form Handlers
@@ -301,13 +347,21 @@ export const useApplicantStepViewModel = (
       field: K,
       value: ThirdPartyBeneficiaryValues[K],
     ): void => {
-      setValue(`thirdPartyValues.${field}` as never, value as never, {
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: true,
+      setEditingThirdPartyValues((prev) => ({
+        ...(prev ??
+          getValues('thirdPartyValues') ??
+          APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY),
+        [field]: value,
+      }));
+      setDraftErrors((prev) => {
+        if (!prev[field]) return prev;
+        const next = { ...prev };
+        delete next[field];
+        return next;
       });
+      clearErrors(`thirdPartyValues.${field}` as never);
     },
-    [setValue],
+    [clearErrors, getValues],
   );
 
   const onVehicleBeneficiaryChange = useCallback(
@@ -319,22 +373,21 @@ export const useApplicantStepViewModel = (
       });
 
       if (beneficiary === 'third_party') {
-        if (savedThirdPartyValues !== null) {
-          setValue('thirdPartyValues', savedThirdPartyValues, {
-            shouldDirty: true,
-            shouldTouch: true,
-            shouldValidate: true,
-          });
-        } else {
-          setValue('thirdPartyValues.isThirdPartyRegistration', true, {
-            shouldDirty: true,
-            shouldTouch: true,
-            shouldValidate: true,
-          });
-        }
-        setIsBeneficiaryModalOpen(true);
+        const saved = getValues('thirdPartyValues');
+        const hasSaved = Boolean(saved?.thirdPartyDocNumber);
+        const nextThirdPartyValues = hasSaved
+          ? { ...saved, isThirdPartyRegistration: true as const }
+          : {
+              ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
+              isThirdPartyRegistration: true as const,
+            };
+        setValue('thirdPartyValues', nextThirdPartyValues, {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+        setEditingThirdPartyValues(nextThirdPartyValues);
       } else {
-        setSavedThirdPartyValues(null);
         setValue(
           'thirdPartyValues',
           APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
@@ -344,10 +397,12 @@ export const useApplicantStepViewModel = (
             shouldValidate: true,
           },
         );
-        setIsBeneficiaryModalOpen(false);
+        setDraftErrors({});
+        clearErrors('thirdPartyValues');
+        setEditingThirdPartyValues(null);
       }
     },
-    [savedThirdPartyValues, setValue],
+    [clearErrors, getValues, setValue],
   );
 
   const onValidSubmit = useCallback(
@@ -394,11 +449,55 @@ export const useApplicantStepViewModel = (
     [onSubmitProp],
   );
 
-  const handleNextStep = handleSubmit(onValidSubmit, (fieldErrors) => {
-    if (fieldErrors.thirdPartyValues) {
-      setIsBeneficiaryModalOpen(true);
-    }
-  });
+  const handleNextStep = useCallback(
+    (dataOrEvent?: unknown): Promise<void> => {
+      if (editingThirdPartyValues !== null) {
+        const parseResult = StrictThirdPartyBeneficiarySchema.safeParse({
+          ...editingThirdPartyValues,
+          isThirdPartyRegistration: true,
+        });
+        if (parseResult.success) {
+          setValue('thirdPartyValues', parseResult.data, {
+            shouldDirty: true,
+            shouldTouch: true,
+            shouldValidate: true,
+          });
+          setDraftErrors({});
+          setEditingThirdPartyValues(null);
+        }
+      }
+
+      return handleSubmit(onValidSubmit, (fieldErrors) => {
+        if (fieldErrors.thirdPartyValues) {
+          const raw = fieldErrors.thirdPartyValues as Partial<
+            Record<ThirdPartyBeneficiaryField, { message?: string }>
+          >;
+          const newDraftErrors: Partial<
+            Record<ThirdPartyBeneficiaryField, string>
+          > = {};
+          THIRD_PARTY_BENEFICIARY_FIELDS.forEach((field) => {
+            if (raw[field]?.message) {
+              newDraftErrors[field] = raw[field]!.message;
+            }
+          });
+          setDraftErrors(newDraftErrors);
+          const saved = getValues('thirdPartyValues');
+          setEditingThirdPartyValues({
+            ...APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
+            ...saved,
+            isThirdPartyRegistration: true,
+          });
+        }
+      })(dataOrEvent as React.BaseSyntheticEvent | undefined);
+    },
+    [
+      editingThirdPartyValues,
+      getValues,
+      handleSubmit,
+      onValidSubmit,
+      setValue,
+    ],
+  );
 
   const onSubmit = useCallback((): Promise<void> => {
     return handleNextStep();

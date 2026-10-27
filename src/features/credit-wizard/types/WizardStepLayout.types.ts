@@ -26,9 +26,14 @@ export interface WizardStepLayoutProps {
   description: string;
   disabled?: boolean;
   extraScrollPadding?: number;
-  footer?: React.ReactNode;
+  isSubmitDisabled?: boolean;
+  isSubmitting?: boolean;
   onBack?: () => void;
   onClose?: () => void;
+  onNext?: () => void;
+  onSubmit?: () => void;
+  submitButtonLabel?: string;
+  submitError?: string | null;
   testID?: string;
   testIds?: WizardStepLayoutTestIds;
   title: string;

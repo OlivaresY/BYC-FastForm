@@ -1,5 +1,4 @@
 import React from 'react';
-import { BaseButton, ErrorBanner } from '@/shared/ui';
 import { LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS } from '../constants/LegalEntityContactStepView.constants';
 import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import { useLegalEntityContactViewModel } from '../hooks/useLegalEntityContactViewModel';
@@ -26,21 +25,15 @@ export const LegalEntityContactStepView = ({
       currentStep={currentStep}
       description={WIZARD_COPY.STEP_2_LEGAL_CONTACT.DESCRIPTION}
       disabled={disabled}
-      footer={
-        <BaseButton
-          className='flex-1'
-          disabled={!isValid || disabled || isSubmitting}
-          label={WIZARD_COPY.BUTTONS.NEXT}
-          loading={isSubmitting}
-          onPress={(): void => {
-            void handleNextStep();
-          }}
-          testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.SUBMIT_BUTTON}
-          variant='primary'
-        />
-      }
+      isSubmitDisabled={!isValid}
+      isSubmitting={isSubmitting}
       onBack={onClose}
       onClose={onClose}
+      onNext={(): void => {
+        void handleNextStep();
+      }}
+      submitButtonLabel={WIZARD_COPY.BUTTONS.NEXT}
+      submitError={submitError}
       testID={testID}
       testIds={{
         backButton: LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.BACK_BUTTON,
@@ -57,17 +50,12 @@ export const LegalEntityContactStepView = ({
       totalSteps={totalSteps}
     >
       {({ onInputFocus }) => (
-        <>
-          {submitError ? (
-            <ErrorBanner error={submitError} message={submitError} />
-          ) : null}
-          <LegalEntityContactForm
-            control={control}
-            disabled={disabled || isSubmitting}
-            onInputFocus={onInputFocus}
-            testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.FORM}
-          />
-        </>
+        <LegalEntityContactForm
+          control={control}
+          disabled={disabled || isSubmitting}
+          onInputFocus={onInputFocus}
+          testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.FORM}
+        />
       )}
     </WizardStepLayout>
   );
