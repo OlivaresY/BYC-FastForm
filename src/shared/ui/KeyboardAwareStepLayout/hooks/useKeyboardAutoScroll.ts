@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Dimensions, Keyboard, Platform, ScrollView } from 'react-native';
+import { Dimensions, Keyboard, Platform } from 'react-native';
 import type {
   KeyboardEvent,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  ScrollViewInstance,
 } from 'react-native';
 import { KEYBOARD_AWARE_STEP_LAYOUT_DIMENSIONS } from '../constants/KeyboardAwareStepLayout.constants';
 
@@ -20,7 +21,7 @@ export interface UseKeyboardAutoScrollReturn {
   handleScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
   keyboardHeight: number;
   onInputFocus: (eventOrNode?: unknown) => void;
-  scrollViewRef: React.RefObject<ScrollView | null>;
+  scrollViewRef: React.RefObject<ScrollViewInstance | null>;
   scrollToFocusedInput: (customKeyboardHeight?: number) => void;
   scrollToInput: (node?: unknown, customKeyboardHeight?: number) => void;
   setFocusedNode: (node: unknown) => void;
@@ -28,7 +29,7 @@ export interface UseKeyboardAutoScrollReturn {
 
 interface MeasurableNode {
   measureLayout?: (
-    relativeToNativeComponentRef: ScrollView,
+    relativeToNativeComponentRef: ScrollViewInstance,
     onSuccess: (x: number, y: number, width: number, height: number) => void,
     onFail: () => void,
   ) => void;
@@ -46,7 +47,7 @@ export const useKeyboardAutoScroll = (
   const keyboardHeightRef = useRef<number>(0);
   const rafIdRef = useRef<number | null>(null);
   const scrollYRef = useRef<number>(0);
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<ScrollViewInstance>(null);
   const focusedNodeRef = useRef<unknown>(null);
 
   const scrollToInput = useCallback(

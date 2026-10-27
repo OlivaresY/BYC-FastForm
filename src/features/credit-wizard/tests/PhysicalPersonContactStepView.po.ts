@@ -526,6 +526,19 @@ export class PhysicalPersonContactStepViewPageObject {
     return this;
   }
 
+  public static async act(
+    callback: () => void | Promise<void>,
+  ): Promise<void> {
+    await act(callback);
+  }
+
+  public async act(
+    callback: () => void | Promise<void>,
+  ): Promise<this> {
+    await act(callback);
+    return this;
+  }
+
   public emitKeyboardDidShow(height = 320): this {
     act(() => {
       mockKeyboard.emit('keyboardDidShow', {
