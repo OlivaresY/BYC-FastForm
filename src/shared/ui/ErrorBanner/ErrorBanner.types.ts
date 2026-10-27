@@ -1,7 +1,8 @@
 import type { StyleProp, ViewStyle } from 'react-native';
 
 export interface ErrorBannerProps {
-  message: string;
+  error?: string | null;
+  message?: string;
   style?: StyleProp<ViewStyle>;
   testID?: string;
   title?: string;

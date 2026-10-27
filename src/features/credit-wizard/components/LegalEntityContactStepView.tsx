@@ -1,7 +1,5 @@
 import React from 'react';
-import {
-  LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS
-} from '../constants/LegalEntityContactStepView.constants';
+import { LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS } from '../constants/LegalEntityContactStepView.constants';
 import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import { useLegalEntityContactViewModel } from '../hooks/useLegalEntityContactViewModel';
 import type { LegalEntityContactStepViewProps } from '../types/LegalEntityContactStepView.types';
@@ -19,7 +17,8 @@ export const LegalEntityContactStepView = ({
 }: LegalEntityContactStepViewProps): React.JSX.Element => {
   const defaultViewModel = useLegalEntityContactViewModel({ onSubmit });
   const viewModel = viewModelProp ?? defaultViewModel;
-  const { control, handleNextStep, isSubmitting, isValid, submitError } = viewModel;
+  const { control, handleNextStep, isSubmitting, isValid, submitError } =
+    viewModel;
 
   return (
     <WizardStepLayout
@@ -30,9 +29,10 @@ export const LegalEntityContactStepView = ({
       isSubmitting={isSubmitting}
       onBack={onClose}
       onClose={onClose}
-      onSubmit={(): void => {
+      onNext={(): void => {
         void handleNextStep();
       }}
+      submitButtonLabel={WIZARD_COPY.BUTTONS.NEXT}
       submitError={submitError}
       testID={testID}
       testIds={{

@@ -9,7 +9,11 @@ import {
 import { Keyboard } from 'react-native';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import type { ReactTestInstance } from 'react-test-renderer';
-import { CUSTOM_SELECT_TEST_IDS, PROCESS_TOP_BAR_TEST_IDS } from '@/shared/ui';
+import {
+  CUSTOM_SELECT_TEST_IDS,
+  ERROR_BANNER_TEST_IDS,
+  PROCESS_TOP_BAR_TEST_IDS,
+} from '@/shared/ui';
 import { PhysicalPersonContactStepView } from '../components/PhysicalPersonContactStepView';
 import { PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS } from '../constants/PhysicalPersonContactForm.constants';
 import { PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS } from '../constants/PhysicalPersonContactStepView.constants';
@@ -154,6 +158,10 @@ export class PhysicalPersonContactStepViewPageObject {
     return screen.getByTestId(
       PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.SUBMIT_BUTTON,
     );
+  }
+
+  public get errorBanner(): ReactTestInstance | null {
+    return screen.queryByTestId(ERROR_BANNER_TEST_IDS.CONTAINER);
   }
 
   // =========================================================================

@@ -1,7 +1,6 @@
 import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import {
-  ArrowRightIcon,
   BaseButton,
   ChevronLeftIcon,
   ErrorBanner,
@@ -32,12 +31,11 @@ export const WizardStepLayout = ({
   extraScrollPadding = WIZARD_STEP_LAYOUT_DIMENSIONS.EXTRA_KEYBOARD_SCROLL_OFFSET,
   isSubmitDisabled = false,
   isSubmitting = false,
-  modal,
   onBack,
   onClose,
+  onNext,
   onSubmit,
-  submitButtonIcon,
-  submitButtonLabel = WIZARD_COPY.BUTTONS.NEXT,
+  submitButtonLabel = WIZARD_COPY.BUTTONS.CONTINUE,
   submitError,
   testID,
   testIds,
@@ -62,15 +60,8 @@ export const WizardStepLayout = ({
     />
   );
 
-  const defaultSubmitIcon = (
-    <ArrowRightIcon
-      color={WIZARD_STEP_LAYOUT_COLORS.SUBMIT_ICON}
-      size={WIZARD_STEP_LAYOUT_DIMENSIONS.SUBMIT_ICON_SIZE}
-      strokeWidth={WIZARD_STEP_LAYOUT_DIMENSIONS.SUBMIT_ICON_STROKE_WIDTH}
-    />
-  );
-
   const hasBackButton = Boolean(onBack);
+  const handleSubmit = onNext ?? onSubmit ?? NOOP_VOID;
 
   return (
     <View
@@ -134,7 +125,9 @@ export const WizardStepLayout = ({
               </Text>
             </View>
 
-            {submitError ? <ErrorBanner message={submitError} /> : null}
+            {submitError ? (
+              <ErrorBanner error={submitError} message={submitError} />
+            ) : null}
 
             {/* 3. Form Content Slot */}
             {resolvedChildren}
@@ -172,10 +165,9 @@ export const WizardStepLayout = ({
             }
             disabled={isSubmitDisabled || disabled || isSubmitting}
             fullWidth={!hasBackButton}
-            iconRight={submitButtonIcon ?? defaultSubmitIcon}
+            isLoading={isSubmitting}
             label={submitButtonLabel}
-            loading={isSubmitting}
-            onPress={onSubmit}
+            onPress={handleSubmit}
             testID={
               testIds?.submitButton ?? WIZARD_STEP_LAYOUT_TEST_IDS.SUBMIT_BUTTON
             }
@@ -183,8 +175,6 @@ export const WizardStepLayout = ({
           />
         </View>
       </View>
-
-      {modal}
     </View>
   );
 };

@@ -12,6 +12,7 @@ export interface BaseButtonProps extends Omit<PressableProps, 'style'> {
   fullWidth?: boolean;
   icon?: ReactNode;
   iconRight?: ReactNode;
+  isLoading?: boolean;
   label: string;
   loading?: boolean;
   onPress?: () => void;

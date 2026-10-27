@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react-native';
+import { act, renderHook, waitFor } from '@testing-library/react-native';
 import type { RenderHookResult } from '@testing-library/react-native';
 import { useApplicantStepViewModel } from '../hooks/useApplicantStepViewModel';
 import type {
@@ -254,15 +254,26 @@ export class ApplicantStepViewModelPageObject {
     return this.submit();
   }
 
-  public saveThirdPartyData(): boolean | Promise<boolean> {
-    let result: boolean | Promise<boolean> = false;
-    act(() => {
-      result = this.current.handleSaveThirdPartyData();
+  public async waitFor(
+    callback: () => void | Promise<void>,
+    options?: { interval?: number; timeout?: number },
+  ): Promise<this> {
+    await waitFor(callback, {
+      interval: options?.interval ?? 50,
+      timeout: options?.timeout ?? 10000,
+    });
+    return this;
+  }
+
+  public async saveThirdPartyData(): Promise<boolean> {
+    let result = false;
+    await act(async () => {
+      result = await this.current.handleSaveThirdPartyData();
     });
     return result;
   }
 
-  public handleSaveThirdPartyData(): boolean | Promise<boolean> {
+  public async handleSaveThirdPartyData(): Promise<boolean> {
     return this.saveThirdPartyData();
   }
 }
