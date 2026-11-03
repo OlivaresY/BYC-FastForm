@@ -15,7 +15,7 @@ const defaultValues = {
 };
 
 const meta = {
-  title: 'CreditWizard/PhysicalPersonForm',
+  title: 'Features/CreditWizard/PhysicalPersonForm',
   component: PhysicalPersonForm,
   args: {
     onFieldChange: () => {},

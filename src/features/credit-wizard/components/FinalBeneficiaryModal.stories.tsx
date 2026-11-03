@@ -5,7 +5,7 @@ import { ModalStoryWrapper } from '@/shared/components';
 import { FinalBeneficiaryModalMemo as FinalBeneficiaryModal } from './FinalBeneficiaryModal';
 
 const meta = {
-  title: 'Credit Wizard/Final Beneficiary Modal',
+  title: 'Features/CreditWizard/FinalBeneficiaryModal',
   component: FinalBeneficiaryModal,
   decorators: [
     (Story) => (
