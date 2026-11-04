@@ -1,12 +1,12 @@
 export type VehicleCreditCurrency = 'USD' | 'CRC';
 
 export interface VehicleCreditFormValues {
+  color_ano: string;
   marca: string;
   modelo: string;
-  color_ano: string;
   moneda: VehicleCreditCurrency;
-  valor_vehiculo: number;
-  monto_prima: number;
   monto_financiar: number;
-  plazo_meses: number;
+  monto_prima: number;
+  plazo_meses: number | string;
+  valor_vehiculo: number;
 }

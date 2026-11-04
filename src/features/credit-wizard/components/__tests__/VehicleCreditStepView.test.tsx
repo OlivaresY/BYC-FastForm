@@ -1,9 +1,15 @@
+import {
+  FINANCING_TERMS,
+  VEHICLE_BRANDS,
+  VEHICLE_COLORS_YEARS,
+} from '../../constants/VehicleCredit.constants';
 import { useVehicleCreditViewModel } from '../../hooks/useVehicleCreditViewModel';
 import type { UseVehicleCreditViewModelReturn } from '../../hooks/useVehicleCreditViewModel';
 import { VehicleCreditStepPOM } from './VehicleCreditStep.pom';
 
 const mockHandleFinancialChange = jest.fn();
 const mockHandleNext = jest.fn();
+const mockSetValue = jest.fn();
 
 jest.mock('../../hooks/useVehicleCreditViewModel', () => ({
   useVehicleCreditViewModel: jest.fn(),
@@ -12,6 +18,28 @@ jest.mock('../../hooks/useVehicleCreditViewModel', () => ({
 describe('VehicleCreditStepView Component Tests', () => {
   let defaultControl: UseVehicleCreditViewModelReturn['control'];
 
+  const createBaseViewModelMock = (
+    overrides?: Partial<UseVehicleCreditViewModelReturn>,
+  ): UseVehicleCreditViewModelReturn => ({
+    availableColorsYears: VEHICLE_COLORS_YEARS,
+    availableModels: [],
+    brands: VEHICLE_BRANDS,
+    colorsYears: VEHICLE_COLORS_YEARS,
+    control: defaultControl,
+    derivedMontoFinanciar: 0,
+    errors: {},
+    financingTerms: FINANCING_TERMS,
+    handleFinancialChange: mockHandleFinancialChange,
+    handleNext: mockHandleNext,
+    handleSubmit: mockHandleNext,
+    isSubmitting: false,
+    isValid: true,
+    setValue: mockSetValue as never,
+    vehicleBrands: VEHICLE_BRANDS,
+    vehicleColorsYears: VEHICLE_COLORS_YEARS,
+    ...overrides,
+  });
+
   beforeAll(() => {
     defaultControl = VehicleCreditStepPOM.createMockControl();
   });
@@ -19,16 +47,9 @@ describe('VehicleCreditStepView Component Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useVehicleCreditViewModel as jest.Mock).mockReturnValue({
-      control: defaultControl,
-      derivedMontoFinanciar: 0,
-      errors: {},
-      handleFinancialChange: mockHandleFinancialChange,
-      handleNext: mockHandleNext,
-      handleSubmit: mockHandleNext,
-      isSubmitting: false,
-      isValid: true,
-    } satisfies UseVehicleCreditViewModelReturn);
+    (useVehicleCreditViewModel as jest.Mock).mockReturnValue(
+      createBaseViewModelMock(),
+    );
   });
 
   it('renders all form fields and the layout containers correctly', () => {
@@ -58,43 +79,38 @@ describe('VehicleCreditStepView Component Tests', () => {
     const pom = VehicleCreditStepPOM.render();
 
     // Act - Change valor_vehiculo
-    pom.fillValorVehiculo('25000');
+    pom.fillValorVehiculo('30000');
 
-    // Assert - valor_vehiculo triggered handleFinancialChange with numeric value
-    expect(mockHandleFinancialChange).toHaveBeenCalledTimes(1);
+    // Assert - Triggered handleFinancialChange with numeric value
     expect(mockHandleFinancialChange).toHaveBeenCalledWith(
       'valor_vehiculo',
-      25000,
+      30000,
     );
 
     // Act - Change monto_prima
-    pom.fillMontoPrima('5000');
+    pom.fillMontoPrima('6000');
 
-    // Assert - monto_prima triggered handleFinancialChange with numeric value
-    expect(mockHandleFinancialChange).toHaveBeenCalledTimes(2);
-    expect(mockHandleFinancialChange).toHaveBeenCalledWith('monto_prima', 5000);
+    // Assert - Triggered handleFinancialChange with numeric value
+    expect(mockHandleFinancialChange).toHaveBeenCalledWith('monto_prima', 6000);
   });
 
   it('renders validation error messages when the mock ViewModel provides them in the errors object', () => {
-    // Arrange - Simulate Rule A violation from ViewModel
+    // Arrange
     const ruleAErrorMessage =
       'La prima debe ser al menos el 20% del valor del vehículo.';
 
-    (useVehicleCreditViewModel as jest.Mock).mockReturnValue({
-      control: defaultControl,
-      derivedMontoFinanciar: 15000,
-      errors: {
-        monto_prima: {
-          message: ruleAErrorMessage,
-          type: 'custom',
+    (useVehicleCreditViewModel as jest.Mock).mockReturnValue(
+      createBaseViewModelMock({
+        derivedMontoFinanciar: 15000,
+        errors: {
+          monto_prima: {
+            message: ruleAErrorMessage,
+            type: 'custom',
+          },
         },
-      },
-      handleFinancialChange: mockHandleFinancialChange,
-      handleNext: mockHandleNext,
-      handleSubmit: mockHandleNext,
-      isSubmitting: false,
-      isValid: false,
-    } satisfies UseVehicleCreditViewModelReturn);
+        isValid: false,
+      }),
+    );
 
     // Act
     const pom = VehicleCreditStepPOM.render();

@@ -1,4 +1,10 @@
-import { vehicleCreditSchema } from './VehicleCredit.schema';
+import {
+  FINANCING_TERMS,
+  VEHICLE_BRANDS,
+  VEHICLE_COLORS_YEARS,
+  VEHICLE_MODELS,
+  vehicleCreditSchema,
+} from './VehicleCredit.schema';
 import type { VehicleCreditFormValues } from '../types/VehicleCredit.types';
 
 const getMessages = (
@@ -28,6 +34,48 @@ const createValidVehicleCredit = (
 });
 
 describe('VehicleCredit Schema Validation', () => {
+  describe('catalogs and constants export', () => {
+    it('exports the required vehicle brands catalog', () => {
+      expect(VEHICLE_BRANDS).toEqual([
+        'BYD',
+        'Foton',
+        'Baic',
+        'Kaiyi',
+        'Wuling',
+      ]);
+    });
+
+    it('exports the required vehicle models mapping with correct models', () => {
+      expect(VEHICLE_MODELS.BYD).toEqual(['S1 Pro', 'Yuan Plus EV (Atto 3)']);
+      expect(VEHICLE_MODELS.Foton).toEqual(['Tunland G7']);
+      expect(VEHICLE_MODELS.Baic).toEqual(['BJ30']);
+      expect(VEHICLE_MODELS.Kaiyi).toEqual([]);
+      expect(VEHICLE_MODELS.Wuling).toEqual([]);
+    });
+
+    it('exports the required colors and years catalog', () => {
+      expect(VEHICLE_COLORS_YEARS).toEqual([
+        'Gris Metálico (2024)',
+        'Blanco (2024)',
+        'Negro (2025)',
+        'Rojo (2024)',
+        'Azul (2024)',
+      ]);
+    });
+
+    it('exports the required financing terms catalog', () => {
+      expect(FINANCING_TERMS).toEqual([
+        '12 Meses (1 Año)',
+        '24 Meses (2 Años)',
+        '36 Meses (3 Años)',
+        '48 Meses (4 Años)',
+        '60 Meses (5 Años)',
+        '72 Meses (6 Años)',
+        '84 Meses (7 Años)',
+      ]);
+    });
+  });
+
   describe('valid payloads', () => {
     it('passes validation when all fields are valid, monto_prima is exactly 20%, and monto_financiar math is exact', () => {
       const validPayload = createValidVehicleCredit();
@@ -54,6 +102,16 @@ describe('VehicleCredit Schema Validation', () => {
       });
       const result = vehicleCreditSchema.safeParse(validPayload);
       expect(result.success).toBe(true);
+    });
+
+    it('accepts every string term from FINANCING_TERMS as a valid plazo_meses', () => {
+      FINANCING_TERMS.forEach((term) => {
+        const validPayload = createValidVehicleCredit({
+          plazo_meses: term,
+        });
+        const result = vehicleCreditSchema.safeParse(validPayload);
+        expect(result.success).toBe(true);
+      });
     });
   });
 
@@ -173,7 +231,7 @@ describe('VehicleCredit Schema Validation', () => {
       });
     });
 
-    describe('numeric constraints', () => {
+    describe('numeric constraints and plazo_meses', () => {
       it('fails when valor_vehiculo is 0 or negative', () => {
         const invalidPayload = createValidVehicleCredit({
           monto_financiar: 0,
@@ -208,6 +266,16 @@ describe('VehicleCredit Schema Validation', () => {
         expect(result.success).toBe(false);
         expect(getMessages(result, ['plazo_meses'])).toContain(
           'El plazo en meses debe ser mayor a 0.',
+        );
+      });
+
+      it('fails when plazo_meses is an empty string or whitespace', () => {
+        const invalidPayload = createValidVehicleCredit({ plazo_meses: '   ' });
+        const result = vehicleCreditSchema.safeParse(invalidPayload);
+
+        expect(result.success).toBe(false);
+        expect(getMessages(result, ['plazo_meses'])).toContain(
+          'El plazo en meses es obligatorio.',
         );
       });
     });

@@ -1,5 +1,18 @@
 import { z } from 'zod';
+import {
+  FINANCING_TERMS,
+  VEHICLE_BRANDS,
+  VEHICLE_COLORS_YEARS,
+  VEHICLE_MODELS,
+} from '../constants/VehicleCredit.constants';
 import type { VehicleCreditFormValues } from '../types/VehicleCredit.types';
+
+export {
+  FINANCING_TERMS,
+  VEHICLE_BRANDS,
+  VEHICLE_COLORS_YEARS,
+  VEHICLE_MODELS,
+};
 
 export const vehicleCreditSchema: z.ZodType<VehicleCreditFormValues> = z
   .object({
@@ -40,13 +53,23 @@ export const vehicleCreditSchema: z.ZodType<VehicleCreditFormValues> = z
       .min(0, {
         message: 'El monto de la prima debe ser mayor o igual a 0.',
       }),
-    plazo_meses: z
-      .number({
-        error: 'El plazo en meses es obligatorio.',
-      })
-      .gt(0, {
-        message: 'El plazo en meses debe ser mayor a 0.',
-      }),
+    plazo_meses: z.union([
+      z
+        .number({
+          error: 'El plazo en meses es obligatorio.',
+        })
+        .gt(0, {
+          message: 'El plazo en meses debe ser mayor a 0.',
+        }),
+      z
+        .string({
+          error: 'El plazo en meses es obligatorio.',
+        })
+        .trim()
+        .min(1, {
+          message: 'El plazo en meses es obligatorio.',
+        }),
+    ]),
     valor_vehiculo: z
       .number({
         error: 'El valor del vehículo es obligatorio.',

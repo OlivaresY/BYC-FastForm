@@ -1,11 +1,21 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useState } from 'react';
-import type { Control, FieldErrors, Resolver } from 'react-hook-form';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type {
+  Control,
+  FieldErrors,
+  Resolver,
+  UseFormSetValue,
+} from 'react-hook-form';
 import { useForm, useWatch } from 'react-hook-form';
+import {
+  FINANCING_TERMS,
+  VEHICLE_BRANDS,
+  VEHICLE_COLORS_YEARS,
+  VEHICLE_CREDIT_SUBMIT_DELAY_MS,
+  VEHICLE_MODELS,
+} from '../constants/VehicleCredit.constants';
 import { vehicleCreditSchema } from '../schemas/VehicleCredit.schema';
 import type { VehicleCreditFormValues } from '../types/VehicleCredit.types';
-
-const SUBMIT_DELAY_MS = 500;
 
 export const VEHICLE_CREDIT_DEFAULT_VALUES: VehicleCreditFormValues = {
   color_ano: '',
@@ -27,14 +37,22 @@ export interface UseVehicleCreditViewModelProps {
 }
 
 export interface UseVehicleCreditViewModelReturn {
+  availableColorsYears: readonly string[];
+  availableModels: readonly string[];
+  brands: readonly string[];
+  colorsYears: readonly string[];
   control: Control<VehicleCreditFormValues>;
   derivedMontoFinanciar: number;
   errors: FieldErrors<VehicleCreditFormValues>;
+  financingTerms: readonly string[];
   handleFinancialChange: (field: FinancialField, value: number) => void;
   handleNext: (e?: unknown) => Promise<void>;
   handleSubmit: (e?: unknown) => Promise<void>;
   isSubmitting: boolean;
   isValid: boolean;
+  setValue: UseFormSetValue<VehicleCreditFormValues>;
+  vehicleBrands: readonly string[];
+  vehicleColorsYears: readonly string[];
 }
 
 export const useVehicleCreditViewModel = (
@@ -65,6 +83,13 @@ export const useVehicleCreditViewModel = (
     ) as unknown as Resolver<VehicleCreditFormValues>,
   });
 
+  const selectedMarca = useWatch({
+    control,
+    defaultValue:
+      defaultValuesProp?.marca ?? VEHICLE_CREDIT_DEFAULT_VALUES.marca,
+    name: 'marca',
+  });
+
   const valorVehiculo = useWatch({
     control,
     defaultValue: VEHICLE_CREDIT_DEFAULT_VALUES.valor_vehiculo,
@@ -75,6 +100,25 @@ export const useVehicleCreditViewModel = (
     defaultValue: VEHICLE_CREDIT_DEFAULT_VALUES.monto_prima,
     name: 'monto_prima',
   });
+
+  const prevMarcaRef = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (
+      prevMarcaRef.current !== undefined &&
+      prevMarcaRef.current !== selectedMarca
+    ) {
+      setValue('modelo', '', { shouldValidate: true });
+    }
+    prevMarcaRef.current = selectedMarca;
+  }, [selectedMarca, setValue]);
+
+  const availableModels = useMemo<readonly string[]>(() => {
+    if (!selectedMarca || !(selectedMarca in VEHICLE_MODELS)) {
+      return [];
+    }
+    return VEHICLE_MODELS[selectedMarca as keyof typeof VEHICLE_MODELS];
+  }, [selectedMarca]);
 
   const derivedMontoFinanciar =
     (typeof valorVehiculo === 'number'
@@ -112,7 +156,7 @@ export const useVehicleCreditViewModel = (
         await formHandleSubmit(
           async (validData: VehicleCreditFormValues): Promise<void> => {
             await new Promise((resolve) =>
-              setTimeout(resolve, SUBMIT_DELAY_MS),
+              setTimeout(resolve, VEHICLE_CREDIT_SUBMIT_DELAY_MS),
             );
             await onSuccess?.(validData);
           },
@@ -125,13 +169,21 @@ export const useVehicleCreditViewModel = (
   );
 
   return {
+    availableColorsYears: VEHICLE_COLORS_YEARS,
+    availableModels,
+    brands: VEHICLE_BRANDS,
+    colorsYears: VEHICLE_COLORS_YEARS,
     control,
     derivedMontoFinanciar,
     errors,
+    financingTerms: FINANCING_TERMS,
     handleFinancialChange,
     handleNext,
     handleSubmit: handleNext,
     isSubmitting,
     isValid,
+    setValue,
+    vehicleBrands: VEHICLE_BRANDS,
+    vehicleColorsYears: VEHICLE_COLORS_YEARS,
   };
 };
