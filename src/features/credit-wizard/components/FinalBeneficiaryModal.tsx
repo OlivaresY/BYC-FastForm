@@ -28,6 +28,11 @@ import {
   BENEFICIARY_MODAL_STYLES,
   BENEFICIARY_MODAL_TEST_IDS,
 } from '../constants/ApplicantStepView.constants';
+import {
+  KeyboardAutoScrollContext,
+  useKeyboardAutoScroll,
+  type KeyboardAutoScrollContextValue,
+} from '../hooks/useKeyboardAutoScroll';
 import type { FinalBeneficiaryModalProps } from '../types/ApplicantStepView.types';
 
 export const FinalBeneficiaryModal = ({
@@ -71,6 +76,13 @@ export const FinalBeneficiaryModal = ({
         onFieldChange?.('thirdPartyRelationship', val),
     }),
     [onFieldChange],
+  );
+
+  const { onInputFocus, onScroll, scrollViewRef } = useKeyboardAutoScroll();
+
+  const autoScrollContextValue = useMemo<KeyboardAutoScrollContextValue>(
+    () => ({ onInputFocus }),
+    [onInputFocus],
   );
 
   return (
@@ -142,8 +154,14 @@ export const FinalBeneficiaryModal = ({
               className={BENEFICIARY_MODAL_STYLES.SCROLL_VIEW}
               contentContainerStyle={styles.scrollContent}
               keyboardShouldPersistTaps='handled'
+              onScroll={onScroll}
+              ref={scrollViewRef}
+              scrollEventThrottle={16}
               showsVerticalScrollIndicator={false}
             >
+              <KeyboardAutoScrollContext.Provider
+                value={autoScrollContextValue}
+              >
               {/* SECTION 1: DOCUMENTO DE IDENTIDAD */}
               <View
                 className={BENEFICIARY_MODAL_STYLES.SECTION_HEADER_ROW_FIRST}
@@ -307,7 +325,8 @@ export const FinalBeneficiaryModal = ({
                 testID={BENEFICIARY_MODAL_TEST_IDS.NATIONALITY_INPUT}
                 value={nationality}
               />
-            </ScrollView>
+            </KeyboardAutoScrollContext.Provider>
+          </ScrollView>
 
             {/* Fixed Bottom Action Bar */}
             <View

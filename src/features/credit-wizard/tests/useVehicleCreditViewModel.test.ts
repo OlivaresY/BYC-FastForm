@@ -1,55 +1,114 @@
 import {
   FINANCING_TERMS,
   VEHICLE_BRANDS,
-  VEHICLE_COLORS_YEARS,
-  VEHICLE_MODELS,
 } from '../constants/VehicleCredit.constants';
+import {
+  formatCapitalizeWords,
+  formatCurrencyDisplay,
+  formatYear,
+  parseCurrencyToNumber,
+} from '../hooks/useVehicleCreditViewModel';
 import { VehicleCreditViewModelPageObject } from './useVehicleCreditViewModel.po';
 
 describe('useVehicleCreditViewModel Unit Tests', () => {
   describe('catalog constants exposure', () => {
-    it('exposes the required brands, colors/years, and financing terms', () => {
+    it('exposes the required brands and financing terms', () => {
       const page = VehicleCreditViewModelPageObject.render();
 
       expect(page.current.brands).toEqual(VEHICLE_BRANDS);
       expect(page.current.vehicleBrands).toEqual(VEHICLE_BRANDS);
-      expect(page.current.colorsYears).toEqual(VEHICLE_COLORS_YEARS);
-      expect(page.current.vehicleColorsYears).toEqual(VEHICLE_COLORS_YEARS);
-      expect(page.current.availableColorsYears).toEqual(VEHICLE_COLORS_YEARS);
       expect(page.current.financingTerms).toEqual(FINANCING_TERMS);
     });
 
-    it('derives empty availableModels when marca is not selected or empty', () => {
+    it('sets default plazo_meses to 96 Meses (8 Años)', () => {
       const page = VehicleCreditViewModelPageObject.render();
+      expect(page.getFieldValue('plazo_meses')).toBe('96 Meses (8 Años)');
+    });
+  });
 
-      expect(page.current.availableModels).toEqual([]);
+  describe('formatting utility functions', () => {
+    describe('formatCapitalizeWords', () => {
+      it('capitalizes the first letter of each word and allows numbers', () => {
+        expect(formatCapitalizeWords('s1 pro')).toBe('S1 Pro');
+        expect(formatCapitalizeWords('toyota corolla cross')).toBe(
+          'Toyota Corolla Cross',
+        );
+        expect(formatCapitalizeWords('bj30')).toBe('Bj30');
+      });
+
+      it('removes leading spaces and collapses multiple spaces into one', () => {
+        expect(formatCapitalizeWords('   s1    pro')).toBe('S1 Pro');
+      });
+
+      it('preserves single trailing space while typing', () => {
+        expect(formatCapitalizeWords('S1 ')).toBe('S1 ');
+      });
+
+      it('handles empty strings safely', () => {
+        expect(formatCapitalizeWords('')).toBe('');
+      });
     });
 
-    it('derives correct models for each supported brand', () => {
-      const bydPage = VehicleCreditViewModelPageObject.render({
-        defaultValues: { marca: 'BYD' },
+    describe('formatYear', () => {
+      it('strips non-numeric characters and limits length to 4 digits', () => {
+        expect(formatYear('2024abc')).toBe('2024');
+        expect(formatYear('abcd')).toBe('');
+        expect(formatYear('202456')).toBe('2024');
       });
-      expect(bydPage.current.availableModels).toEqual(VEHICLE_MODELS.BYD);
 
-      const fotonPage = VehicleCreditViewModelPageObject.render({
-        defaultValues: { marca: 'Foton' },
+      it('handles partial year typing', () => {
+        expect(formatYear('20')).toBe('20');
+        expect(formatYear('202')).toBe('202');
       });
-      expect(fotonPage.current.availableModels).toEqual(VEHICLE_MODELS.Foton);
 
-      const baicPage = VehicleCreditViewModelPageObject.render({
-        defaultValues: { marca: 'Baic' },
+      it('handles empty strings safely', () => {
+        expect(formatYear('')).toBe('');
       });
-      expect(baicPage.current.availableModels).toEqual(VEHICLE_MODELS.Baic);
+    });
 
-      const kaiyiPage = VehicleCreditViewModelPageObject.render({
-        defaultValues: { marca: 'Kaiyi' },
+    describe('formatCurrencyDisplay', () => {
+      it('formats raw number strings into Costa Rican / European format (dots for thousands, comma for decimals)', () => {
+        expect(formatCurrencyDisplay('5305000.25')).toBe('5.305.000,25');
+        expect(formatCurrencyDisplay(5305000.25)).toBe('5.305.000,25');
+        expect(formatCurrencyDisplay('5305000')).toBe('5.305.000');
+        expect(formatCurrencyDisplay(5305000)).toBe('5.305.000');
       });
-      expect(kaiyiPage.current.availableModels).toEqual([]);
 
-      const wulingPage = VehicleCreditViewModelPageObject.render({
-        defaultValues: { marca: 'Wuling' },
+      it('handles dynamic typing by preserving trailing commas and dots while typing decimals', () => {
+        expect(formatCurrencyDisplay('500,')).toBe('500,');
+        expect(formatCurrencyDisplay('500.')).toBe('500,');
+        expect(formatCurrencyDisplay('10.000.')).toBe('10.000,');
+        expect(formatCurrencyDisplay('500,2')).toBe('500,2');
+        expect(formatCurrencyDisplay('500,25')).toBe('500,25');
       });
-      expect(wulingPage.current.availableModels).toEqual([]);
+
+      it('treats single-dot thousands and backspaced groups as integers', () => {
+        expect(formatCurrencyDisplay('20.000')).toBe('20.000');
+        expect(formatCurrencyDisplay('10.00')).toBe('1.000');
+        expect(formatCurrencyDisplay('2.00')).toBe('200');
+        expect(parseCurrencyToNumber('20.000')).toBe(20000);
+        expect(parseCurrencyToNumber('10.000')).toBe(10000);
+      });
+
+      it('handles empty, zero, and boundary inputs gracefully', () => {
+        expect(formatCurrencyDisplay('')).toBe('');
+        expect(formatCurrencyDisplay(0)).toBe('0');
+        expect(formatCurrencyDisplay('0,')).toBe('0,');
+      });
+    });
+
+    describe('parseCurrencyToNumber', () => {
+      it('converts formatted Costa Rican currency strings back to JS numbers', () => {
+        expect(parseCurrencyToNumber('5.305.000,25')).toBe(5305000.25);
+        expect(parseCurrencyToNumber('5.305.000')).toBe(5305000);
+        expect(parseCurrencyToNumber('500,')).toBe(500);
+      });
+
+      it('handles raw numbers and empty inputs safely', () => {
+        expect(parseCurrencyToNumber(20000)).toBe(20000);
+        expect(parseCurrencyToNumber(5305000.25)).toBe(5305000.25);
+        expect(parseCurrencyToNumber('')).toBe(0);
+      });
     });
   });
 
@@ -62,7 +121,7 @@ describe('useVehicleCreditViewModel Unit Tests', () => {
         },
       });
 
-      expect(page.current.availableModels).toEqual(VEHICLE_MODELS.BYD);
+      expect(page.getFieldValue('modelo')).toBe('S1 Pro');
     });
 
     it('automatically resets modelo to empty string when marca changes', async () => {
@@ -73,11 +132,11 @@ describe('useVehicleCreditViewModel Unit Tests', () => {
         },
       });
 
-      expect(page.current.availableModels).toEqual(VEHICLE_MODELS.BYD);
+      expect(page.getFieldValue('modelo')).toBe('S1 Pro');
 
       await page.setFieldValue('marca', 'Foton');
 
-      expect(page.current.availableModels).toEqual(VEHICLE_MODELS.Foton);
+      expect(page.getFieldValue('modelo')).toBe('');
     });
   });
 
@@ -91,13 +150,39 @@ describe('useVehicleCreditViewModel Unit Tests', () => {
       await page.handleFinancialChange('monto_prima', 6000);
       expect(page.current.derivedMontoFinanciar).toBe(24000);
     });
+
+    it('automatically calculates monto_financiar via useEffect when inputs change', async () => {
+      const page = VehicleCreditViewModelPageObject.render();
+
+      await page.setFieldValue('valor_vehiculo', 25000);
+      await page.setFieldValue('monto_prima', 5000);
+
+      expect(page.getFieldValue('monto_financiar')).toBe('20.000');
+      expect(parseCurrencyToNumber(page.getFieldValue('monto_financiar'))).toBe(
+        20000,
+      );
+    });
+
+    it('clamps monto_financiar to 0 if monto_prima exceeds valor_vehiculo', async () => {
+      const page = VehicleCreditViewModelPageObject.render();
+
+      await page.setFieldValue('valor_vehiculo', 10000);
+      await page.setFieldValue('monto_prima', 15000);
+
+      expect(page.getFieldValue('monto_financiar')).toBe('0');
+      expect(parseCurrencyToNumber(page.getFieldValue('monto_financiar'))).toBe(
+        0,
+      );
+      expect(page.current.derivedMontoFinanciar).toBe(0);
+    });
   });
 
   describe('form submission', () => {
     it('calls onSuccess with valid form data upon handleNext', async () => {
       const onSuccessMock = jest.fn();
       const validData = {
-        color_ano: 'Blanco (2024)',
+        anio: '2024',
+        color: 'Blanco',
         marca: 'BYD',
         modelo: 'S1 Pro',
         moneda: 'USD' as const,
@@ -117,7 +202,8 @@ describe('useVehicleCreditViewModel Unit Tests', () => {
       expect(onSuccessMock).toHaveBeenCalledTimes(1);
       expect(onSuccessMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          color_ano: 'Blanco (2024)',
+          anio: '2024',
+          color: 'Blanco',
           marca: 'BYD',
           modelo: 'S1 Pro',
           moneda: 'USD',

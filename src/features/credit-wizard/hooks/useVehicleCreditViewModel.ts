@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type {
   Control,
   FieldErrors,
@@ -10,22 +10,34 @@ import { useForm, useWatch } from 'react-hook-form';
 import {
   FINANCING_TERMS,
   VEHICLE_BRANDS,
-  VEHICLE_COLORS_YEARS,
   VEHICLE_CREDIT_SUBMIT_DELAY_MS,
-  VEHICLE_MODELS,
 } from '../constants/VehicleCredit.constants';
 import { vehicleCreditSchema } from '../schemas/VehicleCredit.schema';
 import type { VehicleCreditFormValues } from '../types/VehicleCredit.types';
+import {
+  formatCapitalizeWords,
+  formatCurrencyDisplay,
+  formatYear,
+  parseCurrencyToNumber,
+} from '../utils/vehicleCreditFormatters';
+
+export {
+  formatCapitalizeWords,
+  formatCurrencyDisplay,
+  formatYear,
+  parseCurrencyToNumber,
+};
 
 export const VEHICLE_CREDIT_DEFAULT_VALUES: VehicleCreditFormValues = {
-  color_ano: '',
+  anio: '',
+  color: '',
   marca: '',
   modelo: '',
   moneda: 'USD',
-  monto_financiar: 0,
-  monto_prima: 0,
-  plazo_meses: 84,
-  valor_vehiculo: 0,
+  monto_financiar: '',
+  monto_prima: '',
+  plazo_meses: '96 Meses (8 Años)',
+  valor_vehiculo: '',
 };
 
 export type FinancialField = 'monto_prima' | 'valor_vehiculo';
@@ -37,22 +49,21 @@ export interface UseVehicleCreditViewModelProps {
 }
 
 export interface UseVehicleCreditViewModelReturn {
-  availableColorsYears: readonly string[];
-  availableModels: readonly string[];
   brands: readonly string[];
-  colorsYears: readonly string[];
   control: Control<VehicleCreditFormValues>;
   derivedMontoFinanciar: number;
   errors: FieldErrors<VehicleCreditFormValues>;
   financingTerms: readonly string[];
-  handleFinancialChange: (field: FinancialField, value: number) => void;
+  handleFinancialChange: (
+    field: FinancialField,
+    value: number | string,
+  ) => void;
   handleNext: (e?: unknown) => Promise<void>;
   handleSubmit: (e?: unknown) => Promise<void>;
   isSubmitting: boolean;
   isValid: boolean;
   setValue: UseFormSetValue<VehicleCreditFormValues>;
   vehicleBrands: readonly string[];
-  vehicleColorsYears: readonly string[];
 }
 
 export const useVehicleCreditViewModel = (
@@ -72,6 +83,7 @@ export const useVehicleCreditViewModel = (
     getValues,
     handleSubmit: formHandleSubmit,
     setValue,
+    trigger,
   } = useForm<VehicleCreditFormValues>({
     defaultValues: {
       ...VEHICLE_CREDIT_DEFAULT_VALUES,
@@ -113,41 +125,56 @@ export const useVehicleCreditViewModel = (
     prevMarcaRef.current = selectedMarca;
   }, [selectedMarca, setValue]);
 
-  const availableModels = useMemo<readonly string[]>(() => {
-    if (!selectedMarca || !(selectedMarca in VEHICLE_MODELS)) {
-      return [];
+  useEffect(() => {
+    const numValor = parseCurrencyToNumber(valorVehiculo);
+    const numPrima = parseCurrencyToNumber(montoPrima);
+    const result = Math.max(0, numValor - numPrima);
+    const formatted = formatCurrencyDisplay(result);
+    const hasFinancialInput = numValor > 0 || numPrima > 0;
+    setValue('monto_financiar', formatted, { shouldValidate: false });
+    if (hasFinancialInput) {
+      void trigger(['monto_financiar', 'monto_prima']);
     }
-    return VEHICLE_MODELS[selectedMarca as keyof typeof VEHICLE_MODELS];
-  }, [selectedMarca]);
+  }, [montoPrima, setValue, trigger, valorVehiculo]);
 
-  const derivedMontoFinanciar =
-    (typeof valorVehiculo === 'number'
-      ? valorVehiculo
-      : Number(valorVehiculo) || 0) -
-    (typeof montoPrima === 'number' ? montoPrima : Number(montoPrima) || 0);
+  const derivedMontoFinanciar = Math.max(
+    0,
+    parseCurrencyToNumber(valorVehiculo) - parseCurrencyToNumber(montoPrima),
+  );
 
   const handleFinancialChange = useCallback(
-    (field: FinancialField, value: number): void => {
-      setValue(field, value, { shouldValidate: true });
+    (field: FinancialField, value: number | string): void => {
+      const formatted =
+        typeof value === 'number' ? formatCurrencyDisplay(value) : value;
+      setValue(field, formatted, { shouldValidate: true });
 
       const currentValor =
-        field === 'valor_vehiculo' ? value : getValues('valor_vehiculo') || 0;
+        field === 'valor_vehiculo'
+          ? parseCurrencyToNumber(value)
+          : parseCurrencyToNumber(getValues('valor_vehiculo'));
       const currentPrima =
-        field === 'monto_prima' ? value : getValues('monto_prima') || 0;
-      const calculatedFinanciar = currentValor - currentPrima;
+        field === 'monto_prima'
+          ? parseCurrencyToNumber(value)
+          : parseCurrencyToNumber(getValues('monto_prima'));
+      const calculatedFinanciar = Math.max(0, currentValor - currentPrima);
 
-      setValue('monto_financiar', calculatedFinanciar, {
-        shouldValidate: true,
-      });
+      setValue(
+        'monto_financiar',
+        formatCurrencyDisplay(calculatedFinanciar),
+        {
+          shouldValidate: true,
+        },
+      );
     },
     [getValues, setValue],
   );
 
   const handleNext = useCallback(
     async (e?: unknown): Promise<void> => {
-      const currentValor = getValues('valor_vehiculo') || 0;
-      const currentPrima = getValues('monto_prima') || 0;
-      setValue('monto_financiar', currentValor - currentPrima, {
+      const currentValor = parseCurrencyToNumber(getValues('valor_vehiculo'));
+      const currentPrima = parseCurrencyToNumber(getValues('monto_prima'));
+      const calculated = Math.max(0, currentValor - currentPrima);
+      setValue('monto_financiar', formatCurrencyDisplay(calculated), {
         shouldValidate: true,
       });
 
@@ -169,10 +196,7 @@ export const useVehicleCreditViewModel = (
   );
 
   return {
-    availableColorsYears: VEHICLE_COLORS_YEARS,
-    availableModels,
     brands: VEHICLE_BRANDS,
-    colorsYears: VEHICLE_COLORS_YEARS,
     control,
     derivedMontoFinanciar,
     errors,
@@ -184,6 +208,5 @@ export const useVehicleCreditViewModel = (
     isValid,
     setValue,
     vehicleBrands: VEHICLE_BRANDS,
-    vehicleColorsYears: VEHICLE_COLORS_YEARS,
   };
 };

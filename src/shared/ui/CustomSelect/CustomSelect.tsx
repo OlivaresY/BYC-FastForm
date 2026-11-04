@@ -12,9 +12,11 @@ import type { CustomSelectProps } from './CustomSelect.types';
 import { useCustomSelect } from './hooks/useCustomSelect';
 
 export const CustomSelect = React.memo(({
-  disabled = false,
+  disabled: disabledProp = false,
   errorMessage,
   helperText,
+  hideChevron = false,
+  isDisabled: isDisabledProp = false,
   label,
   leftIcon,
   modalTitle,
@@ -26,6 +28,7 @@ export const CustomSelect = React.memo(({
   testID,
   value,
 }: CustomSelectProps): React.JSX.Element => {
+  const disabled = disabledProp || isDisabledProp;
   const {
     closeModal,
     handleSelectOption,
@@ -139,13 +142,15 @@ export const CustomSelect = React.memo(({
           {displayText}
         </Text>
 
-        <View testID={chevronIconTestId}>
-          <ChevronDownIcon
-            color={CUSTOM_SELECT_COLORS.CHEVRON_STROKE}
-            size={CUSTOM_SELECT_ICON_DIMENSIONS.CHEVRON_SIZE_PX}
-            strokeWidth={CUSTOM_SELECT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
-          />
-        </View>
+        {!hideChevron ? (
+          <View testID={chevronIconTestId}>
+            <ChevronDownIcon
+              color={CUSTOM_SELECT_COLORS.CHEVRON_STROKE}
+              size={CUSTOM_SELECT_ICON_DIMENSIONS.CHEVRON_SIZE_PX}
+              strokeWidth={CUSTOM_SELECT_ICON_DIMENSIONS.STROKE_WIDTH_PX}
+            />
+          </View>
+        ) : null}
       </Pressable>
 
       {/* Feedback Row: Error takes precedence over Helper text */}

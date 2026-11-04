@@ -4,6 +4,10 @@ import type { ReactTestInstance } from 'react-test-renderer';
 import { CustomTextInput } from '../CustomTextInput';
 import { CUSTOM_TEXT_INPUT_TEST_IDS } from '../constants/CustomTextInput.constants';
 import type { CustomTextInputProps } from '../CustomTextInput.types';
+import {
+  KeyboardAutoScrollContext,
+  type KeyboardAutoScrollContextValue,
+} from '../../KeyboardAwareStepLayout';
 
 export class CustomTextInputPageObject {
   private readonly customTestId?: string;
@@ -16,6 +20,20 @@ export class CustomTextInputPageObject {
     props: CustomTextInputProps = {},
   ): CustomTextInputPageObject {
     render(React.createElement(CustomTextInput, props));
+    return new CustomTextInputPageObject(props.testID);
+  }
+
+  public static renderWithContext(
+    props: CustomTextInputProps = {},
+    contextValue: KeyboardAutoScrollContextValue,
+  ): CustomTextInputPageObject {
+    render(
+      React.createElement(
+        KeyboardAutoScrollContext.Provider,
+        { value: contextValue },
+        React.createElement(CustomTextInput, props),
+      ),
+    );
     return new CustomTextInputPageObject(props.testID);
   }
 

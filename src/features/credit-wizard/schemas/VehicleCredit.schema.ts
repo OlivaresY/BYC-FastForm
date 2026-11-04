@@ -2,27 +2,32 @@ import { z } from 'zod';
 import {
   FINANCING_TERMS,
   VEHICLE_BRANDS,
-  VEHICLE_COLORS_YEARS,
-  VEHICLE_MODELS,
 } from '../constants/VehicleCredit.constants';
 import type { VehicleCreditFormValues } from '../types/VehicleCredit.types';
+import { parseCurrencyToNumber } from '../utils/vehicleCreditFormatters';
 
-export {
-  FINANCING_TERMS,
-  VEHICLE_BRANDS,
-  VEHICLE_COLORS_YEARS,
-  VEHICLE_MODELS,
-};
+export { FINANCING_TERMS, VEHICLE_BRANDS };
 
 export const vehicleCreditSchema: z.ZodType<VehicleCreditFormValues> = z
   .object({
-    color_ano: z
+    anio: z
       .string({
-        error: 'El color y año son obligatorios.',
+        error: 'El año es obligatorio.',
+      })
+      .trim()
+      .length(4, {
+        message: 'Debe ser un año válido.',
+      })
+      .regex(/^\d+$/, {
+        message: 'Debe ser un año válido.',
+      }),
+    color: z
+      .string({
+        error: 'El color es obligatorio.',
       })
       .trim()
       .min(1, {
-        message: 'El color y año son obligatorios.',
+        message: 'El color es obligatorio.',
       }),
     marca: z
       .string({
@@ -43,24 +48,24 @@ export const vehicleCreditSchema: z.ZodType<VehicleCreditFormValues> = z
     moneda: z.enum(['USD', 'CRC'], {
       error: 'Seleccione una moneda válida (USD o CRC).',
     }),
-    monto_financiar: z.number({
-      error: 'El monto a financiar es obligatorio.',
-    }),
-    monto_prima: z
-      .number({
-        error: 'El monto de la prima es obligatorio.',
-      })
-      .min(0, {
-        message: 'El monto de la prima debe ser mayor o igual a 0.',
+    monto_financiar: z.preprocess(
+      (val) => parseCurrencyToNumber(val),
+      z.number({
+        error: 'El monto a financiar es obligatorio.',
       }),
-    plazo_meses: z.union([
+    ),
+    monto_prima: z.preprocess(
+      (val) => parseCurrencyToNumber(val),
       z
         .number({
-          error: 'El plazo en meses es obligatorio.',
+          error: 'El monto de la prima es obligatorio.',
         })
-        .gt(0, {
-          message: 'El plazo en meses debe ser mayor a 0.',
+        .min(0, {
+          message: 'El monto de la prima debe ser mayor o igual a 0.',
         }),
+    ),
+    plazo_meses: z.preprocess(
+      (val) => (typeof val === 'number' ? String(val) : val),
       z
         .string({
           error: 'El plazo en meses es obligatorio.',
@@ -69,40 +74,37 @@ export const vehicleCreditSchema: z.ZodType<VehicleCreditFormValues> = z
         .min(1, {
           message: 'El plazo en meses es obligatorio.',
         }),
-    ]),
-    valor_vehiculo: z
-      .number({
-        error: 'El valor del vehículo es obligatorio.',
-      })
-      .gt(0, {
-        message: 'El valor del vehículo debe ser mayor a 0.',
-      }),
+    ),
+    valor_vehiculo: z.preprocess(
+      (val) => parseCurrencyToNumber(val),
+      z
+        .number({
+          error: 'El valor del vehículo es obligatorio.',
+        })
+        .gt(0, {
+          message: 'El valor del vehículo debe ser mayor a 0.',
+        }),
+    ),
   })
   .superRefine((data, ctx) => {
-    if (
-      typeof data.valor_vehiculo === 'number' &&
-      typeof data.monto_prima === 'number'
-    ) {
-      const minPrima = data.valor_vehiculo * 0.2;
-      if (data.monto_prima < minPrima) {
+    const numValor = parseCurrencyToNumber(data.valor_vehiculo);
+    const numPrima = parseCurrencyToNumber(data.monto_prima);
+    const numFinanciar = parseCurrencyToNumber(data.monto_financiar);
+
+    if (numValor > 0) {
+      const minPrima = numValor * 0.1;
+      if (numPrima < minPrima) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'La prima debe ser al menos el 20% del valor del vehículo.',
+          message: '10% de prima mínima permitida',
           path: ['monto_prima'],
         });
       }
-    }
 
-    if (
-      typeof data.valor_vehiculo === 'number' &&
-      typeof data.monto_prima === 'number' &&
-      typeof data.monto_financiar === 'number'
-    ) {
-      const expectedMontoFinanciar = data.valor_vehiculo - data.monto_prima;
+      const expectedMontoFinanciar = Math.max(0, numValor - numPrima);
       const isExactMatch =
-        data.monto_financiar === expectedMontoFinanciar ||
-        Math.abs(data.monto_financiar - expectedMontoFinanciar) <
-          Number.EPSILON;
+        numFinanciar === expectedMontoFinanciar ||
+        Math.abs(numFinanciar - expectedMontoFinanciar) < Number.EPSILON;
 
       if (!isExactMatch) {
         ctx.addIssue({

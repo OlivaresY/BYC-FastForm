@@ -17,13 +17,14 @@ export class VehicleCreditStepPOM {
     const { result } = renderHook(() =>
       useForm<VehicleCreditFormValues>({
         defaultValues: {
-          color_ano: '',
+          anio: '2024',
+          color: 'Blanco',
           marca: '',
           modelo: '',
           moneda: 'USD',
           monto_financiar: 0,
           monto_prima: 0,
-          plazo_meses: 84,
+          plazo_meses: '96 Meses (8 Años)',
           valor_vehiculo: 0,
         },
       }),
@@ -60,16 +61,44 @@ export class VehicleCreditStepPOM {
     return screen.getByTestId('vehicle-credit-financing-plan-container');
   }
 
+  public get unitSpecificationsHeader(): ReactTestInstance {
+    return screen.getByText('1. ESPECIFICACIONES DE LA UNIDAD');
+  }
+
+  public get financingPlanHeader(): ReactTestInstance {
+    return screen.getByText('2. PLAN DE FINANCIAMIENTO');
+  }
+
+  public get marcaSelect(): ReactTestInstance {
+    return screen.getByTestId('vehicle-credit-marca-select');
+  }
+
   public get marcaInput(): ReactTestInstance {
-    return screen.getByTestId('vehicle-credit-marca-input');
+    return this.marcaSelect;
   }
 
   public get modeloInput(): ReactTestInstance {
     return screen.getByTestId('vehicle-credit-modelo-input');
   }
 
+  public get modeloSelect(): ReactTestInstance {
+    return this.modeloInput;
+  }
+
+  public get colorInput(): ReactTestInstance {
+    return screen.getByTestId('vehicle-credit-color-input');
+  }
+
   public get colorAnoInput(): ReactTestInstance {
-    return screen.getByTestId('vehicle-credit-color-ano-input');
+    return this.colorInput;
+  }
+
+  public get colorAnoSelect(): ReactTestInstance {
+    return this.colorInput;
+  }
+
+  public get anioInput(): ReactTestInstance {
+    return screen.getByTestId('vehicle-credit-anio-input');
   }
 
   public get monedaSelect(): ReactTestInstance {
@@ -84,12 +113,23 @@ export class VehicleCreditStepPOM {
     return screen.getByTestId('vehicle-credit-monto-prima-input');
   }
 
+  public get montoPrimaHelperText(): ReactTestInstance | null {
+    return (
+      screen.queryByText('10% de prima mínima permitida') ??
+      screen.queryByTestId('vehicle-credit-monto-prima-input-helper-text')
+    );
+  }
+
   public get derivedMontoFinanciar(): ReactTestInstance {
     return screen.getByTestId('vehicle-credit-derived-monto-financiar');
   }
 
+  public get plazoMesesSelect(): ReactTestInstance {
+    return screen.getByTestId('vehicle-credit-plazo-meses-select');
+  }
+
   public get plazoMesesInput(): ReactTestInstance {
-    return screen.getByTestId('vehicle-credit-plazo-meses-input');
+    return this.plazoMesesSelect;
   }
 
   // =========================================================================
@@ -97,15 +137,32 @@ export class VehicleCreditStepPOM {
   // =========================================================================
 
   public get marcaError(): ReactTestInstance | null {
-    return screen.queryByTestId('vehicle-credit-marca-input-error');
+    return (
+      screen.queryByTestId('vehicle-credit-marca-select-error') ??
+      screen.queryByTestId('vehicle-credit-marca-input-error')
+    );
   }
 
   public get modeloError(): ReactTestInstance | null {
-    return screen.queryByTestId('vehicle-credit-modelo-input-error');
+    return (
+      screen.queryByTestId('vehicle-credit-modelo-input-error') ??
+      screen.queryByTestId('vehicle-credit-modelo-select-error')
+    );
+  }
+
+  public get colorError(): ReactTestInstance | null {
+    return screen.queryByTestId('vehicle-credit-color-input-error');
+  }
+
+  public get anioError(): ReactTestInstance | null {
+    return screen.queryByTestId('vehicle-credit-anio-input-error');
   }
 
   public get colorAnoError(): ReactTestInstance | null {
-    return screen.queryByTestId('vehicle-credit-color-ano-input-error');
+    return (
+      screen.queryByTestId('vehicle-credit-color-input-error') ??
+      screen.queryByTestId('vehicle-credit-color-ano-select-error')
+    );
   }
 
   public get valorVehiculoError(): ReactTestInstance | null {
@@ -117,29 +174,35 @@ export class VehicleCreditStepPOM {
   }
 
   public get montoFinanciarError(): ReactTestInstance | null {
-    return screen.queryByTestId('vehicle-credit-monto-financiar-error');
+    return (
+      screen.queryByTestId('vehicle-credit-derived-monto-financiar-error') ??
+      screen.queryByTestId('vehicle-credit-monto-financiar-error')
+    );
   }
 
   public get plazoMesesError(): ReactTestInstance | null {
-    return screen.queryByTestId('vehicle-credit-plazo-meses-input-error');
+    return (
+      screen.queryByTestId('vehicle-credit-plazo-meses-select-error') ??
+      screen.queryByTestId('vehicle-credit-plazo-meses-input-error')
+    );
   }
 
   // =========================================================================
   // Fluent Action Helpers (Method Chaining: return this)
   // =========================================================================
 
-  public fillMarca(value: string): this {
-    fireEvent.changeText(this.marcaInput, value);
-    return this;
-  }
-
   public fillModelo(value: string): this {
     fireEvent.changeText(this.modeloInput, value);
     return this;
   }
 
-  public fillColorAno(value: string): this {
-    fireEvent.changeText(this.colorAnoInput, value);
+  public fillColor(value: string): this {
+    fireEvent.changeText(this.colorInput, value);
+    return this;
+  }
+
+  public fillAnio(value: string): this {
+    fireEvent.changeText(this.anioInput, value);
     return this;
   }
 
@@ -150,11 +213,6 @@ export class VehicleCreditStepPOM {
 
   public fillMontoPrima(value: string): this {
     fireEvent.changeText(this.montoPrimaInput, value);
-    return this;
-  }
-
-  public fillPlazoMeses(value: string): this {
-    fireEvent.changeText(this.plazoMesesInput, value);
     return this;
   }
 }

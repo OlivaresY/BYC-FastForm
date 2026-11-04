@@ -42,6 +42,15 @@ export class VehicleCreditViewModelPageObject {
     return this.hookResult.result.current.isValid;
   }
 
+  public getFieldValue<K extends keyof VehicleCreditFormValues>(
+    field: K,
+  ): VehicleCreditFormValues[K] {
+    return (
+      this.hookResult.result.current.control
+        ._formValues as VehicleCreditFormValues
+    )[field];
+  }
+
   public async setFieldValue<K extends keyof VehicleCreditFormValues>(
     field: K,
     value: VehicleCreditFormValues[K],
@@ -75,3 +84,4 @@ export class VehicleCreditViewModelPageObject {
     return this;
   }
 }
+

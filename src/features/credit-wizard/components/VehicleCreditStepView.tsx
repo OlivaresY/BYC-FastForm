@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Text, View } from 'react-native';
-import { Controller } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
 import {
   BanknoteIcon,
   CarIcon,
@@ -9,6 +9,9 @@ import {
   CustomTextInput,
 } from '@/shared/ui';
 import {
+  formatCapitalizeWords,
+  formatCurrencyDisplay,
+  formatYear,
   useVehicleCreditViewModel,
   type UseVehicleCreditViewModelReturn,
 } from '../hooks/useVehicleCreditViewModel';
@@ -45,14 +48,30 @@ export const VehicleCreditStepView = ({
   const viewModel = viewModelProp ?? defaultViewModel;
 
   const {
+    brands = [],
     control,
     derivedMontoFinanciar,
     errors,
-    handleFinancialChange,
+    financingTerms = [],
     handleNext,
     isSubmitting,
     isValid,
   } = viewModel;
+
+  const watchedMontoFinanciar = useWatch({
+    control,
+    name: 'monto_financiar',
+  });
+
+  const brandOptions = useMemo<readonly CustomSelectOption[]>(
+    () => brands.map((brand) => ({ label: brand, value: brand })),
+    [brands],
+  );
+
+  const financingTermOptions = useMemo<readonly CustomSelectOption[]>(
+    () => financingTerms.map((term) => ({ label: term, value: term })),
+    [financingTerms],
+  );
 
   return (
     <WizardStepLayout
@@ -69,21 +88,20 @@ export const VehicleCreditStepView = ({
       title='Vehículo y Crédito'
       totalSteps={totalSteps}
     >
-      {({ onInputFocus }) => (
-        <View className='w-full gap-4'>
+      <View className='w-full gap-4'>
           {/* CONTAINER 1: ESPECIFICACIONES DE LA UNIDAD */}
           <View
-            className='bg-stone-50 rounded-2xl p-4 gap-4 mb-2 border border-stone-200'
+            className='w-full rounded-2xl bg-stone-50 p-4 gap-4 border border-stone-200'
             testID='vehicle-credit-unit-specifications-container'
           >
-            <View className='flex-row items-center gap-2 mb-2'>
+            <View className='flex-row items-center gap-2'>
               <CarIcon
                 color='#111111'
                 size={20}
                 strokeWidth={2}
               />
               <Text className='text-base font-bold text-gray-900'>
-                Especificaciones de la Unidad
+                1. ESPECIFICACIONES DE LA UNIDAD
               </Text>
             </View>
 
@@ -91,21 +109,19 @@ export const VehicleCreditStepView = ({
             <Controller
               control={control}
               name='marca'
-              render={({ field: { onBlur, onChange, value } }) => (
-                <View className='mb-2'>
-                  <CustomTextInput
-                    editable={!disabled && !isSubmitting}
-                    error={errors.marca?.message}
-                    label='Marca'
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    onFocus={onInputFocus}
-                    placeholder='Ej. Toyota, Hyundai, BYD'
-                    required
-                    testID='vehicle-credit-marca-input'
-                    value={value}
-                  />
-                </View>
+              render={({ field: { onChange, value } }) => (
+                <CustomSelect
+                  disabled={disabled || isSubmitting}
+                  errorMessage={errors.marca?.message}
+                  label='Marca'
+                  modalTitle='Seleccione la Marca'
+                  onValueChange={onChange}
+                  options={brandOptions}
+                  placeholder='Seleccione la marca'
+                  required
+                  testID='vehicle-credit-marca-select'
+                  value={value}
+                />
               )}
             />
 
@@ -114,59 +130,88 @@ export const VehicleCreditStepView = ({
               control={control}
               name='modelo'
               render={({ field: { onBlur, onChange, value } }) => (
-                <View className='mb-2'>
-                  <CustomTextInput
-                    editable={!disabled && !isSubmitting}
-                    error={errors.modelo?.message}
-                    label='Modelo'
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    onFocus={onInputFocus}
-                    placeholder='Ej. Corolla, Tucson, Yuan Pro'
-                    required
-                    testID='vehicle-credit-modelo-input'
-                    value={value}
-                  />
-                </View>
+                <CustomTextInput
+                  editable={!disabled && !isSubmitting}
+                  error={errors.modelo?.message}
+                  label='Modelo'
+                  onBlur={onBlur}
+                  onChangeText={(text: string) => {
+                    const formatted = formatCapitalizeWords(text);
+                    onChange(formatted);
+                  }}
+                  placeholder='Ej. S1 Pro, Denza, BJ41'
+                  required
+                  testID='vehicle-credit-modelo-input'
+                  value={value}
+                />
               )}
             />
 
-            {/* Color y Año */}
-            <Controller
-              control={control}
-              name='color_ano'
-              render={({ field: { onBlur, onChange, value } }) => (
-                <View className='mb-2'>
-                  <CustomTextInput
-                    editable={!disabled && !isSubmitting}
-                    error={errors.color_ano?.message}
-                    label='Color y Año'
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    onFocus={onInputFocus}
-                    placeholder='Ej. Blanco 2024'
-                    required
-                    testID='vehicle-credit-color-ano-input'
-                    value={value}
-                  />
-                </View>
-              )}
-            />
+            {/* Color y Año (Parallel Inputs) */}
+            <View className='flex-row gap-3'>
+              <View className='flex-1'>
+                <Controller
+                  control={control}
+                  name='color'
+                  render={({ field: { onBlur, onChange, value } }) => (
+                    <CustomTextInput
+                      editable={!disabled && !isSubmitting}
+                      error={errors.color?.message}
+                      label='Color'
+                      onBlur={onBlur}
+                      onChangeText={(text: string) => {
+                        const formatted = formatCapitalizeWords(text);
+                        onChange(formatted);
+                      }}
+                          placeholder='Ej. Blanco'
+                      required
+                      testID='vehicle-credit-color-input'
+                      value={value}
+                    />
+                  )}
+                />
+              </View>
+
+              <View className='w-28'>
+                <Controller
+                  control={control}
+                  name='anio'
+                  render={({ field: { onBlur, onChange, value } }) => (
+                    <CustomTextInput
+                      editable={!disabled && !isSubmitting}
+                      error={errors.anio?.message}
+                      keyboardType='numeric'
+                      label='Año'
+                      maxLength={4}
+                      onBlur={onBlur}
+                      onChangeText={(text: string) => {
+                        const formatted = formatYear(text);
+                        onChange(formatted);
+                      }}
+                          placeholder='2024'
+                      required
+                      testID='vehicle-credit-anio-input'
+                      value={value}
+                    />
+                  )}
+                />
+              </View>
+            </View>
           </View>
 
           {/* CONTAINER 2: PLAN DE FINANCIAMIENTO */}
           <View
-            className='bg-stone-50 rounded-2xl p-4 gap-4 mb-4 border border-stone-200'
+            className='w-full rounded-2xl bg-stone-50 p-4 gap-4 border border-stone-200'
             testID='vehicle-credit-financing-plan-container'
           >
-            <View className='flex-row items-center gap-2 mb-2'>
+            <View className='flex-row items-center gap-2'>
               <BanknoteIcon
                 color='#111111'
                 size={20}
                 strokeWidth={2}
               />
               <Text className='text-base font-bold text-gray-900'>
-                Plan de Financiamiento
+                2. PLAN DE FINANCIAMIENTO
               </Text>
             </View>
 
@@ -175,20 +220,18 @@ export const VehicleCreditStepView = ({
               control={control}
               name='moneda'
               render={({ field: { onChange, value } }) => (
-                <View className='mb-2'>
-                  <CustomSelect
-                    disabled={disabled || isSubmitting}
-                    errorMessage={errors.moneda?.message}
-                    label='Moneda'
-                    modalTitle='Seleccione la Moneda'
-                    onValueChange={onChange}
-                    options={CURRENCY_OPTIONS}
-                    placeholder='Seleccione la moneda'
-                    required
-                    testID='vehicle-credit-moneda-select'
-                    value={value}
-                  />
-                </View>
+                <CustomSelect
+                  disabled={disabled || isSubmitting}
+                  errorMessage={errors.moneda?.message}
+                  label='Moneda'
+                  modalTitle='Seleccione la Moneda'
+                  onValueChange={onChange}
+                  options={CURRENCY_OPTIONS}
+                  placeholder='Seleccione la moneda'
+                  required
+                  testID='vehicle-credit-moneda-select'
+                  value={value}
+                />
               )}
             />
 
@@ -196,27 +239,27 @@ export const VehicleCreditStepView = ({
             <Controller
               control={control}
               name='valor_vehiculo'
-              render={({ field: { onBlur, value } }) => (
-                <View className='mb-2'>
-                  <CustomTextInput
-                    editable={!disabled && !isSubmitting}
-                    error={errors.valor_vehiculo?.message}
-                    keyboardType='numeric'
-                    label='Valor del Vehículo'
-                    leftIcon='banknote'
-                    onBlur={onBlur}
-                    onChangeText={(text: string) => {
-                      const digits = text.replace(/[^0-9]/g, '');
-                      const num = digits === '' ? 0 : Number(digits);
-                      handleFinancialChange('valor_vehiculo', num);
-                    }}
-                    onFocus={onInputFocus}
-                    placeholder='0'
-                    required
-                    testID='vehicle-credit-valor-vehiculo-input'
-                    value={value ? String(value) : ''}
-                  />
-                </View>
+              render={({ field: { onBlur, onChange, value } }) => (
+                <CustomTextInput
+                  editable={!disabled && !isSubmitting}
+                  error={errors.valor_vehiculo?.message}
+                  keyboardType='numeric'
+                  label='Valor del Vehículo'
+                  leftIcon='banknote'
+                  onBlur={onBlur}
+                  onChangeText={(text: string) => {
+                    const formatted = formatCurrencyDisplay(text);
+                    onChange(formatted);
+                  }}
+                  placeholder='0'
+                  required
+                  testID='vehicle-credit-valor-vehiculo-input'
+                  value={
+                    value !== undefined && value !== null
+                      ? String(value)
+                      : ''
+                  }
+                />
               )}
             />
 
@@ -224,92 +267,79 @@ export const VehicleCreditStepView = ({
             <Controller
               control={control}
               name='monto_prima'
-              render={({ field: { onBlur, value } }) => (
-                <View className='mb-2'>
-                  <CustomTextInput
-                    editable={!disabled && !isSubmitting}
-                    error={errors.monto_prima?.message}
-                    helperText='20% Prima Mínima'
-                    keyboardType='numeric'
-                    label='Monto de Prima'
-                    labelRight={
-                      <Text className='text-xs text-gray-500 font-medium'>
-                        20% Prima Mínima
-                      </Text>
-                    }
-                    leftIcon='banknote'
-                    onBlur={onBlur}
-                    onChangeText={(text: string) => {
-                      const digits = text.replace(/[^0-9]/g, '');
-                      const num = digits === '' ? 0 : Number(digits);
-                      handleFinancialChange('monto_prima', num);
-                    }}
-                    onFocus={onInputFocus}
-                    placeholder='0'
-                    required
-                    testID='vehicle-credit-monto-prima-input'
-                    value={value ? String(value) : ''}
-                  />
-                </View>
+              render={({ field: { onBlur, onChange, value } }) => (
+                <CustomTextInput
+                  editable={!disabled && !isSubmitting}
+                  error={
+                    errors.monto_prima
+                      ? errors.monto_prima.message ??
+                        '10% de prima mínima permitida'
+                      : undefined
+                  }
+                  helperText={
+                    errors.monto_prima
+                      ? undefined
+                      : '10% de prima mínima permitida'
+                  }
+                  keyboardType='numeric'
+                  label='Monto de Prima'
+                  leftIcon='banknote'
+                  onBlur={onBlur}
+                  onChangeText={(text: string) => {
+                    const formatted = formatCurrencyDisplay(text);
+                    onChange(formatted);
+                  }}
+                  placeholder='0'
+                  required
+                  testID='vehicle-credit-monto-prima-input'
+                  value={
+                    value !== undefined && value !== null
+                      ? String(value)
+                      : ''
+                  }
+                />
               )}
             />
 
-            {/* Monto a Financiar (Derived Read-Only) */}
-            <View className='mb-2'>
-              <Text className='text-sm font-medium text-gray-900 mb-1.5'>
-                Monto a Financiar
-              </Text>
-              <View
-                accessibilityLabel='Monto a Financiar'
-                className='bg-stone-100 rounded-lg border border-gray-200 px-3.5 py-2.5 min-h-[48px] justify-center'
-              >
-                <Text
-                  className='text-base font-semibold text-gray-900'
-                  testID='vehicle-credit-derived-monto-financiar'
-                >
-                  {derivedMontoFinanciar !== 0
-                    ? String(derivedMontoFinanciar)
-                    : '0'}
-                </Text>
-              </View>
-              {errors.monto_financiar?.message ? (
-                <Text
-                  className='mt-1 text-xs text-brand-red'
-                  testID='vehicle-credit-monto-financiar-error'
-                >
-                  {errors.monto_financiar.message}
-                </Text>
-              ) : null}
-            </View>
+            {/* Monto a Financiar (Read-Only Auto-Calculated) */}
+            <CustomTextInput
+              editable={false}
+              error={errors.monto_financiar?.message}
+              helperText='Calculado automáticamente'
+              keyboardType='numeric'
+              label='Monto a Financiar'
+              leftIcon='banknote'
+              testID='vehicle-credit-derived-monto-financiar'
+              value={
+                typeof watchedMontoFinanciar === 'string' &&
+                watchedMontoFinanciar !== ''
+                  ? watchedMontoFinanciar
+                  : formatCurrencyDisplay(derivedMontoFinanciar)
+              }
+            />
 
             {/* Plazo en Meses */}
             <Controller
               control={control}
               name='plazo_meses'
-              render={({ field: { onBlur, onChange, value } }) => (
-                <View className='mb-2'>
-                  <CustomTextInput
-                    editable={!disabled && !isSubmitting}
-                    error={errors.plazo_meses?.message}
-                    keyboardType='numeric'
-                    label='Plazo en Meses'
-                    onBlur={onBlur}
-                    onChangeText={(text: string) => {
-                      const digits = text.replace(/[^0-9]/g, '');
-                      onChange(digits === '' ? 0 : Number(digits));
-                    }}
-                    onFocus={onInputFocus}
-                    placeholder='84'
-                    required
-                    testID='vehicle-credit-plazo-meses-input'
-                    value={value ? String(value) : ''}
-                  />
-                </View>
+              render={({ field: { onChange, value } }) => (
+                <CustomSelect
+                  errorMessage={errors.plazo_meses?.message}
+                  hideChevron={true}
+                  isDisabled={true}
+                  label='Plazo en Meses'
+                  modalTitle='Seleccione el Plazo'
+                  onValueChange={onChange}
+                  options={financingTermOptions}
+                  placeholder='Seleccione el plazo'
+                  required={false}
+                  testID='vehicle-credit-plazo-meses-select'
+                  value={value ? String(value) : ''}
+                />
               )}
             />
           </View>
         </View>
-      )}
     </WizardStepLayout>
   );
 };

@@ -1,3 +1,4 @@
+
 import { CustomTextInputPageObject } from './CustomTextInput.po';
 
 describe('CustomTextInput Component', () => {
@@ -181,5 +182,44 @@ describe('CustomTextInput Component', () => {
     expect(page.leftIcon?.props.testID).toBe('custom-id-left-icon');
     expect(page.validIcon?.props.testID).toBe('custom-id-valid-icon');
     expect(page.error?.props.testID).toBe('custom-id-error');
+  });
+
+  describe('KeyboardAutoScrollContext Integration', () => {
+    it('automatically dispatches onInputFocus from context when input focuses without manual onFocus prop', () => {
+      // Arrange
+      const mockOnInputFocus = jest.fn();
+      const page = CustomTextInputPageObject.renderWithContext(
+        {
+          placeholder: 'Test input',
+          testID: 'auto-scroll-input',
+        },
+        { onInputFocus: mockOnInputFocus },
+      );
+
+      // Act
+      page.focus();
+
+      // Assert
+      expect(mockOnInputFocus).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not duplicate onInputFocus calls when onFocus prop matches context onInputFocus', () => {
+      // Arrange
+      const mockOnInputFocus = jest.fn();
+      const page = CustomTextInputPageObject.renderWithContext(
+        {
+          onFocus: mockOnInputFocus,
+          placeholder: 'Test input',
+          testID: 'duplicate-input',
+        },
+        { onInputFocus: mockOnInputFocus },
+      );
+
+      // Act
+      page.focus();
+
+      // Assert - called only once
+      expect(mockOnInputFocus).toHaveBeenCalledTimes(1);
+    });
   });
 });

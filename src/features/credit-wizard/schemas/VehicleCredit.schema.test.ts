@@ -1,8 +1,6 @@
 import {
   FINANCING_TERMS,
   VEHICLE_BRANDS,
-  VEHICLE_COLORS_YEARS,
-  VEHICLE_MODELS,
   vehicleCreditSchema,
 } from './VehicleCredit.schema';
 import type { VehicleCreditFormValues } from '../types/VehicleCredit.types';
@@ -22,7 +20,8 @@ const getMessages = (
 const createValidVehicleCredit = (
   overrides?: Partial<VehicleCreditFormValues>,
 ): VehicleCreditFormValues => ({
-  color_ano: 'Blanco 2024',
+  anio: '2024',
+  color: 'Blanco',
   marca: 'Toyota',
   modelo: 'Corolla',
   moneda: 'USD',
@@ -45,24 +44,6 @@ describe('VehicleCredit Schema Validation', () => {
       ]);
     });
 
-    it('exports the required vehicle models mapping with correct models', () => {
-      expect(VEHICLE_MODELS.BYD).toEqual(['S1 Pro', 'Yuan Plus EV (Atto 3)']);
-      expect(VEHICLE_MODELS.Foton).toEqual(['Tunland G7']);
-      expect(VEHICLE_MODELS.Baic).toEqual(['BJ30']);
-      expect(VEHICLE_MODELS.Kaiyi).toEqual([]);
-      expect(VEHICLE_MODELS.Wuling).toEqual([]);
-    });
-
-    it('exports the required colors and years catalog', () => {
-      expect(VEHICLE_COLORS_YEARS).toEqual([
-        'Gris Metálico (2024)',
-        'Blanco (2024)',
-        'Negro (2025)',
-        'Rojo (2024)',
-        'Azul (2024)',
-      ]);
-    });
-
     it('exports the required financing terms catalog', () => {
       expect(FINANCING_TERMS).toEqual([
         '12 Meses (1 Año)',
@@ -72,6 +53,7 @@ describe('VehicleCredit Schema Validation', () => {
         '60 Meses (5 Años)',
         '72 Meses (6 Años)',
         '84 Meses (7 Años)',
+        '96 Meses (8 Años)',
       ]);
     });
   });
@@ -104,6 +86,34 @@ describe('VehicleCredit Schema Validation', () => {
       expect(result.success).toBe(true);
     });
 
+    it('accepts masked currency strings and coerces them via parseCurrencyToNumber', () => {
+      const validPayload = createValidVehicleCredit({
+        monto_financiar: '18.000',
+        monto_prima: '2.000',
+        valor_vehiculo: '20.000',
+      });
+      const result = vehicleCreditSchema.safeParse(validPayload);
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts masked currency strings with decimals', () => {
+      const validPayload = createValidVehicleCredit({
+        monto_financiar: '4.774.500,22',
+        monto_prima: '530.500,03',
+        valor_vehiculo: '5.305.000,25',
+      });
+      const result = vehicleCreditSchema.safeParse(validPayload);
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts 96 Meses (8 Años) as a valid plazo_meses string', () => {
+      const validPayload = createValidVehicleCredit({
+        plazo_meses: '96 Meses (8 Años)',
+      });
+      const result = vehicleCreditSchema.safeParse(validPayload);
+      expect(result.success).toBe(true);
+    });
+
     it('accepts every string term from FINANCING_TERMS as a valid plazo_meses', () => {
       FINANCING_TERMS.forEach((term) => {
         const validPayload = createValidVehicleCredit({
@@ -116,20 +126,18 @@ describe('VehicleCredit Schema Validation', () => {
   });
 
   describe('financial rules enforcement', () => {
-    describe('Rule A: Minimum 20% Downpayment (monto_prima)', () => {
-      it('fails validation when monto_prima is strictly less than 20% of valor_vehiculo', () => {
+    describe('Rule A: Minimum 10% Downpayment (monto_prima)', () => {
+      it('fails validation when monto_prima is strictly less than 10% of valor_vehiculo', () => {
         const invalidPayload = createValidVehicleCredit({
-          monto_financiar: 16001,
-          monto_prima: 3999,
+          monto_financiar: 18001,
+          monto_prima: 1999,
           valor_vehiculo: 20000,
         });
         const result = vehicleCreditSchema.safeParse(invalidPayload);
 
         expect(result.success).toBe(false);
         const primaErrors = getMessages(result, ['monto_prima']);
-        expect(primaErrors).toContain(
-          'La prima debe ser al menos el 20% del valor del vehículo.',
-        );
+        expect(primaErrors).toContain('10% de prima mínima permitida');
       });
 
       it('fails validation when monto_prima is 0 while valor_vehiculo > 0', () => {
@@ -142,9 +150,18 @@ describe('VehicleCredit Schema Validation', () => {
 
         expect(result.success).toBe(false);
         const primaErrors = getMessages(result, ['monto_prima']);
-        expect(primaErrors).toContain(
-          'La prima debe ser al menos el 20% del valor del vehículo.',
-        );
+        expect(primaErrors).toContain('10% de prima mínima permitida');
+      });
+
+      it('passes validation when monto_prima is exactly 10% of valor_vehiculo', () => {
+        const validPayload = createValidVehicleCredit({
+          monto_financiar: 18000,
+          monto_prima: 2000,
+          valor_vehiculo: 20000,
+        });
+        const result = vehicleCreditSchema.safeParse(validPayload);
+
+        expect(result.success).toBe(true);
       });
     });
 
@@ -167,14 +184,14 @@ describe('VehicleCredit Schema Validation', () => {
       it('fails validation when both Rule A and Rule B are violated simultaneously', () => {
         const invalidPayload = createValidVehicleCredit({
           monto_financiar: 15000,
-          monto_prima: 2000,
+          monto_prima: 1000,
           valor_vehiculo: 20000,
         });
         const result = vehicleCreditSchema.safeParse(invalidPayload);
 
         expect(result.success).toBe(false);
         expect(getMessages(result, ['monto_prima'])).toContain(
-          'La prima debe ser al menos el 20% del valor del vehículo.',
+          '10% de prima mínima permitida',
         );
         expect(getMessages(result, ['monto_financiar'])).toContain(
           'El monto a financiar debe ser exactamente igual al valor del vehículo menos la prima.',
@@ -199,7 +216,7 @@ describe('VehicleCredit Schema Validation', () => {
       });
     });
 
-    describe('mandatory strings (marca, modelo, color_ano)', () => {
+    describe('mandatory strings (marca, modelo, color, anio)', () => {
       it('fails when marca is empty or only whitespace', () => {
         const invalidPayload = createValidVehicleCredit({ marca: '   ' });
         const result = vehicleCreditSchema.safeParse(invalidPayload);
@@ -220,14 +237,34 @@ describe('VehicleCredit Schema Validation', () => {
         );
       });
 
-      it('fails when color_ano is empty or only whitespace', () => {
-        const invalidPayload = createValidVehicleCredit({ color_ano: '  ' });
+      it('fails when color is empty or only whitespace', () => {
+        const invalidPayload = createValidVehicleCredit({ color: '  ' });
         const result = vehicleCreditSchema.safeParse(invalidPayload);
 
         expect(result.success).toBe(false);
-        expect(getMessages(result, ['color_ano'])).toContain(
-          'El color y año son obligatorios.',
+        expect(getMessages(result, ['color'])).toContain(
+          'El color es obligatorio.',
         );
+      });
+
+      it('fails when anio is not a 4-digit number', () => {
+        const invalidLengths = ['20', '202', '20245', 'abcd', '   '];
+        invalidLengths.forEach((anioVal) => {
+          const invalidPayload = createValidVehicleCredit({ anio: anioVal });
+          const result = vehicleCreditSchema.safeParse(invalidPayload);
+
+          expect(result.success).toBe(false);
+          expect(getMessages(result, ['anio'])).toContain(
+            'Debe ser un año válido.',
+          );
+        });
+      });
+
+      it('passes when anio is a valid 4-digit year string', () => {
+        const validPayload = createValidVehicleCredit({ anio: '2025' });
+        const result = vehicleCreditSchema.safeParse(validPayload);
+
+        expect(result.success).toBe(true);
       });
     });
 
@@ -256,16 +293,6 @@ describe('VehicleCredit Schema Validation', () => {
         expect(result.success).toBe(false);
         expect(getMessages(result, ['monto_prima'])).toContain(
           'El monto de la prima debe ser mayor o igual a 0.',
-        );
-      });
-
-      it('fails when plazo_meses is 0 or negative', () => {
-        const invalidPayload = createValidVehicleCredit({ plazo_meses: 0 });
-        const result = vehicleCreditSchema.safeParse(invalidPayload);
-
-        expect(result.success).toBe(false);
-        expect(getMessages(result, ['plazo_meses'])).toContain(
-          'El plazo en meses debe ser mayor a 0.',
         );
       });
 
