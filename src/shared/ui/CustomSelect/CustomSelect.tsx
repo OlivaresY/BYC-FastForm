@@ -47,9 +47,10 @@ export const CustomSelect = React.memo(({
       ? CUSTOM_SELECT_STYLES.TRIGGER_BORDER_OPEN
       : CUSTOM_SELECT_STYLES.TRIGGER_BORDER_BASE;
 
-  const disabledClass = disabled
-    ? ` ${CUSTOM_SELECT_STYLES.TRIGGER_DISABLED}`
-    : '';
+  const disabledClass =
+    disabled && CUSTOM_SELECT_STYLES.TRIGGER_DISABLED
+      ? ` ${CUSTOM_SELECT_STYLES.TRIGGER_DISABLED}`
+      : '';
 
   const displayText = selectedOptionLabel ?? placeholder;
   const isSelected = Boolean(selectedOptionLabel);

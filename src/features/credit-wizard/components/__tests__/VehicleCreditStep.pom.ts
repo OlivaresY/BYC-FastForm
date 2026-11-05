@@ -132,6 +132,13 @@ export class VehicleCreditStepPOM {
     return this.plazoMesesSelect;
   }
 
+  public get submitButton(): ReactTestInstance {
+    return (
+      screen.queryByTestId('wizard-step-layout-submit-button') ??
+      screen.getByText('Siguiente')
+    );
+  }
+
   // =========================================================================
   // Error Getters (Nullable Queries)
   // =========================================================================
@@ -213,6 +220,11 @@ export class VehicleCreditStepPOM {
 
   public fillMontoPrima(value: string): this {
     fireEvent.changeText(this.montoPrimaInput, value);
+    return this;
+  }
+
+  public pressSubmit(): this {
+    fireEvent.press(this.submitButton);
     return this;
   }
 }

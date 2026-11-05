@@ -115,4 +115,15 @@ describe('VehicleCreditStepView Component Tests', () => {
     expect(pom.montoPrimaError).toBeTruthy();
     expect(pom.montoPrimaError?.props.children).toBe(ruleAErrorMessage);
   });
+
+  it('invokes handleNext when submit continue button is pressed', () => {
+    // Arrange
+    const pom = VehicleCreditStepPOM.render();
+
+    // Act
+    pom.pressSubmit();
+
+    // Assert
+    expect(mockHandleNext).toHaveBeenCalledTimes(1);
+  });
 });
