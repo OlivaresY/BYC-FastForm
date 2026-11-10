@@ -66,6 +66,7 @@ export const BaseButton = React.memo(
             {icon ?? null}
             <Text
               className={`${textClassName ?? text} ${BASE_BUTTON_STYLES.LABEL_BASE}`}
+              numberOfLines={1}
               testID={BASE_BUTTON_TEST_IDS.LABEL}
             >
               {label}

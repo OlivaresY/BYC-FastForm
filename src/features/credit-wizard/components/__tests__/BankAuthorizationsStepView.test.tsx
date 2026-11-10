@@ -3,6 +3,7 @@ import type { UseBankAuthorizationsViewModelReturn } from '../../hooks/useBankAu
 import { BankAuthorizationsStepPOM } from './BankAuthorizationsStep.pom';
 
 const mockHandleNext = jest.fn();
+const mockToggleAllBanks = jest.fn();
 
 jest.mock('../../hooks/useBankAuthorizationsViewModel', () => ({
   useBankAuthorizationsViewModel: jest.fn(),
@@ -11,90 +12,99 @@ jest.mock('../../hooks/useBankAuthorizationsViewModel', () => ({
 describe('BankAuthorizationsStepView Component Tests', () => {
   let defaultControl: UseBankAuthorizationsViewModelReturn['control'];
 
+  const createMockViewModel = (
+    overrides?: Partial<UseBankAuthorizationsViewModelReturn>,
+  ): UseBankAuthorizationsViewModelReturn => ({
+    control: defaultControl,
+    errors: {},
+    form: {} as never,
+    handleNext: mockHandleNext,
+    handleSubmit: mockHandleNext,
+    isAllBanksSelected: false,
+    isSubmitting: false,
+    isValid: true,
+    toggleAllBanks: mockToggleAllBanks,
+    ...overrides,
+  });
+
   beforeAll(() => {
     defaultControl = BankAuthorizationsStepPOM.createMockControl();
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    (useBankAuthorizationsViewModel as jest.Mock).mockReturnValue({
-      control: defaultControl,
-      errors: {},
-      handleNext: mockHandleNext,
-      handleSubmit: mockHandleNext,
-      isSubmitting: false,
-      isValid: true,
-    } satisfies UseBankAuthorizationsViewModelReturn);
+    (useBankAuthorizationsViewModel as jest.Mock).mockReturnValue(
+      createMockViewModel(),
+    );
   });
 
-  it('renders the bank selector, the three consent switches, and the layout correctly', () => {
+  it('renders both sections, 5 banks, and 2 legal checkboxes correctly', () => {
     // Arrange & Act
     const pom = BankAuthorizationsStepPOM.render();
 
-    // Assert - Containers
+    // Assert - Sections
     expect(pom.container).toBeTruthy();
-    expect(pom.bankContainer).toBeTruthy();
-    expect(pom.consentsContainer).toBeTruthy();
+    expect(pom.section1Container).toBeTruthy();
+    expect(pom.section2Container).toBeTruthy();
 
-    // Assert - Bank select
-    expect(pom.bancoDestinoSelect).toBeTruthy();
+    // Assert - Section 1 Banks & Toggle
+    expect(pom.toggleAllButton).toBeTruthy();
+    expect(pom.bancoBacCheckbox).toBeTruthy();
+    expect(pom.bancoBncrCheckbox).toBeTruthy();
+    expect(pom.bancoScotiabankCheckbox).toBeTruthy();
+    expect(pom.bancoPromericaCheckbox).toBeTruthy();
+    expect(pom.bancoCarroFacilCheckbox).toBeTruthy();
 
-    // Assert - Switches
-    expect(pom.autorizaBuroSwitch).toBeTruthy();
-    expect(pom.autorizaSugefSwitch).toBeTruthy();
-    expect(pom.aceptaTerminosSwitch).toBeTruthy();
+    // Assert - Section 2 Legal Checkboxes
+    expect(pom.autorizaSugefCicCheckbox).toBeTruthy();
+    expect(pom.autorizaBurosCreditoCheckbox).toBeTruthy();
+
+    // Assert - Submit Button
+    expect(pom.submitButton).toBeTruthy();
   });
 
-  it('renders validation error messages when the mock ViewModel provides them in the errors object', () => {
-    // Arrange - Simulate SUGEF consent violation
-    const sugefErrorMessage = 'Debe aceptar esta condición para continuar';
-    const bancoErrorMessage = 'El banco de destino es obligatorio';
-
-    (useBankAuthorizationsViewModel as jest.Mock).mockReturnValue({
-      control: defaultControl,
-      errors: {
-        autoriza_sugef: {
-          message: sugefErrorMessage,
-          type: 'custom',
-        },
-        banco_destino: {
-          message: bancoErrorMessage,
-          type: 'custom',
-        },
-      },
-      handleNext: mockHandleNext,
-      handleSubmit: mockHandleNext,
-      isSubmitting: false,
-      isValid: false,
-    } satisfies UseBankAuthorizationsViewModelReturn);
-
-    // Act
-    const pom = BankAuthorizationsStepPOM.render();
-
-    // Assert - Error message rendered for SUGEF
-    expect(pom.autorizaSugefError).toBeTruthy();
-    expect(pom.autorizaSugefError?.props.children).toBe(sugefErrorMessage);
-
-    // Assert - Error message rendered for Banco Destino
-    expect(pom.bancoDestinoError).toBeTruthy();
-    expect(pom.bancoDestinoError?.props.children).toBe(bancoErrorMessage);
-  });
-
-  it('simulates user interaction with the switches to ensure the UI responds without crashing', () => {
+  it('toggles individual banks and the "Todos" button successfully', () => {
     // Arrange
     const pom = BankAuthorizationsStepPOM.render();
 
-    // Act & Assert - Toggle each switch
+    // Act & Assert - Toggle individual banks without throwing
     expect(() => {
       pom
-        .toggleAutorizaBuro(true)
-        .toggleAutorizaSugef(true)
-        .toggleAceptaTerminos(true);
+        .toggleBancoBac()
+        .toggleBancoBncr()
+        .toggleBancoScotiabank()
+        .toggleBancoPromerica()
+        .toggleBancoCarroFacil();
     }).not.toThrow();
 
-    expect(pom.autorizaBuroSwitch).toBeTruthy();
-    expect(pom.autorizaSugefSwitch).toBeTruthy();
-    expect(pom.aceptaTerminosSwitch).toBeTruthy();
+    // Act - Press Toggle All
+    pom.pressToggleAll();
+
+    // Assert - toggleAllBanks called
+    expect(mockToggleAllBanks).toHaveBeenCalledTimes(1);
+  });
+
+  it('toggles the 2 legal checkboxes successfully', () => {
+    // Arrange
+    const pom = BankAuthorizationsStepPOM.render();
+
+    // Act & Assert - Toggle legal checkboxes without throwing
+    expect(() => {
+      pom.toggleAutorizaSugefCic().toggleAutorizaBurosCredito();
+    }).not.toThrow();
+
+    expect(pom.autorizaSugefCicCheckbox).toBeTruthy();
+    expect(pom.autorizaBurosCreditoCheckbox).toBeTruthy();
+  });
+
+  it('submits the form successfully when the submit button is pressed', () => {
+    // Arrange
+    const pom = BankAuthorizationsStepPOM.render();
+
+    // Act
+    pom.pressSubmit();
+
+    // Assert
+    expect(mockHandleNext).toHaveBeenCalledTimes(1);
   });
 });

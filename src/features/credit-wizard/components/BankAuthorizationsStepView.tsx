@@ -1,26 +1,28 @@
 import React from 'react';
-import { Switch, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { Controller } from 'react-hook-form';
 import {
   BuildingIcon,
-  CustomSelect,
-  type CustomSelectOption,
+  CheckmarkIcon,
+  CheckSquareIcon,
   DocumentIcon,
+  ShieldCheckIcon,
 } from '@/shared/ui';
+import {
+  BANK_AUTHORIZATIONS_STEP_COLORS,
+  BANK_AUTHORIZATIONS_STEP_COPY,
+  BANK_AUTHORIZATIONS_STEP_NUMERICAL,
+  BANK_AUTHORIZATIONS_STEP_STYLES,
+  BANK_AUTHORIZATIONS_STEP_TEST_IDS,
+  BANKS_CONFIG,
+  type BankOptionConfig,
+} from '../constants/BankAuthorizations.constants';
 import {
   useBankAuthorizationsViewModel,
   type UseBankAuthorizationsViewModelReturn,
 } from '../hooks/useBankAuthorizationsViewModel';
 import type { BankAuthorizationsFormValues } from '../types/BankAuthorizations.types';
 import { WizardStepLayout } from './WizardStepLayout';
-
-const BANK_OPTIONS: readonly CustomSelectOption[] = [
-  { label: 'BAC San José', value: 'BAC San José' },
-  { label: 'Banco Nacional', value: 'Banco Nacional' },
-  { label: 'Scotiabank', value: 'Scotiabank' },
-  { label: 'Banco Davivienda', value: 'Banco Davivienda' },
-  { label: 'Banco de Costa Rica (BCR)', value: 'Banco de Costa Rica' },
-];
 
 export interface BankAuthorizationsStepViewProps {
   currentStep?: number;
@@ -33,211 +35,347 @@ export interface BankAuthorizationsStepViewProps {
   viewModel?: UseBankAuthorizationsViewModelReturn;
 }
 
-export const BankAuthorizationsStepView = ({
-  currentStep = 4,
-  disabled = false,
-  onBack,
-  onClose,
-  onSubmit,
-  testID = 'bank-authorizations-step-view',
-  totalSteps = 4,
-  viewModel: viewModelProp,
-}: BankAuthorizationsStepViewProps): React.JSX.Element => {
-  const defaultViewModel = useBankAuthorizationsViewModel({
-    onSuccess: onSubmit,
-  });
-  const viewModel = viewModelProp ?? defaultViewModel;
+export const BankAuthorizationsStepView = React.memo(
+  ({
+    currentStep = BANK_AUTHORIZATIONS_STEP_NUMERICAL.CURRENT_STEP,
+    disabled = false,
+    onBack,
+    onClose,
+    onSubmit,
+    testID = BANK_AUTHORIZATIONS_STEP_TEST_IDS.CONTAINER,
+    totalSteps = BANK_AUTHORIZATIONS_STEP_NUMERICAL.TOTAL_STEPS,
+    viewModel: viewModelProp,
+  }: BankAuthorizationsStepViewProps): React.JSX.Element => {
+    const defaultViewModel = useBankAuthorizationsViewModel({
+      onSuccess: onSubmit,
+    });
+    const viewModel = viewModelProp ?? defaultViewModel;
 
-  const { control, errors, handleNext, isSubmitting, isValid } = viewModel;
+    const {
+      control,
+      errors,
+      handleNext,
+      isAllBanksSelected,
+      isSubmitting,
+      isValid,
+      toggleAllBanks,
+    } = viewModel;
 
-  return (
-    <WizardStepLayout
-      currentStep={currentStep}
-      description='Selecciona el banco de destino y confirma las autorizaciones legales para el trámite de crédito.'
-      disabled={disabled}
-      isSubmitDisabled={!isValid}
-      isSubmitting={isSubmitting}
-      onBack={onBack}
-      onClose={onClose}
-      onNext={handleNext}
-      submitButtonLabel='Finalizar Solicitud'
-      testID={testID}
-      title='Autorizaciones y Bancos'
-      totalSteps={totalSteps}
-    >
-      <View className='w-full gap-4'>
-        {/* CONTAINER 1: ENTIDAD BANCARIA */}
-        <View
-          className='bg-stone-50 rounded-2xl p-4 gap-4 mb-2 border border-stone-200'
-          testID='bank-authorizations-bank-container'
-        >
-          <View className='flex-row items-center gap-2 mb-2'>
-            <BuildingIcon color='#111111' size={20} strokeWidth={2} />
-            <Text className='text-base font-bold text-gray-900'>
-              Entidad Bancaria
-            </Text>
+    const submitIcon = (
+      <DocumentIcon
+        color='#FFFFFF'
+        size={BANK_AUTHORIZATIONS_STEP_NUMERICAL.SUBMIT_ICON_SIZE}
+        strokeWidth={
+          BANK_AUTHORIZATIONS_STEP_NUMERICAL.SUBMIT_ICON_STROKE_WIDTH
+        }
+      />
+    );
+
+    return (
+      <WizardStepLayout
+        currentStep={currentStep}
+        description={BANK_AUTHORIZATIONS_STEP_COPY.DESCRIPTION}
+        disabled={disabled}
+        isSubmitDisabled={!isValid}
+        isSubmitting={isSubmitting}
+        onBack={onBack}
+        onClose={onClose}
+        onNext={handleNext}
+        submitButtonIcon={submitIcon}
+        submitButtonLabel={BANK_AUTHORIZATIONS_STEP_COPY.SUBMIT_BUTTON_LABEL}
+        testID={testID}
+        title={BANK_AUTHORIZATIONS_STEP_COPY.TITLE}
+        totalSteps={totalSteps}
+      >
+        <View className={BANK_AUTHORIZATIONS_STEP_STYLES.CONTAINER}>
+          {/* SECTION 1: BANCOS A COTIZAR */}
+          <View
+            className={BANK_AUTHORIZATIONS_STEP_STYLES.CARD_CONTAINER}
+            testID={BANK_AUTHORIZATIONS_STEP_TEST_IDS.SECTION_1_CONTAINER}
+          >
+            <View className='flex-row items-center justify-between'>
+              <View className='flex-1 flex-row items-center gap-3 pr-2'>
+                <View
+                  className={BANK_AUTHORIZATIONS_STEP_STYLES.HEADER_ICON_BOX}
+                >
+                  <BuildingIcon
+                    color={BANK_AUTHORIZATIONS_STEP_COLORS.HEADER_ICON}
+                    size={BANK_AUTHORIZATIONS_STEP_NUMERICAL.HEADER_ICON_SIZE}
+                    strokeWidth={
+                      BANK_AUTHORIZATIONS_STEP_NUMERICAL.HEADER_ICON_STROKE_WIDTH
+                    }
+                  />
+                </View>
+                <View className='flex-1'>
+                  <Text className='text-base font-bold text-gray-900'>
+                    {BANK_AUTHORIZATIONS_STEP_COPY.SECTION_1_TITLE}
+                  </Text>
+                  <Text className='text-xs text-stone-600 mt-0.5'>
+                    {BANK_AUTHORIZATIONS_STEP_COPY.SECTION_1_HELPER}
+                  </Text>
+                </View>
+              </View>
+
+              <Pressable
+                accessibilityLabel={
+                  BANK_AUTHORIZATIONS_STEP_COPY.TOGGLE_ALL_BANKS
+                }
+                accessibilityRole='button'
+                className={`${BANK_AUTHORIZATIONS_STEP_STYLES.TOGGLE_ALL_BUTTON} ${
+                  isAllBanksSelected
+                    ? BANK_AUTHORIZATIONS_STEP_STYLES.TOGGLE_ALL_BUTTON_ACTIVE
+                    : BANK_AUTHORIZATIONS_STEP_STYLES.TOGGLE_ALL_BUTTON_INACTIVE
+                }`}
+                disabled={disabled || isSubmitting}
+                hitSlop={8}
+                onPress={toggleAllBanks}
+                testID={BANK_AUTHORIZATIONS_STEP_TEST_IDS.TOGGLE_ALL_BUTTON}
+              >
+                <CheckSquareIcon
+                  color={
+                    isAllBanksSelected
+                      ? BANK_AUTHORIZATIONS_STEP_COLORS.TOGGLE_ALL_ICON_ACTIVE
+                      : BANK_AUTHORIZATIONS_STEP_COLORS.TOGGLE_ALL_ICON_INACTIVE
+                  }
+                  size={BANK_AUTHORIZATIONS_STEP_NUMERICAL.TOGGLE_ALL_ICON_SIZE}
+                  strokeWidth={
+                    BANK_AUTHORIZATIONS_STEP_NUMERICAL.TOGGLE_ALL_ICON_STROKE_WIDTH
+                  }
+                />
+                <Text
+                  className={
+                    isAllBanksSelected
+                      ? BANK_AUTHORIZATIONS_STEP_STYLES.TOGGLE_ALL_TEXT_ACTIVE
+                      : BANK_AUTHORIZATIONS_STEP_STYLES.TOGGLE_ALL_TEXT_INACTIVE
+                  }
+                >
+                  {BANK_AUTHORIZATIONS_STEP_COPY.TOGGLE_ALL_BANKS}
+                </Text>
+              </Pressable>
+            </View>
+
+            {BANKS_CONFIG.map((bank: BankOptionConfig) => (
+              <Controller
+                control={control}
+                key={bank.id}
+                name={bank.formKey}
+                render={({ field: { onChange, value } }) => (
+                  <Pressable
+                    accessibilityLabel={bank.label}
+                    accessibilityRole='checkbox'
+                    accessibilityState={{ checked: value }}
+                    className='flex-row items-center justify-between p-3.5 bg-white rounded-xl border border-stone-200'
+                    disabled={disabled || isSubmitting}
+                    onPress={() => onChange(!value)}
+                    testID={bank.testID}
+                  >
+                    {/* LEFT: Checkbox */}
+                    <View
+                      className={`${BANK_AUTHORIZATIONS_STEP_STYLES.CHECKBOX_BOX} ${
+                        value
+                          ? BANK_AUTHORIZATIONS_STEP_STYLES.CHECKBOX_BOX_ACTIVE
+                          : BANK_AUTHORIZATIONS_STEP_STYLES.CHECKBOX_BOX_INACTIVE
+                      }`}
+                    >
+                      {value ? (
+                        <CheckmarkIcon
+                          color={BANK_AUTHORIZATIONS_STEP_COLORS.CHECKBOX_ICON}
+                          size={
+                            BANK_AUTHORIZATIONS_STEP_NUMERICAL.CHECKBOX_ICON_SIZE
+                          }
+                          strokeWidth={
+                            BANK_AUTHORIZATIONS_STEP_NUMERICAL.CHECKBOX_STROKE_WIDTH
+                          }
+                        />
+                      ) : null}
+                    </View>
+
+                    {/* MIDDLE: Bank Name */}
+                    <Text className='flex-1 ml-3 text-sm font-semibold text-gray-900'>
+                      {bank.label}
+                    </Text>
+
+                    {/* RIGHT: Bank SVG Logo */}
+                    <View className='w-12 h-6 items-center justify-center'>
+                      <bank.LogoComponent
+                        color={BANK_AUTHORIZATIONS_STEP_COLORS.ICON_COLOR}
+                        size={BANK_AUTHORIZATIONS_STEP_NUMERICAL.ICON_SIZE}
+                        strokeWidth={
+                          BANK_AUTHORIZATIONS_STEP_NUMERICAL.ICON_STROKE_WIDTH
+                        }
+                      />
+                    </View>
+                  </Pressable>
+                )}
+              />
+            ))}
+
+            {errors.banco_bac?.message ? (
+              <Text
+                className='text-xs text-red-600'
+                testID={BANK_AUTHORIZATIONS_STEP_TEST_IDS.BANCO_ERROR}
+              >
+                {errors.banco_bac.message}
+              </Text>
+            ) : null}
           </View>
 
-          <Controller
-            control={control}
-            name='banco_destino'
-            render={({ field: { onChange, value } }) => (
-              <View className='mb-2'>
-                <CustomSelect
-                  disabled={disabled || isSubmitting}
-                  errorMessage={errors.banco_destino?.message}
-                  label='Banco de Destino'
-                  modalTitle='Seleccione el Banco'
-                  onValueChange={onChange}
-                  options={BANK_OPTIONS}
-                  placeholder='Seleccione la entidad bancaria'
-                  required
-                  testID='bank-authorizations-banco-destino-select'
-                  value={value}
+          {/* SECTION 2: AUTORIZACIONES LEGALES (SUGEF / CIC) */}
+          <View
+            className={BANK_AUTHORIZATIONS_STEP_STYLES.CARD_CONTAINER}
+            testID={BANK_AUTHORIZATIONS_STEP_TEST_IDS.SECTION_2_CONTAINER}
+          >
+            <View className='flex-row items-center gap-3'>
+              <View className={BANK_AUTHORIZATIONS_STEP_STYLES.HEADER_ICON_BOX}>
+                <ShieldCheckIcon
+                  color={BANK_AUTHORIZATIONS_STEP_COLORS.HEADER_ICON}
+                  size={BANK_AUTHORIZATIONS_STEP_NUMERICAL.HEADER_ICON_SIZE}
+                  strokeWidth={
+                    BANK_AUTHORIZATIONS_STEP_NUMERICAL.HEADER_ICON_STROKE_WIDTH
+                  }
                 />
               </View>
-            )}
-          />
+              <View className='flex-1'>
+                <Text className='text-base font-bold text-gray-900'>
+                  {BANK_AUTHORIZATIONS_STEP_COPY.SECTION_2_TITLE}
+                </Text>
+                <Text className='text-xs text-stone-600 mt-0.5'>
+                  {BANK_AUTHORIZATIONS_STEP_COPY.SECTION_2_HELPER}
+                </Text>
+              </View>
+            </View>
+
+            {/* Legal Consent 1: SUGEF CIC */}
+            <Controller
+              control={control}
+              name='autoriza_sugef_cic'
+              render={({ field: { onChange, value } }) => (
+                <View>
+                  <Pressable
+                    accessibilityLabel={
+                      BANK_AUTHORIZATIONS_STEP_COPY.LEGAL_TITLE_1
+                    }
+                    accessibilityRole='checkbox'
+                    accessibilityState={{ checked: value }}
+                    className='flex-row items-start gap-3 p-3.5 bg-white rounded-xl border border-stone-200'
+                    disabled={disabled || isSubmitting}
+                    onPress={() => onChange(!value)}
+                    testID={
+                      BANK_AUTHORIZATIONS_STEP_TEST_IDS.AUTORIZA_SUGEF_CIC_CHECKBOX
+                    }
+                  >
+                    <View
+                      className={`mt-0.5 ${
+                        BANK_AUTHORIZATIONS_STEP_STYLES.CHECKBOX_BOX
+                      } ${
+                        value
+                          ? BANK_AUTHORIZATIONS_STEP_STYLES.CHECKBOX_BOX_ACTIVE
+                          : BANK_AUTHORIZATIONS_STEP_STYLES.CHECKBOX_BOX_INACTIVE
+                      }`}
+                    >
+                      {value ? (
+                        <CheckmarkIcon
+                          color={BANK_AUTHORIZATIONS_STEP_COLORS.CHECKBOX_ICON}
+                          size={
+                            BANK_AUTHORIZATIONS_STEP_NUMERICAL.CHECKBOX_ICON_SIZE
+                          }
+                          strokeWidth={
+                            BANK_AUTHORIZATIONS_STEP_NUMERICAL.CHECKBOX_STROKE_WIDTH
+                          }
+                        />
+                      ) : null}
+                    </View>
+                    <View className='flex-1'>
+                      <Text className='text-sm font-semibold text-gray-900 leading-5'>
+                        {BANK_AUTHORIZATIONS_STEP_COPY.LEGAL_TITLE_1}
+                      </Text>
+                      <Text className='text-xs text-stone-600 mt-1 leading-4'>
+                        {BANK_AUTHORIZATIONS_STEP_COPY.LEGAL_DESC_1}
+                      </Text>
+                    </View>
+                  </Pressable>
+                  {errors.autoriza_sugef_cic?.message ? (
+                    <Text
+                      className='mt-1 text-xs text-red-600'
+                      testID={
+                        BANK_AUTHORIZATIONS_STEP_TEST_IDS.AUTORIZA_SUGEF_CIC_ERROR
+                      }
+                    >
+                      {errors.autoriza_sugef_cic.message}
+                    </Text>
+                  ) : null}
+                </View>
+              )}
+            />
+
+            {/* Legal Consent 2: Burós de Crédito */}
+            <Controller
+              control={control}
+              name='autoriza_buros_credito'
+              render={({ field: { onChange, value } }) => (
+                <View>
+                  <Pressable
+                    accessibilityLabel={
+                      BANK_AUTHORIZATIONS_STEP_COPY.LEGAL_TITLE_2
+                    }
+                    accessibilityRole='checkbox'
+                    accessibilityState={{ checked: value }}
+                    className='flex-row items-start gap-3 p-3.5 bg-white rounded-xl border border-stone-200'
+                    disabled={disabled || isSubmitting}
+                    onPress={() => onChange(!value)}
+                    testID={
+                      BANK_AUTHORIZATIONS_STEP_TEST_IDS.AUTORIZA_BUROS_CREDITO_CHECKBOX
+                    }
+                  >
+                    <View
+                      className={`mt-0.5 ${
+                        BANK_AUTHORIZATIONS_STEP_STYLES.CHECKBOX_BOX
+                      } ${
+                        value
+                          ? BANK_AUTHORIZATIONS_STEP_STYLES.CHECKBOX_BOX_ACTIVE
+                          : BANK_AUTHORIZATIONS_STEP_STYLES.CHECKBOX_BOX_INACTIVE
+                      }`}
+                    >
+                      {value ? (
+                        <CheckmarkIcon
+                          color={BANK_AUTHORIZATIONS_STEP_COLORS.CHECKBOX_ICON}
+                          size={
+                            BANK_AUTHORIZATIONS_STEP_NUMERICAL.CHECKBOX_ICON_SIZE
+                          }
+                          strokeWidth={
+                            BANK_AUTHORIZATIONS_STEP_NUMERICAL.CHECKBOX_STROKE_WIDTH
+                          }
+                        />
+                      ) : null}
+                    </View>
+                    <View className='flex-1'>
+                      <Text className='text-sm font-semibold text-gray-900 leading-5'>
+                        {BANK_AUTHORIZATIONS_STEP_COPY.LEGAL_TITLE_2}
+                      </Text>
+                      <Text className='text-xs text-stone-600 mt-1 leading-4'>
+                        {BANK_AUTHORIZATIONS_STEP_COPY.LEGAL_DESC_2}
+                      </Text>
+                    </View>
+                  </Pressable>
+                  {errors.autoriza_buros_credito?.message ? (
+                    <Text
+                      className='mt-1 text-xs text-red-600'
+                      testID={
+                        BANK_AUTHORIZATIONS_STEP_TEST_IDS.AUTORIZA_BUROS_CREDITO_ERROR
+                      }
+                    >
+                      {errors.autoriza_buros_credito.message}
+                    </Text>
+                  ) : null}
+                </View>
+              )}
+            />
+          </View>
         </View>
-
-        {/* CONTAINER 2: CONSENTIMIENTOS Y AUTORIZACIONES */}
-        <View
-          className='bg-stone-50 rounded-2xl p-4 gap-2 mb-4 border border-stone-200'
-          testID='bank-authorizations-consents-container'
-        >
-          <View className='flex-row items-center gap-2 mb-2'>
-            <DocumentIcon color='#111111' size={20} strokeWidth={2} />
-            <Text className='text-base font-bold text-gray-900'>
-              Consentimientos y Autorizaciones
-            </Text>
-          </View>
-
-          {/* Switch 1: Consulta de Buró de Crédito */}
-          <View className='py-2'>
-            <View className='flex-row items-center justify-between gap-4'>
-              <View className='flex-1'>
-                <Text className='text-sm font-semibold text-gray-900'>
-                  Consulta de Buró de Crédito
-                </Text>
-                <Text className='text-xs text-gray-500 mt-0.5 leading-4'>
-                  Autorizo la consulta de mi historial crediticio en las
-                  centrales de riesgo privadas autorizadas.
-                </Text>
-              </View>
-              <Controller
-                control={control}
-                name='autoriza_buro'
-                render={({ field: { onChange, value } }) => (
-                  <Switch
-                    accessibilityLabel='Consulta de Buró de Crédito'
-                    accessibilityRole='switch'
-                    disabled={disabled || isSubmitting}
-                    onValueChange={onChange}
-                    testID='bank-authorizations-autoriza-buro-switch'
-                    thumbColor='#FFFFFF'
-                    trackColor={{ false: '#D6D3D1', true: '#10B981' }}
-                    value={value}
-                  />
-                )}
-              />
-            </View>
-            {errors.autoriza_buro?.message ? (
-              <Text
-                className='mt-1 text-xs text-red-600'
-                testID='bank-authorizations-autoriza-buro-error'
-              >
-                {errors.autoriza_buro.message}
-              </Text>
-            ) : null}
-          </View>
-
-          <View className='h-px bg-stone-200 my-1' />
-
-          {/* Switch 2: Directriz SUGEF CIC */}
-          <View className='py-2'>
-            <View className='flex-row items-center justify-between gap-4'>
-              <View className='flex-1'>
-                <Text className='text-sm font-semibold text-gray-900'>
-                  Directriz SUGEF CIC
-                </Text>
-                <Text className='text-xs text-gray-500 mt-0.5 leading-4'>
-                  Autorizo la consulta y verificación de mi información
-                  crediticia en el Centro de Información Crediticia (CIC) de la
-                  SUGEF.
-                </Text>
-              </View>
-              <Controller
-                control={control}
-                name='autoriza_sugef'
-                render={({ field: { onChange, value } }) => (
-                  <Switch
-                    accessibilityLabel='Directriz SUGEF CIC'
-                    accessibilityRole='switch'
-                    disabled={disabled || isSubmitting}
-                    onValueChange={onChange}
-                    testID='bank-authorizations-autoriza-sugef-switch'
-                    thumbColor='#FFFFFF'
-                    trackColor={{ false: '#D6D3D1', true: '#10B981' }}
-                    value={value}
-                  />
-                )}
-              />
-            </View>
-            {errors.autoriza_sugef?.message ? (
-              <Text
-                className='mt-1 text-xs text-red-600'
-                testID='bank-authorizations-autoriza-sugef-error'
-              >
-                {errors.autoriza_sugef.message}
-              </Text>
-            ) : null}
-          </View>
-
-          <View className='h-px bg-stone-200 my-1' />
-
-          {/* Switch 3: Términos y Condiciones */}
-          <View className='py-2'>
-            <View className='flex-row items-center justify-between gap-4'>
-              <View className='flex-1'>
-                <Text className='text-sm font-semibold text-gray-900'>
-                  Términos y Condiciones
-                </Text>
-                <Text className='text-xs text-gray-500 mt-0.5 leading-4'>
-                  Acepto los términos y condiciones del servicio y confirmo que
-                  la información suministrada es verídica.
-                </Text>
-              </View>
-              <Controller
-                control={control}
-                name='acepta_terminos'
-                render={({ field: { onChange, value } }) => (
-                  <Switch
-                    accessibilityLabel='Términos y Condiciones'
-                    accessibilityRole='switch'
-                    disabled={disabled || isSubmitting}
-                    onValueChange={onChange}
-                    testID='bank-authorizations-acepta-terminos-switch'
-                    thumbColor='#FFFFFF'
-                    trackColor={{ false: '#D6D3D1', true: '#10B981' }}
-                    value={value}
-                  />
-                )}
-              />
-            </View>
-            {errors.acepta_terminos?.message ? (
-              <Text
-                className='mt-1 text-xs text-red-600'
-                testID='bank-authorizations-acepta-terminos-error'
-              >
-                {errors.acepta_terminos.message}
-              </Text>
-            ) : null}
-          </View>
-        </View>
-      </View>
-    </WizardStepLayout>
-  );
-};
+      </WizardStepLayout>
+    );
+  },
+);
 
 BankAuthorizationsStepView.displayName = 'BankAuthorizationsStepView';
 

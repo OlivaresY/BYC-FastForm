@@ -56,7 +56,7 @@ export {
   CalendarIcon,
   CarIcon,
   CheckmarkIcon,
-  ChevronDownIcon,
+  CheckSquareIcon,  ChevronDownIcon,
   ChevronLeftIcon,
   CircleIcon,
   ClockIcon,
@@ -70,6 +70,7 @@ export {
   PhoneCallIcon,
   PhoneIcon,
   SaveIcon,
+  ShieldCheckIcon,
   SmartphoneIcon,
   UserIcon,
 } from './Icons';

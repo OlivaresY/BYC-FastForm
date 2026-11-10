@@ -32,6 +32,7 @@ export interface WizardStepLayoutProps {
   onClose?: () => void;
   onNext?: () => void;
   onSubmit?: () => void;
+  submitButtonIcon?: React.ReactNode;
   submitButtonLabel?: string;
   submitError?: string | null;
   testID?: string;

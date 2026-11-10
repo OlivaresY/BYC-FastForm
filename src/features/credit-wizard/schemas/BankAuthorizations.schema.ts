@@ -2,43 +2,48 @@ import { z } from 'zod';
 import type { BankAuthorizationsFormValues } from '../types/BankAuthorizations.types';
 
 export const BANK_AUTHORIZATIONS_ERROR_MESSAGES = {
-  ACEPTA_TERMINOS_REQUIRED: 'Debe aceptar esta condición para continuar',
-  AUTORIZA_BURO_REQUIRED: 'Debe aceptar esta condición para continuar',
-  AUTORIZA_SUGEF_REQUIRED: 'Debe aceptar esta condición para continuar',
-  BANCO_DESTINO_REQUIRED: 'El banco de destino es obligatorio',
+  AT_LEAST_ONE_BANK_REQUIRED: 'Debe seleccionar al menos una entidad bancaria',
+  AUTORIZA_BUROS_CREDITO_REQUIRED: 'Debe aceptar esta condición para continuar',
+  AUTORIZA_SUGEF_CIC_REQUIRED: 'Debe aceptar esta condición para continuar',
 } as const;
 
 export const bankAuthorizationsSchema: z.ZodType<BankAuthorizationsFormValues> =
-  z.object({
-    acepta_terminos: z
-      .boolean({
-        error: BANK_AUTHORIZATIONS_ERROR_MESSAGES.ACEPTA_TERMINOS_REQUIRED,
-      })
-      .refine((val) => val === true, {
-        message: BANK_AUTHORIZATIONS_ERROR_MESSAGES.ACEPTA_TERMINOS_REQUIRED,
-      }),
-    autoriza_buro: z
-      .boolean({
-        error: BANK_AUTHORIZATIONS_ERROR_MESSAGES.AUTORIZA_BURO_REQUIRED,
-      })
-      .refine((val) => val === true, {
-        message: BANK_AUTHORIZATIONS_ERROR_MESSAGES.AUTORIZA_BURO_REQUIRED,
-      }),
-    autoriza_sugef: z
-      .boolean({
-        error: BANK_AUTHORIZATIONS_ERROR_MESSAGES.AUTORIZA_SUGEF_REQUIRED,
-      })
-      .refine((val) => val === true, {
-        message: BANK_AUTHORIZATIONS_ERROR_MESSAGES.AUTORIZA_SUGEF_REQUIRED,
-      }),
-    banco_destino: z
-      .string({
-        error: BANK_AUTHORIZATIONS_ERROR_MESSAGES.BANCO_DESTINO_REQUIRED,
-      })
-      .trim()
-      .min(1, {
-        message: BANK_AUTHORIZATIONS_ERROR_MESSAGES.BANCO_DESTINO_REQUIRED,
-      }),
-  });
+  z
+    .object({
+      autoriza_buros_credito: z
+        .boolean({
+          error:
+            BANK_AUTHORIZATIONS_ERROR_MESSAGES.AUTORIZA_BUROS_CREDITO_REQUIRED,
+        })
+        .refine((val) => val === true, {
+          message:
+            BANK_AUTHORIZATIONS_ERROR_MESSAGES.AUTORIZA_BUROS_CREDITO_REQUIRED,
+        }),
+      autoriza_sugef_cic: z
+        .boolean({
+          error: BANK_AUTHORIZATIONS_ERROR_MESSAGES.AUTORIZA_SUGEF_CIC_REQUIRED,
+        })
+        .refine((val) => val === true, {
+          message:
+            BANK_AUTHORIZATIONS_ERROR_MESSAGES.AUTORIZA_SUGEF_CIC_REQUIRED,
+        }),
+      banco_bac: z.boolean().default(false),
+      banco_bncr: z.boolean().default(false),
+      banco_carro_facil: z.boolean().default(false),
+      banco_promerica: z.boolean().default(false),
+      banco_scotiabank: z.boolean().default(false),
+    })
+    .refine(
+      (data) =>
+        data.banco_bac ||
+        data.banco_bncr ||
+        data.banco_carro_facil ||
+        data.banco_promerica ||
+        data.banco_scotiabank,
+      {
+        message: BANK_AUTHORIZATIONS_ERROR_MESSAGES.AT_LEAST_ONE_BANK_REQUIRED,
+        path: ['banco_bac'],
+      },
+    );
 
 export type BankAuthorizationsSchema = typeof bankAuthorizationsSchema;

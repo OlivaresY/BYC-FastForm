@@ -35,6 +35,7 @@ export const WizardStepLayout = ({
   onClose,
   onNext,
   onSubmit,
+  submitButtonIcon,
   submitButtonLabel = WIZARD_COPY.BUTTONS.CONTINUE,
   submitError,
   testID,
@@ -165,6 +166,7 @@ export const WizardStepLayout = ({
             }
             disabled={isSubmitDisabled || disabled || isSubmitting}
             fullWidth={!hasBackButton}
+            icon={submitButtonIcon}
             isLoading={isSubmitting}
             label={submitButtonLabel}
             onPress={handleSubmit}

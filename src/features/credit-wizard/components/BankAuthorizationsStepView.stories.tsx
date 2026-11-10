@@ -9,10 +9,13 @@ import type { BankAuthorizationsFormValues } from '../types/BankAuthorizations.t
 
 const defaultControl = createFormControl<BankAuthorizationsFormValues>({
   defaultValues: {
-    acepta_terminos: false,
-    autoriza_buro: false,
-    autoriza_sugef: false,
-    banco_destino: '',
+    autoriza_buros_credito: false,
+    autoriza_sugef_cic: false,
+    banco_bac: false,
+    banco_bncr: false,
+    banco_carro_facil: false,
+    banco_promerica: false,
+    banco_scotiabank: false,
   },
 }).control;
 
@@ -27,10 +30,13 @@ const createMockViewModel = (
 ): UseBankAuthorizationsViewModelReturn => ({
   control: defaultControl,
   errors: {},
+  form: {} as never,
   handleNext: action('handleNext'),
   handleSubmit: action('handleNext'),
+  isAllBanksSelected: false,
   isSubmitting: false,
   isValid: false,
+  toggleAllBanks: (): void => undefined,
   ...overrides,
 });
 
@@ -60,12 +66,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args): React.JSX.Element => (
-    <BankAuthorizationsStepView
-      {...args}
-      viewModel={createMockViewModel({
-        isValid: false,
-      })}
-    />
+    <BankAuthorizationsStepView {...args} />
   ),
 };
 
@@ -74,6 +75,7 @@ export const ValidState: Story = {
     <BankAuthorizationsStepView
       {...args}
       viewModel={createMockViewModel({
+        isAllBanksSelected: true,
         isValid: true,
       })}
     />
@@ -86,12 +88,14 @@ export const ErrorState: Story = {
       {...args}
       viewModel={createMockViewModel({
         errors: {
-          autoriza_sugef: {
-            message: BANK_AUTHORIZATIONS_ERROR_MESSAGES.AUTORIZA_SUGEF_REQUIRED,
+          autoriza_sugef_cic: {
+            message:
+              BANK_AUTHORIZATIONS_ERROR_MESSAGES.AUTORIZA_SUGEF_CIC_REQUIRED,
             type: 'custom',
           },
-          banco_destino: {
-            message: BANK_AUTHORIZATIONS_ERROR_MESSAGES.BANCO_DESTINO_REQUIRED,
+          banco_bac: {
+            message:
+              BANK_AUTHORIZATIONS_ERROR_MESSAGES.AT_LEAST_ONE_BANK_REQUIRED,
             type: 'custom',
           },
         },
@@ -112,4 +116,3 @@ export const Submitting: Story = {
     />
   ),
 };
-

@@ -30,7 +30,7 @@ export const WIZARD_STEP_LAYOUT_NUMERICAL = {
 } as const;
 
 export const WIZARD_STEP_LAYOUT_STYLES = {
-  BACK_BUTTON: 'flex-1',
+  BACK_BUTTON: 'w-28 flex-none',
   BOTTOM_BAR:
     'w-full flex-row items-center gap-3 border-t border-border-card bg-surface-card px-4 py-3 pb-8',
   BOTTOM_BAR_FULL:
@@ -39,7 +39,7 @@ export const WIZARD_STEP_LAYOUT_STYLES = {
   DESCRIPTION: 'text-sm text-text-secondary',
   HEADER_BLOCK: 'gap-1',
   KEYBOARD_AVOIDING_VIEW: 'flex-1',
-  SCROLL_CONTENT: 'gap-6 p-4 pb-28',
+  SCROLL_CONTENT: 'gap-6 p-4 pb-4',
   SCROLL_VIEW: 'flex-1',
   SUBMIT_BUTTON: 'flex-1',
   SUBMIT_BUTTON_FULL: 'w-full flex-1',
