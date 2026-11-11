@@ -139,6 +139,18 @@ export const WIZARD_COPY = {
     DESCRIPTION:
       'Ingresa la información de contacto, residencia y situación laboral/financiera del solicitante para el análisis de capacidad de pago.',
     ERRORS: {
+      COMMERCIAL_REFERENCE: {
+        COMPANY_REFERENCE_MIN:
+          'El nombre de la empresa de referencia debe tener al menos 2 caracteres.',
+        COMPANY_REFERENCE_REQUIRED:
+          'El nombre de la empresa de referencia es obligatorio.',
+        IBAN_ACCOUNT_INVALID:
+          'La cuenta IBAN debe tener un formato válido de Costa Rica (ej. CR05015202001026284066).',
+        IBAN_ACCOUNT_REQUIRED: 'La cuenta IBAN es obligatoria.',
+        REFERENCE_PHONE_INVALID:
+          'El formato del teléfono de referencia no es válido.',
+        REFERENCE_PHONE_REQUIRED: 'El teléfono de referencia es obligatorio.',
+      },
       CONTACT_INFO: {
         CELL_PHONE_INVALID: 'El formato del teléfono celular no es válido.',
         CELL_PHONE_REQUIRED: 'El teléfono celular es obligatorio.',

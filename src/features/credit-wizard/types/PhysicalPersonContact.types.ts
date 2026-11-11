@@ -5,6 +5,7 @@ import type {
 } from 'react-hook-form';
 import type { z } from 'zod';
 import type {
+  CommercialReferenceSchema,
   ContactInfoSchema,
   EmploymentDataSchema,
   FinancialCapacitySchema,
@@ -12,11 +13,12 @@ import type {
   ResidentialAddressSchema,
 } from '../schemas/PhysicalPersonContact.schema';
 
+export type CommercialReference = z.infer<typeof CommercialReferenceSchema>;
 export type ContactInfo = z.infer<typeof ContactInfoSchema>;
-export type ResidentialAddress = z.infer<typeof ResidentialAddressSchema>;
 export type EmploymentData = z.infer<typeof EmploymentDataSchema>;
 export type FinancialCapacity = z.infer<typeof FinancialCapacitySchema>;
 export type PhysicalPersonContact = z.infer<typeof PhysicalPersonContactSchema>;
+export type ResidentialAddress = z.infer<typeof ResidentialAddressSchema>;
 
 export type FinancialCurrency = FinancialCapacity['currency'];
 

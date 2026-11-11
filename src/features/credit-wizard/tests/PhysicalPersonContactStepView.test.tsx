@@ -4,8 +4,8 @@ import { PhysicalPersonContactStepViewPageObject } from './PhysicalPersonContact
 describe('PhysicalPersonContactStepView Integration', () => {
   jest.setTimeout(20000);
 
-  describe('Structural Layout & 4 Main Sections', () => {
-    it('renders all structural wrappers, top bars, headers, and the 4 visual sections', () => {
+  describe('Structural Layout & 5 Main Sections', () => {
+    it('renders all structural wrappers, top bars, headers, and the 5 visual sections', () => {
       // Arrange
       const page = PhysicalPersonContactStepViewPageObject.render();
 
@@ -57,6 +57,14 @@ describe('PhysicalPersonContactStepView Integration', () => {
       expect(page.grossIncomeInput).toBeTruthy();
       expect(page.netIncomeInput).toBeTruthy();
       expect(page.otherIncomesInput).toBeTruthy();
+
+      // Assert - Section 5: REFERENCIA COMERCIAL Y CUENTA
+      expect(page.section5Card).toBeTruthy();
+      expect(page.section5Header).toBeTruthy();
+      expect(page.section5Icon).toBeTruthy();
+      expect(page.companyReferenceInput).toBeTruthy();
+      expect(page.referencePhoneInput).toBeTruthy();
+      expect(page.ibanAccountInput).toBeTruthy();
 
       // Assert - Initially submit button is disabled
       expect(page.isSubmitButtonDisabled()).toBe(true);
@@ -232,6 +240,11 @@ describe('PhysicalPersonContactStepView Integration', () => {
       await page.waitFor(() => {
         expect(handleSubmit).toHaveBeenCalledTimes(1);
         expect(handleSubmit).toHaveBeenCalledWith({
+          commercialReference: {
+            companyReference: 'CoriMotors S.A.',
+            ibanAccount: 'CR05015202001026284066',
+            referencePhone: '+506 2200-0000',
+          },
           contactInfo: {
             cellPhone: '+506 8888-8888',
             email: 'carlos.rodriguez@byc.cr',
@@ -258,6 +271,26 @@ describe('PhysicalPersonContactStepView Integration', () => {
           },
         });
       });
+    });
+  });
+
+  describe('Section 5: Commercial Reference & IBAN Interaction', () => {
+    it('updates Section 5 input fields when typing values via POM helpers', () => {
+      // Arrange
+      const page = PhysicalPersonContactStepViewPageObject.render();
+
+      // Act
+      page
+        .fillCompanyReference('Distribuidora del Este S.A.')
+        .fillReferencePhone('+506 2222-3333')
+        .fillIbanAccount('CR05015202001026284066');
+
+      // Assert
+      expect(page.companyReferenceInput.props.value).toBe(
+        'Distribuidora del Este S.A.',
+      );
+      expect(page.referencePhoneInput.props.value).toBe('+506 2222-3333');
+      expect(page.ibanAccountInput.props.value).toBe('CR05015202001026284066');
     });
   });
 

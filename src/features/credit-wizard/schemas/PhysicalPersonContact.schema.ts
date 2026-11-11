@@ -13,6 +13,59 @@ const PHYSICAL_PERSON_CONTACT_ERRORS =
 export const INTERNATIONAL_PHONE_REGEX =
   PHYSICAL_PERSON_CONTACT_PATTERNS.INTERNATIONAL_PHONE;
 
+export const CommercialReferenceSchema = z.object({
+  companyReference: z
+    .string({
+      error:
+        PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+          .COMPANY_REFERENCE_REQUIRED,
+    })
+    .trim()
+    .min(1, {
+      message:
+        PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+          .COMPANY_REFERENCE_REQUIRED,
+    })
+    .min(2, {
+      message:
+        PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+          .COMPANY_REFERENCE_MIN,
+    }),
+  ibanAccount: z
+    .string({
+      error:
+        PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+          .IBAN_ACCOUNT_REQUIRED,
+    })
+    .trim()
+    .min(1, {
+      message:
+        PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+          .IBAN_ACCOUNT_REQUIRED,
+    })
+    .regex(
+      PHYSICAL_PERSON_CONTACT_PATTERNS.CR_IBAN,
+      PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE.IBAN_ACCOUNT_INVALID,
+    ),
+  referencePhone: z
+    .string({
+      error:
+        PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+          .REFERENCE_PHONE_REQUIRED,
+    })
+    .trim()
+    .min(1, {
+      message:
+        PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+          .REFERENCE_PHONE_REQUIRED,
+    })
+    .regex(
+      INTERNATIONAL_PHONE_REGEX,
+      PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+        .REFERENCE_PHONE_INVALID,
+    ),
+});
+
 export const ContactInfoSchema = z.object({
   cellPhone: z
     .string({
@@ -188,6 +241,7 @@ export const FinancialCapacitySchema = z.object({
 });
 
 export const PhysicalPersonContactSchema = z.object({
+  commercialReference: CommercialReferenceSchema,
   contactInfo: ContactInfoSchema,
   employmentData: EmploymentDataSchema,
   financialCapacity: FinancialCapacitySchema,

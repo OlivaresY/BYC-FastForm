@@ -106,6 +106,7 @@ export {
 } from './constants/PhysicalPersonContactStepView.constants';
 
 export {
+  CommercialReferenceSchema,
   ContactInfoSchema,
   EmploymentDataSchema,
   FinancialCapacitySchema,
@@ -115,6 +116,7 @@ export {
 } from './schemas/PhysicalPersonContact.schema';
 
 export type {
+  CommercialReference,
   ContactInfo,
   EmploymentData,
   FinancialCapacity,

@@ -16,6 +16,11 @@ export const FINANCIAL_CURRENCIES = {
 } as const;
 
 export const PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES = {
+  commercialReference: {
+    companyReference: '',
+    ibanAccount: '',
+    referencePhone: '',
+  },
   contactInfo: {
     cellPhone: '',
     email: '',
@@ -46,6 +51,7 @@ export const PHYSICAL_PERSON_CONTACT_ERRORS =
   WIZARD_COPY.STEP_2_PHYSICAL_CONTACT.ERRORS;
 
 export const PHYSICAL_PERSON_CONTACT_PATTERNS = {
+  CR_IBAN: /^CR\d{20}$/,
   DATE_DD_MM_YYYY,
   INTERNATIONAL_PHONE: INTERNATIONAL_PHONE_REGEX,
 } as const;

@@ -12,6 +12,8 @@ export const PHYSICAL_PERSON_CONTACT_FORM_COPY = {
   CANTON_PLACEHOLDER: 'Seleccione cantón',
   CELL_PHONE_LABEL: 'TELÉFONO CELULAR',
   CELL_PHONE_PLACEHOLDER: '+506 8888-8888',
+  COMPANY_REFERENCE_LABEL: 'REFERENCIA LABORAL / EMPRESA',
+  COMPANY_REFERENCE_PLACEHOLDER: 'Ej: Corporación CoriMotors S.A.',
   CURRENCY_LABEL: 'MONEDA DE INGRESOS',
   CURRENCY_PLACEHOLDER: 'Seleccione moneda',
   DISTRICT_LABEL: 'DISTRITO',
@@ -30,6 +32,8 @@ export const PHYSICAL_PERSON_CONTACT_FORM_COPY = {
   GROSS_INCOME_PLACEHOLDER: '1500000',
   HOME_PHONE_LABEL: 'TELÉFONO HABITACIÓN',
   HOME_PHONE_PLACEHOLDER: '+506 2222-2222',
+  IBAN_ACCOUNT_LABEL: 'CUENTA IBAN',
+  IBAN_ACCOUNT_PLACEHOLDER: 'CR05015202001026284066',
   NET_INCOME_LABEL: 'INGRESO NETO',
   NET_INCOME_PLACEHOLDER: '1200000',
   OFFICE_PHONE_LABEL: 'TEL. OFICINA',
@@ -44,10 +48,13 @@ export const PHYSICAL_PERSON_CONTACT_FORM_COPY = {
   PROFESSION_PLACEHOLDER: 'Ej: Ingeniero de Sistemas, Administrador',
   PROVINCE_LABEL: 'PROVINCIA',
   PROVINCE_PLACEHOLDER: 'Seleccione provincia',
+  REFERENCE_PHONE_LABEL: 'TELÉFONO DE REFERENCIA',
+  REFERENCE_PHONE_PLACEHOLDER: '+506 2200-0000',
   SECTION_1_TITLE: '1. INFORMACIÓN DE CONTACTO',
   SECTION_2_TITLE: '2. DOMICILIO RESIDENCIAL',
   SECTION_3_TITLE: '3. DATOS LABORALES',
   SECTION_4_TITLE: '4. CAPACIDAD FINANCIERA',
+  SECTION_5_TITLE: '5. REFERENCIA COMERCIAL Y CUENTA',
 } as const;
 
 export const PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS = {
@@ -59,6 +66,7 @@ export const PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS = {
 export const PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL = {
   EXACT_ADDRESS_NUMBER_OF_LINES: 3,
   MAX_LENGTH_DATE: 14,
+  MAX_LENGTH_IBAN: 22,
   MAX_LENGTH_INCOME: 15,
 } as const;
 
@@ -135,6 +143,7 @@ export const PHYSICAL_PERSON_CONTACT_FORM_STYLES = {
 export const PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS = {
   CANTON_SELECT: 'physical-person-contact-canton-select',
   CELL_PHONE_INPUT: 'physical-person-contact-cell-phone-input',
+  COMPANY_REFERENCE_INPUT: 'physical-person-contact-company-reference-input',
   CONTAINER: 'physical-person-contact-form-container',
   CURRENCY_SELECT: 'physical-person-contact-currency-select',
   DISTRICT_SELECT: 'physical-person-contact-district-select',
@@ -145,11 +154,13 @@ export const PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS = {
   EXACT_ADDRESS_INPUT: 'physical-person-contact-exact-address-input',
   GROSS_INCOME_INPUT: 'physical-person-contact-gross-income-input',
   HOME_PHONE_INPUT: 'physical-person-contact-home-phone-input',
+  IBAN_ACCOUNT_INPUT: 'physical-person-contact-iban-account-input',
   NET_INCOME_INPUT: 'physical-person-contact-net-income-input',
   OFFICE_PHONE_INPUT: 'physical-person-contact-office-phone-input',
   OTHER_INCOMES_INPUT: 'physical-person-contact-other-incomes-input',
   PROFESSION_INPUT: 'physical-person-contact-profession-input',
   PROVINCE_SELECT: 'physical-person-contact-province-select',
+  REFERENCE_PHONE_INPUT: 'physical-person-contact-reference-phone-input',
   SECTION_1_CARD: 'physical-person-contact-section-1-card',
   SECTION_1_HEADER: 'physical-person-contact-section-1-header',
   SECTION_1_ICON: 'physical-person-contact-section-1-icon',
@@ -162,4 +173,7 @@ export const PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS = {
   SECTION_4_CARD: 'physical-person-contact-section-4-card',
   SECTION_4_HEADER: 'physical-person-contact-section-4-header',
   SECTION_4_ICON: 'physical-person-contact-section-4-icon',
+  SECTION_5_CARD: 'physical-person-contact-section-5-card',
+  SECTION_5_HEADER: 'physical-person-contact-section-5-header',
+  SECTION_5_ICON: 'physical-person-contact-section-5-icon',
 } as const;

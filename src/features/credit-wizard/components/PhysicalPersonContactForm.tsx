@@ -1,5 +1,6 @@
 import {
   BanknoteIcon,
+  BuildingIcon,
   CustomSelect,
   CustomTextInput,
   IdCardIcon,
@@ -59,6 +60,16 @@ const EmploymentSectionIcon = (): React.JSX.Element => (
 const FinancialSectionIcon = (): React.JSX.Element => (
   <View testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.SECTION_4_ICON}>
     <BanknoteIcon
+      color={PHYSICAL_PERSON_CONTACT_FORM_COLORS.HEADER_ICON_STROKE}
+      size={PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS.SIZE_PX}
+      strokeWidth={PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS.STROKE_WIDTH_PX}
+    />
+  </View>
+);
+
+const CommercialSectionIcon = (): React.JSX.Element => (
+  <View testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.SECTION_5_ICON}>
+    <BuildingIcon
       color={PHYSICAL_PERSON_CONTACT_FORM_COLORS.HEADER_ICON_STROKE}
       size={PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS.SIZE_PX}
       strokeWidth={PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS.STROKE_WIDTH_PX}
@@ -648,6 +659,120 @@ const PhysicalPersonContactFormComponent = ({
               />
             );
           }}
+        />
+      </View>
+
+      {/* SECTION 5: REFERENCIA COMERCIAL Y CUENTA */}
+      <View
+        className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.CARD_CONTAINER}
+        testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.SECTION_5_CARD}
+      >
+        <SectionHeader
+          icon={<CommercialSectionIcon />}
+          testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.SECTION_5_HEADER}
+          title={PHYSICAL_PERSON_CONTACT_FORM_COPY.SECTION_5_TITLE}
+        />
+
+        {/* Row with Referencia Laboral / Empresa & Teléfono de Referencia (Side-by-side) */}
+        <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_ROW}>
+          <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_COLUMN}>
+            <Controller
+              control={control}
+              name='commercialReference.companyReference'
+              render={({
+                field: { onBlur, onChange, value },
+                fieldState: { error },
+              }) => (
+                <CustomTextInput
+                  autoCapitalize='words'
+                  editable={!disabled}
+                  error={error?.message}
+                  label={
+                    PHYSICAL_PERSON_CONTACT_FORM_COPY.COMPANY_REFERENCE_LABEL
+                  }
+                  leftIcon='hash'
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  onFocus={onInputFocus}
+                  placeholder={
+                    PHYSICAL_PERSON_CONTACT_FORM_COPY.COMPANY_REFERENCE_PLACEHOLDER
+                  }
+                  required
+                  testID={
+                    PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.COMPANY_REFERENCE_INPUT
+                  }
+                  value={value ?? ''}
+                />
+              )}
+            />
+          </View>
+
+          <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_COLUMN}>
+            <Controller
+              control={control}
+              name='commercialReference.referencePhone'
+              render={({
+                field: { onBlur, onChange, value },
+                fieldState: { error },
+              }) => (
+                <CustomTextInput
+                  editable={!disabled}
+                  error={error?.message}
+                  keyboardType='phone-pad'
+                  label={
+                    PHYSICAL_PERSON_CONTACT_FORM_COPY.REFERENCE_PHONE_LABEL
+                  }
+                  leftIcon='phone-call'
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  onFocus={onInputFocus}
+                  placeholder={
+                    PHYSICAL_PERSON_CONTACT_FORM_COPY.REFERENCE_PHONE_PLACEHOLDER
+                  }
+                  required
+                  testID={
+                    PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.REFERENCE_PHONE_INPUT
+                  }
+                  value={value ?? ''}
+                />
+              )}
+            />
+          </View>
+        </View>
+
+        {/* Cuenta IBAN (Full Width) */}
+        <Controller
+          control={control}
+          name='commercialReference.ibanAccount'
+          render={({
+            field: { onBlur, onChange, value },
+            fieldState: { error },
+          }) => (
+            <CustomTextInput
+              autoCapitalize='characters'
+              editable={!disabled}
+              error={error?.message}
+              keyboardType='default'
+              label={PHYSICAL_PERSON_CONTACT_FORM_COPY.IBAN_ACCOUNT_LABEL}
+              leftIcon='banknote'
+              maxLength={
+                PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL.MAX_LENGTH_IBAN
+              }
+              onBlur={onBlur}
+              onChangeText={(text: string): void => {
+                onChange(text.toUpperCase());
+              }}
+              onFocus={onInputFocus}
+              placeholder={
+                PHYSICAL_PERSON_CONTACT_FORM_COPY.IBAN_ACCOUNT_PLACEHOLDER
+              }
+              required
+              testID={
+                PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.IBAN_ACCOUNT_INPUT
+              }
+              value={value ?? ''}
+            />
+          )}
         />
       </View>
     </View>

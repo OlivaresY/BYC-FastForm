@@ -8,6 +8,11 @@ import type { PhysicalPersonContactStepViewProps } from '../types/PhysicalPerson
 import { PhysicalPersonContactStepView } from './PhysicalPersonContactStepView';
 
 const FIGMA_VALID_MOCK_DATA: PhysicalPersonContact = {
+  commercialReference: {
+    companyReference: 'Servicios Tecnológicos',
+    ibanAccount: 'CR05015202001026284066',
+    referencePhone: '+506 2540-1000',
+  },
   contactInfo: {
     cellPhone: '+506 8834-9210',
     email: 'carlos.mora@ejemplo.cr',

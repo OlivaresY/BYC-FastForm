@@ -33,6 +33,10 @@ export const usePhysicalPersonContactViewModel = (
     defaultValues: {
       ...PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES,
       ...defaultValuesProp,
+      commercialReference: {
+        ...PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES.commercialReference,
+        ...defaultValuesProp?.commercialReference,
+      },
       contactInfo: {
         ...PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES.contactInfo,
         ...defaultValuesProp?.contactInfo,
@@ -71,8 +75,9 @@ export const usePhysicalPersonContactViewModel = (
         if (
           dataOrEvent &&
           typeof dataOrEvent === 'object' &&
-          'contactInfo' in dataOrEvent &&
-          'residentialAddress' in dataOrEvent
+          ('commercialReference' in dataOrEvent ||
+            'contactInfo' in dataOrEvent ||
+            'residentialAddress' in dataOrEvent)
         ) {
           const parseResult = PhysicalPersonContactSchema.safeParse(dataOrEvent);
           if (!parseResult.success) {
