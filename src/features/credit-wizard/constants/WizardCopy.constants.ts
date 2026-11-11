@@ -104,28 +104,59 @@ export const WIZARD_COPY = {
     DESCRIPTION:
       'Ingresa la información legal, de contacto y financiera de la empresa para la evaluación y perfilado de crédito multi-banco.',
     ERRORS: {
-      CONSTITUTION_DATE_FUTURE:
-        'La fecha de constitución no puede ser una fecha futura.',
-      CONSTITUTION_DATE_INVALID:
-        'La fecha de constitución debe tener un formato DD-MM-YYYY válido.',
-      CONSTITUTION_DATE_REQUIRED: 'La fecha de constitución es obligatoria.',
-      CORPORATE_ID_INVALID:
-        'La cédula jurídica debe tener un formato válido (ej. 3-101-123456).',
-      CORPORATE_ID_REQUIRED: 'La cédula jurídica es obligatoria.',
-      CORPORATE_NAME_REQUIRED: 'La razón social es obligatoria.',
-      EMAIL_INVALID: 'El formato del correo electrónico no es válido.',
-      EMAIL_REQUIRED: 'El correo electrónico es obligatorio.',
-      GROSS_INCOME_POSITIVE: 'El ingreso bruto debe ser mayor a 0.',
-      GROSS_INCOME_REQUIRED: 'El ingreso bruto es obligatorio.',
-      NET_INCOME_EXCEEDS_GROSS:
-        'El ingreso neto no puede ser mayor al ingreso bruto.',
-      NET_INCOME_POSITIVE: 'El ingreso neto debe ser mayor a 0.',
-      NET_INCOME_REQUIRED: 'El ingreso neto es obligatorio.',
-      PHONE_INVALID: 'El formato del teléfono no es válido.',
-      PHONE_REQUIRED: 'El teléfono es obligatorio.',
-      REPRESENTATIVE_ID_REQUIRED: 'La cédula del representante es obligatoria.',
-      REPRESENTATIVE_NAME_REQUIRED:
-        'El nombre del representante legal es obligatorio.',
+      COMMERCIAL_ACTIVITY: {
+        ACCOUNTING_PHONE_INVALID:
+          'El formato del teléfono de contabilidad no es válido.',
+        ACCOUNTING_PHONE_REQUIRED:
+          'El teléfono de contabilidad es obligatorio.',
+        CONSTITUTION_DATE_FUTURE:
+          'La fecha de constitución no puede ser una fecha futura.',
+        CONSTITUTION_DATE_INVALID:
+          'La fecha de constitución debe tener un formato DD-MM-YYYY válido.',
+        CONSTITUTION_DATE_REQUIRED: 'La fecha de constitución es obligatoria.',
+        ECONOMIC_SECTOR_REQUIRED: 'El sector económico es obligatorio.',
+        EMPLOYEES_COUNT_POSITIVE:
+          'La cantidad de empleados debe ser mayor a 0.',
+        EMPLOYEES_COUNT_REQUIRED: 'La cantidad de empleados es obligatoria.',
+        MAIN_ACTIVITY_REQUIRED: 'La actividad principal es obligatoria.',
+      },
+      COMMERCIAL_ADDRESS: {
+        CANTON_REQUIRED: 'El cantón es obligatorio.',
+        DISTRICT_REQUIRED: 'El distrito es obligatorio.',
+        EXACT_ADDRESS_REQUIRED: 'La dirección exacta es obligatoria.',
+        PROVINCE_REQUIRED: 'La provincia es obligatoria.',
+      },
+      COMMERCIAL_REFERENCE: {
+        COMPANY_REFERENCE_MIN:
+          'El nombre de la empresa de referencia debe tener al menos 2 caracteres.',
+        COMPANY_REFERENCE_REQUIRED:
+          'El nombre de la empresa de referencia es obligatorio.',
+        IBAN_ACCOUNT_INVALID:
+          'La cuenta IBAN debe tener un formato válido de Costa Rica (ej. CR05015202001026284066).',
+        IBAN_ACCOUNT_REQUIRED: 'La cuenta IBAN es obligatoria.',
+        REFERENCE_PHONE_INVALID:
+          'El formato del teléfono de referencia no es válido.',
+        REFERENCE_PHONE_REQUIRED: 'El teléfono de referencia es obligatorio.',
+      },
+      CONTACT_INFO: {
+        CELL_PHONE_INVALID: 'El formato del teléfono celular no es válido.',
+        CELL_PHONE_REQUIRED: 'El teléfono celular es obligatorio.',
+        EMAIL_INVALID: 'El formato del correo electrónico no es válido.',
+        EMAIL_REQUIRED: 'El correo electrónico es obligatorio.',
+        OFFICE_PHONE_INVALID: 'El formato del teléfono de oficina no es válido.',
+        OFFICE_PHONE_REQUIRED: 'El teléfono de oficina es obligatorio.',
+      },
+      FINANCIAL_STATEMENTS: {
+        CURRENCY_INVALID: 'Seleccione una moneda válida (CRC o USD).',
+        GROSS_SALES_POSITIVE: 'Las ventas brutas deben ser mayores a 0.',
+        GROSS_SALES_REQUIRED: 'Las ventas brutas son obligatorias.',
+        NET_PROFIT_EXCEEDS_GROSS:
+          'La utilidad neta no puede ser mayor a las ventas brutas.',
+        NET_PROFIT_POSITIVE: 'La utilidad neta debe ser mayor a 0.',
+        NET_PROFIT_REQUIRED: 'La utilidad neta es obligatoria.',
+        OTHER_INCOMES_MIN: 'Otros ingresos no puede ser negativo.',
+        OTHER_INCOMES_REQUIRED: 'Otros ingresos debe ser un valor numérico.',
+      },
       SUBMIT_FAILED:
         'Ocurrió un error al procesar la solicitud. Intente nuevamente.',
     },
@@ -133,7 +164,7 @@ export const WIZARD_COPY = {
       'Ingresa la información legal, de contacto y financiera de la empresa para la evaluación y perfilado de crédito multi-banco.',
     HEADER_TITLE: 'Persona Jurídica',
     SUBMIT_BUTTON: 'Siguiente',
-    TITLE: 'Persona Jurídica',
+    TITLE: 'Contacto y Comercial',
   },
   STEP_2_PHYSICAL_CONTACT: {
     DESCRIPTION:

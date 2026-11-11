@@ -1,3 +1,4 @@
+import { TextInput } from 'react-native';
 import { KeyboardAutoScrollPageObject } from './useKeyboardAutoScroll.po';
 
 describe('useKeyboardAutoScroll', () => {
@@ -84,21 +85,85 @@ describe('useKeyboardAutoScroll', () => {
       jest.runAllTimers();
     });
 
-    // Assert - measureLayout called relative to the ScrollView ref
-    expect(mockInputNode.measureLayout).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.any(Function),
+    // Assert - input measured in window coordinates and scrolled by the
+    // exact amount it was covered by the keyboard (screenY 500, gap 24)
+    expect(mockInputNode.measureInWindow).toHaveBeenCalledWith(
       expect.any(Function),
     );
-    expect(mockScrollTo).toHaveBeenCalledWith(
-      expect.objectContaining({
-        animated: true,
-        y: expect.any(Number),
-      }),
-    );
+    expect(mockScrollTo).toHaveBeenCalledWith({
+      animated: true,
+      y: 1000 + 50 - (500 - 24),
+    });
   });
 
-  it('triggers fallback scrollTo when node lacks measureLayout in test environment', () => {
+  it('does not scroll when the focused input is already above the keyboard', () => {
+    // Arrange
+    const page = KeyboardAutoScrollPageObject.render({
+      bottomBarHeight: 64,
+      extraScrollPadding: 24,
+    });
+
+    const mockScrollTo = jest.fn();
+    (page.current.scrollViewRef as { current: unknown }).current = {
+      scrollTo: mockScrollTo,
+    };
+
+    const mockInputNode = page.createMockNode({
+      height: 50,
+      left: 0,
+      top: 200,
+      width: 300,
+    });
+
+    // Act
+    page.emitKeyboardDidShow(300);
+    page.onInputFocus({ nativeEvent: { target: mockInputNode } });
+
+    KeyboardAutoScrollPageObject.act(() => {
+      jest.runAllTimers();
+    });
+
+    // Assert
+    expect(mockInputNode.measureInWindow).toHaveBeenCalled();
+    expect(mockScrollTo).not.toHaveBeenCalled();
+  });
+
+  it('falls back to the currently focused TextInput when the event target is a numeric native tag', () => {
+    // Arrange
+    const page = KeyboardAutoScrollPageObject.render({
+      bottomBarHeight: 64,
+      extraScrollPadding: 24,
+    });
+
+    const mockScrollTo = jest.fn();
+    (page.current.scrollViewRef as { current: unknown }).current = {
+      scrollTo: mockScrollTo,
+    };
+
+    const focusedInput = page.createMockNode({ height: 50, top: 600 });
+    const focusedInputSpy = jest
+      .spyOn(TextInput.State, 'currentlyFocusedInput')
+      .mockReturnValue(focusedInput as never);
+
+    // Act - RN delivers an integer tag as the event target
+    page.emitKeyboardDidShow(300);
+    page.onInputFocus({ nativeEvent: { target: 4217 } });
+
+    KeyboardAutoScrollPageObject.act(() => {
+      jest.runAllTimers();
+    });
+
+    // Assert
+    expect(focusedInput.measureInWindow).toHaveBeenCalled();
+    expect(mockScrollTo).toHaveBeenCalledWith({
+      animated: true,
+      y: 600 + 50 - (500 - 24),
+    });
+
+    focusedInputSpy.mockRestore();
+  });
+
+  it('does not trigger blind scrollTo when node lacks measureInWindow', () => {
     // Arrange
     const page = KeyboardAutoScrollPageObject.render({
       bottomBarHeight: 64,
@@ -122,9 +187,51 @@ describe('useKeyboardAutoScroll', () => {
     });
 
     // Assert
+    expect(mockScrollTo).not.toHaveBeenCalled();
+  });
+
+  it('uses default constants with 64px extra scroll padding when options are omitted', () => {
+    // Arrange & Act
+    const page = KeyboardAutoScrollPageObject.render();
+    page.emitKeyboardDidShow(300);
+
+    // Assert (keyboard 300 + bottomBar 84 + extraPadding 64 = 448)
+    expect(page.keyboardHeight).toBe(300);
+    expect(page.paddingBottom).toBe(300 + 84 + 64);
+  });
+
+  it('automatically triggers measurement and scroll when keyboard opens if an input is already focused', () => {
+    // Arrange
+    const page = KeyboardAutoScrollPageObject.render({
+      bottomBarHeight: 64,
+      extraScrollPadding: 64,
+    });
+
+    const mockScrollTo = jest.fn();
+    (page.current.scrollViewRef as { current: unknown }).current = {
+      scrollTo: mockScrollTo,
+    };
+
+    const mockInputNode = page.createMockNode({
+      height: 50,
+      left: 0,
+      top: 600,
+      width: 300,
+    });
+
+    // Act - Focus input before keyboard emits show
+    page.onInputFocus({ nativeEvent: { target: mockInputNode } });
+    page.emitKeyboardDidShow(300);
+
+    KeyboardAutoScrollPageObject.act(() => {
+      jest.runAllTimers();
+    });
+
+    // Assert
+    expect(mockInputNode.measureInWindow).toHaveBeenCalled();
     expect(mockScrollTo).toHaveBeenCalledWith({
       animated: true,
-      y: 280 + 24,
+      y: 600 + 50 - (500 - 64),
     });
   });
 

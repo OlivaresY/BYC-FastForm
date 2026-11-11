@@ -18,15 +18,35 @@ const getMessages = (
 };
 
 const createValidLegalEntity = (): LegalEntityContact => ({
-  constitutionDate: '15-05-2015',
-  corporateId: '3-101-123456',
-  corporateName: 'Distribuidora Automotriz del Este S.A.',
-  email: 'contacto@distribuidoraeste.cr',
-  grossIncome: 5000000,
-  netIncome: 3500000,
-  phone: '+506 2200-0000',
-  representativeId: '1-1150-0222',
-  representativeName: 'Juan Alberto Perez Rojas',
+  commercialActivity: {
+    accountingPhone: '+506 2200-1111',
+    constitutionDate: '15-05-2015',
+    economicSector: 'Automotriz y Repuestos',
+    employeesCount: 25,
+    mainActivity: 'Venta de repuestos y mantenimiento vehicular',
+  },
+  commercialAddress: {
+    canton: 'San José',
+    district: 'Uruca',
+    exactAddress: '200 metros norte del puente Juan Pablo II',
+    province: 'San José',
+  },
+  commercialReference: {
+    companyReference: 'CoriMotors S.A.',
+    ibanAccount: 'CR05015202001026284066',
+    referencePhone: '+506 2200-2222',
+  },
+  contactInfo: {
+    cellPhone: '+506 8888-9999',
+    email: 'contacto@distribuidoraeste.cr',
+    officePhone: '+506 2200-0000',
+  },
+  financialStatements: {
+    currency: 'CRC',
+    grossSales: 50000000,
+    netProfit: 15000000,
+    otherIncomes: 2000000,
+  },
 });
 
 describe('LegalEntityContactSchema', () => {
@@ -42,11 +62,32 @@ describe('LegalEntityContactSchema', () => {
       expect(result.success).toBe(true);
     });
 
-    it('accepts an unformatted 10-digit Costa Rican corporate ID', () => {
+    it('accepts USD as currency', () => {
       // Arrange
-      const data = {
+      const validData: LegalEntityContact = {
         ...createValidLegalEntity(),
-        corporateId: '3101123456',
+        financialStatements: {
+          ...createValidLegalEntity().financialStatements,
+          currency: 'USD',
+        },
+      };
+
+      // Act
+      const result = LegalEntityContactSchema.safeParse(validData);
+
+      // Assert
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts net profit equal to gross sales', () => {
+      // Arrange
+      const data: LegalEntityContact = {
+        ...createValidLegalEntity(),
+        financialStatements: {
+          ...createValidLegalEntity().financialStatements,
+          grossSales: 25000000,
+          netProfit: 25000000,
+        },
       };
 
       // Act
@@ -56,26 +97,43 @@ describe('LegalEntityContactSchema', () => {
       expect(result.success).toBe(true);
     });
 
-    it('accepts net income equal to gross income', () => {
+    it('accepts nullish or omitted otherIncomes', () => {
       // Arrange
-      const data = {
+      const dataWithoutOtherIncomes = {
         ...createValidLegalEntity(),
-        grossIncome: 2500000,
-        netIncome: 2500000,
+        financialStatements: {
+          currency: 'CRC' as const,
+          grossSales: 30000000,
+          netProfit: 10000000,
+        },
       };
 
       // Act
-      const result = LegalEntityContactSchema.safeParse(data);
+      const result = LegalEntityContactSchema.safeParse(
+        dataWithoutOtherIncomes,
+      );
 
       // Assert
       expect(result.success).toBe(true);
     });
 
-    it('accepts alternative valid phone formats', () => {
+    it('accepts alternative valid local phone formats', () => {
       // Arrange
-      const dataWithLocalPhone = {
+      const dataWithLocalPhone: LegalEntityContact = {
         ...createValidLegalEntity(),
-        phone: '2222-3333',
+        contactInfo: {
+          ...createValidLegalEntity().contactInfo,
+          cellPhone: '8888-9999',
+          officePhone: '2222-3333',
+        },
+        commercialActivity: {
+          ...createValidLegalEntity().commercialActivity,
+          accountingPhone: '2200-4444',
+        },
+        commercialReference: {
+          ...createValidLegalEntity().commercialReference,
+          referencePhone: '2200-5555',
+        },
       };
 
       // Act & Assert
@@ -94,63 +152,112 @@ describe('LegalEntityContactSchema', () => {
 
       // Assert
       expect(result.success).toBe(false);
-      expect(getMessages(result, ['constitutionDate'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.CONSTITUTION_DATE_REQUIRED,
-      ]);
-      expect(getMessages(result, ['corporateId'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.CORPORATE_ID_REQUIRED,
-      ]);
-      expect(getMessages(result, ['corporateName'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.CORPORATE_NAME_REQUIRED,
-      ]);
-      expect(getMessages(result, ['email'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.EMAIL_REQUIRED,
-      ]);
-      expect(getMessages(result, ['phone'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.PHONE_REQUIRED,
-      ]);
-      expect(getMessages(result, ['representativeId'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.REPRESENTATIVE_ID_REQUIRED,
-      ]);
-      expect(getMessages(result, ['representativeName'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.REPRESENTATIVE_NAME_REQUIRED,
-      ]);
-      expect(getMessages(result, ['grossIncome'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.GROSS_INCOME_REQUIRED,
-      ]);
-      expect(getMessages(result, ['netIncome'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.NET_INCOME_REQUIRED,
-      ]);
-    });
 
-    it('returns exact Spanish required messages when incomes are undefined', () => {
-      // Arrange
-      const data = {
-        ...createValidLegalEntity(),
-        grossIncome: undefined,
-        netIncome: undefined,
-      };
-
-      // Act
-      const result = LegalEntityContactSchema.safeParse(data);
-
-      // Assert
-      expect(result.success).toBe(false);
-      expect(getMessages(result, ['grossIncome'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.GROSS_INCOME_REQUIRED,
+      // commercialActivity
+      expect(
+        getMessages(result, ['commercialActivity', 'accountingPhone']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+          .ACCOUNTING_PHONE_REQUIRED,
       ]);
-      expect(getMessages(result, ['netIncome'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.NET_INCOME_REQUIRED,
+      expect(
+        getMessages(result, ['commercialActivity', 'constitutionDate']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+          .CONSTITUTION_DATE_REQUIRED,
       ]);
+      expect(
+        getMessages(result, ['commercialActivity', 'economicSector']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+          .ECONOMIC_SECTOR_REQUIRED,
+      ]);
+      expect(
+        getMessages(result, ['commercialActivity', 'employeesCount']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+          .EMPLOYEES_COUNT_REQUIRED,
+      ]);
+      expect(
+        getMessages(result, ['commercialActivity', 'mainActivity']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY.MAIN_ACTIVITY_REQUIRED,
+      ]);
+
+      // commercialAddress
+      expect(getMessages(result, ['commercialAddress', 'canton'])).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.CANTON_REQUIRED,
+      ]);
+      expect(getMessages(result, ['commercialAddress', 'district'])).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.DISTRICT_REQUIRED,
+      ]);
+      expect(
+        getMessages(result, ['commercialAddress', 'exactAddress']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.EXACT_ADDRESS_REQUIRED,
+      ]);
+      expect(getMessages(result, ['commercialAddress', 'province'])).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.PROVINCE_REQUIRED,
+      ]);
+
+      // commercialReference
+      expect(
+        getMessages(result, ['commercialReference', 'companyReference']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+          .COMPANY_REFERENCE_REQUIRED,
+      ]);
+      expect(
+        getMessages(result, ['commercialReference', 'ibanAccount']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_REFERENCE.IBAN_ACCOUNT_REQUIRED,
+      ]);
+      expect(
+        getMessages(result, ['commercialReference', 'referencePhone']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+          .REFERENCE_PHONE_REQUIRED,
+      ]);
+
+      // contactInfo
+      expect(getMessages(result, ['contactInfo', 'cellPhone'])).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.CONTACT_INFO.CELL_PHONE_REQUIRED,
+      ]);
+      expect(getMessages(result, ['contactInfo', 'email'])).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.CONTACT_INFO.EMAIL_REQUIRED,
+      ]);
+      expect(getMessages(result, ['contactInfo', 'officePhone'])).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.CONTACT_INFO.OFFICE_PHONE_REQUIRED,
+      ]);
+
+      // financialStatements
+      expect(
+        getMessages(result, ['financialStatements', 'grossSales']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS.GROSS_SALES_REQUIRED,
+      ]);
+      expect(getMessages(result, ['financialStatements', 'netProfit'])).toEqual(
+        [LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS.NET_PROFIT_REQUIRED],
+      );
     });
 
     it('rejects whitespace-only strings with required errors', () => {
       // Arrange
       const data = {
         ...createValidLegalEntity(),
-        corporateName: '   ',
-        representativeId: '   ',
-        representativeName: '   ',
+        commercialActivity: {
+          ...createValidLegalEntity().commercialActivity,
+          economicSector: '   ',
+          mainActivity: '   ',
+        },
+        commercialAddress: {
+          ...createValidLegalEntity().commercialAddress,
+          exactAddress: '   ',
+        },
+        commercialReference: {
+          ...createValidLegalEntity().commercialReference,
+          companyReference: '   ',
+        },
       };
 
       // Act
@@ -158,76 +265,70 @@ describe('LegalEntityContactSchema', () => {
 
       // Assert
       expect(result.success).toBe(false);
-      expect(getMessages(result, ['corporateName'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.CORPORATE_NAME_REQUIRED,
+      expect(
+        getMessages(result, ['commercialActivity', 'economicSector']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+          .ECONOMIC_SECTOR_REQUIRED,
       ]);
-      expect(getMessages(result, ['representativeId'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.REPRESENTATIVE_ID_REQUIRED,
+      expect(
+        getMessages(result, ['commercialActivity', 'mainActivity']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY.MAIN_ACTIVITY_REQUIRED,
       ]);
-      expect(getMessages(result, ['representativeName'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.REPRESENTATIVE_NAME_REQUIRED,
+      expect(
+        getMessages(result, ['commercialAddress', 'exactAddress']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.EXACT_ADDRESS_REQUIRED,
+      ]);
+      expect(
+        getMessages(result, ['commercialReference', 'companyReference']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+          .COMPANY_REFERENCE_REQUIRED,
       ]);
     });
   });
 
   describe('format validations', () => {
-    it('returns CORPORATE_ID_INVALID when corporate ID does not start with 3', () => {
-      // Arrange
-      const data = {
-        ...createValidLegalEntity(),
-        corporateId: '1-101-123456',
-      };
-
-      // Act
-      const result = LegalEntityContactSchema.safeParse(data);
-
-      // Assert
-      expect(result.success).toBe(false);
-      expect(getMessages(result, ['corporateId'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.CORPORATE_ID_INVALID,
-      ]);
-    });
-
-    it('returns CORPORATE_ID_INVALID when corporate ID has incorrect length or format', () => {
-      // Arrange
-      const data = {
-        ...createValidLegalEntity(),
-        corporateId: '3-10-12345',
-      };
-
-      // Act
-      const result = LegalEntityContactSchema.safeParse(data);
-
-      // Assert
-      expect(result.success).toBe(false);
-      expect(getMessages(result, ['corporateId'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.CORPORATE_ID_INVALID,
-      ]);
-    });
-
     it('returns CONSTITUTION_DATE_INVALID when date is syntactically or calendar invalid', () => {
       // Arrange
       const invalidCalendarDate = {
         ...createValidLegalEntity(),
-        constitutionDate: '32-01-2020',
+        commercialActivity: {
+          ...createValidLegalEntity().commercialActivity,
+          constitutionDate: '32-01-2020',
+        },
       };
       const invalidLeapDate = {
         ...createValidLegalEntity(),
-        constitutionDate: '29-02-2023',
+        commercialActivity: {
+          ...createValidLegalEntity().commercialActivity,
+          constitutionDate: '29-02-2023',
+        },
       };
 
       // Act & Assert
       const resultCalendar =
         LegalEntityContactSchema.safeParse(invalidCalendarDate);
       expect(resultCalendar.success).toBe(false);
-      expect(getMessages(resultCalendar, ['constitutionDate'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.CONSTITUTION_DATE_INVALID,
+      expect(
+        getMessages(resultCalendar, [
+          'commercialActivity',
+          'constitutionDate',
+        ]),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+          .CONSTITUTION_DATE_INVALID,
       ]);
 
       const resultLeap = LegalEntityContactSchema.safeParse(invalidLeapDate);
       expect(resultLeap.success).toBe(false);
-      expect(getMessages(resultLeap, ['constitutionDate'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.CONSTITUTION_DATE_INVALID,
+      expect(
+        getMessages(resultLeap, ['commercialActivity', 'constitutionDate']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+          .CONSTITUTION_DATE_INVALID,
       ]);
     });
 
@@ -235,7 +336,10 @@ describe('LegalEntityContactSchema', () => {
       // Arrange
       const futureData = {
         ...createValidLegalEntity(),
-        constitutionDate: '01-01-2099',
+        commercialActivity: {
+          ...createValidLegalEntity().commercialActivity,
+          constitutionDate: '01-01-2099',
+        },
       };
 
       // Act
@@ -243,8 +347,11 @@ describe('LegalEntityContactSchema', () => {
 
       // Assert
       expect(result.success).toBe(false);
-      expect(getMessages(result, ['constitutionDate'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.CONSTITUTION_DATE_FUTURE,
+      expect(
+        getMessages(result, ['commercialActivity', 'constitutionDate']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+          .CONSTITUTION_DATE_FUTURE,
       ]);
     });
 
@@ -252,7 +359,10 @@ describe('LegalEntityContactSchema', () => {
       // Arrange
       const data = {
         ...createValidLegalEntity(),
-        email: 'invalid-email-address',
+        contactInfo: {
+          ...createValidLegalEntity().contactInfo,
+          email: 'invalid-email-address',
+        },
       };
 
       // Act
@@ -260,16 +370,28 @@ describe('LegalEntityContactSchema', () => {
 
       // Assert
       expect(result.success).toBe(false);
-      expect(getMessages(result, ['email'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.EMAIL_INVALID,
+      expect(getMessages(result, ['contactInfo', 'email'])).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.CONTACT_INFO.EMAIL_INVALID,
       ]);
     });
 
-    it('returns PHONE_INVALID when phone format is invalid', () => {
+    it('returns phone invalid errors for malformed phones in all sections', () => {
       // Arrange
       const data = {
         ...createValidLegalEntity(),
-        phone: '123',
+        commercialActivity: {
+          ...createValidLegalEntity().commercialActivity,
+          accountingPhone: '123',
+        },
+        commercialReference: {
+          ...createValidLegalEntity().commercialReference,
+          referencePhone: '456',
+        },
+        contactInfo: {
+          ...createValidLegalEntity().contactInfo,
+          cellPhone: '789',
+          officePhone: '000',
+        },
       };
 
       // Act
@@ -277,69 +399,170 @@ describe('LegalEntityContactSchema', () => {
 
       // Assert
       expect(result.success).toBe(false);
-      expect(getMessages(result, ['phone'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.PHONE_INVALID,
+      expect(
+        getMessages(result, ['commercialActivity', 'accountingPhone']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+          .ACCOUNTING_PHONE_INVALID,
+      ]);
+      expect(
+        getMessages(result, ['commercialReference', 'referencePhone']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+          .REFERENCE_PHONE_INVALID,
+      ]);
+      expect(getMessages(result, ['contactInfo', 'cellPhone'])).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.CONTACT_INFO.CELL_PHONE_INVALID,
+      ]);
+      expect(getMessages(result, ['contactInfo', 'officePhone'])).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.CONTACT_INFO.OFFICE_PHONE_INVALID,
+      ]);
+    });
+
+    it('returns IBAN_ACCOUNT_INVALID when IBAN is malformed or invalid country', () => {
+      // Arrange
+      const data = {
+        ...createValidLegalEntity(),
+        commercialReference: {
+          ...createValidLegalEntity().commercialReference,
+          ibanAccount: 'ES05015202001026284066',
+        },
+      };
+
+      // Act
+      const result = LegalEntityContactSchema.safeParse(data);
+
+      // Assert
+      expect(result.success).toBe(false);
+      expect(
+        getMessages(result, ['commercialReference', 'ibanAccount']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_REFERENCE.IBAN_ACCOUNT_INVALID,
+      ]);
+    });
+
+    it('returns COMPANY_REFERENCE_MIN when company reference is shorter than 2 chars', () => {
+      // Arrange
+      const data = {
+        ...createValidLegalEntity(),
+        commercialReference: {
+          ...createValidLegalEntity().commercialReference,
+          companyReference: 'A',
+        },
+      };
+
+      // Act
+      const result = LegalEntityContactSchema.safeParse(data);
+
+      // Assert
+      expect(result.success).toBe(false);
+      expect(
+        getMessages(result, ['commercialReference', 'companyReference']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_REFERENCE.COMPANY_REFERENCE_MIN,
       ]);
     });
   });
 
-  describe('income constraints and cross-field refinement', () => {
-    it('returns GROSS_INCOME_POSITIVE when gross income is negative or zero', () => {
+  describe('financial statements & cross-field refinement', () => {
+    it('returns GROSS_SALES_POSITIVE when gross sales is negative or zero', () => {
       // Arrange
       const zeroData = {
         ...createValidLegalEntity(),
-        grossIncome: 0,
-      };
-      const negativeData = {
-        ...createValidLegalEntity(),
-        grossIncome: -1000,
+        financialStatements: {
+          ...createValidLegalEntity().financialStatements,
+          grossSales: 0,
+        },
       };
 
-      // Act & Assert
-      const zeroResult = LegalEntityContactSchema.safeParse(zeroData);
-      expect(zeroResult.success).toBe(false);
-      expect(getMessages(zeroResult, ['grossIncome'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.GROSS_INCOME_POSITIVE,
-      ]);
+      // Act
+      const result = LegalEntityContactSchema.safeParse(zeroData);
 
-      const negativeResult = LegalEntityContactSchema.safeParse(negativeData);
-      expect(negativeResult.success).toBe(false);
-      expect(getMessages(negativeResult, ['grossIncome'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.GROSS_INCOME_POSITIVE,
+      // Assert
+      expect(result.success).toBe(false);
+      expect(
+        getMessages(result, ['financialStatements', 'grossSales']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS.GROSS_SALES_POSITIVE,
       ]);
     });
 
-    it('returns NET_INCOME_POSITIVE when net income is negative or zero', () => {
+    it('returns NET_PROFIT_POSITIVE when net profit is negative or zero', () => {
       // Arrange
       const zeroData = {
         ...createValidLegalEntity(),
-        netIncome: 0,
-      };
-      const negativeData = {
-        ...createValidLegalEntity(),
-        netIncome: -500,
+        financialStatements: {
+          ...createValidLegalEntity().financialStatements,
+          netProfit: 0,
+        },
       };
 
-      // Act & Assert
-      const zeroResult = LegalEntityContactSchema.safeParse(zeroData);
-      expect(zeroResult.success).toBe(false);
-      expect(getMessages(zeroResult, ['netIncome'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.NET_INCOME_POSITIVE,
-      ]);
+      // Act
+      const result = LegalEntityContactSchema.safeParse(zeroData);
 
-      const negativeResult = LegalEntityContactSchema.safeParse(negativeData);
-      expect(negativeResult.success).toBe(false);
-      expect(getMessages(negativeResult, ['netIncome'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.NET_INCOME_POSITIVE,
+      // Assert
+      expect(result.success).toBe(false);
+      expect(
+        getMessages(result, ['financialStatements', 'netProfit']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS.NET_PROFIT_POSITIVE,
       ]);
     });
 
-    it('triggers NET_INCOME_EXCEEDS_GROSS error on netIncome when netIncome > grossIncome', () => {
+    it('returns OTHER_INCOMES_MIN when other incomes is negative', () => {
+      // Arrange
+      const negativeData = {
+        ...createValidLegalEntity(),
+        financialStatements: {
+          ...createValidLegalEntity().financialStatements,
+          otherIncomes: -500,
+        },
+      };
+
+      // Act
+      const result = LegalEntityContactSchema.safeParse(negativeData);
+
+      // Assert
+      expect(result.success).toBe(false);
+      expect(
+        getMessages(result, ['financialStatements', 'otherIncomes']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS.OTHER_INCOMES_MIN,
+      ]);
+    });
+
+    it('returns EMPLOYEES_COUNT_POSITIVE when employee count is zero or negative', () => {
+      // Arrange
+      const zeroData = {
+        ...createValidLegalEntity(),
+        commercialActivity: {
+          ...createValidLegalEntity().commercialActivity,
+          employeesCount: 0,
+        },
+      };
+
+      // Act
+      const result = LegalEntityContactSchema.safeParse(zeroData);
+
+      // Assert
+      expect(result.success).toBe(false);
+      expect(
+        getMessages(result, ['commercialActivity', 'employeesCount']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+          .EMPLOYEES_COUNT_POSITIVE,
+      ]);
+    });
+
+    it('triggers NET_PROFIT_EXCEEDS_GROSS error when netProfit > grossSales', () => {
       // Arrange
       const data = {
         ...createValidLegalEntity(),
-        grossIncome: 3000000,
-        netIncome: 3000001,
+        financialStatements: {
+          ...createValidLegalEntity().financialStatements,
+          grossSales: 30000000,
+          netProfit: 30000001,
+        },
       };
 
       // Act
@@ -347,17 +570,23 @@ describe('LegalEntityContactSchema', () => {
 
       // Assert
       expect(result.success).toBe(false);
-      expect(getMessages(result, ['netIncome'])).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.NET_INCOME_EXCEEDS_GROSS,
+      expect(
+        getMessages(result, ['financialStatements', 'netProfit']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS
+          .NET_PROFIT_EXCEEDS_GROSS,
       ]);
     });
 
-    it('does not trigger NET_INCOME_EXCEEDS_GROSS if incomes are invalid types', () => {
+    it('does not trigger NET_PROFIT_EXCEEDS_GROSS if incomes are invalid types', () => {
       // Arrange
       const data = {
         ...createValidLegalEntity(),
-        grossIncome: undefined,
-        netIncome: 1000,
+        financialStatements: {
+          currency: 'CRC' as const,
+          grossSales: undefined as unknown as number,
+          netProfit: 1000,
+        },
       };
 
       // Act
@@ -365,8 +594,11 @@ describe('LegalEntityContactSchema', () => {
 
       // Assert
       expect(result.success).toBe(false);
-      expect(getMessages(result, ['netIncome'])).not.toContain(
-        LEGAL_ENTITY_CONTACT_ERRORS.NET_INCOME_EXCEEDS_GROSS,
+      expect(
+        getMessages(result, ['financialStatements', 'netProfit']),
+      ).not.toContain(
+        LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS
+          .NET_PROFIT_EXCEEDS_GROSS,
       );
     });
   });

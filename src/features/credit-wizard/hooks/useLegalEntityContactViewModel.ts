@@ -33,6 +33,26 @@ export const useLegalEntityContactViewModel = (
     defaultValues: {
       ...LEGAL_ENTITY_CONTACT_DEFAULT_VALUES,
       ...defaultValuesProp,
+      commercialActivity: {
+        ...LEGAL_ENTITY_CONTACT_DEFAULT_VALUES.commercialActivity,
+        ...defaultValuesProp?.commercialActivity,
+      },
+      commercialAddress: {
+        ...LEGAL_ENTITY_CONTACT_DEFAULT_VALUES.commercialAddress,
+        ...defaultValuesProp?.commercialAddress,
+      },
+      commercialReference: {
+        ...LEGAL_ENTITY_CONTACT_DEFAULT_VALUES.commercialReference,
+        ...defaultValuesProp?.commercialReference,
+      },
+      contactInfo: {
+        ...LEGAL_ENTITY_CONTACT_DEFAULT_VALUES.contactInfo,
+        ...defaultValuesProp?.contactInfo,
+      },
+      financialStatements: {
+        ...LEGAL_ENTITY_CONTACT_DEFAULT_VALUES.financialStatements,
+        ...defaultValuesProp?.financialStatements,
+      },
     },
     mode,
     resolver: zodResolver(
@@ -55,8 +75,11 @@ export const useLegalEntityContactViewModel = (
         if (
           dataOrEvent &&
           typeof dataOrEvent === 'object' &&
-          'corporateId' in dataOrEvent &&
-          'corporateName' in dataOrEvent
+          ('commercialActivity' in dataOrEvent ||
+            'commercialAddress' in dataOrEvent ||
+            'commercialReference' in dataOrEvent ||
+            'contactInfo' in dataOrEvent ||
+            'financialStatements' in dataOrEvent)
         ) {
           const parseResult = LegalEntityContactSchema.safeParse(dataOrEvent);
           if (!parseResult.success) {

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Dimensions, Keyboard, Platform } from 'react-native';
+import { Dimensions, Keyboard, Platform, TextInput } from 'react-native';
 import type {
   KeyboardEvent,
   NativeScrollEvent,
@@ -7,6 +7,18 @@ import type {
   ScrollViewInstance,
 } from 'react-native';
 import { KEYBOARD_AWARE_STEP_LAYOUT_DIMENSIONS } from '../constants/KeyboardAwareStepLayout.constants';
+
+import {
+  KeyboardAutoScrollContext,
+  useKeyboardAutoScrollContext,
+  type KeyboardAutoScrollContextValue,
+} from '../context/KeyboardAutoScrollContext';
+
+export {
+  KeyboardAutoScrollContext,
+  useKeyboardAutoScrollContext,
+  type KeyboardAutoScrollContextValue,
+};
 
 export interface UseKeyboardAutoScrollOptions {
   bottomBarHeight?: number;
@@ -21,6 +33,7 @@ export interface UseKeyboardAutoScrollReturn {
   handleScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
   keyboardHeight: number;
   onInputFocus: (eventOrNode?: unknown) => void;
+  onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
   scrollViewRef: React.RefObject<ScrollViewInstance | null>;
   scrollToFocusedInput: (customKeyboardHeight?: number) => void;
   scrollToInput: (node?: unknown, customKeyboardHeight?: number) => void;
@@ -28,12 +41,26 @@ export interface UseKeyboardAutoScrollReturn {
 }
 
 interface MeasurableNode {
-  measureLayout?: (
-    relativeToNativeComponentRef: ScrollViewInstance,
+  measureInWindow?: (
     onSuccess: (x: number, y: number, width: number, height: number) => void,
-    onFail: () => void,
   ) => void;
 }
+
+const isMeasurable = (node: unknown): node is MeasurableNode =>
+  typeof (node as MeasurableNode | null)?.measureInWindow === 'function';
+
+/**
+ * React Native reports `nativeEvent.target` on focus as a numeric native tag,
+ * which cannot be measured. Whenever the received node is not a measurable
+ * instance, fall back to the TextInput that currently owns focus.
+ */
+const resolveMeasurableNode = (node: unknown): MeasurableNode | null => {
+  if (isMeasurable(node)) {
+    return node;
+  }
+  const focusedInput = TextInput.State?.currentlyFocusedInput?.();
+  return isMeasurable(focusedInput) ? focusedInput : null;
+};
 
 export const useKeyboardAutoScroll = (
   options?: UseKeyboardAutoScrollOptions,
@@ -45,6 +72,7 @@ export const useKeyboardAutoScroll = (
 
   const [keyboardHeight, setKeyboardHeight] = useState<number>(0);
   const keyboardHeightRef = useRef<number>(0);
+  const keyboardTopRef = useRef<number>(0);
   const rafIdRef = useRef<number | null>(null);
   const scrollYRef = useRef<number>(0);
   const scrollViewRef = useRef<ScrollViewInstance>(null);
@@ -70,56 +98,40 @@ export const useKeyboardAutoScroll = (
       rafIdRef.current = requestAnimationFrame((): void => {
         rafIdRef.current = null;
         try {
-          const measurable = nodeToMeasure as MeasurableNode;
-
-          if (
-            typeof measurable?.measureLayout === 'function' &&
-            scrollViewRef.current
-          ) {
-            measurable.measureLayout(
-              scrollViewRef.current,
-              (
-                _left: number,
-                top: number,
-                _width: number,
-                height: number,
-              ): void => {
-                const windowHeight = Dimensions.get('window').height;
-                const visibleHeight =
-                  windowHeight - activeKeyboardHeight - bottomBarHeight;
-                const inputBottom = top + height;
-
-                if (
-                  inputBottom > scrollYRef.current + visibleHeight ||
-                  top < scrollYRef.current
-                ) {
-                  const targetY = Math.max(
-                    0,
-                    inputBottom - visibleHeight + extraScrollPadding,
-                  );
-                  scrollViewRef.current?.scrollTo({
-                    animated: true,
-                    y: targetY,
-                  });
-                }
-              },
-              (): void => {
-                // If measureLayout fails, skip auto-scroll safely
-              },
-            );
-          } else if (typeof scrollViewRef.current?.scrollTo === 'function') {
-            // Deterministic fallback for test environments or synthetic nodes
-            scrollViewRef.current.scrollTo({
-              animated: true,
-              y: Math.max(0, activeKeyboardHeight + extraScrollPadding),
-            });
+          const measurable = resolveMeasurableNode(nodeToMeasure);
+          if (!measurable?.measureInWindow) {
+            return;
           }
+
+          measurable.measureInWindow(
+            (_x: number, y: number, _width: number, height: number): void => {
+              const keyboardTop =
+                keyboardTopRef.current > 0
+                  ? keyboardTopRef.current
+                  : Dimensions.get('window').height - activeKeyboardHeight;
+              const visibleBottom = keyboardTop - extraScrollPadding;
+              const inputBottom = y + height;
+
+              // Scroll only when the keyboard would cover the input.
+              if (inputBottom <= visibleBottom) {
+                return;
+              }
+
+              scrollViewRef.current?.scrollTo({
+                animated: true,
+                y: Math.max(
+                  0,
+                  scrollYRef.current + (inputBottom - visibleBottom),
+                ),
+              });
+            },
+          );
         } catch {
           // Graceful fallback for non-native environments
         }
       });
     },
-    [bottomBarHeight, extraScrollPadding],
+    [extraScrollPadding],
   );
 
   const setFocusedNode = useCallback(
@@ -174,14 +186,19 @@ export const useKeyboardAutoScroll = (
     const onShow = (event: KeyboardEvent): void => {
       const height = event?.endCoordinates?.height ?? 0;
       keyboardHeightRef.current = height;
+      keyboardTopRef.current = event?.endCoordinates?.screenY ?? 0;
       setKeyboardHeight(height);
-      if (focusedNodeRef.current) {
-        scrollToInput(focusedNodeRef.current, height);
+      const targetNode =
+        focusedNodeRef.current ?? TextInput.State?.currentlyFocusedInput?.();
+      if (targetNode) {
+        focusedNodeRef.current = targetNode;
+        scrollToInput(targetNode, height);
       }
     };
 
     const onHide = (): void => {
       keyboardHeightRef.current = 0;
+      keyboardTopRef.current = 0;
       setKeyboardHeight(0);
       focusedNodeRef.current = null;
     };
@@ -232,6 +249,7 @@ export const useKeyboardAutoScroll = (
     handleScroll,
     keyboardHeight,
     onInputFocus,
+    onScroll: handleScroll,
     scrollViewRef,
     scrollToFocusedInput,
     scrollToInput,

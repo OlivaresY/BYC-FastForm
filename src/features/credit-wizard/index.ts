@@ -145,6 +145,7 @@ export {
   LEGAL_ENTITY_CONTACT_FORM_COPY,
   LEGAL_ENTITY_CONTACT_FORM_ICON_DIMENSIONS,
   LEGAL_ENTITY_CONTACT_FORM_NUMERICAL,
+  LEGAL_ENTITY_CONTACT_FORM_OPTIONS,
   LEGAL_ENTITY_CONTACT_FORM_STYLES,
   LEGAL_ENTITY_CONTACT_FORM_TEST_IDS,
 } from './constants/LegalEntityContactForm.constants';
@@ -155,15 +156,30 @@ export {
   LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS,
 } from './constants/LegalEntityContactStepView.constants';
 
-export { LegalEntityContactSchema } from './schemas/LegalEntityContact.schema';
+export {
+  CommercialActivitySchema as LegalEntityCommercialActivitySchema,
+  CommercialAddressSchema as LegalEntityCommercialAddressSchema,
+  CommercialReferenceSchema as LegalEntityCommercialReferenceSchema,
+  ContactInfoSchema as LegalEntityContactInfoSchema,
+  FinancialStatementsSchema,
+  LegalEntityContactSchema,
+} from './schemas/LegalEntityContact.schema';
 
 export type {
+  CommercialActivity as LegalEntityCommercialActivity,
+  CommercialAddress as LegalEntityCommercialAddress,
+  CommercialReference as LegalEntityCommercialReference,
+  ContactInfo as LegalEntityContactInfo,
+  FinancialCurrency as LegalEntityFinancialCurrency,
+  FinancialStatements,
   LegalEntityContact,
-  LegalEntityContactField,
   UseLegalEntityContactViewModelProps,
   UseLegalEntityContactViewModelReturn,
 } from './types/LegalEntityContact.types';
 
-export type { LegalEntityContactFormProps } from './types/LegalEntityContactForm.types';
+export type {
+  LegalEntityContactFormOptions,
+  LegalEntityContactFormProps,
+} from './types/LegalEntityContactForm.types';
 
 export type { LegalEntityContactStepViewProps } from './types/LegalEntityContactStepView.types';

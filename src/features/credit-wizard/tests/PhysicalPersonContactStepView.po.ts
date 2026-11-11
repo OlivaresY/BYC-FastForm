@@ -641,27 +641,29 @@ export class PhysicalPersonContactStepViewPageObject {
       width?: number;
     },
   ): this {
+    const mockCallback = (
+      onSuccess: (
+        left: number,
+        top: number,
+        width: number,
+        height: number,
+      ) => void,
+    ) => {
+      onSuccess(
+        nodeMetrics?.left ?? 0,
+        nodeMetrics?.top ?? 1100,
+        nodeMetrics?.width ?? 180,
+        nodeMetrics?.height ?? 50,
+      );
+    };
+
     act(() => {
       fireEvent(input, 'focus', {
         nativeEvent: {
           target: {
-            measureLayout: jest.fn(
-              (
-                _relativeTo: unknown,
-                onSuccess: (
-                  left: number,
-                  top: number,
-                  width: number,
-                  height: number,
-                ) => void,
-              ) => {
-                onSuccess(
-                  nodeMetrics?.left ?? 0,
-                  nodeMetrics?.top ?? 1100,
-                  nodeMetrics?.width ?? 180,
-                  nodeMetrics?.height ?? 50,
-                );
-              },
+            measureInWindow: jest.fn(mockCallback),
+            measureLayout: jest.fn((_relativeTo: unknown, onSuccess: any) =>
+              mockCallback(onSuccess),
             ),
           },
         },

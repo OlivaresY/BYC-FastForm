@@ -1,17 +1,41 @@
-import { LEGAL_ENTITY_CONTACT_ERRORS } from '../constants/LegalEntityContact.constants';
+import {
+  FINANCIAL_CURRENCIES,
+  LEGAL_ENTITY_CONTACT_DEFAULT_VALUES,
+  LEGAL_ENTITY_CONTACT_ERRORS,
+} from '../constants/LegalEntityContact.constants';
 import { LegalEntityContactViewModelPageObject } from './useLegalEntityContactViewModel.po';
 import type { LegalEntityContact } from '../types/LegalEntityContact.types';
 
 const validData: LegalEntityContact = {
-  constitutionDate: '15-05-2015',
-  corporateId: '3-101-123456',
-  corporateName: 'Distribuidora del Este S.A.',
-  email: 'contacto@distribuidora.cr',
-  grossIncome: 5000000,
-  netIncome: 3500000,
-  phone: '+506 2200-0000',
-  representativeId: '1-1150-0222',
-  representativeName: 'Juan Alberto Perez Rojas',
+  commercialActivity: {
+    accountingPhone: '+506 2200-1111',
+    constitutionDate: '15-05-2015',
+    economicSector: 'Automotriz y Repuestos',
+    employeesCount: 25,
+    mainActivity: 'Venta de repuestos y mantenimiento vehicular',
+  },
+  commercialAddress: {
+    canton: 'San José',
+    district: 'Uruca',
+    exactAddress: '200 metros norte del puente Juan Pablo II',
+    province: 'San José',
+  },
+  commercialReference: {
+    companyReference: 'CoriMotors S.A.',
+    ibanAccount: 'CR05015202001026284066',
+    referencePhone: '+506 2200-2222',
+  },
+  contactInfo: {
+    cellPhone: '+506 8888-9999',
+    email: 'contacto@distribuidora.cr',
+    officePhone: '+506 2200-0000',
+  },
+  financialStatements: {
+    currency: FINANCIAL_CURRENCIES.CRC,
+    grossSales: 50000000,
+    netProfit: 15000000,
+    otherIncomes: 2000000,
+  },
 };
 
 describe('useLegalEntityContactViewModel', () => {
@@ -24,6 +48,21 @@ describe('useLegalEntityContactViewModel', () => {
     expect(page.current.control).toBeDefined();
     expect(page.current.handleSubmit).toBeDefined();
     expect(page.current.handleNextStep).toBeDefined();
+    expect(page.current.control._defaultValues.commercialActivity).toEqual(
+      LEGAL_ENTITY_CONTACT_DEFAULT_VALUES.commercialActivity,
+    );
+    expect(page.current.control._defaultValues.commercialAddress).toEqual(
+      LEGAL_ENTITY_CONTACT_DEFAULT_VALUES.commercialAddress,
+    );
+    expect(page.current.control._defaultValues.commercialReference).toEqual(
+      LEGAL_ENTITY_CONTACT_DEFAULT_VALUES.commercialReference,
+    );
+    expect(page.current.control._defaultValues.contactInfo).toEqual(
+      LEGAL_ENTITY_CONTACT_DEFAULT_VALUES.contactInfo,
+    );
+    expect(page.current.control._defaultValues.financialStatements).toEqual(
+      LEGAL_ENTITY_CONTACT_DEFAULT_VALUES.financialStatements,
+    );
 
     await page.waitForValid(false);
   });
@@ -67,8 +106,12 @@ describe('useLegalEntityContactViewModel', () => {
     });
 
     const invalidData = {
-      corporateId: 'invalid-id',
-      corporateName: '',
+      commercialReference: {
+        companyReference: 'A',
+      },
+      contactInfo: {
+        cellPhone: 'invalid-phone',
+      },
     };
 
     // Act
@@ -82,7 +125,7 @@ describe('useLegalEntityContactViewModel', () => {
     expect(page.current.isSubmitting).toBe(false);
   });
 
-  it('executes onSubmit when programmatic submission passes validation', async () => {
+  it('executes onSubmit when programmatic submission passes validation with 5 sections', async () => {
     // Arrange
     const onSubmitMock = jest.fn().mockResolvedValue(undefined);
     const page = LegalEntityContactViewModelPageObject.render({

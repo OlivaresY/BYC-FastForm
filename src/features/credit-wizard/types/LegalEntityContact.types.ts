@@ -4,11 +4,23 @@ import type {
   UseFormHandleSubmit,
 } from 'react-hook-form';
 import type { z } from 'zod';
-import type { LegalEntityContactSchema } from '../schemas/LegalEntityContact.schema';
+import type {
+  CommercialActivitySchema,
+  CommercialAddressSchema,
+  CommercialReferenceSchema,
+  ContactInfoSchema,
+  FinancialStatementsSchema,
+  LegalEntityContactSchema,
+} from '../schemas/LegalEntityContact.schema';
 
+export type CommercialActivity = z.infer<typeof CommercialActivitySchema>;
+export type CommercialAddress = z.infer<typeof CommercialAddressSchema>;
+export type CommercialReference = z.infer<typeof CommercialReferenceSchema>;
+export type ContactInfo = z.infer<typeof ContactInfoSchema>;
+export type FinancialStatements = z.infer<typeof FinancialStatementsSchema>;
 export type LegalEntityContact = z.infer<typeof LegalEntityContactSchema>;
 
-export type LegalEntityContactField = keyof LegalEntityContact;
+export type FinancialCurrency = FinancialStatements['currency'];
 
 export interface UseLegalEntityContactViewModelProps {
   defaultValues?: Partial<LegalEntityContact>;

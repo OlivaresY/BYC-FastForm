@@ -54,7 +54,7 @@ describe('useKeyboardAutoScroll (Credit Wizard Binding)', () => {
     });
 
     // Assert
-    expect(mockInputNode.measureLayout).toHaveBeenCalled();
+    expect(mockInputNode.measureInWindow).toHaveBeenCalled();
     expect(mockScrollTo).toHaveBeenCalledWith(
       expect.objectContaining({
         animated: true,

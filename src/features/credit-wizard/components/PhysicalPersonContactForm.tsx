@@ -356,64 +356,57 @@ const PhysicalPersonContactFormComponent = ({
           )}
         />
 
-        {/* Profesión u Oficio & Patrono / Empresa (2-Column Flex Row) */}
-        <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_ROW}>
-          <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_COLUMN}>
-            <Controller
-              control={control}
-              name='employmentData.profession'
-              render={({
-                field: { onBlur, onChange, value },
-                fieldState: { error },
-              }) => (
-                <CustomTextInput
-                  autoCapitalize='words'
-                  editable={!disabled}
-                  error={error?.message}
-                  label={PHYSICAL_PERSON_CONTACT_FORM_COPY.PROFESSION_LABEL}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  onFocus={onInputFocus}
-                  placeholder={
-                    PHYSICAL_PERSON_CONTACT_FORM_COPY.PROFESSION_PLACEHOLDER
-                  }
-                  required
-                  testID={
-                    PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.PROFESSION_INPUT
-                  }
-                  value={value ?? ''}
-                />
-              )}
+        {/* Profesión u Oficio (Full Width) */}
+        <Controller
+          control={control}
+          name='employmentData.profession'
+          render={({
+            field: { onBlur, onChange, value },
+            fieldState: { error },
+          }) => (
+            <CustomTextInput
+              autoCapitalize='words'
+              editable={!disabled}
+              error={error?.message}
+              label={PHYSICAL_PERSON_CONTACT_FORM_COPY.PROFESSION_LABEL}
+              onBlur={onBlur}
+              onChangeText={onChange}
+              onFocus={onInputFocus}
+              placeholder={
+                PHYSICAL_PERSON_CONTACT_FORM_COPY.PROFESSION_PLACEHOLDER
+              }
+              required
+              testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.PROFESSION_INPUT}
+              value={value ?? ''}
             />
-          </View>
+          )}
+        />
 
-          <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_COLUMN}>
-            <Controller
-              control={control}
-              name='employmentData.employer'
-              render={({
-                field: { onBlur, onChange, value },
-                fieldState: { error },
-              }) => (
-                <CustomTextInput
-                  autoCapitalize='words'
-                  editable={!disabled}
-                  error={error?.message}
-                  label={PHYSICAL_PERSON_CONTACT_FORM_COPY.EMPLOYER_LABEL}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  onFocus={onInputFocus}
-                  placeholder={
-                    PHYSICAL_PERSON_CONTACT_FORM_COPY.EMPLOYER_PLACEHOLDER
-                  }
-                  required
-                  testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.EMPLOYER_INPUT}
-                  value={value ?? ''}
-                />
-              )}
+        {/* Patrono / Empresa (Full Width) */}
+        <Controller
+          control={control}
+          name='employmentData.employer'
+          render={({
+            field: { onBlur, onChange, value },
+            fieldState: { error },
+          }) => (
+            <CustomTextInput
+              autoCapitalize='words'
+              editable={!disabled}
+              error={error?.message}
+              label={PHYSICAL_PERSON_CONTACT_FORM_COPY.EMPLOYER_LABEL}
+              onBlur={onBlur}
+              onChangeText={onChange}
+              onFocus={onInputFocus}
+              placeholder={
+                PHYSICAL_PERSON_CONTACT_FORM_COPY.EMPLOYER_PLACEHOLDER
+              }
+              required
+              testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.EMPLOYER_INPUT}
+              value={value ?? ''}
             />
-          </View>
-        </View>
+          )}
+        />
 
         {/* Fecha de Ingreso & Tel. Oficina (2-Column Flex Row) */}
         <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_ROW}>
@@ -673,72 +666,67 @@ const PhysicalPersonContactFormComponent = ({
           title={PHYSICAL_PERSON_CONTACT_FORM_COPY.SECTION_5_TITLE}
         />
 
-        {/* Row with Referencia Laboral / Empresa & Teléfono de Referencia (Side-by-side) */}
-        <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_ROW}>
-          <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_COLUMN}>
-            <Controller
-              control={control}
-              name='commercialReference.companyReference'
-              render={({
-                field: { onBlur, onChange, value },
-                fieldState: { error },
-              }) => (
-                <CustomTextInput
-                  autoCapitalize='words'
-                  editable={!disabled}
-                  error={error?.message}
-                  label={
-                    PHYSICAL_PERSON_CONTACT_FORM_COPY.COMPANY_REFERENCE_LABEL
-                  }
-                  leftIcon='hash'
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  onFocus={onInputFocus}
-                  placeholder={
-                    PHYSICAL_PERSON_CONTACT_FORM_COPY.COMPANY_REFERENCE_PLACEHOLDER
-                  }
-                  required
-                  testID={
-                    PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.COMPANY_REFERENCE_INPUT
-                  }
-                  value={value ?? ''}
-                />
-              )}
+        {/* Referencia Laboral / Empresa (Full Width) */}
+        <Controller
+          control={control}
+          name='commercialReference.companyReference'
+          render={({
+            field: { onBlur, onChange, value },
+            fieldState: { error },
+          }) => (
+            <CustomTextInput
+              autoCapitalize='words'
+              editable={!disabled}
+              error={error?.message}
+              label={
+                PHYSICAL_PERSON_CONTACT_FORM_COPY.COMPANY_REFERENCE_LABEL
+              }
+              leftIcon='hash'
+              onBlur={onBlur}
+              onChangeText={onChange}
+              onFocus={onInputFocus}
+              placeholder={
+                PHYSICAL_PERSON_CONTACT_FORM_COPY.COMPANY_REFERENCE_PLACEHOLDER
+              }
+              required
+              testID={
+                PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.COMPANY_REFERENCE_INPUT
+              }
+              value={value ?? ''}
             />
-          </View>
+          )}
+        />
 
-          <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_COLUMN}>
-            <Controller
-              control={control}
-              name='commercialReference.referencePhone'
-              render={({
-                field: { onBlur, onChange, value },
-                fieldState: { error },
-              }) => (
-                <CustomTextInput
-                  editable={!disabled}
-                  error={error?.message}
-                  keyboardType='phone-pad'
-                  label={
-                    PHYSICAL_PERSON_CONTACT_FORM_COPY.REFERENCE_PHONE_LABEL
-                  }
-                  leftIcon='phone-call'
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  onFocus={onInputFocus}
-                  placeholder={
-                    PHYSICAL_PERSON_CONTACT_FORM_COPY.REFERENCE_PHONE_PLACEHOLDER
-                  }
-                  required
-                  testID={
-                    PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.REFERENCE_PHONE_INPUT
-                  }
-                  value={value ?? ''}
-                />
-              )}
+        {/* Teléfono de Referencia (Full Width) */}
+        <Controller
+          control={control}
+          name='commercialReference.referencePhone'
+          render={({
+            field: { onBlur, onChange, value },
+            fieldState: { error },
+          }) => (
+            <CustomTextInput
+              editable={!disabled}
+              error={error?.message}
+              keyboardType='phone-pad'
+              label={
+                PHYSICAL_PERSON_CONTACT_FORM_COPY.REFERENCE_PHONE_LABEL
+              }
+              leftIcon='phone-call'
+              onBlur={onBlur}
+              onChangeText={onChange}
+              onFocus={onInputFocus}
+              placeholder={
+                PHYSICAL_PERSON_CONTACT_FORM_COPY.REFERENCE_PHONE_PLACEHOLDER
+              }
+              required
+              testID={
+                PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.REFERENCE_PHONE_INPUT
+              }
+              value={value ?? ''}
             />
-          </View>
-        </View>
+          )}
+        />
 
         {/* Cuenta IBAN (Full Width) */}
         <Controller
