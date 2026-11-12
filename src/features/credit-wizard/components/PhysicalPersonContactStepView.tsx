@@ -52,15 +52,12 @@ export const PhysicalPersonContactStepView = ({
       title={WIZARD_COPY.STEP_2_PHYSICAL_CONTACT.TITLE}
       totalSteps={totalSteps}
     >
-      {({ onInputFocus }) => (
-        <PhysicalPersonContactForm
-          control={control}
-          disabled={disabled || isSubmitting}
-          onInputFocus={onInputFocus}
-          options={options}
-          testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.FORM}
-        />
-      )}
+      <PhysicalPersonContactForm
+        control={control}
+        disabled={disabled || isSubmitting}
+        options={options}
+        testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.FORM}
+      />
     </WizardStepLayout>
   );
 };
