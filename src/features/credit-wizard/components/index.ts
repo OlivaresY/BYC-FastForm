@@ -1,4 +1,5 @@
 export { ApplicantStepView } from './ApplicantStepView';
+export { BankAuthorizationsStepView } from './BankAuthorizationsStepView';
 export { CloseProcessModal } from './CloseProcessModal';
 export { FinalBeneficiaryModal } from './FinalBeneficiaryModal';
 export { LegalEntityContactForm } from './LegalEntityContactForm';
@@ -11,4 +12,3 @@ export { PhysicalPersonForm } from './PhysicalPersonForm';
 export { VehicleBeneficiarySection } from './VehicleBeneficiarySection';
 export { WizardProgressHeader } from './WizardProgressHeader';
 export { WizardStepLayout } from './WizardStepLayout';
-
