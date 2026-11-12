@@ -1,9 +1,11 @@
 import React from 'react';
 import {
+  act,
   fireEvent,
   render,
   renderHook,
   screen,
+  waitFor,
 } from '@testing-library/react-native';
 import type { ReactTestInstance } from 'react-test-renderer';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
@@ -132,10 +134,30 @@ export class VehicleCreditStepPOM {
     return this.plazoMesesSelect;
   }
 
+  public get plazoMesesTrigger(): ReactTestInstance {
+    return screen.getByTestId('vehicle-credit-plazo-meses-select-trigger');
+  }
+
+  public get plazoMesesTriggerText(): string {
+    return screen.getByTestId('vehicle-credit-plazo-meses-select-trigger-text')
+      .props.children as string;
+  }
+
+  public isPlazoMesesDisabled(): boolean {
+    return this.plazoMesesTrigger.props.accessibilityState?.disabled === true;
+  }
+
   public get submitButton(): ReactTestInstance {
     return (
       screen.queryByTestId('wizard-step-layout-submit-button') ??
       screen.getByText('Siguiente')
+    );
+  }
+
+  public isSubmitButtonDisabled(): boolean {
+    return (
+      this.submitButton.props.accessibilityState?.disabled === true ||
+      this.submitButton.props.disabled === true
     );
   }
 
@@ -198,33 +220,87 @@ export class VehicleCreditStepPOM {
   // Fluent Action Helpers (Method Chaining: return this)
   // =========================================================================
 
+  public static async act(callback: () => Promise<void> | void): Promise<void> {
+    await act(callback);
+  }
+
+  public async act(callback: () => Promise<void> | void): Promise<void> {
+    await act(callback);
+  }
+
   public fillModelo(value: string): this {
-    fireEvent.changeText(this.modeloInput, value);
+    act(() => {
+      fireEvent.changeText(this.modeloInput, value);
+    });
     return this;
   }
 
   public fillColor(value: string): this {
-    fireEvent.changeText(this.colorInput, value);
+    act(() => {
+      fireEvent.changeText(this.colorInput, value);
+    });
     return this;
   }
 
   public fillAnio(value: string): this {
-    fireEvent.changeText(this.anioInput, value);
+    act(() => {
+      fireEvent.changeText(this.anioInput, value);
+    });
     return this;
   }
 
   public fillValorVehiculo(value: string): this {
-    fireEvent.changeText(this.valorVehiculoInput, value);
+    act(() => {
+      fireEvent.changeText(this.valorVehiculoInput, value);
+    });
     return this;
   }
 
   public fillMontoPrima(value: string): this {
-    fireEvent.changeText(this.montoPrimaInput, value);
+    act(() => {
+      fireEvent.changeText(this.montoPrimaInput, value);
+    });
     return this;
   }
 
   public pressSubmit(): this {
-    fireEvent.press(this.submitButton);
+    act(() => {
+      fireEvent.press(this.submitButton);
+    });
     return this;
+  }
+
+  public selectMarca(brand: string): this {
+    act(() => {
+      fireEvent.press(
+        screen.getByTestId('vehicle-credit-marca-select-trigger'),
+      );
+    });
+    act(() => {
+      fireEvent.press(screen.getByTestId(`custom-select-option-${brand}`));
+    });
+    return this;
+  }
+
+  public fillAllValidData(overrides?: Partial<VehicleCreditFormValues>): this {
+    this.selectMarca((overrides?.marca as string) ?? 'BYD');
+    this.fillModelo((overrides?.modelo as string) ?? 'Tang');
+    this.fillColor((overrides?.color as string) ?? 'Negro');
+    this.fillAnio((overrides?.anio as string) ?? '2024');
+    this.fillValorVehiculo(
+      overrides?.valor_vehiculo !== undefined
+        ? String(overrides.valor_vehiculo)
+        : '20000',
+    );
+    this.fillMontoPrima(
+      overrides?.monto_prima !== undefined
+        ? String(overrides.monto_prima)
+        : '2000',
+    );
+    return this;
+  }
+
+  public async waitFor(callback: () => void | Promise<void>): Promise<void> {
+    await waitFor(callback);
   }
 }

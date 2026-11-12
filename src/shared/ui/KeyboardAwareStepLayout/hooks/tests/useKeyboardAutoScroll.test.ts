@@ -86,13 +86,13 @@ describe('useKeyboardAutoScroll', () => {
     });
 
     // Assert - input measured in window coordinates and scrolled by the
-    // exact amount it was covered by the keyboard (screenY 500, gap 24)
+    // exact amount it was covered by the keyboard and bottom bar (screenY 500, bottomBar 64, gap 24)
     expect(mockInputNode.measureInWindow).toHaveBeenCalledWith(
       expect.any(Function),
     );
     expect(mockScrollTo).toHaveBeenCalledWith({
       animated: true,
-      y: 1000 + 50 - (500 - 24),
+      y: 1000 + 50 - (500 - 64 - 24),
     });
   });
 
@@ -157,7 +157,7 @@ describe('useKeyboardAutoScroll', () => {
     expect(focusedInput.measureInWindow).toHaveBeenCalled();
     expect(mockScrollTo).toHaveBeenCalledWith({
       animated: true,
-      y: 600 + 50 - (500 - 24),
+      y: 600 + 50 - (500 - 64 - 24),
     });
 
     focusedInputSpy.mockRestore();
@@ -231,7 +231,7 @@ describe('useKeyboardAutoScroll', () => {
     expect(mockInputNode.measureInWindow).toHaveBeenCalled();
     expect(mockScrollTo).toHaveBeenCalledWith({
       animated: true,
-      y: 600 + 50 - (500 - 64),
+      y: 600 + 50 - (500 - 64 - 64),
     });
   });
 

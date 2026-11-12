@@ -78,7 +78,7 @@ export const CUSTOM_SELECT_STYLES = {
   TRIGGER_BORDER_BASE: 'border-[#A39F97]',
   TRIGGER_BORDER_ERROR: 'border-[#B91C1C]',
   TRIGGER_BORDER_OPEN: 'border-[#5A6B80]',
-  TRIGGER_DISABLED: '',
+  TRIGGER_DISABLED: 'opacity-40',
   TRIGGER_TEXT_PLACEHOLDER: 'flex-1 text-sm font-normal text-[#5A6B80]',
   TRIGGER_TEXT_SELECTED: 'flex-1 text-sm font-medium text-[#111111]',
 } as const;

@@ -109,7 +109,8 @@ export const useKeyboardAutoScroll = (
                 keyboardTopRef.current > 0
                   ? keyboardTopRef.current
                   : Dimensions.get('window').height - activeKeyboardHeight;
-              const visibleBottom = keyboardTop - extraScrollPadding;
+              const visibleBottom =
+                keyboardTop - bottomBarHeight - extraScrollPadding;
               const inputBottom = y + height;
 
               // Scroll only when the keyboard would cover the input.
@@ -131,7 +132,7 @@ export const useKeyboardAutoScroll = (
         }
       });
     },
-    [extraScrollPadding],
+    [bottomBarHeight, extraScrollPadding],
   );
 
   const setFocusedNode = useCallback(
