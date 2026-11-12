@@ -24,6 +24,75 @@ import {
 import type { BankAuthorizationsFormValues } from '../types/BankAuthorizations.types';
 import { WizardStepLayout } from './WizardStepLayout';
 
+export interface LegalConsentItemProps {
+  description: string;
+  disabled?: boolean;
+  errorMessage?: string;
+  errorTestID?: string;
+  isChecked: boolean;
+  onToggle: () => void;
+  testID: string;
+  title: string;
+}
+
+export const LegalConsentItem = React.memo(
+  ({
+    description,
+    disabled = false,
+    errorMessage,
+    errorTestID,
+    isChecked,
+    onToggle,
+    testID,
+    title,
+  }: LegalConsentItemProps): React.JSX.Element => (
+    <View>
+      <Pressable
+        accessibilityLabel={title}
+        accessibilityRole='checkbox'
+        accessibilityState={{ checked: isChecked }}
+        className='flex-row items-start gap-3 p-3.5 bg-white rounded-xl border border-stone-200'
+        disabled={disabled}
+        onPress={onToggle}
+        testID={testID}
+      >
+        <View
+          className={`mt-0.5 ${BANK_AUTHORIZATIONS_STEP_STYLES.CHECKBOX_BOX} ${
+            isChecked
+              ? BANK_AUTHORIZATIONS_STEP_STYLES.CHECKBOX_BOX_ACTIVE
+              : BANK_AUTHORIZATIONS_STEP_STYLES.CHECKBOX_BOX_INACTIVE
+          }`}
+        >
+          {isChecked ? (
+            <CheckmarkIcon
+              color={BANK_AUTHORIZATIONS_STEP_COLORS.CHECKBOX_ICON}
+              size={BANK_AUTHORIZATIONS_STEP_NUMERICAL.CHECKBOX_ICON_SIZE}
+              strokeWidth={
+                BANK_AUTHORIZATIONS_STEP_NUMERICAL.CHECKBOX_STROKE_WIDTH
+              }
+            />
+          ) : null}
+        </View>
+        <View className='flex-1'>
+          <Text className='text-sm font-semibold text-gray-900 leading-5'>
+            {title}
+          </Text>
+          <Text className='text-xs text-stone-600 mt-1 leading-4'>
+            {description}
+          </Text>
+        </View>
+      </Pressable>
+      {errorMessage ? (
+        <Text className='mt-1 text-xs text-red-600' testID={errorTestID}>
+          {errorMessage}
+        </Text>
+      ) : null}
+    </View>
+  ),
+);
+
+LegalConsentItem.displayName = 'LegalConsentItem';
+
 export interface BankAuthorizationsStepViewProps {
   currentStep?: number;
   disabled?: boolean;
@@ -250,61 +319,20 @@ export const BankAuthorizationsStepView = React.memo(
               control={control}
               name='autoriza_sugef_cic'
               render={({ field: { onChange, value } }) => (
-                <View>
-                  <Pressable
-                    accessibilityLabel={
-                      BANK_AUTHORIZATIONS_STEP_COPY.LEGAL_TITLE_1
-                    }
-                    accessibilityRole='checkbox'
-                    accessibilityState={{ checked: value }}
-                    className='flex-row items-start gap-3 p-3.5 bg-white rounded-xl border border-stone-200'
-                    disabled={disabled || isSubmitting}
-                    onPress={() => onChange(!value)}
-                    testID={
-                      BANK_AUTHORIZATIONS_STEP_TEST_IDS.AUTORIZA_SUGEF_CIC_CHECKBOX
-                    }
-                  >
-                    <View
-                      className={`mt-0.5 ${
-                        BANK_AUTHORIZATIONS_STEP_STYLES.CHECKBOX_BOX
-                      } ${
-                        value
-                          ? BANK_AUTHORIZATIONS_STEP_STYLES.CHECKBOX_BOX_ACTIVE
-                          : BANK_AUTHORIZATIONS_STEP_STYLES.CHECKBOX_BOX_INACTIVE
-                      }`}
-                    >
-                      {value ? (
-                        <CheckmarkIcon
-                          color={BANK_AUTHORIZATIONS_STEP_COLORS.CHECKBOX_ICON}
-                          size={
-                            BANK_AUTHORIZATIONS_STEP_NUMERICAL.CHECKBOX_ICON_SIZE
-                          }
-                          strokeWidth={
-                            BANK_AUTHORIZATIONS_STEP_NUMERICAL.CHECKBOX_STROKE_WIDTH
-                          }
-                        />
-                      ) : null}
-                    </View>
-                    <View className='flex-1'>
-                      <Text className='text-sm font-semibold text-gray-900 leading-5'>
-                        {BANK_AUTHORIZATIONS_STEP_COPY.LEGAL_TITLE_1}
-                      </Text>
-                      <Text className='text-xs text-stone-600 mt-1 leading-4'>
-                        {BANK_AUTHORIZATIONS_STEP_COPY.LEGAL_DESC_1}
-                      </Text>
-                    </View>
-                  </Pressable>
-                  {errors.autoriza_sugef_cic?.message ? (
-                    <Text
-                      className='mt-1 text-xs text-red-600'
-                      testID={
-                        BANK_AUTHORIZATIONS_STEP_TEST_IDS.AUTORIZA_SUGEF_CIC_ERROR
-                      }
-                    >
-                      {errors.autoriza_sugef_cic.message}
-                    </Text>
-                  ) : null}
-                </View>
+                <LegalConsentItem
+                  description={BANK_AUTHORIZATIONS_STEP_COPY.LEGAL_DESC_1}
+                  disabled={disabled || isSubmitting}
+                  errorMessage={errors.autoriza_sugef_cic?.message}
+                  errorTestID={
+                    BANK_AUTHORIZATIONS_STEP_TEST_IDS.AUTORIZA_SUGEF_CIC_ERROR
+                  }
+                  isChecked={value}
+                  onToggle={() => onChange(!value)}
+                  testID={
+                    BANK_AUTHORIZATIONS_STEP_TEST_IDS.AUTORIZA_SUGEF_CIC_CHECKBOX
+                  }
+                  title={BANK_AUTHORIZATIONS_STEP_COPY.LEGAL_TITLE_1}
+                />
               )}
             />
 
@@ -313,61 +341,20 @@ export const BankAuthorizationsStepView = React.memo(
               control={control}
               name='autoriza_buros_credito'
               render={({ field: { onChange, value } }) => (
-                <View>
-                  <Pressable
-                    accessibilityLabel={
-                      BANK_AUTHORIZATIONS_STEP_COPY.LEGAL_TITLE_2
-                    }
-                    accessibilityRole='checkbox'
-                    accessibilityState={{ checked: value }}
-                    className='flex-row items-start gap-3 p-3.5 bg-white rounded-xl border border-stone-200'
-                    disabled={disabled || isSubmitting}
-                    onPress={() => onChange(!value)}
-                    testID={
-                      BANK_AUTHORIZATIONS_STEP_TEST_IDS.AUTORIZA_BUROS_CREDITO_CHECKBOX
-                    }
-                  >
-                    <View
-                      className={`mt-0.5 ${
-                        BANK_AUTHORIZATIONS_STEP_STYLES.CHECKBOX_BOX
-                      } ${
-                        value
-                          ? BANK_AUTHORIZATIONS_STEP_STYLES.CHECKBOX_BOX_ACTIVE
-                          : BANK_AUTHORIZATIONS_STEP_STYLES.CHECKBOX_BOX_INACTIVE
-                      }`}
-                    >
-                      {value ? (
-                        <CheckmarkIcon
-                          color={BANK_AUTHORIZATIONS_STEP_COLORS.CHECKBOX_ICON}
-                          size={
-                            BANK_AUTHORIZATIONS_STEP_NUMERICAL.CHECKBOX_ICON_SIZE
-                          }
-                          strokeWidth={
-                            BANK_AUTHORIZATIONS_STEP_NUMERICAL.CHECKBOX_STROKE_WIDTH
-                          }
-                        />
-                      ) : null}
-                    </View>
-                    <View className='flex-1'>
-                      <Text className='text-sm font-semibold text-gray-900 leading-5'>
-                        {BANK_AUTHORIZATIONS_STEP_COPY.LEGAL_TITLE_2}
-                      </Text>
-                      <Text className='text-xs text-stone-600 mt-1 leading-4'>
-                        {BANK_AUTHORIZATIONS_STEP_COPY.LEGAL_DESC_2}
-                      </Text>
-                    </View>
-                  </Pressable>
-                  {errors.autoriza_buros_credito?.message ? (
-                    <Text
-                      className='mt-1 text-xs text-red-600'
-                      testID={
-                        BANK_AUTHORIZATIONS_STEP_TEST_IDS.AUTORIZA_BUROS_CREDITO_ERROR
-                      }
-                    >
-                      {errors.autoriza_buros_credito.message}
-                    </Text>
-                  ) : null}
-                </View>
+                <LegalConsentItem
+                  description={BANK_AUTHORIZATIONS_STEP_COPY.LEGAL_DESC_2}
+                  disabled={disabled || isSubmitting}
+                  errorMessage={errors.autoriza_buros_credito?.message}
+                  errorTestID={
+                    BANK_AUTHORIZATIONS_STEP_TEST_IDS.AUTORIZA_BUROS_CREDITO_ERROR
+                  }
+                  isChecked={value}
+                  onToggle={() => onChange(!value)}
+                  testID={
+                    BANK_AUTHORIZATIONS_STEP_TEST_IDS.AUTORIZA_BUROS_CREDITO_CHECKBOX
+                  }
+                  title={BANK_AUTHORIZATIONS_STEP_COPY.LEGAL_TITLE_2}
+                />
               )}
             />
           </View>

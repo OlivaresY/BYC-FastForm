@@ -1,26 +1,27 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useState } from 'react';
-import type {
-  Control,
-  FieldErrors,
-  Resolver,
-  UseFormReturn,
-} from 'react-hook-form';
+import type { Control, FieldErrors, UseFormReturn } from 'react-hook-form';
 import { useForm, useWatch } from 'react-hook-form';
+import {
+  AVAILABLE_BANKS,
+  type BankKey,
+} from '../constants/BankAuthorizations.constants';
 import { bankAuthorizationsSchema } from '../schemas/BankAuthorizations.schema';
 import type { BankAuthorizationsFormValues } from '../types/BankAuthorizations.types';
 
-const SUBMIT_DELAY_MS = 500;
+const defaultBankFlags = AVAILABLE_BANKS.reduce(
+  (acc, bank) => {
+    acc[bank] = false;
+    return acc;
+  },
+  {} as Record<BankKey, boolean>,
+);
 
 export const BANK_AUTHORIZATIONS_DEFAULT_VALUES: BankAuthorizationsFormValues =
   {
+    ...defaultBankFlags,
     autoriza_buros_credito: false,
     autoriza_sugef_cic: false,
-    banco_bac: false,
-    banco_bncr: false,
-    banco_carro_facil: false,
-    banco_promerica: false,
-    banco_scotiabank: false,
   };
 
 export interface UseBankAuthorizationsViewModelProps {
@@ -58,9 +59,7 @@ export const useBankAuthorizationsViewModel = (
       ...defaultValuesProp,
     },
     mode,
-    resolver: zodResolver(
-      bankAuthorizationsSchema as never,
-    ) as unknown as Resolver<BankAuthorizationsFormValues>,
+    resolver: zodResolver(bankAuthorizationsSchema),
   });
 
   const {
@@ -71,39 +70,17 @@ export const useBankAuthorizationsViewModel = (
     setValue,
   } = form;
 
-  const [
-    bancoBac,
-    bancoBncr,
-    bancoCarroFacil,
-    bancoPromerica,
-    bancoScotiabank,
-  ] = useWatch({
+  const bankValues = useWatch({
     control,
-    name: [
-      'banco_bac',
-      'banco_bncr',
-      'banco_carro_facil',
-      'banco_promerica',
-      'banco_scotiabank',
-    ],
+    name: AVAILABLE_BANKS,
   });
 
   const isAllBanksSelected = Boolean(
-    bancoBac &&
-      bancoBncr &&
-      bancoCarroFacil &&
-      bancoPromerica &&
-      bancoScotiabank,
+    bankValues && bankValues.length > 0 && bankValues.every(Boolean),
   );
 
   const toggleAllBanks = useCallback((): void => {
-    const currentValues = getValues([
-      'banco_bac',
-      'banco_bncr',
-      'banco_carro_facil',
-      'banco_promerica',
-      'banco_scotiabank',
-    ]);
+    const currentValues = getValues(AVAILABLE_BANKS);
     const areAllSelected = currentValues.every(Boolean);
     const nextValue = !areAllSelected;
 
@@ -113,20 +90,15 @@ export const useBankAuthorizationsViewModel = (
       shouldValidate: true,
     };
 
-    setValue('banco_bac', nextValue, options);
-    setValue('banco_bncr', nextValue, options);
-    setValue('banco_carro_facil', nextValue, options);
-    setValue('banco_promerica', nextValue, options);
-    setValue('banco_scotiabank', nextValue, options);
+    AVAILABLE_BANKS.forEach((bank) => {
+      setValue(bank, nextValue, options);
+    });
   }, [getValues, setValue]);
 
   const onValidSubmit = useCallback(
     async (data: BankAuthorizationsFormValues): Promise<void> => {
       setIsSubmitting(true);
       try {
-        await new Promise<void>((resolve) => {
-          setTimeout(resolve, SUBMIT_DELAY_MS);
-        });
         await onSuccessProp?.(data);
       } finally {
         setIsSubmitting(false);

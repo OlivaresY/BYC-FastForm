@@ -1,9 +1,9 @@
-export interface BankAuthorizationsFormValues {
-  autoriza_buros_credito: boolean;
-  autoriza_sugef_cic: boolean;
-  banco_bac: boolean;
-  banco_bncr: boolean;
-  banco_carro_facil: boolean;
-  banco_promerica: boolean;
-  banco_scotiabank: boolean;
-}
+import type { z } from 'zod';
+import type { BankKey } from '../constants/BankAuthorizations.constants';
+import type { bankAuthorizationsSchema } from '../schemas/BankAuthorizations.schema';
+
+export type BankFlags = Record<BankKey, boolean>;
+
+export type BankAuthorizationsFormValues = z.infer<
+  typeof bankAuthorizationsSchema
+>;

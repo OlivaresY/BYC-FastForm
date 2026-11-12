@@ -1,7 +1,6 @@
 import type React from 'react';
 import { BanknoteIcon, BuildingIcon, CarIcon } from '@/shared/ui';
 import type { IconProps } from '@/shared/ui/Icons/Icons.types';
-import type { BankAuthorizationsFormValues } from '../types/BankAuthorizations.types';
 
 export const BANK_AUTHORIZATIONS_STEP_COLORS = {
   CHECKBOX_ACTIVE: '#10B981',
@@ -90,17 +89,19 @@ export const BANK_AUTHORIZATIONS_STEP_TEST_IDS = {
   TOGGLE_ALL_BUTTON: 'bank-authorizations-toggle-all-button',
 } as const;
 
-export type BankFormKey = keyof Pick<
-  BankAuthorizationsFormValues,
-  | 'banco_bac'
-  | 'banco_bncr'
-  | 'banco_carro_facil'
-  | 'banco_promerica'
-  | 'banco_scotiabank'
->;
+export const AVAILABLE_BANKS = [
+  'banco_bac',
+  'banco_bncr',
+  'banco_scotiabank',
+  'banco_promerica',
+  'banco_carro_facil',
+] as const;
+
+export type BankKey = (typeof AVAILABLE_BANKS)[number];
+export type BankFormKey = BankKey;
 
 export interface BankOptionConfig {
-  formKey: BankFormKey;
+  formKey: BankKey;
   id: string;
   label: string;
   LogoComponent: React.ComponentType<IconProps>;

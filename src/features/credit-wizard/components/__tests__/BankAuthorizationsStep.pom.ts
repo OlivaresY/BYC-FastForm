@@ -1,9 +1,11 @@
 import React from 'react';
 import {
+  act,
   fireEvent,
   render,
   renderHook,
   screen,
+  waitFor,
 } from '@testing-library/react-native';
 import type { ReactTestInstance } from 'react-test-renderer';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
@@ -11,6 +13,7 @@ import { useForm, type Control } from 'react-hook-form';
 import { BankAuthorizationsStepView } from '../BankAuthorizationsStepView';
 import type { BankAuthorizationsStepViewProps } from '../BankAuthorizationsStepView';
 import {
+  type BankKey,
   BANK_AUTHORIZATIONS_STEP_COPY,
   BANK_AUTHORIZATIONS_STEP_TEST_IDS,
 } from '../../constants/BankAuthorizations.constants';
@@ -134,6 +137,13 @@ export class BankAuthorizationsStepPOM {
     );
   }
 
+  public isSubmitButtonDisabled(): boolean {
+    return (
+      this.submitButton.props.accessibilityState?.disabled === true ||
+      this.submitButton.props.disabled === true
+    );
+  }
+
   // =========================================================================
   // Error Message Getters (Nullable)
   // =========================================================================
@@ -158,48 +168,111 @@ export class BankAuthorizationsStepPOM {
   // Fluent Action Helpers
   // =========================================================================
 
+  public static async act(callback: () => Promise<void> | void): Promise<void> {
+    await act(callback);
+  }
+
+  public async act(callback: () => Promise<void> | void): Promise<void> {
+    await act(callback);
+  }
+
+  public async waitFor(callback: () => void | Promise<void>): Promise<void> {
+    await waitFor(callback);
+  }
+
   public pressToggleAll(): this {
-    fireEvent.press(this.toggleAllButton);
+    act(() => {
+      fireEvent.press(this.toggleAllButton);
+    });
     return this;
   }
 
   public toggleBancoBac(): this {
-    fireEvent.press(this.bancoBacCheckbox);
+    act(() => {
+      fireEvent.press(this.bancoBacCheckbox);
+    });
     return this;
   }
 
   public toggleBancoBncr(): this {
-    fireEvent.press(this.bancoBncrCheckbox);
+    act(() => {
+      fireEvent.press(this.bancoBncrCheckbox);
+    });
     return this;
   }
 
   public toggleBancoScotiabank(): this {
-    fireEvent.press(this.bancoScotiabankCheckbox);
+    act(() => {
+      fireEvent.press(this.bancoScotiabankCheckbox);
+    });
     return this;
   }
 
   public toggleBancoPromerica(): this {
-    fireEvent.press(this.bancoPromericaCheckbox);
+    act(() => {
+      fireEvent.press(this.bancoPromericaCheckbox);
+    });
     return this;
   }
 
   public toggleBancoCarroFacil(): this {
-    fireEvent.press(this.bancoCarroFacilCheckbox);
+    act(() => {
+      fireEvent.press(this.bancoCarroFacilCheckbox);
+    });
     return this;
   }
 
+  public toggleBank(key: BankKey): this {
+    switch (key) {
+      case 'banco_bac':
+        return this.toggleBancoBac();
+      case 'banco_bncr':
+        return this.toggleBancoBncr();
+      case 'banco_scotiabank':
+        return this.toggleBancoScotiabank();
+      case 'banco_promerica':
+        return this.toggleBancoPromerica();
+      case 'banco_carro_facil':
+        return this.toggleBancoCarroFacil();
+    }
+  }
+
   public toggleAutorizaSugefCic(): this {
-    fireEvent.press(this.autorizaSugefCicCheckbox);
+    act(() => {
+      fireEvent.press(this.autorizaSugefCicCheckbox);
+    });
     return this;
   }
 
   public toggleAutorizaBurosCredito(): this {
-    fireEvent.press(this.autorizaBurosCreditoCheckbox);
+    act(() => {
+      fireEvent.press(this.autorizaBurosCreditoCheckbox);
+    });
+    return this;
+  }
+
+  public fillAllValidData(
+    overrides?: Partial<BankAuthorizationsFormValues>,
+  ): this {
+    const shouldSelectBac = overrides?.banco_bac ?? true;
+    if (shouldSelectBac) {
+      this.toggleBancoBac();
+    }
+    const shouldSelectSugef = overrides?.autoriza_sugef_cic ?? true;
+    if (shouldSelectSugef) {
+      this.toggleAutorizaSugefCic();
+    }
+    const shouldSelectBuros = overrides?.autoriza_buros_credito ?? true;
+    if (shouldSelectBuros) {
+      this.toggleAutorizaBurosCredito();
+    }
     return this;
   }
 
   public pressSubmit(): this {
-    fireEvent.press(this.submitButton);
+    act(() => {
+      fireEvent.press(this.submitButton);
+    });
     return this;
   }
 }

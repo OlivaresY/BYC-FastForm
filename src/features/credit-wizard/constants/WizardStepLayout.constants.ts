@@ -39,7 +39,7 @@ export const WIZARD_STEP_LAYOUT_STYLES = {
   DESCRIPTION: 'text-sm text-text-secondary',
   HEADER_BLOCK: 'gap-1',
   KEYBOARD_AVOIDING_VIEW: 'flex-1',
-  SCROLL_CONTENT: 'gap-6 p-4 pb-4',
+  SCROLL_CONTENT: 'gap-6 p-4 pb-28',
   SCROLL_VIEW: 'flex-1',
   SUBMIT_BUTTON: 'flex-1',
   SUBMIT_BUTTON_FULL: 'w-full flex-1',
