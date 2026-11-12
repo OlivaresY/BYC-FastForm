@@ -26,7 +26,6 @@ import {
 } from '../constants/PhysicalPersonContactForm.constants';
 import type { PhysicalPersonContactFormProps } from '../types/PhysicalPersonContactForm.types';
 
-
 const ContactSectionIcon = (): React.JSX.Element => (
   <View testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.SECTION_1_ICON}>
     <IdCardIcon
@@ -76,7 +75,6 @@ const CommercialSectionIcon = (): React.JSX.Element => (
     />
   </View>
 );
-
 
 const PhysicalPersonContactFormComponent = ({
   control,
@@ -130,7 +128,6 @@ const PhysicalPersonContactFormComponent = ({
               leftIcon='mail'
               onBlur={onBlur}
               onChangeText={onChange}
-              onFocus={onInputFocus}
               placeholder={PHYSICAL_PERSON_CONTACT_FORM_COPY.EMAIL_PLACEHOLDER}
               required
               testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.EMAIL_INPUT}
@@ -157,7 +154,6 @@ const PhysicalPersonContactFormComponent = ({
                   leftIcon='smartphone'
                   onBlur={onBlur}
                   onChangeText={onChange}
-                  onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.CELL_PHONE_PLACEHOLDER
                   }
@@ -187,7 +183,6 @@ const PhysicalPersonContactFormComponent = ({
                   leftIcon='phone-call'
                   onBlur={onBlur}
                   onChangeText={onChange}
-                  onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.HOME_PHONE_PLACEHOLDER
                   }
@@ -223,7 +218,6 @@ const PhysicalPersonContactFormComponent = ({
               disabled={disabled}
               errorMessage={error?.message}
               label={PHYSICAL_PERSON_CONTACT_FORM_COPY.PROVINCE_LABEL}
-              onFocus={onInputFocus}
               onValueChange={onChange}
               options={provinceOptions}
               placeholder={
@@ -250,7 +244,6 @@ const PhysicalPersonContactFormComponent = ({
                   disabled={disabled}
                   errorMessage={error?.message}
                   label={PHYSICAL_PERSON_CONTACT_FORM_COPY.CANTON_LABEL}
-                  onFocus={onInputFocus}
                   onValueChange={onChange}
                   options={cantonOptions}
                   placeholder={
@@ -276,7 +269,6 @@ const PhysicalPersonContactFormComponent = ({
                   disabled={disabled}
                   errorMessage={error?.message}
                   label={PHYSICAL_PERSON_CONTACT_FORM_COPY.DISTRICT_LABEL}
-                  onFocus={onInputFocus}
                   onValueChange={onChange}
                   options={districtOptions}
                   placeholder={
@@ -309,7 +301,6 @@ const PhysicalPersonContactFormComponent = ({
               }
               onBlur={onBlur}
               onChangeText={onChange}
-              onFocus={onInputFocus}
               placeholder={
                 PHYSICAL_PERSON_CONTACT_FORM_COPY.EXACT_ADDRESS_PLACEHOLDER
               }
@@ -341,7 +332,6 @@ const PhysicalPersonContactFormComponent = ({
               disabled={disabled}
               errorMessage={error?.message}
               label={PHYSICAL_PERSON_CONTACT_FORM_COPY.EMPLOYMENT_STATUS_LABEL}
-              onFocus={onInputFocus}
               onValueChange={onChange}
               options={employmentStatusOptions}
               placeholder={
@@ -432,7 +422,6 @@ const PhysicalPersonContactFormComponent = ({
                     const maskedDate = formatDateDisplay(text);
                     onChange(maskedDate);
                   }}
-                  onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.ENTRY_DATE_PLACEHOLDER
                   }
@@ -462,7 +451,6 @@ const PhysicalPersonContactFormComponent = ({
                   leftIcon='phone-call'
                   onBlur={onBlur}
                   onChangeText={onChange}
-                  onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.OFFICE_PHONE_PLACEHOLDER
                   }
@@ -498,7 +486,6 @@ const PhysicalPersonContactFormComponent = ({
               disabled={disabled}
               errorMessage={error?.message}
               label={PHYSICAL_PERSON_CONTACT_FORM_COPY.CURRENCY_LABEL}
-              onFocus={onInputFocus}
               onValueChange={onChange}
               options={currencyOptions}
               placeholder={
@@ -541,7 +528,6 @@ const PhysicalPersonContactFormComponent = ({
                       const digits = sanitizeNumericDigits(text);
                       onChange(digits === '' ? undefined : Number(digits));
                     }}
-                    onFocus={onInputFocus}
                     placeholder={
                       PHYSICAL_PERSON_CONTACT_FORM_COPY.GROSS_INCOME_PLACEHOLDER
                     }
@@ -584,7 +570,6 @@ const PhysicalPersonContactFormComponent = ({
                       const digits = sanitizeNumericDigits(text);
                       onChange(digits === '' ? undefined : Number(digits));
                     }}
-                    onFocus={onInputFocus}
                     placeholder={
                       PHYSICAL_PERSON_CONTACT_FORM_COPY.NET_INCOME_PLACEHOLDER
                     }
@@ -640,7 +625,6 @@ const PhysicalPersonContactFormComponent = ({
                   const digits = sanitizeNumericDigits(text);
                   onChange(digits === '' ? undefined : Number(digits));
                 }}
-                onFocus={onInputFocus}
                 placeholder={
                   PHYSICAL_PERSON_CONTACT_FORM_COPY.OTHER_INCOMES_PLACEHOLDER
                 }
@@ -678,9 +662,7 @@ const PhysicalPersonContactFormComponent = ({
               autoCapitalize='words'
               editable={!disabled}
               error={error?.message}
-              label={
-                PHYSICAL_PERSON_CONTACT_FORM_COPY.COMPANY_REFERENCE_LABEL
-              }
+              label={PHYSICAL_PERSON_CONTACT_FORM_COPY.COMPANY_REFERENCE_LABEL}
               leftIcon='hash'
               onBlur={onBlur}
               onChangeText={onChange}
@@ -709,9 +691,7 @@ const PhysicalPersonContactFormComponent = ({
               editable={!disabled}
               error={error?.message}
               keyboardType='phone-pad'
-              label={
-                PHYSICAL_PERSON_CONTACT_FORM_COPY.REFERENCE_PHONE_LABEL
-              }
+              label={PHYSICAL_PERSON_CONTACT_FORM_COPY.REFERENCE_PHONE_LABEL}
               leftIcon='phone-call'
               onBlur={onBlur}
               onChangeText={onChange}
@@ -743,9 +723,7 @@ const PhysicalPersonContactFormComponent = ({
               keyboardType='default'
               label={PHYSICAL_PERSON_CONTACT_FORM_COPY.IBAN_ACCOUNT_LABEL}
               leftIcon='banknote'
-              maxLength={
-                PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL.MAX_LENGTH_IBAN
-              }
+              maxLength={PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL.MAX_LENGTH_IBAN}
               onBlur={onBlur}
               onChangeText={(text: string): void => {
                 onChange(text.toUpperCase());
@@ -755,9 +733,7 @@ const PhysicalPersonContactFormComponent = ({
                 PHYSICAL_PERSON_CONTACT_FORM_COPY.IBAN_ACCOUNT_PLACEHOLDER
               }
               required
-              testID={
-                PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.IBAN_ACCOUNT_INPUT
-              }
+              testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.IBAN_ACCOUNT_INPUT}
               value={value ?? ''}
             />
           )}

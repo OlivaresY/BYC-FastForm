@@ -76,7 +76,7 @@ const meta = {
       </View>
     ),
   ],
-  title: 'Features/Credit Wizard/Step 2: Physical Person Contact',
+  title: 'Features/CreditWizard/PhysicalPersonContactStepView',
 } satisfies Meta<typeof PhysicalPersonContactStepView>;
 
 export default meta;

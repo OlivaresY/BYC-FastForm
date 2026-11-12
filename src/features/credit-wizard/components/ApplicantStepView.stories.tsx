@@ -57,7 +57,7 @@ const meta = {
       </View>
     ),
   ],
-  title: 'CreditWizard/ApplicantStepView',
+  title: 'Features/CreditWizard/ApplicantStepView',
 } satisfies Meta<typeof ApplicantStepView>;
 
 export default meta;

@@ -1,14 +1,13 @@
 export {
-  BaseButton,
   BASE_BUTTON_COLORS,
   BASE_BUTTON_STYLES,
   BASE_BUTTON_TEST_IDS,
   BASE_BUTTON_VARIANTS,
+  BaseButton,
 } from './BaseButton';
 export type { BaseButtonProps, BaseButtonVariant } from './BaseButton';
 
 export {
-  CustomSelect,
   CUSTOM_SELECT_COLORS,
   CUSTOM_SELECT_COPY,
   CUSTOM_SELECT_ICON_DIMENSIONS,
@@ -16,6 +15,7 @@ export {
   CUSTOM_SELECT_STYLES,
   CUSTOM_SELECT_SVG_ATTRIBUTES,
   CUSTOM_SELECT_TEST_IDS,
+  CustomSelect,
   useCustomSelect,
 } from './CustomSelect';
 export type {
@@ -27,7 +27,6 @@ export type {
 } from './CustomSelect';
 
 export {
-  CustomTextInput,
   CUSTOM_TEXT_INPUT_COLORS,
   CUSTOM_TEXT_INPUT_COPY,
   CUSTOM_TEXT_INPUT_ICON_DIMENSIONS,
@@ -35,6 +34,7 @@ export {
   CUSTOM_TEXT_INPUT_STYLES,
   CUSTOM_TEXT_INPUT_SVG_ATTRIBUTES,
   CUSTOM_TEXT_INPUT_TEST_IDS,
+  CustomTextInput,
 } from './CustomTextInput';
 export type {
   CustomTextInputPresetIcon,
@@ -56,6 +56,7 @@ export {
   CalendarIcon,
   CarIcon,
   CheckmarkIcon,
+  CheckSquareIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
   CircleIcon,
@@ -70,6 +71,7 @@ export {
   PhoneCallIcon,
   PhoneIcon,
   SaveIcon,
+  ShieldCheckIcon,
   SmartphoneIcon,
   UserIcon,
 } from './Icons';
@@ -89,7 +91,6 @@ export type {
   UseKeyboardAutoScrollReturn,
 } from './KeyboardAwareStepLayout';
 
-
 export {
   PROCESS_TOP_BAR_COLORS,
   PROCESS_TOP_BAR_COPY,
@@ -101,9 +102,5 @@ export {
 } from './ProcessTopBar';
 export type { ProcessTopBarProps } from './ProcessTopBar';
 
-export {
-  SECTION_HEADER_STYLES,
-  SectionHeader,
-} from './SectionHeader';
+export { SECTION_HEADER_STYLES, SectionHeader } from './SectionHeader';
 export type { SectionHeaderProps } from './SectionHeader';
-

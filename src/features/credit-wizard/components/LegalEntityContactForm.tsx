@@ -218,10 +218,7 @@ const LegalEntityContactFormComponent = ({
         <Controller
           control={control}
           name='commercialAddress.province'
-          render={({
-            field: { onChange, value },
-            fieldState: { error },
-          }) => (
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
             <CustomSelect
               disabled={disabled}
               errorMessage={error?.message}
@@ -229,9 +226,7 @@ const LegalEntityContactFormComponent = ({
               onFocus={onInputFocus}
               onValueChange={onChange}
               options={provinceOptions}
-              placeholder={
-                LEGAL_ENTITY_CONTACT_FORM_COPY.PROVINCE_PLACEHOLDER
-              }
+              placeholder={LEGAL_ENTITY_CONTACT_FORM_COPY.PROVINCE_PLACEHOLDER}
               required
               testID={LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.PROVINCE_SELECT}
               value={value ?? ''}
@@ -308,8 +303,7 @@ const LegalEntityContactFormComponent = ({
               label={LEGAL_ENTITY_CONTACT_FORM_COPY.EXACT_ADDRESS_LABEL}
               multiline
               numberOfLines={
-                LEGAL_ENTITY_CONTACT_FORM_NUMERICAL
-                  .EXACT_ADDRESS_NUMBER_OF_LINES
+                LEGAL_ENTITY_CONTACT_FORM_NUMERICAL.EXACT_ADDRESS_NUMBER_OF_LINES
               }
               onBlur={onBlur}
               onChangeText={onChange}
@@ -373,7 +367,6 @@ const LegalEntityContactFormComponent = ({
               label={LEGAL_ENTITY_CONTACT_FORM_COPY.MAIN_ACTIVITY_LABEL}
               onBlur={onBlur}
               onChangeText={onChange}
-              onFocus={onInputFocus}
               placeholder={
                 LEGAL_ENTITY_CONTACT_FORM_COPY.MAIN_ACTIVITY_PLACEHOLDER
               }
@@ -401,9 +394,7 @@ const LegalEntityContactFormComponent = ({
               keyboardType='numeric'
               label={LEGAL_ENTITY_CONTACT_FORM_COPY.CONSTITUTION_DATE_LABEL}
               leftIcon='calendar'
-              maxLength={
-                LEGAL_ENTITY_CONTACT_FORM_NUMERICAL.MAX_LENGTH_DATE
-              }
+              maxLength={LEGAL_ENTITY_CONTACT_FORM_NUMERICAL.MAX_LENGTH_DATE}
               onBlur={onBlur}
               onChangeText={(text: string): void => {
                 const maskedDate = formatDateDisplay(text);
@@ -448,9 +439,7 @@ const LegalEntityContactFormComponent = ({
                 LEGAL_ENTITY_CONTACT_FORM_COPY.EMPLOYEES_COUNT_PLACEHOLDER
               }
               required
-              testID={
-                LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.EMPLOYEES_COUNT_INPUT
-              }
+              testID={LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.EMPLOYEES_COUNT_INPUT}
               value={value !== undefined ? String(value) : ''}
             />
           )}
@@ -473,14 +462,11 @@ const LegalEntityContactFormComponent = ({
               maxLength={LEGAL_ENTITY_CONTACT_FORM_NUMERICAL.MAX_LENGTH_PHONE}
               onBlur={onBlur}
               onChangeText={onChange}
-              onFocus={onInputFocus}
               placeholder={
                 LEGAL_ENTITY_CONTACT_FORM_COPY.ACCOUNTING_PHONE_PLACEHOLDER
               }
               required
-              testID={
-                LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.ACCOUNTING_PHONE_INPUT
-              }
+              testID={LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.ACCOUNTING_PHONE_INPUT}
               value={value ?? ''}
             />
           )}
@@ -622,9 +608,7 @@ const LegalEntityContactFormComponent = ({
               <CustomTextInput
                 editable={!disabled}
                 error={error?.message}
-                helperText={
-                  LEGAL_ENTITY_CONTACT_FORM_COPY.OTHER_INCOMES_HELPER
-                }
+                helperText={LEGAL_ENTITY_CONTACT_FORM_COPY.OTHER_INCOMES_HELPER}
                 keyboardType='numeric'
                 label={LEGAL_ENTITY_CONTACT_FORM_COPY.OTHER_INCOMES_LABEL}
                 labelRight={
@@ -712,9 +696,7 @@ const LegalEntityContactFormComponent = ({
               keyboardType='phone-pad'
               label={LEGAL_ENTITY_CONTACT_FORM_COPY.REFERENCE_PHONE_LABEL}
               leftIcon='phone-call'
-              maxLength={
-                LEGAL_ENTITY_CONTACT_FORM_NUMERICAL.MAX_LENGTH_PHONE
-              }
+              maxLength={LEGAL_ENTITY_CONTACT_FORM_NUMERICAL.MAX_LENGTH_PHONE}
               onBlur={onBlur}
               onChangeText={onChange}
               onFocus={onInputFocus}
@@ -722,9 +704,7 @@ const LegalEntityContactFormComponent = ({
                 LEGAL_ENTITY_CONTACT_FORM_COPY.REFERENCE_PHONE_PLACEHOLDER
               }
               required
-              testID={
-                LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.REFERENCE_PHONE_INPUT
-              }
+              testID={LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.REFERENCE_PHONE_INPUT}
               value={value ?? ''}
             />
           )}
@@ -745,9 +725,7 @@ const LegalEntityContactFormComponent = ({
               keyboardType='default'
               label={LEGAL_ENTITY_CONTACT_FORM_COPY.IBAN_ACCOUNT_LABEL}
               leftIcon='banknote'
-              maxLength={
-                LEGAL_ENTITY_CONTACT_FORM_NUMERICAL.MAX_LENGTH_IBAN
-              }
+              maxLength={LEGAL_ENTITY_CONTACT_FORM_NUMERICAL.MAX_LENGTH_IBAN}
               onBlur={onBlur}
               onChangeText={(text: string): void => {
                 onChange(text.toUpperCase());
@@ -757,9 +735,7 @@ const LegalEntityContactFormComponent = ({
                 LEGAL_ENTITY_CONTACT_FORM_COPY.IBAN_ACCOUNT_PLACEHOLDER
               }
               required
-              testID={
-                LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.IBAN_ACCOUNT_INPUT
-              }
+              testID={LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.IBAN_ACCOUNT_INPUT}
               value={value ?? ''}
             />
           )}

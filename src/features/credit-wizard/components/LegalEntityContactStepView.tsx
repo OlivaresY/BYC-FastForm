@@ -49,14 +49,11 @@ export const LegalEntityContactStepView = ({
       title={WIZARD_COPY.STEP_2_LEGAL_CONTACT.TITLE}
       totalSteps={totalSteps}
     >
-      {({ onInputFocus }) => (
-        <LegalEntityContactForm
-          control={control}
-          disabled={disabled || isSubmitting}
-          onInputFocus={onInputFocus}
-          testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.FORM}
-        />
-      )}
+      <LegalEntityContactForm
+        control={control}
+        disabled={disabled || isSubmitting}
+        testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.FORM}
+      />
     </WizardStepLayout>
   );
 };

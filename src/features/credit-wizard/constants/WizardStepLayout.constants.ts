@@ -30,7 +30,7 @@ export const WIZARD_STEP_LAYOUT_NUMERICAL = {
 } as const;
 
 export const WIZARD_STEP_LAYOUT_STYLES = {
-  BACK_BUTTON: 'flex-1',
+  BACK_BUTTON: 'w-28 flex-none',
   BOTTOM_BAR:
     'w-full flex-row items-center gap-3 border-t border-border-card bg-surface-card px-4 py-3 pb-8',
   BOTTOM_BAR_FULL:

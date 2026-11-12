@@ -70,8 +70,18 @@
   },
   "jest": {
     "preset": "jest-expo",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "\\.po\\.[jt]sx?$",
+      "\\.pom\\.[jt]sx?$"
+    ],
     "transformIgnorePatterns": [
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|nativewind|@testing-library/react-native)"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "\\.po\\.[jt]sx?$",
+      "\\.pom\\.[jt]sx?$"
     ]
   },
   "private": true

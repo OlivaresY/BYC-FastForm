@@ -9,6 +9,8 @@ export interface CustomSelectProps {
   disabled?: boolean;
   errorMessage?: string;
   helperText?: string;
+  hideChevron?: boolean;
+  isDisabled?: boolean;
   label?: string;
   leftIcon?: CustomSelectPresetIcon;
   modalTitle?: string;

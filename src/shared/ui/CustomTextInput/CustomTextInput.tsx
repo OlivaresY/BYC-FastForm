@@ -210,20 +210,27 @@ export const CustomTextInput = React.memo(
         <View className={CUSTOM_TEXT_INPUT_STYLES.LABEL_ROW}>
           <View className={CUSTOM_TEXT_INPUT_STYLES.LABEL_LEFT_CONTAINER}>
             {label ? (
-              <Text
-                className={CUSTOM_TEXT_INPUT_STYLES.LABEL_TEXT}
-                testID={labelTestId}
-              >
-                {label}
-              </Text>
-            ) : null}
-            {required && label && !label.trim().endsWith('*') ? (
-              <Text
-                className={CUSTOM_TEXT_INPUT_STYLES.REQUIRED_ASTERISK}
-                testID={requiredAsteriskTestId}
-              >
-                {CUSTOM_TEXT_INPUT_COPY.REQUIRED_ASTERISK}
-              </Text>
+              required && !label.trim().endsWith('*') ? (
+                <Text
+                  className={CUSTOM_TEXT_INPUT_STYLES.LABEL_TEXT}
+                  testID={labelTestId}
+                >
+                  {label}
+                  <Text
+                    className={CUSTOM_TEXT_INPUT_STYLES.REQUIRED_ASTERISK}
+                    testID={requiredAsteriskTestId}
+                  >
+                    {CUSTOM_TEXT_INPUT_COPY.REQUIRED_ASTERISK}
+                  </Text>
+                </Text>
+              ) : (
+                <Text
+                  className={CUSTOM_TEXT_INPUT_STYLES.LABEL_TEXT}
+                  testID={labelTestId}
+                >
+                  {label}
+                </Text>
+              )
             ) : null}
           </View>
           {labelRight ? (

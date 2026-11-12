@@ -10,7 +10,7 @@ const defaultValues = {
 };
 
 const meta = {
-  title: 'CreditWizard/LegalEntityForm',
+  title: 'Features/CreditWizard/LegalEntityForm',
   component: LegalEntityForm,
   args: {
     onFieldChange: () => {},
