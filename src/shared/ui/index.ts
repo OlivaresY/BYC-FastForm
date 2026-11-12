@@ -80,9 +80,12 @@ export {
   KEYBOARD_AWARE_STEP_LAYOUT_DIMENSIONS,
   KEYBOARD_AWARE_STEP_LAYOUT_STYLES,
   KEYBOARD_AWARE_STEP_LAYOUT_TEST_IDS,
+  KeyboardAutoScrollContext,
   useKeyboardAutoScroll,
+  useKeyboardAutoScrollContext,
 } from './KeyboardAwareStepLayout';
 export type {
+  KeyboardAutoScrollContextValue,
   UseKeyboardAutoScrollOptions,
   UseKeyboardAutoScrollReturn,
 } from './KeyboardAwareStepLayout';

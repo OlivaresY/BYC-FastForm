@@ -99,11 +99,10 @@ export class KeyboardAutoScrollPageObject {
     left?: number;
     top?: number;
     width?: number;
-  }): { measureLayout: jest.Mock } {
+  }): { measureInWindow: jest.Mock } {
     return {
-      measureLayout: jest.fn(
+      measureInWindow: jest.fn(
         (
-          _relativeTo: unknown,
           onSuccess: (
             left: number,
             top: number,

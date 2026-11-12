@@ -15,7 +15,11 @@ import {
   WIZARD_STEP_LAYOUT_STYLES,
   WIZARD_STEP_LAYOUT_TEST_IDS,
 } from '../constants/WizardStepLayout.constants';
-import { useKeyboardAutoScroll } from '../hooks/useKeyboardAutoScroll';
+import {
+  KeyboardAutoScrollContext,
+  useKeyboardAutoScroll,
+  type KeyboardAutoScrollContextValue,
+} from '../hooks/useKeyboardAutoScroll';
 import type { WizardStepLayoutProps } from '../types/WizardStepLayout.types';
 import { WizardProgressHeader } from './WizardProgressHeader';
 
@@ -64,13 +68,19 @@ export const WizardStepLayout = ({
   const hasBackButton = Boolean(onBack);
   const handleSubmit = onNext ?? onSubmit ?? NOOP_VOID;
 
+  const autoScrollContextValue = React.useMemo<KeyboardAutoScrollContextValue>(
+    () => ({ onInputFocus }),
+    [onInputFocus],
+  );
+
   return (
-    <View
-      className={WIZARD_STEP_LAYOUT_STYLES.CONTAINER}
-      testID={
-        testID ?? testIds?.container ?? WIZARD_STEP_LAYOUT_TEST_IDS.CONTAINER
-      }
-    >
+    <KeyboardAutoScrollContext.Provider value={autoScrollContextValue}>
+      <View
+        className={WIZARD_STEP_LAYOUT_STYLES.CONTAINER}
+        testID={
+          testID ?? testIds?.container ?? WIZARD_STEP_LAYOUT_TEST_IDS.CONTAINER
+        }
+      >
       <ProcessTopBar
         onClose={onClose ?? NOOP_VOID}
         testID={
@@ -178,6 +188,7 @@ export const WizardStepLayout = ({
         </View>
       </View>
     </View>
+    </KeyboardAutoScrollContext.Provider>
   );
 };
 

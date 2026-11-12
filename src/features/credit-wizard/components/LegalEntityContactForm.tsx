@@ -70,7 +70,6 @@ const FinancialSectionIcon = (): React.JSX.Element => (
 export const LegalEntityContactForm = ({
   control,
   disabled = false,
-  onInputFocus,
   testID,
 }: LegalEntityContactFormProps): React.JSX.Element => {
   return (
@@ -104,7 +103,6 @@ export const LegalEntityContactForm = ({
               label={LEGAL_ENTITY_CONTACT_FORM_COPY.CORPORATE_NAME_LABEL}
               onBlur={onBlur}
               onChangeText={onChange}
-              onFocus={onInputFocus}
               placeholder={
                 LEGAL_ENTITY_CONTACT_FORM_COPY.CORPORATE_NAME_PLACEHOLDER
               }
@@ -144,7 +142,6 @@ export const LegalEntityContactForm = ({
                     const masked = formatCorporateIdDisplay(text);
                     onChange(masked);
                   }}
-                  onFocus={onInputFocus}
                   placeholder={
                     LEGAL_ENTITY_CONTACT_FORM_COPY.CORPORATE_ID_PLACEHOLDER
                   }
@@ -181,7 +178,6 @@ export const LegalEntityContactForm = ({
                     const maskedDate = formatDateDisplay(text);
                     onChange(maskedDate);
                   }}
-                  onFocus={onInputFocus}
                   placeholder={
                     LEGAL_ENTITY_CONTACT_FORM_COPY.CONSTITUTION_DATE_PLACEHOLDER
                   }
@@ -228,7 +224,6 @@ export const LegalEntityContactForm = ({
                   }
                   onBlur={onBlur}
                   onChangeText={onChange}
-                  onFocus={onInputFocus}
                   placeholder={LEGAL_ENTITY_CONTACT_FORM_COPY.PHONE_PLACEHOLDER}
                   required
                   testID={LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.PHONE_INPUT}
@@ -255,7 +250,6 @@ export const LegalEntityContactForm = ({
                   leftIcon='mail'
                   onBlur={onBlur}
                   onChangeText={onChange}
-                  onFocus={onInputFocus}
                   placeholder={LEGAL_ENTITY_CONTACT_FORM_COPY.EMAIL_PLACEHOLDER}
                   required
                   testID={LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.EMAIL_INPUT}
@@ -293,7 +287,6 @@ export const LegalEntityContactForm = ({
               label={LEGAL_ENTITY_CONTACT_FORM_COPY.REPRESENTATIVE_NAME_LABEL}
               onBlur={onBlur}
               onChangeText={onChange}
-              onFocus={onInputFocus}
               placeholder={
                 LEGAL_ENTITY_CONTACT_FORM_COPY.REPRESENTATIVE_NAME_PLACEHOLDER
               }
@@ -323,7 +316,6 @@ export const LegalEntityContactForm = ({
               leftIcon='hash'
               onBlur={onBlur}
               onChangeText={onChange}
-              onFocus={onInputFocus}
               placeholder={
                 LEGAL_ENTITY_CONTACT_FORM_COPY.REPRESENTATIVE_ID_PLACEHOLDER
               }
@@ -378,8 +370,7 @@ export const LegalEntityContactForm = ({
                       const digits = sanitizeNumericDigits(text);
                       onChange(digits === '' ? undefined : Number(digits));
                     }}
-                    onFocus={onInputFocus}
-                    placeholder={
+                      placeholder={
                       LEGAL_ENTITY_CONTACT_FORM_COPY.GROSS_INCOME_PLACEHOLDER
                     }
                     required
@@ -421,8 +412,7 @@ export const LegalEntityContactForm = ({
                       const digits = sanitizeNumericDigits(text);
                       onChange(digits === '' ? undefined : Number(digits));
                     }}
-                    onFocus={onInputFocus}
-                    placeholder={
+                      placeholder={
                       LEGAL_ENTITY_CONTACT_FORM_COPY.NET_INCOME_PLACEHOLDER
                     }
                     required

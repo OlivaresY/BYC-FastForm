@@ -3,6 +3,11 @@ export {
   KEYBOARD_AWARE_STEP_LAYOUT_STYLES,
   KEYBOARD_AWARE_STEP_LAYOUT_TEST_IDS,
 } from './constants/KeyboardAwareStepLayout.constants';
+export {
+  KeyboardAutoScrollContext,
+  useKeyboardAutoScrollContext,
+  type KeyboardAutoScrollContextValue,
+} from './context/KeyboardAutoScrollContext';
 export { useKeyboardAutoScroll } from './hooks/useKeyboardAutoScroll';
 export type {
   UseKeyboardAutoScrollOptions,

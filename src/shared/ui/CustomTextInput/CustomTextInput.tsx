@@ -22,6 +22,7 @@ import type {
   CustomTextInputPresetIcon,
   CustomTextInputProps,
 } from './CustomTextInput.types';
+import { useKeyboardAutoScrollContext } from '../KeyboardAwareStepLayout';
 
 interface LeftIconProps {
   testID: string;
@@ -146,9 +147,16 @@ export const CustomTextInput = React.memo(
   ...rest
 }: CustomTextInputProps): React.JSX.Element => {
   const [isFocused, setIsFocused] = useState<boolean>(false);
+  const autoScrollContext = useKeyboardAutoScrollContext();
 
   const handleFocus: TextInputProps['onFocus'] = (event): void => {
     setIsFocused(true);
+    if (
+      autoScrollContext?.onInputFocus &&
+      onFocus !== autoScrollContext.onInputFocus
+    ) {
+      autoScrollContext.onInputFocus(event);
+    }
     onFocus?.(event);
   };
 
