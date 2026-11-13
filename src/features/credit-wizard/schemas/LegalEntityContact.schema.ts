@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import { isNotFutureDateDDMMYYYY, isValidDateDDMMYYYY } from '@/shared/utils';
 import {
+  isValidCantonForProvince,
+  isValidLocationHierarchy,
+} from '../constants/CostaRicaLocations.constants';
+import {
   FINANCIAL_CURRENCIES,
   LEGAL_ENTITY_CONTACT_PATTERNS,
 } from '../constants/LegalEntityContact.constants';
@@ -96,42 +100,67 @@ export const CommercialActivitySchema = z.object({
     }),
 });
 
-export const CommercialAddressSchema = z.object({
-  canton: z
-    .string({
-      error: LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.CANTON_REQUIRED,
-    })
-    .trim()
-    .min(1, {
-      message: LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.CANTON_REQUIRED,
-    }),
-  district: z
-    .string({
-      error: LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.DISTRICT_REQUIRED,
-    })
-    .trim()
-    .min(1, {
-      message: LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.DISTRICT_REQUIRED,
-    }),
-  exactAddress: z
-    .string({
-      error:
-        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.EXACT_ADDRESS_REQUIRED,
-    })
-    .trim()
-    .min(1, {
-      message:
-        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.EXACT_ADDRESS_REQUIRED,
-    }),
-  province: z
-    .string({
-      error: LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.PROVINCE_REQUIRED,
-    })
-    .trim()
-    .min(1, {
-      message: LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.PROVINCE_REQUIRED,
-    }),
-});
+export const CommercialAddressSchema = z
+  .object({
+    canton: z
+      .string({
+        error: LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.CANTON_REQUIRED,
+      })
+      .trim()
+      .min(1, {
+        message: LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.CANTON_REQUIRED,
+      }),
+    district: z
+      .string({
+        error: LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.DISTRICT_REQUIRED,
+      })
+      .trim()
+      .min(1, {
+        message:
+          LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.DISTRICT_REQUIRED,
+      }),
+    exactAddress: z
+      .string({
+        error:
+          LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.EXACT_ADDRESS_REQUIRED,
+      })
+      .trim()
+      .min(1, {
+        message:
+          LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.EXACT_ADDRESS_REQUIRED,
+      }),
+    province: z
+      .string({
+        error: LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.PROVINCE_REQUIRED,
+      })
+      .trim()
+      .min(1, {
+        message:
+          LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.PROVINCE_REQUIRED,
+      }),
+  })
+  .superRefine((address, ctx) => {
+    const { canton, district, province } = address;
+    if (!province || !canton) {
+      return;
+    }
+    if (!isValidCantonForProvince(province, canton)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.CANTON_INVALID,
+        path: ['canton'],
+      });
+      return;
+    }
+    if (district && !isValidLocationHierarchy(province, canton, district)) {
+      ctx.addIssue({
+        code: 'custom',
+        message:
+          LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ADDRESS.DISTRICT_INVALID,
+        path: ['district'],
+      });
+    }
+  });
 
 export const CommercialReferenceSchema = z.object({
   companyReference: z
@@ -147,13 +176,11 @@ export const CommercialReferenceSchema = z.object({
           .COMPANY_REFERENCE_REQUIRED,
     })
     .pipe(
-      z
-        .string()
-        .min(2, {
-          message:
-            LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_REFERENCE
-              .COMPANY_REFERENCE_MIN,
-        }),
+      z.string().min(2, {
+        message:
+          LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+            .COMPANY_REFERENCE_MIN,
+      }),
     ),
   ibanAccount: z
     .string({
@@ -170,8 +197,7 @@ export const CommercialReferenceSchema = z.object({
         .string()
         .regex(
           LEGAL_ENTITY_CONTACT_PATTERNS.CR_IBAN,
-          LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_REFERENCE
-            .IBAN_ACCOUNT_INVALID,
+          LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_REFERENCE.IBAN_ACCOUNT_INVALID,
         ),
     ),
   referencePhone: z
@@ -263,16 +289,16 @@ export const FinancialStatementsSchema = z.object({
       error:
         LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS.NET_PROFIT_REQUIRED,
     })
-    .gt(0, LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS.NET_PROFIT_POSITIVE),
+    .gt(
+      0,
+      LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS.NET_PROFIT_POSITIVE,
+    ),
   otherIncomes: z.coerce
     .number({
       error:
         LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS.OTHER_INCOMES_REQUIRED,
     })
-    .min(
-      0,
-      LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS.OTHER_INCOMES_MIN,
-    )
+    .min(0, LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS.OTHER_INCOMES_MIN)
     .nullish(),
 });
 

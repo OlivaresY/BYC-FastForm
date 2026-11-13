@@ -121,7 +121,9 @@ export const WIZARD_COPY = {
         MAIN_ACTIVITY_REQUIRED: 'La actividad principal es obligatoria.',
       },
       COMMERCIAL_ADDRESS: {
+        CANTON_INVALID: 'El cantón no pertenece a la provincia seleccionada.',
         CANTON_REQUIRED: 'El cantón es obligatorio.',
+        DISTRICT_INVALID: 'El distrito no pertenece al cantón seleccionado.',
         DISTRICT_REQUIRED: 'El distrito es obligatorio.',
         EXACT_ADDRESS_REQUIRED: 'La dirección exacta es obligatoria.',
         PROVINCE_REQUIRED: 'La provincia es obligatoria.',
@@ -143,7 +145,8 @@ export const WIZARD_COPY = {
         CELL_PHONE_REQUIRED: 'El teléfono celular es obligatorio.',
         EMAIL_INVALID: 'El formato del correo electrónico no es válido.',
         EMAIL_REQUIRED: 'El correo electrónico es obligatorio.',
-        OFFICE_PHONE_INVALID: 'El formato del teléfono de oficina no es válido.',
+        OFFICE_PHONE_INVALID:
+          'El formato del teléfono de oficina no es válido.',
         OFFICE_PHONE_REQUIRED: 'El teléfono de oficina es obligatorio.',
       },
       FINANCIAL_STATEMENTS: {
@@ -210,7 +213,9 @@ export const WIZARD_COPY = {
         OTHER_INCOMES_REQUIRED: 'Otros ingresos debe ser un valor numérico.',
       },
       RESIDENTIAL_ADDRESS: {
+        CANTON_INVALID: 'El cantón no pertenece a la provincia seleccionada.',
         CANTON_REQUIRED: 'El cantón es obligatorio.',
+        DISTRICT_INVALID: 'El distrito no pertenece al cantón seleccionado.',
         DISTRICT_REQUIRED: 'El distrito es obligatorio.',
         EXACT_ADDRESS_REQUIRED: 'La dirección exacta es obligatoria.',
         PROVINCE_REQUIRED: 'La provincia es obligatoria.',

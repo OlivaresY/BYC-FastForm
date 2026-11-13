@@ -4,6 +4,7 @@ import type {
   UseFormHandleSubmit,
 } from 'react-hook-form';
 import type { z } from 'zod';
+import type { CustomSelectOption } from '@/shared/ui';
 import type {
   CommercialReferenceSchema,
   ContactInfoSchema,
@@ -29,11 +30,16 @@ export interface UsePhysicalPersonContactViewModelProps {
 }
 
 export interface UsePhysicalPersonContactViewModelReturn {
+  cantonOptions: readonly CustomSelectOption[];
   control: Control<PhysicalPersonContact>;
+  districtOptions: readonly CustomSelectOption[];
   errors: FieldErrors<PhysicalPersonContact>;
+  handleCantonChange: (canton: string) => void;
   handleNextStep: (dataOrEvent?: unknown) => Promise<void> | void;
+  handleProvinceChange: (province: string) => void;
   handleSubmit: UseFormHandleSubmit<PhysicalPersonContact>;
   isSubmitting: boolean;
   isValid: boolean;
+  provinceOptions: readonly CustomSelectOption[];
   submitError: string | null;
 }

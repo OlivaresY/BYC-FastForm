@@ -1,7 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { Resolver } from 'react-hook-form';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
+import {
+  getCantonOptions,
+  getDistrictOptions,
+  getProvinceOptions,
+} from '../constants/CostaRicaLocations.constants';
 import {
   PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES,
   PHYSICAL_PERSON_CONTACT_ERRORS,
@@ -29,6 +34,7 @@ export const usePhysicalPersonContactViewModel = (
     control,
     formState: { errors, isValid },
     handleSubmit,
+    setValue,
   } = useForm<PhysicalPersonContact>({
     defaultValues: {
       ...PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES,
@@ -60,6 +66,42 @@ export const usePhysicalPersonContactViewModel = (
     ) as unknown as Resolver<PhysicalPersonContact>,
   });
 
+  const selectedProvince = useWatch({
+    control,
+    name: 'residentialAddress.province',
+  });
+  const selectedCanton = useWatch({
+    control,
+    name: 'residentialAddress.canton',
+  });
+
+  const provinceOptions = useMemo(() => getProvinceOptions(), []);
+  const cantonOptions = useMemo(
+    () => getCantonOptions(selectedProvince),
+    [selectedProvince],
+  );
+  const districtOptions = useMemo(
+    () => getDistrictOptions(selectedProvince, selectedCanton),
+    [selectedCanton, selectedProvince],
+  );
+
+  const handleProvinceChange = useCallback(
+    (province: string): void => {
+      setValue('residentialAddress.canton', '', { shouldDirty: true });
+      setValue('residentialAddress.district', '', { shouldDirty: true });
+      setValue('residentialAddress.province', province, { shouldDirty: true });
+    },
+    [setValue],
+  );
+
+  const handleCantonChange = useCallback(
+    (canton: string): void => {
+      setValue('residentialAddress.district', '', { shouldDirty: true });
+      setValue('residentialAddress.canton', canton, { shouldDirty: true });
+    },
+    [setValue],
+  );
+
   const onValidSubmit = useCallback(
     async (data: PhysicalPersonContact): Promise<void> => {
       await onSubmitProp?.(data);
@@ -79,7 +121,8 @@ export const usePhysicalPersonContactViewModel = (
             'contactInfo' in dataOrEvent ||
             'residentialAddress' in dataOrEvent)
         ) {
-          const parseResult = PhysicalPersonContactSchema.safeParse(dataOrEvent);
+          const parseResult =
+            PhysicalPersonContactSchema.safeParse(dataOrEvent);
           if (!parseResult.success) {
             throw new Error('Programmatic validation failed');
           }
@@ -97,12 +140,17 @@ export const usePhysicalPersonContactViewModel = (
   );
 
   return {
+    cantonOptions,
     control,
+    districtOptions,
     errors,
+    handleCantonChange,
     handleNextStep,
+    handleProvinceChange,
     handleSubmit,
     isSubmitting,
     isValid,
+    provinceOptions,
     submitError,
   };
 };

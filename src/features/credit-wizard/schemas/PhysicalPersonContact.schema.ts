@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import { isNotFutureDateDDMMYYYY, isValidDateDDMMYYYY } from '@/shared/utils';
 import {
+  isValidCantonForProvince,
+  isValidLocationHierarchy,
+} from '../constants/CostaRicaLocations.constants';
+import {
   EMPLOYMENT_STATUSES,
   FINANCIAL_CURRENCIES,
   PHYSICAL_PERSON_CONTACT_PATTERNS,
@@ -101,49 +105,74 @@ export const ContactInfoSchema = z.object({
     }),
 });
 
-export const ResidentialAddressSchema = z.object({
-  canton: z
-    .string({
-      error: PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.CANTON_REQUIRED,
-    })
-    .trim()
-    .min(1, {
-      message:
-        PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.CANTON_REQUIRED,
-    }),
-  district: z
-    .string({
-      error:
-        PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.DISTRICT_REQUIRED,
-    })
-    .trim()
-    .min(1, {
-      message:
-        PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.DISTRICT_REQUIRED,
-    }),
-  exactAddress: z
-    .string({
-      error:
-        PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS
-          .EXACT_ADDRESS_REQUIRED,
-    })
-    .trim()
-    .min(1, {
-      message:
-        PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS
-          .EXACT_ADDRESS_REQUIRED,
-    }),
-  province: z
-    .string({
-      error:
-        PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.PROVINCE_REQUIRED,
-    })
-    .trim()
-    .min(1, {
-      message:
-        PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.PROVINCE_REQUIRED,
-    }),
-});
+export const ResidentialAddressSchema = z
+  .object({
+    canton: z
+      .string({
+        error:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.CANTON_REQUIRED,
+      })
+      .trim()
+      .min(1, {
+        message:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.CANTON_REQUIRED,
+      }),
+    district: z
+      .string({
+        error:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.DISTRICT_REQUIRED,
+      })
+      .trim()
+      .min(1, {
+        message:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.DISTRICT_REQUIRED,
+      }),
+    exactAddress: z
+      .string({
+        error:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS
+            .EXACT_ADDRESS_REQUIRED,
+      })
+      .trim()
+      .min(1, {
+        message:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS
+            .EXACT_ADDRESS_REQUIRED,
+      }),
+    province: z
+      .string({
+        error:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.PROVINCE_REQUIRED,
+      })
+      .trim()
+      .min(1, {
+        message:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.PROVINCE_REQUIRED,
+      }),
+  })
+  .superRefine((address, ctx) => {
+    const { canton, district, province } = address;
+    if (!province || !canton) {
+      return;
+    }
+    if (!isValidCantonForProvince(province, canton)) {
+      ctx.addIssue({
+        code: 'custom',
+        message:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.CANTON_INVALID,
+        path: ['canton'],
+      });
+      return;
+    }
+    if (district && !isValidLocationHierarchy(province, canton, district)) {
+      ctx.addIssue({
+        code: 'custom',
+        message:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.DISTRICT_INVALID,
+        path: ['district'],
+      });
+    }
+  });
 
 export { isNotFutureDateDDMMYYYY };
 

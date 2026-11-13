@@ -1,4 +1,5 @@
 import { DATE_DD_MM_YYYY, INTERNATIONAL_PHONE_REGEX } from '@/shared/utils';
+import { FINANCIAL_CURRENCIES } from './SharedCatalogs.constants';
 import { WIZARD_COPY } from './WizardCopy.constants';
 
 export const EMPLOYMENT_STATUSES = {
@@ -10,10 +11,7 @@ export const EMPLOYMENT_STATUSES = {
   SALARIED_PUBLIC: 'salaried_public',
 } as const;
 
-export const FINANCIAL_CURRENCIES = {
-  CRC: 'CRC',
-  USD: 'USD',
-} as const;
+export { FINANCIAL_CURRENCIES };
 
 export const PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES = {
   commercialReference: {

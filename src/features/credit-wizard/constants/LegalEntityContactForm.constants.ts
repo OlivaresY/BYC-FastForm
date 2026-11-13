@@ -30,8 +30,7 @@ export const LEGAL_ENTITY_CONTACT_FORM_COPY = {
   EMPLOYEES_COUNT_LABEL: 'CANTIDAD DE EMPLEADOS',
   EMPLOYEES_COUNT_PLACEHOLDER: 'Ej: 25',
   EXACT_ADDRESS_LABEL: 'DIRECCIÓN EXACTA',
-  EXACT_ADDRESS_PLACEHOLDER:
-    'Frente a parque, edificio corporativo, piso 3...',
+  EXACT_ADDRESS_PLACEHOLDER: 'Frente a parque, edificio corporativo, piso 3...',
   GROSS_SALES_LABEL: 'VENTAS BRUTAS',
   GROSS_SALES_PLACEHOLDER: '5000000',
   IBAN_ACCOUNT_LABEL: 'CUENTA IBAN',
@@ -75,27 +74,6 @@ export const LEGAL_ENTITY_CONTACT_FORM_NUMERICAL = {
 } as const;
 
 export const LEGAL_ENTITY_CONTACT_FORM_OPTIONS = {
-  CANTON: [
-    { label: 'Central', value: 'Central' },
-    { label: 'Curridabat', value: 'Curridabat' },
-    { label: 'Desamparados', value: 'Desamparados' },
-    { label: 'Escazú', value: 'Escazú' },
-    { label: 'Santa Ana', value: 'Santa Ana' },
-    { label: 'Otro', value: 'Otro' },
-  ] as const satisfies readonly CustomSelectOption[],
-  CURRENCY: [
-    { label: 'CRC - Colones Costarricenses (₡)', value: 'CRC' },
-    { label: 'USD - Dólares Estadounidenses ($)', value: 'USD' },
-  ] as const satisfies readonly CustomSelectOption[],
-  DISTRICT: [
-    { label: 'Carmen', value: 'Carmen' },
-    { label: 'Catedral', value: 'Catedral' },
-    { label: 'Hospital', value: 'Hospital' },
-    { label: 'Merced', value: 'Merced' },
-    { label: 'San Antonio', value: 'San Antonio' },
-    { label: 'San Rafael', value: 'San Rafael' },
-    { label: 'Otro', value: 'Otro' },
-  ] as const satisfies readonly CustomSelectOption[],
   ECONOMIC_SECTOR: [
     { label: 'Agricultura y Ganadería', value: 'Agricultura y Ganadería' },
     { label: 'Comercio', value: 'Comercio' },
@@ -110,20 +88,10 @@ export const LEGAL_ENTITY_CONTACT_FORM_OPTIONS = {
     { label: 'Turismo y Hospitalidad', value: 'Turismo y Hospitalidad' },
     { label: 'Otro', value: 'Otro' },
   ] as const satisfies readonly CustomSelectOption[],
-  PROVINCE: [
-    { label: 'Alajuela', value: 'Alajuela' },
-    { label: 'Cartago', value: 'Cartago' },
-    { label: 'Guanacaste', value: 'Guanacaste' },
-    { label: 'Heredia', value: 'Heredia' },
-    { label: 'Limón', value: 'Limón' },
-    { label: 'Puntarenas', value: 'Puntarenas' },
-    { label: 'San José', value: 'San José' },
-  ] as const satisfies readonly CustomSelectOption[],
 } as const;
 
 export const LEGAL_ENTITY_CONTACT_FORM_STYLES = {
-  CARD_CONTAINER:
-    'w-full self-stretch rounded-2xl bg-stone-200 p-4 gap-4',
+  CARD_CONTAINER: 'w-full self-stretch rounded-2xl bg-stone-200 p-4 gap-4',
   CONTAINER: 'w-full self-stretch gap-4',
   GRID_COLUMN: 'flex-1',
   GRID_ROW: 'w-full flex-row gap-3',

@@ -18,8 +18,18 @@ export const PhysicalPersonContactStepView = ({
 }: PhysicalPersonContactStepViewProps): React.JSX.Element => {
   const defaultViewModel = usePhysicalPersonContactViewModel({ onSubmit });
   const viewModel = viewModelProp ?? defaultViewModel;
-  const { control, handleNextStep, isSubmitting, isValid, submitError } =
-    viewModel;
+  const {
+    cantonOptions,
+    control,
+    districtOptions,
+    handleCantonChange,
+    handleNextStep,
+    handleProvinceChange,
+    isSubmitting,
+    isValid,
+    provinceOptions,
+    submitError,
+  } = viewModel;
 
   return (
     <WizardStepLayout
@@ -55,7 +65,14 @@ export const PhysicalPersonContactStepView = ({
       <PhysicalPersonContactForm
         control={control}
         disabled={disabled || isSubmitting}
-        options={options}
+        onCantonChange={handleCantonChange}
+        onProvinceChange={handleProvinceChange}
+        options={{
+          ...options,
+          cantonOptions: options?.cantonOptions ?? cantonOptions,
+          districtOptions: options?.districtOptions ?? districtOptions,
+          provinceOptions: options?.provinceOptions ?? provinceOptions,
+        }}
         testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.FORM}
       />
     </WizardStepLayout>

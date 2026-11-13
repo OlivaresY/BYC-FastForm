@@ -13,7 +13,7 @@ import {
   sanitizeNumericDigits,
 } from '@/shared/utils';
 import React from 'react';
-import { Controller } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
 import { Text, View } from 'react-native';
 import {
   LEGAL_ENTITY_CONTACT_FORM_COLORS,
@@ -24,6 +24,12 @@ import {
   LEGAL_ENTITY_CONTACT_FORM_STYLES,
   LEGAL_ENTITY_CONTACT_FORM_TEST_IDS,
 } from '../constants/LegalEntityContactForm.constants';
+import {
+  getCantonOptions,
+  getDistrictOptions,
+  getProvinceOptions,
+} from '../constants/CostaRicaLocations.constants';
+import { CURRENCY_OPTIONS } from '../constants/SharedCatalogs.constants';
 import type { LegalEntityContactFormProps } from '../types/LegalEntityContactForm.types';
 
 const ContactSectionIcon = (): React.JSX.Element => (
@@ -79,21 +85,31 @@ const CommercialSectionIcon = (): React.JSX.Element => (
 const LegalEntityContactFormComponent = ({
   control,
   disabled = false,
+  onCantonChange,
   onInputFocus,
+  onProvinceChange,
   options,
   testID,
 }: LegalEntityContactFormProps): React.JSX.Element => {
-  const cantonOptions =
-    options?.cantonOptions ?? LEGAL_ENTITY_CONTACT_FORM_OPTIONS.CANTON;
-  const currencyOptions =
-    options?.currencyOptions ?? LEGAL_ENTITY_CONTACT_FORM_OPTIONS.CURRENCY;
-  const districtOptions =
-    options?.districtOptions ?? LEGAL_ENTITY_CONTACT_FORM_OPTIONS.DISTRICT;
   const economicSectorOptions =
     options?.economicSectorOptions ??
     LEGAL_ENTITY_CONTACT_FORM_OPTIONS.ECONOMIC_SECTOR;
-  const provinceOptions =
-    options?.provinceOptions ?? LEGAL_ENTITY_CONTACT_FORM_OPTIONS.PROVINCE;
+
+  const selectedProvince = useWatch({
+    control,
+    name: 'commercialAddress.province',
+  });
+  const selectedCanton = useWatch({
+    control,
+    name: 'commercialAddress.canton',
+  });
+  const provinceOptions = options?.provinceOptions ?? getProvinceOptions();
+  const cantonOptions =
+    options?.cantonOptions ?? getCantonOptions(selectedProvince);
+  const districtOptions =
+    options?.districtOptions ??
+    getDistrictOptions(selectedProvince, selectedCanton);
+  const currencyOptions = options?.currencyOptions ?? CURRENCY_OPTIONS;
 
   return (
     <View
@@ -224,7 +240,10 @@ const LegalEntityContactFormComponent = ({
               errorMessage={error?.message}
               label={LEGAL_ENTITY_CONTACT_FORM_COPY.PROVINCE_LABEL}
               onFocus={onInputFocus}
-              onValueChange={onChange}
+              onValueChange={(selected: string): void => {
+                onChange(selected);
+                onProvinceChange?.(selected);
+              }}
               options={provinceOptions}
               placeholder={LEGAL_ENTITY_CONTACT_FORM_COPY.PROVINCE_PLACEHOLDER}
               required
@@ -249,7 +268,10 @@ const LegalEntityContactFormComponent = ({
                   errorMessage={error?.message}
                   label={LEGAL_ENTITY_CONTACT_FORM_COPY.CANTON_LABEL}
                   onFocus={onInputFocus}
-                  onValueChange={onChange}
+                  onValueChange={(selected: string): void => {
+                    onChange(selected);
+                    onCantonChange?.(selected);
+                  }}
                   options={cantonOptions}
                   placeholder={
                     LEGAL_ENTITY_CONTACT_FORM_COPY.CANTON_PLACEHOLDER

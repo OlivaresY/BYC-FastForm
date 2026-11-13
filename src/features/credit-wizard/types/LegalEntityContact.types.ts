@@ -4,6 +4,7 @@ import type {
   UseFormHandleSubmit,
 } from 'react-hook-form';
 import type { z } from 'zod';
+import type { CustomSelectOption } from '@/shared/ui';
 import type {
   CommercialActivitySchema,
   CommercialAddressSchema,
@@ -29,11 +30,16 @@ export interface UseLegalEntityContactViewModelProps {
 }
 
 export interface UseLegalEntityContactViewModelReturn {
+  cantonOptions: readonly CustomSelectOption[];
   control: Control<LegalEntityContact>;
+  districtOptions: readonly CustomSelectOption[];
   errors: FieldErrors<LegalEntityContact>;
+  handleCantonChange: (canton: string) => void;
   handleNextStep: (dataOrEvent?: unknown) => Promise<void> | void;
+  handleProvinceChange: (province: string) => void;
   handleSubmit: UseFormHandleSubmit<LegalEntityContact>;
   isSubmitting: boolean;
   isValid: boolean;
+  provinceOptions: readonly CustomSelectOption[];
   submitError: string | null;
 }

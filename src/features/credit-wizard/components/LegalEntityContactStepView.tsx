@@ -17,8 +17,18 @@ export const LegalEntityContactStepView = ({
 }: LegalEntityContactStepViewProps): React.JSX.Element => {
   const defaultViewModel = useLegalEntityContactViewModel({ onSubmit });
   const viewModel = viewModelProp ?? defaultViewModel;
-  const { control, handleNextStep, isSubmitting, isValid, submitError } =
-    viewModel;
+  const {
+    cantonOptions,
+    control,
+    districtOptions,
+    handleCantonChange,
+    handleNextStep,
+    handleProvinceChange,
+    isSubmitting,
+    isValid,
+    provinceOptions,
+    submitError,
+  } = viewModel;
 
   return (
     <WizardStepLayout
@@ -52,6 +62,9 @@ export const LegalEntityContactStepView = ({
       <LegalEntityContactForm
         control={control}
         disabled={disabled || isSubmitting}
+        onCantonChange={handleCantonChange}
+        onProvinceChange={handleProvinceChange}
+        options={{ cantonOptions, districtOptions, provinceOptions }}
         testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.FORM}
       />
     </WizardStepLayout>

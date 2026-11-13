@@ -13,7 +13,9 @@ export interface LegalEntityContactFormOptions {
 export interface LegalEntityContactFormProps {
   control: Control<LegalEntityContact>;
   disabled?: boolean;
+  onCantonChange?: (canton: string) => void;
   onInputFocus?: (event?: unknown) => void;
+  onProvinceChange?: (province: string) => void;
   options?: LegalEntityContactFormOptions;
   testID?: string;
 }

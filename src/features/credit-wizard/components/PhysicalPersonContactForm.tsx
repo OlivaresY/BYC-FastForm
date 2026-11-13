@@ -13,7 +13,7 @@ import {
   sanitizeNumericDigits,
 } from '@/shared/utils';
 import React from 'react';
-import { Controller } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
 import { Text, View } from 'react-native';
 import {
   PHYSICAL_PERSON_CONTACT_FORM_COLORS,
@@ -24,6 +24,12 @@ import {
   PHYSICAL_PERSON_CONTACT_FORM_STYLES,
   PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS,
 } from '../constants/PhysicalPersonContactForm.constants';
+import {
+  getCantonOptions,
+  getDistrictOptions,
+  getProvinceOptions,
+} from '../constants/CostaRicaLocations.constants';
+import { CURRENCY_OPTIONS } from '../constants/SharedCatalogs.constants';
 import type { PhysicalPersonContactFormProps } from '../types/PhysicalPersonContactForm.types';
 
 const ContactSectionIcon = (): React.JSX.Element => (
@@ -79,21 +85,31 @@ const CommercialSectionIcon = (): React.JSX.Element => (
 const PhysicalPersonContactFormComponent = ({
   control,
   disabled = false,
+  onCantonChange,
   onInputFocus,
+  onProvinceChange,
   options,
   testID,
 }: PhysicalPersonContactFormProps): React.JSX.Element => {
-  const provinceOptions =
-    options?.provinceOptions ?? PHYSICAL_PERSON_CONTACT_FORM_OPTIONS.PROVINCE;
-  const cantonOptions =
-    options?.cantonOptions ?? PHYSICAL_PERSON_CONTACT_FORM_OPTIONS.CANTON;
-  const districtOptions =
-    options?.districtOptions ?? PHYSICAL_PERSON_CONTACT_FORM_OPTIONS.DISTRICT;
   const employmentStatusOptions =
     options?.employmentStatusOptions ??
     PHYSICAL_PERSON_CONTACT_FORM_OPTIONS.EMPLOYMENT_STATUS;
-  const currencyOptions =
-    options?.currencyOptions ?? PHYSICAL_PERSON_CONTACT_FORM_OPTIONS.CURRENCY;
+
+  const selectedProvince = useWatch({
+    control,
+    name: 'residentialAddress.province',
+  });
+  const selectedCanton = useWatch({
+    control,
+    name: 'residentialAddress.canton',
+  });
+  const provinceOptions = options?.provinceOptions ?? getProvinceOptions();
+  const cantonOptions =
+    options?.cantonOptions ?? getCantonOptions(selectedProvince);
+  const districtOptions =
+    options?.districtOptions ??
+    getDistrictOptions(selectedProvince, selectedCanton);
+  const currencyOptions = options?.currencyOptions ?? CURRENCY_OPTIONS;
 
   return (
     <View
@@ -218,7 +234,10 @@ const PhysicalPersonContactFormComponent = ({
               disabled={disabled}
               errorMessage={error?.message}
               label={PHYSICAL_PERSON_CONTACT_FORM_COPY.PROVINCE_LABEL}
-              onValueChange={onChange}
+              onValueChange={(selected: string): void => {
+                onChange(selected);
+                onProvinceChange?.(selected);
+              }}
               options={provinceOptions}
               placeholder={
                 PHYSICAL_PERSON_CONTACT_FORM_COPY.PROVINCE_PLACEHOLDER
@@ -244,7 +263,10 @@ const PhysicalPersonContactFormComponent = ({
                   disabled={disabled}
                   errorMessage={error?.message}
                   label={PHYSICAL_PERSON_CONTACT_FORM_COPY.CANTON_LABEL}
-                  onValueChange={onChange}
+                  onValueChange={(selected: string): void => {
+                    onChange(selected);
+                    onCantonChange?.(selected);
+                  }}
                   options={cantonOptions}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.CANTON_PLACEHOLDER
