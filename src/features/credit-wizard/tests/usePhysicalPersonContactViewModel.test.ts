@@ -127,5 +127,40 @@ describe('usePhysicalPersonContactViewModel', () => {
     // Assert
     expect(onSubmitMock).toHaveBeenCalledWith(validData);
   });
+
+  it('normalizes legacy flat draft with san_jose canton and missing commercialReference', async () => {
+    // Arrange & Act
+    const legacyDraft = {
+      canton: 'san_jose',
+      cellPhone: '+506 8888-8888',
+      district: 'Carmen',
+      email: 'legacy@byc.com',
+      exactAddress: 'Calle 1',
+      province: 'San José',
+    };
+
+    const page = PhysicalPersonContactViewModelPageObject.render({
+      defaultValues: legacyDraft,
+    });
+
+    // Assert - Canton was normalized from san_jose to central
+    expect(page.current.control._defaultValues.residentialAddress?.canton).toBe(
+      'central',
+    );
+    expect(
+      page.current.control._defaultValues.residentialAddress?.province,
+    ).toBe('San José');
+
+    // Assert - Missing commercialReference fields safely defaulted to empty strings
+    expect(
+      page.current.control._defaultValues.commercialReference?.companyReference,
+    ).toBe('');
+    expect(
+      page.current.control._defaultValues.commercialReference?.ibanAccount,
+    ).toBe('');
+    expect(
+      page.current.control._defaultValues.commercialReference?.referencePhone,
+    ).toBe('');
+  });
 });
 

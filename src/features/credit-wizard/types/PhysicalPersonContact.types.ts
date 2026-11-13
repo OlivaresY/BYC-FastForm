@@ -24,7 +24,7 @@ export type ResidentialAddress = z.infer<typeof ResidentialAddressSchema>;
 export type FinancialCurrency = FinancialCapacity['currency'];
 
 export interface UsePhysicalPersonContactViewModelProps {
-  defaultValues?: Partial<PhysicalPersonContact>;
+  defaultValues?: Partial<PhysicalPersonContact> | Record<string, unknown>;
   mode?: 'all' | 'onBlur' | 'onChange' | 'onSubmit' | 'onTouched';
   onSubmit?: (data: PhysicalPersonContact) => void | Promise<void>;
 }

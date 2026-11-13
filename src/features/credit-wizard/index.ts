@@ -183,3 +183,9 @@ export type {
 } from './types/LegalEntityContactForm.types';
 
 export type { LegalEntityContactStepViewProps } from './types/LegalEntityContactStepView.types';
+
+export {
+  normalizeCantonValue,
+  normalizeLegalEntityContactPayload,
+  normalizePhysicalPersonContactPayload,
+} from './utils';

@@ -138,4 +138,52 @@ describe('useLegalEntityContactViewModel', () => {
     // Assert
     expect(onSubmitMock).toHaveBeenCalledWith(validData);
   });
+
+  it('normalizes legacy flat draft with san_jose canton and flat income fields', async () => {
+    // Arrange & Act
+    const legacyDraft = {
+      accountingPhone: '+506 2200-1111',
+      canton: 'san_jose',
+      cellPhone: '+506 8888-9999',
+      constitutionDate: '15-05-2015',
+      district: 'Central',
+      economicSector: 'Automotriz',
+      email: 'corp@byc.com',
+      employeesCount: 20,
+      exactAddress: 'Avenida 1',
+      grossIncome: 45000000,
+      mainActivity: 'Comercio',
+      netIncome: 12000000,
+      officePhone: '+506 2200-0000',
+      province: 'San José',
+    };
+
+    const page = LegalEntityContactViewModelPageObject.render({
+      defaultValues: legacyDraft,
+    });
+
+    // Assert - Canton was normalized to central
+    expect(page.current.control._defaultValues.commercialAddress?.canton).toBe(
+      'central',
+    );
+    expect(page.current.control._defaultValues.commercialAddress?.province).toBe(
+      'San José',
+    );
+
+    // Assert - Flat income fields mapped to financialStatements
+    expect(
+      page.current.control._defaultValues.financialStatements?.grossSales,
+    ).toBe(45000000);
+    expect(
+      page.current.control._defaultValues.financialStatements?.netProfit,
+    ).toBe(12000000);
+
+    // Assert - Missing commercialReference fields safely defaulted to empty strings
+    expect(
+      page.current.control._defaultValues.commercialReference?.companyReference,
+    ).toBe('');
+    expect(
+      page.current.control._defaultValues.commercialReference?.ibanAccount,
+    ).toBe('');
+  });
 });

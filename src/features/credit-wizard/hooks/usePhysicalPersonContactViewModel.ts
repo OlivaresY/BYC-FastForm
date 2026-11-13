@@ -8,13 +8,13 @@ import {
   getDistrictOptions,
   getProvinceOptions,
 } from '../constants/CostaRicaLocations.constants';
-import { PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES } from '../constants/PhysicalPersonContact.constants';
 import { PhysicalPersonContactSchema } from '../schemas/PhysicalPersonContact.schema';
 import type {
   PhysicalPersonContact,
   UsePhysicalPersonContactViewModelProps,
   UsePhysicalPersonContactViewModelReturn,
 } from '../types/PhysicalPersonContact.types';
+import { normalizePhysicalPersonContactPayload } from '../utils/contactPayloadNormalizer';
 
 export const usePhysicalPersonContactViewModel = (
   props?: UsePhysicalPersonContactViewModelProps,
@@ -29,36 +29,18 @@ export const usePhysicalPersonContactViewModel = (
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const normalizedDefaultValues = useMemo(
+    () => normalizePhysicalPersonContactPayload(defaultValuesProp),
+    [defaultValuesProp],
+  );
+
   const {
     control,
     formState: { errors, isValid },
     handleSubmit,
     setValue,
   } = useForm<PhysicalPersonContact>({
-    defaultValues: {
-      ...PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES,
-      ...defaultValuesProp,
-      commercialReference: {
-        ...PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES.commercialReference,
-        ...defaultValuesProp?.commercialReference,
-      },
-      contactInfo: {
-        ...PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES.contactInfo,
-        ...defaultValuesProp?.contactInfo,
-      },
-      employmentData: {
-        ...PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES.employmentData,
-        ...defaultValuesProp?.employmentData,
-      },
-      financialCapacity: {
-        ...PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES.financialCapacity,
-        ...defaultValuesProp?.financialCapacity,
-      },
-      residentialAddress: {
-        ...PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES.residentialAddress,
-        ...defaultValuesProp?.residentialAddress,
-      },
-    },
+    defaultValues: normalizedDefaultValues,
     mode,
     resolver: zodResolver(
       PhysicalPersonContactSchema,

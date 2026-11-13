@@ -8,13 +8,13 @@ import {
   getDistrictOptions,
   getProvinceOptions,
 } from '../constants/CostaRicaLocations.constants';
-import { LEGAL_ENTITY_CONTACT_DEFAULT_VALUES } from '../constants/LegalEntityContact.constants';
 import { LegalEntityContactSchema } from '../schemas/LegalEntityContact.schema';
 import type {
   LegalEntityContact,
   UseLegalEntityContactViewModelProps,
   UseLegalEntityContactViewModelReturn,
 } from '../types/LegalEntityContact.types';
+import { normalizeLegalEntityContactPayload } from '../utils/contactPayloadNormalizer';
 
 export const useLegalEntityContactViewModel = (
   props?: UseLegalEntityContactViewModelProps,
@@ -29,36 +29,18 @@ export const useLegalEntityContactViewModel = (
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const normalizedDefaultValues = useMemo(
+    () => normalizeLegalEntityContactPayload(defaultValuesProp),
+    [defaultValuesProp],
+  );
+
   const {
     control,
     formState: { errors, isValid },
     handleSubmit,
     setValue,
   } = useForm<LegalEntityContact>({
-    defaultValues: {
-      ...LEGAL_ENTITY_CONTACT_DEFAULT_VALUES,
-      ...defaultValuesProp,
-      commercialActivity: {
-        ...LEGAL_ENTITY_CONTACT_DEFAULT_VALUES.commercialActivity,
-        ...defaultValuesProp?.commercialActivity,
-      },
-      commercialAddress: {
-        ...LEGAL_ENTITY_CONTACT_DEFAULT_VALUES.commercialAddress,
-        ...defaultValuesProp?.commercialAddress,
-      },
-      commercialReference: {
-        ...LEGAL_ENTITY_CONTACT_DEFAULT_VALUES.commercialReference,
-        ...defaultValuesProp?.commercialReference,
-      },
-      contactInfo: {
-        ...LEGAL_ENTITY_CONTACT_DEFAULT_VALUES.contactInfo,
-        ...defaultValuesProp?.contactInfo,
-      },
-      financialStatements: {
-        ...LEGAL_ENTITY_CONTACT_DEFAULT_VALUES.financialStatements,
-        ...defaultValuesProp?.financialStatements,
-      },
-    },
+    defaultValues: normalizedDefaultValues,
     mode,
     resolver: zodResolver(
       LegalEntityContactSchema,

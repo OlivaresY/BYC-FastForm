@@ -24,7 +24,7 @@ export type LegalEntityContact = z.infer<typeof LegalEntityContactSchema>;
 export type FinancialCurrency = FinancialStatements['currency'];
 
 export interface UseLegalEntityContactViewModelProps {
-  defaultValues?: Partial<LegalEntityContact>;
+  defaultValues?: Partial<LegalEntityContact> | Record<string, unknown>;
   mode?: 'all' | 'onBlur' | 'onChange' | 'onSubmit' | 'onTouched';
   onSubmit?: (data: LegalEntityContact) => void | Promise<void>;
 }
