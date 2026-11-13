@@ -1,3 +1,4 @@
+import { useTranslation } from '@/shared/i18n';
 import {
   BanknoteIcon,
   BuildingIcon,
@@ -6,6 +7,7 @@ import {
   IdCardIcon,
   MapPinIcon,
   SectionHeader,
+  type CustomSelectOption,
 } from '@/shared/ui';
 import {
   formatCurrencyDisplay,
@@ -109,7 +111,22 @@ const PhysicalPersonContactFormComponent = ({
   const districtOptions =
     options?.districtOptions ??
     getDistrictOptions(selectedProvince, selectedCanton);
-  const currencyOptions = options?.currencyOptions ?? CURRENCY_OPTIONS;
+  const { t } = useTranslation();
+
+  const currencyOptions = React.useMemo<readonly CustomSelectOption[]>(() => {
+    if (options?.currencyOptions) {
+      return options.currencyOptions;
+    }
+    return CURRENCY_OPTIONS.map((opt) => ({
+      label:
+        opt.value in t.common.catalogs.currencies
+          ? t.common.catalogs.currencies[
+              opt.value as keyof typeof t.common.catalogs.currencies
+            ]
+          : opt.label,
+      value: opt.value,
+    }));
+  }, [options?.currencyOptions, t]);
 
   return (
     <View

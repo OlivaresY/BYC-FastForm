@@ -1,3 +1,4 @@
+import { useTranslation } from '@/shared/i18n';
 import {
   BanknoteIcon,
   BuildingIcon,
@@ -6,6 +7,7 @@ import {
   MapPinIcon,
   PhoneIcon,
   SectionHeader,
+  type CustomSelectOption,
 } from '@/shared/ui';
 import {
   formatCurrencyDisplay,
@@ -20,9 +22,9 @@ import {
   LEGAL_ENTITY_CONTACT_FORM_COPY,
   LEGAL_ENTITY_CONTACT_FORM_ICON_DIMENSIONS,
   LEGAL_ENTITY_CONTACT_FORM_NUMERICAL,
-  LEGAL_ENTITY_CONTACT_FORM_OPTIONS,
   LEGAL_ENTITY_CONTACT_FORM_STYLES,
   LEGAL_ENTITY_CONTACT_FORM_TEST_IDS,
+  RAW_ECONOMIC_SECTOR_OPTIONS,
 } from '../constants/LegalEntityContactForm.constants';
 import {
   getCantonOptions,
@@ -91,9 +93,19 @@ const LegalEntityContactFormComponent = ({
   options,
   testID,
 }: LegalEntityContactFormProps): React.JSX.Element => {
-  const economicSectorOptions =
-    options?.economicSectorOptions ??
-    LEGAL_ENTITY_CONTACT_FORM_OPTIONS.ECONOMIC_SECTOR;
+  const { t } = useTranslation();
+
+  const economicSectorOptions = React.useMemo<
+    readonly CustomSelectOption[]
+  >(() => {
+    if (options?.economicSectorOptions) {
+      return options.economicSectorOptions;
+    }
+    return RAW_ECONOMIC_SECTOR_OPTIONS.map((opt) => ({
+      label: t.common.catalogs.economicSectors[opt.key],
+      value: opt.value,
+    }));
+  }, [options?.economicSectorOptions, t]);
 
   const selectedProvince = useWatch({
     control,
@@ -109,7 +121,21 @@ const LegalEntityContactFormComponent = ({
   const districtOptions =
     options?.districtOptions ??
     getDistrictOptions(selectedProvince, selectedCanton);
-  const currencyOptions = options?.currencyOptions ?? CURRENCY_OPTIONS;
+
+  const currencyOptions = React.useMemo<readonly CustomSelectOption[]>(() => {
+    if (options?.currencyOptions) {
+      return options.currencyOptions;
+    }
+    return CURRENCY_OPTIONS.map((opt) => ({
+      label:
+        opt.value in t.common.catalogs.currencies
+          ? t.common.catalogs.currencies[
+              opt.value as keyof typeof t.common.catalogs.currencies
+            ]
+          : opt.label,
+      value: opt.value,
+    }));
+  }, [options?.currencyOptions, t]);
 
   return (
     <View

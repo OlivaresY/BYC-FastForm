@@ -36,4 +36,17 @@ describe('useTranslation', () => {
       'El sector económico es obligatorio.',
     );
   });
+
+  it('contains centralized catalog translations for currencies and economic sectors', () => {
+    const { t } = useTranslation();
+    const catalogs = t.common.catalogs;
+
+    expect(catalogs.currencies.CRC).toBe('Colones (₡)');
+    expect(catalogs.currencies.USD).toBe('Dólares ($)');
+    expect(catalogs.economicSectors.commerce).toBe('Comercio');
+    expect(catalogs.economicSectors.services).toBe('Servicios');
+    expect(catalogs.economicSectors.agriculture).toBe(
+      'Agricultura y Ganadería',
+    );
+  });
 });

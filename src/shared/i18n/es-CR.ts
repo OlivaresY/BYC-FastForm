@@ -12,6 +12,23 @@ export const esCR = {
       saveData: 'Guardar Datos',
       saveDraft: 'Guardar Borrador',
     },
+    catalogs: {
+      currencies: {
+        CRC: 'Colones (₡)',
+        USD: 'Dólares ($)',
+      },
+      economicSectors: {
+        agriculture: 'Agricultura y Ganadería',
+        commerce: 'Comercio',
+        construction: 'Construcción',
+        industry: 'Industria y Manufactura',
+        other: 'Otro',
+        services: 'Servicios',
+        technology: 'Tecnología y Telecomunicaciones',
+        tourism: 'Turismo y Hospitalidad',
+        transport: 'Transporte y Logística',
+      },
+    },
     placeholders: {
       select: 'Seleccionar...',
     },

@@ -73,21 +73,46 @@ export const LEGAL_ENTITY_CONTACT_FORM_NUMERICAL = {
   MAX_LENGTH_PHONE: 20,
 } as const;
 
+export const ECONOMIC_SECTOR_KEYS = {
+  AGRICULTURE: 'agriculture',
+  COMMERCE: 'commerce',
+  CONSTRUCTION: 'construction',
+  INDUSTRY: 'industry',
+  OTHER: 'other',
+  SERVICES: 'services',
+  TECHNOLOGY: 'technology',
+  TOURISM: 'tourism',
+  TRANSPORT: 'transport',
+} as const;
+
+export type EconomicSectorKey =
+  (typeof ECONOMIC_SECTOR_KEYS)[keyof typeof ECONOMIC_SECTOR_KEYS];
+
+export interface RawEconomicSectorOption {
+  key: EconomicSectorKey;
+  value: string;
+}
+
+export const RAW_ECONOMIC_SECTOR_OPTIONS: readonly RawEconomicSectorOption[] = [
+  { key: ECONOMIC_SECTOR_KEYS.AGRICULTURE, value: 'Agricultura y Ganadería' },
+  { key: ECONOMIC_SECTOR_KEYS.COMMERCE, value: 'Comercio' },
+  { key: ECONOMIC_SECTOR_KEYS.CONSTRUCTION, value: 'Construcción' },
+  { key: ECONOMIC_SECTOR_KEYS.INDUSTRY, value: 'Industria y Manufactura' },
+  { key: ECONOMIC_SECTOR_KEYS.SERVICES, value: 'Servicios' },
+  {
+    key: ECONOMIC_SECTOR_KEYS.TECHNOLOGY,
+    value: 'Tecnología y Telecomunicaciones',
+  },
+  { key: ECONOMIC_SECTOR_KEYS.TRANSPORT, value: 'Transporte y Logística' },
+  { key: ECONOMIC_SECTOR_KEYS.TOURISM, value: 'Turismo y Hospitalidad' },
+  { key: ECONOMIC_SECTOR_KEYS.OTHER, value: 'Otro' },
+] as const;
+
 export const LEGAL_ENTITY_CONTACT_FORM_OPTIONS = {
-  ECONOMIC_SECTOR: [
-    { label: 'Agricultura y Ganadería', value: 'Agricultura y Ganadería' },
-    { label: 'Comercio', value: 'Comercio' },
-    { label: 'Construcción', value: 'Construcción' },
-    { label: 'Industria y Manufactura', value: 'Industria y Manufactura' },
-    { label: 'Servicios', value: 'Servicios' },
-    {
-      label: 'Tecnología y Telecomunicaciones',
-      value: 'Tecnología y Telecomunicaciones',
-    },
-    { label: 'Transporte y Logística', value: 'Transporte y Logística' },
-    { label: 'Turismo y Hospitalidad', value: 'Turismo y Hospitalidad' },
-    { label: 'Otro', value: 'Otro' },
-  ] as const satisfies readonly CustomSelectOption[],
+  ECONOMIC_SECTOR: RAW_ECONOMIC_SECTOR_OPTIONS.map((opt) => ({
+    label: esCR.common.catalogs.economicSectors[opt.key],
+    value: opt.value,
+  })) as readonly CustomSelectOption[],
 } as const;
 
 export const LEGAL_ENTITY_CONTACT_FORM_STYLES = {
