@@ -64,19 +64,22 @@ export const PhysicalPersonContactStepView = ({
       title={stepCopy.title}
       totalSteps={totalSteps}
     >
-      <PhysicalPersonContactForm
-        control={control}
-        disabled={disabled || isSubmitting}
-        onCantonChange={handleCantonChange}
-        onProvinceChange={handleProvinceChange}
-        options={{
-          ...options,
-          cantonOptions: options?.cantonOptions ?? cantonOptions,
-          districtOptions: options?.districtOptions ?? districtOptions,
-          provinceOptions: options?.provinceOptions ?? provinceOptions,
-        }}
-        testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.FORM}
-      />
+      {({ onInputFocus }): React.JSX.Element => (
+        <PhysicalPersonContactForm
+          control={control}
+          disabled={disabled || isSubmitting}
+          onCantonChange={handleCantonChange}
+          onInputFocus={onInputFocus}
+          onProvinceChange={handleProvinceChange}
+          options={{
+            ...options,
+            cantonOptions: options?.cantonOptions ?? cantonOptions,
+            districtOptions: options?.districtOptions ?? districtOptions,
+            provinceOptions: options?.provinceOptions ?? provinceOptions,
+          }}
+          testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.FORM}
+        />
+      )}
     </WizardStepLayout>
   );
 };

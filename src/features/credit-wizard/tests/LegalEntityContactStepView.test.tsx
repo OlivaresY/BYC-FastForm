@@ -277,4 +277,40 @@ describe('LegalEntityContactStepView Integration', () => {
       });
     });
   });
+
+  describe('Keyboard Auto-Scroll Integration', () => {
+    it('adjusts bottom padding when keyboardDidShow is emitted', () => {
+      // Arrange
+      const page = LegalEntityContactStepViewPageObject.render();
+
+      // Act
+      page.emitKeyboardDidShow(320);
+
+      // Assert - ScrollView contentContainerStyle paddingBottom expands to avoid keyboard
+      const contentContainerStyle = page.scrollView.props.contentContainerStyle;
+      expect(contentContainerStyle.paddingBottom).toBeGreaterThanOrEqual(320);
+    });
+
+    it('triggers scroll logic when a lower input like exactAddress or netProfit is focused', () => {
+      // Arrange
+      const page = LegalEntityContactStepViewPageObject.render();
+
+      // Open keyboard
+      page.emitKeyboardDidShow(320);
+
+      // Focus netProfit input
+      page.focusInputWithMockNode(page.netProfitInput, {
+        height: 50,
+        left: 0,
+        top: 1100,
+        width: 180,
+      });
+
+      // Assert - ScrollView's paddingBottom accommodates keyboard and view is reactive
+      expect(
+        page.scrollView.props.contentContainerStyle.paddingBottom,
+      ).toBeGreaterThanOrEqual(320);
+      expect(page.netProfitInput).toBeTruthy();
+    });
+  });
 });

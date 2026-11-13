@@ -389,6 +389,7 @@ const LegalEntityContactFormComponent = ({
               label={LEGAL_ENTITY_CONTACT_FORM_COPY.MAIN_ACTIVITY_LABEL}
               onBlur={onBlur}
               onChangeText={onChange}
+              onFocus={onInputFocus}
               placeholder={
                 LEGAL_ENTITY_CONTACT_FORM_COPY.MAIN_ACTIVITY_PLACEHOLDER
               }
@@ -484,6 +485,7 @@ const LegalEntityContactFormComponent = ({
               maxLength={LEGAL_ENTITY_CONTACT_FORM_NUMERICAL.MAX_LENGTH_PHONE}
               onBlur={onBlur}
               onChangeText={onChange}
+              onFocus={onInputFocus}
               placeholder={
                 LEGAL_ENTITY_CONTACT_FORM_COPY.ACCOUNTING_PHONE_PLACEHOLDER
               }

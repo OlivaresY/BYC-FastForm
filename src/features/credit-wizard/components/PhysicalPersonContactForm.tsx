@@ -144,6 +144,7 @@ const PhysicalPersonContactFormComponent = ({
               leftIcon='mail'
               onBlur={onBlur}
               onChangeText={onChange}
+              onFocus={onInputFocus}
               placeholder={PHYSICAL_PERSON_CONTACT_FORM_COPY.EMAIL_PLACEHOLDER}
               required
               testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.EMAIL_INPUT}
@@ -170,6 +171,7 @@ const PhysicalPersonContactFormComponent = ({
                   leftIcon='smartphone'
                   onBlur={onBlur}
                   onChangeText={onChange}
+                  onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.CELL_PHONE_PLACEHOLDER
                   }
@@ -199,6 +201,7 @@ const PhysicalPersonContactFormComponent = ({
                   leftIcon='phone-call'
                   onBlur={onBlur}
                   onChangeText={onChange}
+                  onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.HOME_PHONE_PLACEHOLDER
                   }
@@ -323,6 +326,7 @@ const PhysicalPersonContactFormComponent = ({
               }
               onBlur={onBlur}
               onChangeText={onChange}
+              onFocus={onInputFocus}
               placeholder={
                 PHYSICAL_PERSON_CONTACT_FORM_COPY.EXACT_ADDRESS_PLACEHOLDER
               }
@@ -444,6 +448,7 @@ const PhysicalPersonContactFormComponent = ({
                     const maskedDate = formatDateDisplay(text);
                     onChange(maskedDate);
                   }}
+                  onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.ENTRY_DATE_PLACEHOLDER
                   }
@@ -473,6 +478,7 @@ const PhysicalPersonContactFormComponent = ({
                   leftIcon='phone-call'
                   onBlur={onBlur}
                   onChangeText={onChange}
+                  onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.OFFICE_PHONE_PLACEHOLDER
                   }
@@ -550,6 +556,7 @@ const PhysicalPersonContactFormComponent = ({
                       const digits = sanitizeNumericDigits(text);
                       onChange(digits === '' ? undefined : Number(digits));
                     }}
+                    onFocus={onInputFocus}
                     placeholder={
                       PHYSICAL_PERSON_CONTACT_FORM_COPY.GROSS_INCOME_PLACEHOLDER
                     }
@@ -592,6 +599,7 @@ const PhysicalPersonContactFormComponent = ({
                       const digits = sanitizeNumericDigits(text);
                       onChange(digits === '' ? undefined : Number(digits));
                     }}
+                    onFocus={onInputFocus}
                     placeholder={
                       PHYSICAL_PERSON_CONTACT_FORM_COPY.NET_INCOME_PLACEHOLDER
                     }
@@ -647,6 +655,7 @@ const PhysicalPersonContactFormComponent = ({
                   const digits = sanitizeNumericDigits(text);
                   onChange(digits === '' ? undefined : Number(digits));
                 }}
+                onFocus={onInputFocus}
                 placeholder={
                   PHYSICAL_PERSON_CONTACT_FORM_COPY.OTHER_INCOMES_PLACEHOLDER
                 }

@@ -61,14 +61,17 @@ export const LegalEntityContactStepView = ({
       title={stepCopy.title}
       totalSteps={totalSteps}
     >
-      <LegalEntityContactForm
-        control={control}
-        disabled={disabled || isSubmitting}
-        onCantonChange={handleCantonChange}
-        onProvinceChange={handleProvinceChange}
-        options={{ cantonOptions, districtOptions, provinceOptions }}
-        testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.FORM}
-      />
+      {({ onInputFocus }): React.JSX.Element => (
+        <LegalEntityContactForm
+          control={control}
+          disabled={disabled || isSubmitting}
+          onCantonChange={handleCantonChange}
+          onInputFocus={onInputFocus}
+          onProvinceChange={handleProvinceChange}
+          options={{ cantonOptions, districtOptions, provinceOptions }}
+          testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.FORM}
+        />
+      )}
     </WizardStepLayout>
   );
 };

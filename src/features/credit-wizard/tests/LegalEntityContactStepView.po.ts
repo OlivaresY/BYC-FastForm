@@ -1,10 +1,12 @@
 import React from 'react';
 import {
+  act,
   fireEvent,
   render,
   screen,
   waitFor,
 } from '@testing-library/react-native';
+import { Keyboard } from 'react-native';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import type { ReactTestInstance } from 'react-test-renderer';
 import {
@@ -21,6 +23,18 @@ import type {
   UseLegalEntityContactViewModelReturn,
 } from '../types/LegalEntityContact.types';
 import type { LegalEntityContactStepViewProps } from '../types/LegalEntityContactStepView.types';
+
+type MockKeyboardWithEmitter = typeof Keyboard & {
+  _emitter: { emit: (event: string, ...args: unknown[]) => void };
+  emit: (event: string, ...args: unknown[]) => void;
+};
+
+const mockKeyboard = Keyboard as unknown as MockKeyboardWithEmitter;
+
+if (!mockKeyboard.emit) {
+  mockKeyboard.emit = (event: string, ...args: unknown[]) =>
+    mockKeyboard._emitter.emit(event, ...args);
+}
 
 export interface LegalEntityContactStepViewTestContainerProps extends UseLegalEntityContactViewModelProps {
   currentStep?: number;
@@ -714,6 +728,62 @@ export class LegalEntityContactStepViewPageObject {
     await waitFor(callback, {
       interval: options?.interval ?? 50,
       timeout: options?.timeout ?? 10000,
+    });
+    return this;
+  }
+
+  public emitKeyboardDidShow(height = 320): this {
+    act(() => {
+      mockKeyboard.emit('keyboardDidShow', {
+        endCoordinates: { height, screenX: 0, screenY: 500, width: 390 },
+      });
+    });
+    return this;
+  }
+
+  public emitKeyboardDidHide(): this {
+    act(() => {
+      mockKeyboard.emit('keyboardDidHide');
+    });
+    return this;
+  }
+
+  public focusInputWithMockNode(
+    input: ReactTestInstance,
+    nodeMetrics?: {
+      height?: number;
+      left?: number;
+      top?: number;
+      width?: number;
+    },
+  ): this {
+    const mockCallback = (
+      onSuccess: (
+        left: number,
+        top: number,
+        width: number,
+        height: number,
+      ) => void,
+    ) => {
+      onSuccess(
+        nodeMetrics?.left ?? 0,
+        nodeMetrics?.top ?? 1100,
+        nodeMetrics?.width ?? 180,
+        nodeMetrics?.height ?? 50,
+      );
+    };
+
+    act(() => {
+      fireEvent(input, 'focus', {
+        nativeEvent: {
+          target: {
+            measureInWindow: jest.fn(mockCallback),
+            measureLayout: jest.fn((_relativeTo: unknown, onSuccess: any) =>
+              mockCallback(onSuccess),
+            ),
+          },
+        },
+      });
     });
     return this;
   }
