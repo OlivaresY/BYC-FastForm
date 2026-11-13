@@ -192,7 +192,7 @@ describe('PhysicalPersonContactSchema custom error messages', () => {
       }
     });
 
-    it('rejects ibanAccount with wrong country code or incorrect digit length', () => {
+    it('rejects ibanAccount with wrong country code, incorrect digit length, or invalid checksum', () => {
       // Act - Wrong prefix
       const wrongPrefixResult = CommercialReferenceSchema.safeParse({
         ...validCommercialReference,
@@ -203,6 +203,12 @@ describe('PhysicalPersonContactSchema custom error messages', () => {
       const wrongLengthResult = CommercialReferenceSchema.safeParse({
         ...validCommercialReference,
         ibanAccount: 'CR0501520200102628406',
+      });
+
+      // Act - Invalid checksum (Mod 97-10 failure)
+      const invalidChecksumResult = CommercialReferenceSchema.safeParse({
+        ...validCommercialReference,
+        ibanAccount: 'CR05015202001026284067',
       });
 
       // Assert
@@ -220,6 +226,17 @@ describe('PhysicalPersonContactSchema custom error messages', () => {
       expect(wrongLengthResult.success).toBe(false);
       if (!wrongLengthResult.success) {
         const errorMessages = wrongLengthResult.error.issues
+          .filter((issue) => issue.path[0] === 'ibanAccount')
+          .map((issue) => issue.message);
+        expect(errorMessages).toContain(
+          PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+            .IBAN_ACCOUNT_INVALID,
+        );
+      }
+
+      expect(invalidChecksumResult.success).toBe(false);
+      if (!invalidChecksumResult.success) {
+        const errorMessages = invalidChecksumResult.error.issues
           .filter((issue) => issue.path[0] === 'ibanAccount')
           .map((issue) => issue.message);
         expect(errorMessages).toContain(

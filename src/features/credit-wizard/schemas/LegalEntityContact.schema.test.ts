@@ -313,10 +313,7 @@ describe('LegalEntityContactSchema', () => {
         LegalEntityContactSchema.safeParse(invalidCalendarDate);
       expect(resultCalendar.success).toBe(false);
       expect(
-        getMessages(resultCalendar, [
-          'commercialActivity',
-          'constitutionDate',
-        ]),
+        getMessages(resultCalendar, ['commercialActivity', 'constitutionDate']),
       ).toEqual([
         LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
           .CONSTITUTION_DATE_INVALID,
@@ -441,6 +438,28 @@ describe('LegalEntityContactSchema', () => {
       ]);
     });
 
+    it('returns IBAN_ACCOUNT_INVALID when IBAN fails ISO 7064 Mod 97-10 checksum', () => {
+      // Arrange
+      const data = {
+        ...createValidLegalEntity(),
+        commercialReference: {
+          ...createValidLegalEntity().commercialReference,
+          ibanAccount: 'CR05015202001026284067',
+        },
+      };
+
+      // Act
+      const result = LegalEntityContactSchema.safeParse(data);
+
+      // Assert
+      expect(result.success).toBe(false);
+      expect(
+        getMessages(result, ['commercialReference', 'ibanAccount']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_REFERENCE.IBAN_ACCOUNT_INVALID,
+      ]);
+    });
+
     it('returns COMPANY_REFERENCE_MIN when company reference is shorter than 2 chars', () => {
       // Arrange
       const data = {
@@ -502,11 +521,9 @@ describe('LegalEntityContactSchema', () => {
 
       // Assert
       expect(result.success).toBe(false);
-      expect(
-        getMessages(result, ['financialStatements', 'netProfit']),
-      ).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS.NET_PROFIT_POSITIVE,
-      ]);
+      expect(getMessages(result, ['financialStatements', 'netProfit'])).toEqual(
+        [LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS.NET_PROFIT_POSITIVE],
+      );
     });
 
     it('returns OTHER_INCOMES_MIN when other incomes is negative', () => {
@@ -570,12 +587,12 @@ describe('LegalEntityContactSchema', () => {
 
       // Assert
       expect(result.success).toBe(false);
-      expect(
-        getMessages(result, ['financialStatements', 'netProfit']),
-      ).toEqual([
-        LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS
-          .NET_PROFIT_EXCEEDS_GROSS,
-      ]);
+      expect(getMessages(result, ['financialStatements', 'netProfit'])).toEqual(
+        [
+          LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS
+            .NET_PROFIT_EXCEEDS_GROSS,
+        ],
+      );
     });
 
     it('does not trigger NET_PROFIT_EXCEEDS_GROSS if incomes are invalid types', () => {

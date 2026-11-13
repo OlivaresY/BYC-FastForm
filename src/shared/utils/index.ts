@@ -15,3 +15,4 @@ export {
   formatDateDisplay,
   sanitizeNumericDigits,
 } from './formatters.utils';
+export { CR_IBAN_REGEX, isValidCostaRicaIban } from './iban.utils';

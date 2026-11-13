@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { isNotFutureDateDDMMYYYY, isValidDateDDMMYYYY } from '@/shared/utils';
+import {
+  isNotFutureDateDDMMYYYY,
+  isValidCostaRicaIban,
+  isValidDateDDMMYYYY,
+} from '@/shared/utils';
 import {
   isValidCantonForProvince,
   isValidLocationHierarchy,
@@ -47,8 +51,8 @@ export const CommercialReferenceSchema = z.object({
         PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
           .IBAN_ACCOUNT_REQUIRED,
     })
-    .regex(
-      PHYSICAL_PERSON_CONTACT_PATTERNS.CR_IBAN,
+    .refine(
+      isValidCostaRicaIban,
       PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE.IBAN_ACCOUNT_INVALID,
     ),
   referencePhone: z
