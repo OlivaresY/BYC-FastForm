@@ -1,7 +1,7 @@
 import type React from 'react';
 
 export interface WizardStepLayoutChildrenProps {
-  onInputFocus: () => void;
+  onInputFocus: (eventOrNode?: unknown) => void;
 }
 
 export interface WizardStepLayoutTestIds {

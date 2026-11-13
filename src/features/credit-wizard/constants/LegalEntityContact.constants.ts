@@ -1,23 +1,46 @@
 import { DATE_DD_MM_YYYY, INTERNATIONAL_PHONE_REGEX } from '@/shared/utils';
+import { FINANCIAL_CURRENCIES } from './SharedCatalogs.constants';
 import { WIZARD_COPY } from './WizardCopy.constants';
 
+export { FINANCIAL_CURRENCIES };
+
 export const LEGAL_ENTITY_CONTACT_DEFAULT_VALUES = {
-  constitutionDate: '',
-  corporateId: '',
-  corporateName: '',
-  email: '',
-  grossIncome: undefined,
-  netIncome: undefined,
-  phone: '',
-  representativeId: '',
-  representativeName: '',
+  commercialActivity: {
+    accountingPhone: '',
+    constitutionDate: '',
+    economicSector: '',
+    employeesCount: undefined,
+    mainActivity: '',
+  },
+  commercialAddress: {
+    canton: '',
+    district: '',
+    exactAddress: '',
+    province: '',
+  },
+  commercialReference: {
+    companyReference: '',
+    ibanAccount: '',
+    referencePhone: '',
+  },
+  contactInfo: {
+    cellPhone: '',
+    email: '',
+    officePhone: '',
+  },
+  financialStatements: {
+    currency: FINANCIAL_CURRENCIES.CRC,
+    grossSales: undefined,
+    netProfit: undefined,
+    otherIncomes: undefined,
+  },
 } as const;
 
 export const LEGAL_ENTITY_CONTACT_ERRORS =
   WIZARD_COPY.STEP_2_LEGAL_CONTACT.ERRORS;
 
 export const LEGAL_ENTITY_CONTACT_PATTERNS = {
-  CORPORATE_ID: /^3-?\d{3}-?\d{6}$/,
+  CR_IBAN: /^CR\d{20}$/,
   DATE_DD_MM_YYYY,
-  PHONE: INTERNATIONAL_PHONE_REGEX,
+  INTERNATIONAL_PHONE: INTERNATIONAL_PHONE_REGEX,
 } as const;

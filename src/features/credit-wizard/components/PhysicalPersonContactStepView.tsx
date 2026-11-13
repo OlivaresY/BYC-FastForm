@@ -1,6 +1,6 @@
+import { useTranslation } from '@/shared/i18n';
 import React from 'react';
 import { PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS } from '../constants/PhysicalPersonContactStepView.constants';
-import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import { usePhysicalPersonContactViewModel } from '../hooks/usePhysicalPersonContactViewModel';
 import type { PhysicalPersonContactStepViewProps } from '../types/PhysicalPersonContactStepView.types';
 import { PhysicalPersonContactForm } from './PhysicalPersonContactForm';
@@ -16,15 +16,27 @@ export const PhysicalPersonContactStepView = ({
   totalSteps,
   viewModel: viewModelProp,
 }: PhysicalPersonContactStepViewProps): React.JSX.Element => {
+  const { t } = useTranslation();
+  const stepCopy = t.creditWizard.step2PhysicalContact;
   const defaultViewModel = usePhysicalPersonContactViewModel({ onSubmit });
   const viewModel = viewModelProp ?? defaultViewModel;
-  const { control, handleNextStep, isSubmitting, isValid, submitError } =
-    viewModel;
+  const {
+    cantonOptions,
+    control,
+    districtOptions,
+    handleCantonChange,
+    handleNextStep,
+    handleProvinceChange,
+    isSubmitting,
+    isValid,
+    provinceOptions,
+    submitError,
+  } = viewModel;
 
   return (
     <WizardStepLayout
       currentStep={currentStep}
-      description={WIZARD_COPY.STEP_2_PHYSICAL_CONTACT.DESCRIPTION}
+      description={stepCopy.description}
       disabled={disabled}
       isSubmitDisabled={!isValid}
       isSubmitting={isSubmitting}
@@ -33,7 +45,7 @@ export const PhysicalPersonContactStepView = ({
       onNext={(): void => {
         void handleNextStep();
       }}
-      submitButtonLabel={WIZARD_COPY.BUTTONS.NEXT}
+      submitButtonLabel={t.common.buttons.next}
       submitError={submitError}
       testID={testID}
       testIds={{
@@ -49,15 +61,25 @@ export const PhysicalPersonContactStepView = ({
         title: PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.TITLE,
         wizardHeader: PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.WIZARD_HEADER,
       }}
-      title={WIZARD_COPY.STEP_2_PHYSICAL_CONTACT.TITLE}
+      title={stepCopy.title}
       totalSteps={totalSteps}
     >
-      <PhysicalPersonContactForm
-        control={control}
-        disabled={disabled || isSubmitting}
-        options={options}
-        testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.FORM}
-      />
+      {({ onInputFocus }): React.JSX.Element => (
+        <PhysicalPersonContactForm
+          control={control}
+          disabled={disabled || isSubmitting}
+          onCantonChange={handleCantonChange}
+          onInputFocus={onInputFocus}
+          onProvinceChange={handleProvinceChange}
+          options={{
+            ...options,
+            cantonOptions: options?.cantonOptions ?? cantonOptions,
+            districtOptions: options?.districtOptions ?? districtOptions,
+            provinceOptions: options?.provinceOptions ?? provinceOptions,
+          }}
+          testID={PHYSICAL_PERSON_CONTACT_STEP_VIEW_TEST_IDS.FORM}
+        />
+      )}
     </WizardStepLayout>
   );
 };

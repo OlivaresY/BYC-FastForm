@@ -4,24 +4,42 @@ import type {
   UseFormHandleSubmit,
 } from 'react-hook-form';
 import type { z } from 'zod';
-import type { LegalEntityContactSchema } from '../schemas/LegalEntityContact.schema';
+import type { CustomSelectOption } from '@/shared/ui';
+import type {
+  CommercialActivitySchema,
+  CommercialAddressSchema,
+  CommercialReferenceSchema,
+  ContactInfoSchema,
+  FinancialStatementsSchema,
+  LegalEntityContactSchema,
+} from '../schemas/LegalEntityContact.schema';
 
+export type CommercialActivity = z.infer<typeof CommercialActivitySchema>;
+export type CommercialAddress = z.infer<typeof CommercialAddressSchema>;
+export type CommercialReference = z.infer<typeof CommercialReferenceSchema>;
+export type ContactInfo = z.infer<typeof ContactInfoSchema>;
+export type FinancialStatements = z.infer<typeof FinancialStatementsSchema>;
 export type LegalEntityContact = z.infer<typeof LegalEntityContactSchema>;
 
-export type LegalEntityContactField = keyof LegalEntityContact;
+export type FinancialCurrency = FinancialStatements['currency'];
 
 export interface UseLegalEntityContactViewModelProps {
-  defaultValues?: Partial<LegalEntityContact>;
+  defaultValues?: Partial<LegalEntityContact> | Record<string, unknown>;
   mode?: 'all' | 'onBlur' | 'onChange' | 'onSubmit' | 'onTouched';
   onSubmit?: (data: LegalEntityContact) => void | Promise<void>;
 }
 
 export interface UseLegalEntityContactViewModelReturn {
+  cantonOptions: readonly CustomSelectOption[];
   control: Control<LegalEntityContact>;
+  districtOptions: readonly CustomSelectOption[];
   errors: FieldErrors<LegalEntityContact>;
+  handleCantonChange: (canton: string) => void;
   handleNextStep: (dataOrEvent?: unknown) => Promise<void> | void;
+  handleProvinceChange: (province: string) => void;
   handleSubmit: UseFormHandleSubmit<LegalEntityContact>;
   isSubmitting: boolean;
   isValid: boolean;
+  provinceOptions: readonly CustomSelectOption[];
   submitError: string | null;
 }

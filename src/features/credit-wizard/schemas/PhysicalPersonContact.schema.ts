@@ -1,5 +1,13 @@
 import { z } from 'zod';
-import { isNotFutureDateDDMMYYYY, isValidDateDDMMYYYY } from '@/shared/utils';
+import {
+  isNotFutureDateDDMMYYYY,
+  isValidCostaRicaIban,
+  isValidDateDDMMYYYY,
+} from '@/shared/utils';
+import {
+  isValidCantonForProvince,
+  isValidLocationHierarchy,
+} from '../constants/CostaRicaLocations.constants';
 import {
   EMPLOYMENT_STATUSES,
   FINANCIAL_CURRENCIES,
@@ -12,6 +20,59 @@ const PHYSICAL_PERSON_CONTACT_ERRORS =
 
 export const INTERNATIONAL_PHONE_REGEX =
   PHYSICAL_PERSON_CONTACT_PATTERNS.INTERNATIONAL_PHONE;
+
+export const CommercialReferenceSchema = z.object({
+  companyReference: z
+    .string({
+      error:
+        PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+          .COMPANY_REFERENCE_REQUIRED,
+    })
+    .trim()
+    .min(1, {
+      message:
+        PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+          .COMPANY_REFERENCE_REQUIRED,
+    })
+    .min(2, {
+      message:
+        PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+          .COMPANY_REFERENCE_MIN,
+    }),
+  ibanAccount: z
+    .string({
+      error:
+        PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+          .IBAN_ACCOUNT_REQUIRED,
+    })
+    .trim()
+    .min(1, {
+      message:
+        PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+          .IBAN_ACCOUNT_REQUIRED,
+    })
+    .refine(
+      isValidCostaRicaIban,
+      PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE.IBAN_ACCOUNT_INVALID,
+    ),
+  referencePhone: z
+    .string({
+      error:
+        PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+          .REFERENCE_PHONE_REQUIRED,
+    })
+    .trim()
+    .min(1, {
+      message:
+        PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+          .REFERENCE_PHONE_REQUIRED,
+    })
+    .regex(
+      INTERNATIONAL_PHONE_REGEX,
+      PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+        .REFERENCE_PHONE_INVALID,
+    ),
+});
 
 export const ContactInfoSchema = z.object({
   cellPhone: z
@@ -48,49 +109,74 @@ export const ContactInfoSchema = z.object({
     }),
 });
 
-export const ResidentialAddressSchema = z.object({
-  canton: z
-    .string({
-      error: PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.CANTON_REQUIRED,
-    })
-    .trim()
-    .min(1, {
-      message:
-        PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.CANTON_REQUIRED,
-    }),
-  district: z
-    .string({
-      error:
-        PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.DISTRICT_REQUIRED,
-    })
-    .trim()
-    .min(1, {
-      message:
-        PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.DISTRICT_REQUIRED,
-    }),
-  exactAddress: z
-    .string({
-      error:
-        PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS
-          .EXACT_ADDRESS_REQUIRED,
-    })
-    .trim()
-    .min(1, {
-      message:
-        PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS
-          .EXACT_ADDRESS_REQUIRED,
-    }),
-  province: z
-    .string({
-      error:
-        PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.PROVINCE_REQUIRED,
-    })
-    .trim()
-    .min(1, {
-      message:
-        PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.PROVINCE_REQUIRED,
-    }),
-});
+export const ResidentialAddressSchema = z
+  .object({
+    canton: z
+      .string({
+        error:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.CANTON_REQUIRED,
+      })
+      .trim()
+      .min(1, {
+        message:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.CANTON_REQUIRED,
+      }),
+    district: z
+      .string({
+        error:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.DISTRICT_REQUIRED,
+      })
+      .trim()
+      .min(1, {
+        message:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.DISTRICT_REQUIRED,
+      }),
+    exactAddress: z
+      .string({
+        error:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS
+            .EXACT_ADDRESS_REQUIRED,
+      })
+      .trim()
+      .min(1, {
+        message:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS
+            .EXACT_ADDRESS_REQUIRED,
+      }),
+    province: z
+      .string({
+        error:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.PROVINCE_REQUIRED,
+      })
+      .trim()
+      .min(1, {
+        message:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.PROVINCE_REQUIRED,
+      }),
+  })
+  .superRefine((address, ctx) => {
+    const { canton, district, province } = address;
+    if (!province || !canton) {
+      return;
+    }
+    if (!isValidCantonForProvince(province, canton)) {
+      ctx.addIssue({
+        code: 'custom',
+        message:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.CANTON_INVALID,
+        path: ['canton'],
+      });
+      return;
+    }
+    if (district && !isValidLocationHierarchy(province, canton, district)) {
+      ctx.addIssue({
+        code: 'custom',
+        message:
+          PHYSICAL_PERSON_CONTACT_ERRORS.RESIDENTIAL_ADDRESS.DISTRICT_INVALID,
+        path: ['district'],
+      });
+    }
+  });
 
 export { isNotFutureDateDDMMYYYY };
 
@@ -188,6 +274,7 @@ export const FinancialCapacitySchema = z.object({
 });
 
 export const PhysicalPersonContactSchema = z.object({
+  commercialReference: CommercialReferenceSchema,
   contactInfo: ContactInfoSchema,
   employmentData: EmploymentDataSchema,
   financialCapacity: FinancialCapacitySchema,

@@ -1,10 +1,13 @@
+import { useTranslation } from '@/shared/i18n';
 import {
   BanknoteIcon,
+  BuildingIcon,
   CustomSelect,
   CustomTextInput,
   IdCardIcon,
   MapPinIcon,
   SectionHeader,
+  type CustomSelectOption,
 } from '@/shared/ui';
 import {
   formatCurrencyDisplay,
@@ -12,7 +15,7 @@ import {
   sanitizeNumericDigits,
 } from '@/shared/utils';
 import React from 'react';
-import { Controller } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
 import { Text, View } from 'react-native';
 import {
   PHYSICAL_PERSON_CONTACT_FORM_COLORS,
@@ -23,8 +26,13 @@ import {
   PHYSICAL_PERSON_CONTACT_FORM_STYLES,
   PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS,
 } from '../constants/PhysicalPersonContactForm.constants';
+import {
+  getCantonOptions,
+  getDistrictOptions,
+  getProvinceOptions,
+} from '../constants/CostaRicaLocations.constants';
+import { CURRENCY_OPTIONS } from '../constants/SharedCatalogs.constants';
 import type { PhysicalPersonContactFormProps } from '../types/PhysicalPersonContactForm.types';
-
 
 const ContactSectionIcon = (): React.JSX.Element => (
   <View testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.SECTION_1_ICON}>
@@ -66,24 +74,59 @@ const FinancialSectionIcon = (): React.JSX.Element => (
   </View>
 );
 
+const CommercialSectionIcon = (): React.JSX.Element => (
+  <View testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.SECTION_5_ICON}>
+    <BuildingIcon
+      color={PHYSICAL_PERSON_CONTACT_FORM_COLORS.HEADER_ICON_STROKE}
+      size={PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS.SIZE_PX}
+      strokeWidth={PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS.STROKE_WIDTH_PX}
+    />
+  </View>
+);
 
 const PhysicalPersonContactFormComponent = ({
   control,
   disabled = false,
+  onCantonChange,
+  onInputFocus,
+  onProvinceChange,
   options,
   testID,
 }: PhysicalPersonContactFormProps): React.JSX.Element => {
-  const provinceOptions =
-    options?.provinceOptions ?? PHYSICAL_PERSON_CONTACT_FORM_OPTIONS.PROVINCE;
-  const cantonOptions =
-    options?.cantonOptions ?? PHYSICAL_PERSON_CONTACT_FORM_OPTIONS.CANTON;
-  const districtOptions =
-    options?.districtOptions ?? PHYSICAL_PERSON_CONTACT_FORM_OPTIONS.DISTRICT;
   const employmentStatusOptions =
     options?.employmentStatusOptions ??
     PHYSICAL_PERSON_CONTACT_FORM_OPTIONS.EMPLOYMENT_STATUS;
-  const currencyOptions =
-    options?.currencyOptions ?? PHYSICAL_PERSON_CONTACT_FORM_OPTIONS.CURRENCY;
+
+  const selectedProvince = useWatch({
+    control,
+    name: 'residentialAddress.province',
+  });
+  const selectedCanton = useWatch({
+    control,
+    name: 'residentialAddress.canton',
+  });
+  const provinceOptions = options?.provinceOptions ?? getProvinceOptions();
+  const cantonOptions =
+    options?.cantonOptions ?? getCantonOptions(selectedProvince);
+  const districtOptions =
+    options?.districtOptions ??
+    getDistrictOptions(selectedProvince, selectedCanton);
+  const { t } = useTranslation();
+
+  const currencyOptions = React.useMemo<readonly CustomSelectOption[]>(() => {
+    if (options?.currencyOptions) {
+      return options.currencyOptions;
+    }
+    return CURRENCY_OPTIONS.map((opt) => ({
+      label:
+        opt.value in t.common.catalogs.currencies
+          ? t.common.catalogs.currencies[
+              opt.value as keyof typeof t.common.catalogs.currencies
+            ]
+          : opt.label,
+      value: opt.value,
+    }));
+  }, [options?.currencyOptions, t]);
 
   return (
     <View
@@ -118,6 +161,7 @@ const PhysicalPersonContactFormComponent = ({
               leftIcon='mail'
               onBlur={onBlur}
               onChangeText={onChange}
+              onFocus={onInputFocus}
               placeholder={PHYSICAL_PERSON_CONTACT_FORM_COPY.EMAIL_PLACEHOLDER}
               required
               testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.EMAIL_INPUT}
@@ -144,6 +188,7 @@ const PhysicalPersonContactFormComponent = ({
                   leftIcon='smartphone'
                   onBlur={onBlur}
                   onChangeText={onChange}
+                  onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.CELL_PHONE_PLACEHOLDER
                   }
@@ -173,6 +218,7 @@ const PhysicalPersonContactFormComponent = ({
                   leftIcon='phone-call'
                   onBlur={onBlur}
                   onChangeText={onChange}
+                  onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.HOME_PHONE_PLACEHOLDER
                   }
@@ -208,7 +254,10 @@ const PhysicalPersonContactFormComponent = ({
               disabled={disabled}
               errorMessage={error?.message}
               label={PHYSICAL_PERSON_CONTACT_FORM_COPY.PROVINCE_LABEL}
-              onValueChange={onChange}
+              onValueChange={(selected: string): void => {
+                onChange(selected);
+                onProvinceChange?.(selected);
+              }}
               options={provinceOptions}
               placeholder={
                 PHYSICAL_PERSON_CONTACT_FORM_COPY.PROVINCE_PLACEHOLDER
@@ -234,7 +283,10 @@ const PhysicalPersonContactFormComponent = ({
                   disabled={disabled}
                   errorMessage={error?.message}
                   label={PHYSICAL_PERSON_CONTACT_FORM_COPY.CANTON_LABEL}
-                  onValueChange={onChange}
+                  onValueChange={(selected: string): void => {
+                    onChange(selected);
+                    onCantonChange?.(selected);
+                  }}
                   options={cantonOptions}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.CANTON_PLACEHOLDER
@@ -291,6 +343,7 @@ const PhysicalPersonContactFormComponent = ({
               }
               onBlur={onBlur}
               onChangeText={onChange}
+              onFocus={onInputFocus}
               placeholder={
                 PHYSICAL_PERSON_CONTACT_FORM_COPY.EXACT_ADDRESS_PLACEHOLDER
               }
@@ -336,62 +389,57 @@ const PhysicalPersonContactFormComponent = ({
           )}
         />
 
-        {/* Profesión u Oficio & Patrono / Empresa (2-Column Flex Row) */}
-        <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_ROW}>
-          <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_COLUMN}>
-            <Controller
-              control={control}
-              name='employmentData.profession'
-              render={({
-                field: { onBlur, onChange, value },
-                fieldState: { error },
-              }) => (
-                <CustomTextInput
-                  autoCapitalize='words'
-                  editable={!disabled}
-                  error={error?.message}
-                  label={PHYSICAL_PERSON_CONTACT_FORM_COPY.PROFESSION_LABEL}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  placeholder={
-                    PHYSICAL_PERSON_CONTACT_FORM_COPY.PROFESSION_PLACEHOLDER
-                  }
-                  required
-                  testID={
-                    PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.PROFESSION_INPUT
-                  }
-                  value={value ?? ''}
-                />
-              )}
+        {/* Profesión u Oficio (Full Width) */}
+        <Controller
+          control={control}
+          name='employmentData.profession'
+          render={({
+            field: { onBlur, onChange, value },
+            fieldState: { error },
+          }) => (
+            <CustomTextInput
+              autoCapitalize='words'
+              editable={!disabled}
+              error={error?.message}
+              label={PHYSICAL_PERSON_CONTACT_FORM_COPY.PROFESSION_LABEL}
+              onBlur={onBlur}
+              onChangeText={onChange}
+              onFocus={onInputFocus}
+              placeholder={
+                PHYSICAL_PERSON_CONTACT_FORM_COPY.PROFESSION_PLACEHOLDER
+              }
+              required
+              testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.PROFESSION_INPUT}
+              value={value ?? ''}
             />
-          </View>
+          )}
+        />
 
-          <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_COLUMN}>
-            <Controller
-              control={control}
-              name='employmentData.employer'
-              render={({
-                field: { onBlur, onChange, value },
-                fieldState: { error },
-              }) => (
-                <CustomTextInput
-                  autoCapitalize='words'
-                  editable={!disabled}
-                  error={error?.message}
-                  label={PHYSICAL_PERSON_CONTACT_FORM_COPY.EMPLOYER_LABEL}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  placeholder={
-                    PHYSICAL_PERSON_CONTACT_FORM_COPY.EMPLOYER_PLACEHOLDER
-                  }
-                  required
-                  testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.EMPLOYER_INPUT}
-                  value={value ?? ''}
-                />
-              )}
+        {/* Patrono / Empresa (Full Width) */}
+        <Controller
+          control={control}
+          name='employmentData.employer'
+          render={({
+            field: { onBlur, onChange, value },
+            fieldState: { error },
+          }) => (
+            <CustomTextInput
+              autoCapitalize='words'
+              editable={!disabled}
+              error={error?.message}
+              label={PHYSICAL_PERSON_CONTACT_FORM_COPY.EMPLOYER_LABEL}
+              onBlur={onBlur}
+              onChangeText={onChange}
+              onFocus={onInputFocus}
+              placeholder={
+                PHYSICAL_PERSON_CONTACT_FORM_COPY.EMPLOYER_PLACEHOLDER
+              }
+              required
+              testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.EMPLOYER_INPUT}
+              value={value ?? ''}
             />
-          </View>
-        </View>
+          )}
+        />
 
         {/* Fecha de Ingreso & Tel. Oficina (2-Column Flex Row) */}
         <View className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.GRID_ROW}>
@@ -417,6 +465,7 @@ const PhysicalPersonContactFormComponent = ({
                     const maskedDate = formatDateDisplay(text);
                     onChange(maskedDate);
                   }}
+                  onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.ENTRY_DATE_PLACEHOLDER
                   }
@@ -446,6 +495,7 @@ const PhysicalPersonContactFormComponent = ({
                   leftIcon='phone-call'
                   onBlur={onBlur}
                   onChangeText={onChange}
+                  onFocus={onInputFocus}
                   placeholder={
                     PHYSICAL_PERSON_CONTACT_FORM_COPY.OFFICE_PHONE_PLACEHOLDER
                   }
@@ -523,7 +573,8 @@ const PhysicalPersonContactFormComponent = ({
                       const digits = sanitizeNumericDigits(text);
                       onChange(digits === '' ? undefined : Number(digits));
                     }}
-                      placeholder={
+                    onFocus={onInputFocus}
+                    placeholder={
                       PHYSICAL_PERSON_CONTACT_FORM_COPY.GROSS_INCOME_PLACEHOLDER
                     }
                     required
@@ -565,7 +616,8 @@ const PhysicalPersonContactFormComponent = ({
                       const digits = sanitizeNumericDigits(text);
                       onChange(digits === '' ? undefined : Number(digits));
                     }}
-                      placeholder={
+                    onFocus={onInputFocus}
+                    placeholder={
                       PHYSICAL_PERSON_CONTACT_FORM_COPY.NET_INCOME_PLACEHOLDER
                     }
                     required
@@ -620,7 +672,8 @@ const PhysicalPersonContactFormComponent = ({
                   const digits = sanitizeNumericDigits(text);
                   onChange(digits === '' ? undefined : Number(digits));
                 }}
-                  placeholder={
+                onFocus={onInputFocus}
+                placeholder={
                   PHYSICAL_PERSON_CONTACT_FORM_COPY.OTHER_INCOMES_PLACEHOLDER
                 }
                 required={false}
@@ -631,6 +684,107 @@ const PhysicalPersonContactFormComponent = ({
               />
             );
           }}
+        />
+      </View>
+
+      {/* SECTION 5: REFERENCIA COMERCIAL Y CUENTA */}
+      <View
+        className={PHYSICAL_PERSON_CONTACT_FORM_STYLES.CARD_CONTAINER}
+        testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.SECTION_5_CARD}
+      >
+        <SectionHeader
+          icon={<CommercialSectionIcon />}
+          testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.SECTION_5_HEADER}
+          title={PHYSICAL_PERSON_CONTACT_FORM_COPY.SECTION_5_TITLE}
+        />
+
+        {/* Referencia Laboral / Empresa (Full Width) */}
+        <Controller
+          control={control}
+          name='commercialReference.companyReference'
+          render={({
+            field: { onBlur, onChange, value },
+            fieldState: { error },
+          }) => (
+            <CustomTextInput
+              autoCapitalize='words'
+              editable={!disabled}
+              error={error?.message}
+              label={PHYSICAL_PERSON_CONTACT_FORM_COPY.COMPANY_REFERENCE_LABEL}
+              leftIcon='hash'
+              onBlur={onBlur}
+              onChangeText={onChange}
+              onFocus={onInputFocus}
+              placeholder={
+                PHYSICAL_PERSON_CONTACT_FORM_COPY.COMPANY_REFERENCE_PLACEHOLDER
+              }
+              required
+              testID={
+                PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.COMPANY_REFERENCE_INPUT
+              }
+              value={value ?? ''}
+            />
+          )}
+        />
+
+        {/* Teléfono de Referencia (Full Width) */}
+        <Controller
+          control={control}
+          name='commercialReference.referencePhone'
+          render={({
+            field: { onBlur, onChange, value },
+            fieldState: { error },
+          }) => (
+            <CustomTextInput
+              editable={!disabled}
+              error={error?.message}
+              keyboardType='phone-pad'
+              label={PHYSICAL_PERSON_CONTACT_FORM_COPY.REFERENCE_PHONE_LABEL}
+              leftIcon='phone-call'
+              onBlur={onBlur}
+              onChangeText={onChange}
+              onFocus={onInputFocus}
+              placeholder={
+                PHYSICAL_PERSON_CONTACT_FORM_COPY.REFERENCE_PHONE_PLACEHOLDER
+              }
+              required
+              testID={
+                PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.REFERENCE_PHONE_INPUT
+              }
+              value={value ?? ''}
+            />
+          )}
+        />
+
+        {/* Cuenta IBAN (Full Width) */}
+        <Controller
+          control={control}
+          name='commercialReference.ibanAccount'
+          render={({
+            field: { onBlur, onChange, value },
+            fieldState: { error },
+          }) => (
+            <CustomTextInput
+              autoCapitalize='characters'
+              editable={!disabled}
+              error={error?.message}
+              keyboardType='default'
+              label={PHYSICAL_PERSON_CONTACT_FORM_COPY.IBAN_ACCOUNT_LABEL}
+              leftIcon='banknote'
+              maxLength={PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL.MAX_LENGTH_IBAN}
+              onBlur={onBlur}
+              onChangeText={(text: string): void => {
+                onChange(text.toUpperCase());
+              }}
+              onFocus={onInputFocus}
+              placeholder={
+                PHYSICAL_PERSON_CONTACT_FORM_COPY.IBAN_ACCOUNT_PLACEHOLDER
+              }
+              required
+              testID={PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.IBAN_ACCOUNT_INPUT}
+              value={value ?? ''}
+            />
+          )}
         />
       </View>
     </View>

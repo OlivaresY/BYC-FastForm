@@ -99,24 +99,27 @@ export class KeyboardAutoScrollPageObject {
     left?: number;
     top?: number;
     width?: number;
-  }): { measureInWindow: jest.Mock } {
+  }): { measureInWindow: jest.Mock; measureLayout: jest.Mock } {
+    const mockCallback = (
+      onSuccess: (
+        left: number,
+        top: number,
+        width: number,
+        height: number,
+      ) => void,
+    ) => {
+      onSuccess(
+        metrics.left ?? 0,
+        metrics.top ?? 0,
+        metrics.width ?? 100,
+        metrics.height ?? 50,
+      );
+    };
+
     return {
-      measureInWindow: jest.fn(
-        (
-          onSuccess: (
-            left: number,
-            top: number,
-            width: number,
-            height: number,
-          ) => void,
-        ) => {
-          onSuccess(
-            metrics.left ?? 0,
-            metrics.top ?? 0,
-            metrics.width ?? 100,
-            metrics.height ?? 50,
-          );
-        },
+      measureInWindow: jest.fn(mockCallback),
+      measureLayout: jest.fn((_relativeTo: unknown, onSuccess: any) =>
+        mockCallback(onSuccess),
       ),
     };
   }

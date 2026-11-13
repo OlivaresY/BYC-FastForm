@@ -1,6 +1,6 @@
+import { useTranslation } from '@/shared/i18n';
 import React from 'react';
 import { LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS } from '../constants/LegalEntityContactStepView.constants';
-import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import { useLegalEntityContactViewModel } from '../hooks/useLegalEntityContactViewModel';
 import type { LegalEntityContactStepViewProps } from '../types/LegalEntityContactStepView.types';
 import { LegalEntityContactForm } from './LegalEntityContactForm';
@@ -15,15 +15,27 @@ export const LegalEntityContactStepView = ({
   totalSteps,
   viewModel: viewModelProp,
 }: LegalEntityContactStepViewProps): React.JSX.Element => {
+  const { t } = useTranslation();
+  const stepCopy = t.creditWizard.step2LegalContact;
   const defaultViewModel = useLegalEntityContactViewModel({ onSubmit });
   const viewModel = viewModelProp ?? defaultViewModel;
-  const { control, handleNextStep, isSubmitting, isValid, submitError } =
-    viewModel;
+  const {
+    cantonOptions,
+    control,
+    districtOptions,
+    handleCantonChange,
+    handleNextStep,
+    handleProvinceChange,
+    isSubmitting,
+    isValid,
+    provinceOptions,
+    submitError,
+  } = viewModel;
 
   return (
     <WizardStepLayout
       currentStep={currentStep}
-      description={WIZARD_COPY.STEP_2_LEGAL_CONTACT.DESCRIPTION}
+      description={stepCopy.description}
       disabled={disabled}
       isSubmitDisabled={!isValid}
       isSubmitting={isSubmitting}
@@ -32,7 +44,7 @@ export const LegalEntityContactStepView = ({
       onNext={(): void => {
         void handleNextStep();
       }}
-      submitButtonLabel={WIZARD_COPY.BUTTONS.NEXT}
+      submitButtonLabel={t.common.buttons.next}
       submitError={submitError}
       testID={testID}
       testIds={{
@@ -46,14 +58,20 @@ export const LegalEntityContactStepView = ({
         title: LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.TITLE,
         wizardHeader: LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.WIZARD_HEADER,
       }}
-      title={WIZARD_COPY.STEP_2_LEGAL_CONTACT.TITLE}
+      title={stepCopy.title}
       totalSteps={totalSteps}
     >
-      <LegalEntityContactForm
-        control={control}
-        disabled={disabled || isSubmitting}
-        testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.FORM}
-      />
+      {({ onInputFocus }): React.JSX.Element => (
+        <LegalEntityContactForm
+          control={control}
+          disabled={disabled || isSubmitting}
+          onCantonChange={handleCantonChange}
+          onInputFocus={onInputFocus}
+          onProvinceChange={handleProvinceChange}
+          options={{ cantonOptions, districtOptions, provinceOptions }}
+          testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.FORM}
+        />
+      )}
     </WizardStepLayout>
   );
 };

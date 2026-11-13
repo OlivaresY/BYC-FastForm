@@ -1,34 +1,61 @@
+import { esCR } from '@/shared/i18n';
+import type { CustomSelectOption } from '@/shared/ui';
+
 export const LEGAL_ENTITY_CONTACT_FORM_COLORS = {
   HEADER_ICON_STROKE: '#111111',
   HEADER_TITLE_COLOR: '#111111',
 } as const;
 
+const FORM_I18N = esCR.creditWizard.step2LegalContact.form;
+
 export const LEGAL_ENTITY_CONTACT_FORM_COPY = {
-  CONSTITUTION_DATE_HELPER:
-    'Fecha oficial de constitución en formato DD-MM-YYYY.',
-  CONSTITUTION_DATE_LABEL: 'FECHA DE CONSTITUCIÓN',
-  CONSTITUTION_DATE_PLACEHOLDER: 'DD-MM-YYYY',
-  CORPORATE_ID_HELPER: 'Formato oficial costarricense (ej. 3-101-123456).',
-  CORPORATE_ID_LABEL: 'CÉDULA JURÍDICA',
-  CORPORATE_ID_PLACEHOLDER: '3-101-123456',
-  CORPORATE_NAME_LABEL: 'RAZÓN SOCIAL',
-  CORPORATE_NAME_PLACEHOLDER: 'Ej: Distribuidora Automotriz del Este S.A.',
-  EMAIL_LABEL: 'CORREO ELECTRÓNICO',
-  EMAIL_PLACEHOLDER: 'contacto@empresa.cr',
-  GROSS_INCOME_LABEL: 'INGRESO BRUTO MENSUAL',
-  GROSS_INCOME_PLACEHOLDER: '5000000',
-  NET_INCOME_LABEL: 'INGRESO NETO MENSUAL',
-  NET_INCOME_PLACEHOLDER: '3500000',
-  PHONE_LABEL: 'TELÉFONO DE CONTACTO',
-  PHONE_PLACEHOLDER: '+506 2200-0000',
-  REPRESENTATIVE_ID_LABEL: 'CÉDULA DEL REPRESENTANTE',
-  REPRESENTATIVE_ID_PLACEHOLDER: '1-1150-0222',
-  REPRESENTATIVE_NAME_LABEL: 'NOMBRE DEL REPRESENTANTE LEGAL',
-  REPRESENTATIVE_NAME_PLACEHOLDER: 'Ej: Juan Alberto Pérez Rojas',
-  SECTION_1_TITLE: '1. INFORMACIÓN CORPORATIVA',
-  SECTION_2_TITLE: '2. CONTACTO CORPORATIVO',
-  SECTION_3_TITLE: '3. REPRESENTANTE LEGAL',
-  SECTION_4_TITLE: '4. CAPACIDAD FINANCIERA',
+  ACCOUNTING_PHONE_LABEL: FORM_I18N.labels.accountingPhone,
+  ACCOUNTING_PHONE_PLACEHOLDER: FORM_I18N.placeholders.accountingPhone,
+  CANTON_LABEL: FORM_I18N.labels.canton,
+  CANTON_PLACEHOLDER: FORM_I18N.placeholders.canton,
+  CELL_PHONE_LABEL: FORM_I18N.labels.cellPhone,
+  CELL_PHONE_PLACEHOLDER: FORM_I18N.placeholders.cellPhone,
+  COMPANY_REFERENCE_LABEL: FORM_I18N.labels.companyReference,
+  COMPANY_REFERENCE_PLACEHOLDER: FORM_I18N.placeholders.companyReference,
+  CONSTITUTION_DATE_HELPER: FORM_I18N.helpers.constitutionDate,
+  CONSTITUTION_DATE_LABEL: FORM_I18N.labels.constitutionDate,
+  CONSTITUTION_DATE_PLACEHOLDER: FORM_I18N.placeholders.constitutionDate,
+  CURRENCY_LABEL: FORM_I18N.labels.currency,
+  CURRENCY_PLACEHOLDER: FORM_I18N.placeholders.currency,
+  DISTRICT_LABEL: FORM_I18N.labels.district,
+  DISTRICT_PLACEHOLDER: FORM_I18N.placeholders.district,
+  ECONOMIC_SECTOR_LABEL: FORM_I18N.labels.economicSector,
+  ECONOMIC_SECTOR_PLACEHOLDER: FORM_I18N.placeholders.economicSector,
+  EMAIL_LABEL: FORM_I18N.labels.email,
+  EMAIL_PLACEHOLDER: FORM_I18N.placeholders.email,
+  EMPLOYEES_COUNT_LABEL: FORM_I18N.labels.employeesCount,
+  EMPLOYEES_COUNT_PLACEHOLDER: FORM_I18N.placeholders.employeesCount,
+  EXACT_ADDRESS_LABEL: FORM_I18N.labels.exactAddress,
+  EXACT_ADDRESS_PLACEHOLDER: FORM_I18N.placeholders.exactAddress,
+  GROSS_SALES_LABEL: FORM_I18N.labels.grossSales,
+  GROSS_SALES_PLACEHOLDER: FORM_I18N.placeholders.grossSales,
+  IBAN_ACCOUNT_LABEL: FORM_I18N.labels.ibanAccount,
+  IBAN_ACCOUNT_PLACEHOLDER: FORM_I18N.placeholders.ibanAccount,
+  MAIN_ACTIVITY_LABEL: FORM_I18N.labels.mainActivity,
+  MAIN_ACTIVITY_PLACEHOLDER: FORM_I18N.placeholders.mainActivity,
+  NET_PROFIT_LABEL: FORM_I18N.labels.netProfit,
+  NET_PROFIT_PLACEHOLDER: FORM_I18N.placeholders.netProfit,
+  OFFICE_PHONE_LABEL: FORM_I18N.labels.officePhone,
+  OFFICE_PHONE_PLACEHOLDER: FORM_I18N.placeholders.officePhone,
+  OPTIONAL_BADGE: esCR.common.badges.optional,
+  OTHER_INCOMES_HELPER: FORM_I18N.helpers.otherIncomes,
+  OTHER_INCOMES_LABEL: FORM_I18N.labels.otherIncomes,
+  OTHER_INCOMES_PLACEHOLDER: FORM_I18N.placeholders.otherIncomes,
+  PROVINCE_LABEL: FORM_I18N.labels.province,
+  PROVINCE_PLACEHOLDER: FORM_I18N.placeholders.province,
+  REFERENCE_PHONE_LABEL: FORM_I18N.labels.referencePhone,
+  REFERENCE_PHONE_PLACEHOLDER: FORM_I18N.placeholders.referencePhone,
+  SECTION_1_TITLE: FORM_I18N.sections.section1,
+  SECTION_2_TITLE: FORM_I18N.sections.section2,
+  SECTION_3_TITLE: FORM_I18N.sections.section3,
+  SECTION_4_TITLE: FORM_I18N.sections.section4,
+  SECTION_5_TITLE: FORM_I18N.sections.section5,
+  TITLE: esCR.creditWizard.step2LegalContact.title,
 } as const;
 
 export const LEGAL_ENTITY_CONTACT_FORM_ICON_DIMENSIONS = {
@@ -38,44 +65,113 @@ export const LEGAL_ENTITY_CONTACT_FORM_ICON_DIMENSIONS = {
 } as const;
 
 export const LEGAL_ENTITY_CONTACT_FORM_NUMERICAL = {
-  MAX_LENGTH_CORPORATE_ID: 12,
+  EXACT_ADDRESS_NUMBER_OF_LINES: 3,
   MAX_LENGTH_DATE: 14,
+  MAX_LENGTH_EMPLOYEES: 8,
+  MAX_LENGTH_IBAN: 22,
   MAX_LENGTH_INCOME: 15,
   MAX_LENGTH_PHONE: 20,
 } as const;
 
+export const ECONOMIC_SECTOR_KEYS = {
+  AGRICULTURE: 'agriculture',
+  COMMERCE: 'commerce',
+  CONSTRUCTION: 'construction',
+  INDUSTRY: 'industry',
+  OTHER: 'other',
+  SERVICES: 'services',
+  TECHNOLOGY: 'technology',
+  TOURISM: 'tourism',
+  TRANSPORT: 'transport',
+} as const;
+
+export type EconomicSectorKey =
+  (typeof ECONOMIC_SECTOR_KEYS)[keyof typeof ECONOMIC_SECTOR_KEYS];
+
+export interface RawEconomicSectorOption {
+  key: EconomicSectorKey;
+  value: string;
+}
+
+export const RAW_ECONOMIC_SECTOR_OPTIONS: readonly RawEconomicSectorOption[] = [
+  { key: ECONOMIC_SECTOR_KEYS.AGRICULTURE, value: 'Agricultura y Ganadería' },
+  { key: ECONOMIC_SECTOR_KEYS.COMMERCE, value: 'Comercio' },
+  { key: ECONOMIC_SECTOR_KEYS.CONSTRUCTION, value: 'Construcción' },
+  { key: ECONOMIC_SECTOR_KEYS.INDUSTRY, value: 'Industria y Manufactura' },
+  { key: ECONOMIC_SECTOR_KEYS.SERVICES, value: 'Servicios' },
+  {
+    key: ECONOMIC_SECTOR_KEYS.TECHNOLOGY,
+    value: 'Tecnología y Telecomunicaciones',
+  },
+  { key: ECONOMIC_SECTOR_KEYS.TRANSPORT, value: 'Transporte y Logística' },
+  { key: ECONOMIC_SECTOR_KEYS.TOURISM, value: 'Turismo y Hospitalidad' },
+  { key: ECONOMIC_SECTOR_KEYS.OTHER, value: 'Otro' },
+] as const;
+
+export const LEGAL_ENTITY_CONTACT_FORM_OPTIONS = {
+  ECONOMIC_SECTOR: RAW_ECONOMIC_SECTOR_OPTIONS.map((opt) => ({
+    label: esCR.common.catalogs.economicSectors[opt.key],
+    value: opt.value,
+  })) as readonly CustomSelectOption[],
+} as const;
+
 export const LEGAL_ENTITY_CONTACT_FORM_STYLES = {
-  CARD_CONTAINER:
-    'w-full self-stretch rounded-2xl bg-white p-4 gap-4 border border-gray-200',
+  CARD_CONTAINER: 'w-full self-stretch rounded-2xl bg-stone-200 p-4 gap-4',
   CONTAINER: 'w-full self-stretch gap-4',
   GRID_COLUMN: 'flex-1',
   GRID_ROW: 'w-full flex-row gap-3',
+  OTHER_INCOMES_BADGE_TEXT: 'text-xs font-semibold text-text-secondary',
   SECTION_HEADER_ROW: 'flex-row items-center gap-2 mb-1',
   SECTION_HEADER_TITLE:
     'text-xs font-bold uppercase tracking-wider text-text-primary',
 } as const;
 
 export const LEGAL_ENTITY_CONTACT_FORM_TEST_IDS = {
+  ACCOUNTING_PHONE_INPUT: 'legal-entity-contact-accounting-phone-input',
+  CANTON_SELECT: 'legal-entity-contact-canton-select',
   CARD_SECTION_1: 'legal-entity-contact-card-section-1',
   CARD_SECTION_2: 'legal-entity-contact-card-section-2',
   CARD_SECTION_3: 'legal-entity-contact-card-section-3',
   CARD_SECTION_4: 'legal-entity-contact-card-section-4',
+  CARD_SECTION_5: 'legal-entity-contact-card-section-5',
+  CELL_PHONE_INPUT: 'legal-entity-contact-cell-phone-input',
+  COMPANY_REFERENCE_INPUT: 'legal-entity-contact-company-reference-input',
   CONSTITUTION_DATE_INPUT: 'legal-entity-contact-constitution-date-input',
   CONTAINER: 'legal-entity-contact-form-container',
   CORPORATE_ID_INPUT: 'legal-entity-contact-corporate-id-input',
   CORPORATE_NAME_INPUT: 'legal-entity-contact-corporate-name-input',
+  CURRENCY_SELECT: 'legal-entity-contact-currency-select',
+  DISTRICT_SELECT: 'legal-entity-contact-district-select',
+  ECONOMIC_SECTOR_SELECT: 'legal-entity-contact-economic-sector-select',
   EMAIL_INPUT: 'legal-entity-contact-email-input',
+  EMPLOYEES_COUNT_INPUT: 'legal-entity-contact-employees-count-input',
+  EXACT_ADDRESS_INPUT: 'legal-entity-contact-exact-address-input',
   GROSS_INCOME_INPUT: 'legal-entity-contact-gross-income-input',
+  GROSS_SALES_INPUT: 'legal-entity-contact-gross-sales-input',
+  IBAN_ACCOUNT_INPUT: 'legal-entity-contact-iban-account-input',
+  MAIN_ACTIVITY_INPUT: 'legal-entity-contact-main-activity-input',
   NET_INCOME_INPUT: 'legal-entity-contact-net-income-input',
+  NET_PROFIT_INPUT: 'legal-entity-contact-net-profit-input',
+  OFFICE_PHONE_INPUT: 'legal-entity-contact-office-phone-input',
+  OTHER_INCOMES_INPUT: 'legal-entity-contact-other-incomes-input',
   PHONE_INPUT: 'legal-entity-contact-phone-input',
+  PROVINCE_SELECT: 'legal-entity-contact-province-select',
+  REFERENCE_PHONE_INPUT: 'legal-entity-contact-reference-phone-input',
   REPRESENTATIVE_ID_INPUT: 'legal-entity-contact-representative-id-input',
   REPRESENTATIVE_NAME_INPUT: 'legal-entity-contact-representative-name-input',
+  SECTION_1_CARD: 'legal-entity-contact-section-1-card',
   SECTION_1_HEADER: 'legal-entity-contact-section-1-header',
   SECTION_1_ICON: 'legal-entity-contact-section-1-icon',
+  SECTION_2_CARD: 'legal-entity-contact-section-2-card',
   SECTION_2_HEADER: 'legal-entity-contact-section-2-header',
   SECTION_2_ICON: 'legal-entity-contact-section-2-icon',
+  SECTION_3_CARD: 'legal-entity-contact-section-3-card',
   SECTION_3_HEADER: 'legal-entity-contact-section-3-header',
   SECTION_3_ICON: 'legal-entity-contact-section-3-icon',
+  SECTION_4_CARD: 'legal-entity-contact-section-4-card',
   SECTION_4_HEADER: 'legal-entity-contact-section-4-header',
   SECTION_4_ICON: 'legal-entity-contact-section-4-icon',
+  SECTION_5_CARD: 'legal-entity-contact-section-5-card',
+  SECTION_5_HEADER: 'legal-entity-contact-section-5-header',
+  SECTION_5_ICON: 'legal-entity-contact-section-5-icon',
 } as const;

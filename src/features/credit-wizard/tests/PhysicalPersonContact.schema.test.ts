@@ -4,6 +4,7 @@ import {
   PHYSICAL_PERSON_CONTACT_ERRORS,
 } from '../constants/PhysicalPersonContact.constants';
 import {
+  CommercialReferenceSchema,
   EmploymentDataSchema,
   FinancialCapacitySchema,
   PhysicalPersonContactSchema,
@@ -65,6 +66,23 @@ describe('PhysicalPersonContactSchema custom error messages', () => {
     );
 
     // Assert
+    expect(
+      getMessages(result, ['commercialReference', 'companyReference']),
+    ).toContain(
+      PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+        .COMPANY_REFERENCE_REQUIRED,
+    );
+    expect(
+      getMessages(result, ['commercialReference', 'referencePhone']),
+    ).toContain(
+      PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+        .REFERENCE_PHONE_REQUIRED,
+    );
+    expect(
+      getMessages(result, ['commercialReference', 'ibanAccount']),
+    ).toContain(
+      PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE.IBAN_ACCOUNT_REQUIRED,
+    );
     expect(getMessages(result, ['contactInfo', 'email'])).toContain(
       PHYSICAL_PERSON_CONTACT_ERRORS.CONTACT_INFO.EMAIL_REQUIRED,
     );
@@ -111,6 +129,156 @@ describe('PhysicalPersonContactSchema custom error messages', () => {
       entryDate: '15-05-2019',
       officePhone: '+506 2200-0000',
       profession: 'Ingeniero',
+    });
+
+    // Assert
+    expect(result.success).toBe(true);
+  });
+
+  describe('CommercialReferenceSchema validations', () => {
+    const validCommercialReference = {
+      companyReference: 'CoriMotors S.A.',
+      ibanAccount: 'CR05015202001026284066',
+      referencePhone: '+506 2200-0000',
+    };
+
+    it('validates a correct commercial reference successfully', () => {
+      // Act
+      const result = CommercialReferenceSchema.safeParse(
+        validCommercialReference,
+      );
+
+      // Assert
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects companyReference with fewer than 2 characters', () => {
+      // Act
+      const result = CommercialReferenceSchema.safeParse({
+        ...validCommercialReference,
+        companyReference: 'A',
+      });
+
+      // Assert
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const errorMessages = result.error.issues
+          .filter((issue) => issue.path[0] === 'companyReference')
+          .map((issue) => issue.message);
+        expect(errorMessages).toContain(
+          PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+            .COMPANY_REFERENCE_MIN,
+        );
+      }
+    });
+
+    it('rejects invalid referencePhone formats', () => {
+      // Act
+      const result = CommercialReferenceSchema.safeParse({
+        ...validCommercialReference,
+        referencePhone: '123',
+      });
+
+      // Assert
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const errorMessages = result.error.issues
+          .filter((issue) => issue.path[0] === 'referencePhone')
+          .map((issue) => issue.message);
+        expect(errorMessages).toContain(
+          PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+            .REFERENCE_PHONE_INVALID,
+        );
+      }
+    });
+
+    it('rejects ibanAccount with wrong country code, incorrect digit length, or invalid checksum', () => {
+      // Act - Wrong prefix
+      const wrongPrefixResult = CommercialReferenceSchema.safeParse({
+        ...validCommercialReference,
+        ibanAccount: 'ES05015202001026284066',
+      });
+
+      // Act - Wrong length (CR + 19 digits)
+      const wrongLengthResult = CommercialReferenceSchema.safeParse({
+        ...validCommercialReference,
+        ibanAccount: 'CR0501520200102628406',
+      });
+
+      // Act - Invalid checksum (Mod 97-10 failure)
+      const invalidChecksumResult = CommercialReferenceSchema.safeParse({
+        ...validCommercialReference,
+        ibanAccount: 'CR05015202001026284067',
+      });
+
+      // Assert
+      expect(wrongPrefixResult.success).toBe(false);
+      if (!wrongPrefixResult.success) {
+        const errorMessages = wrongPrefixResult.error.issues
+          .filter((issue) => issue.path[0] === 'ibanAccount')
+          .map((issue) => issue.message);
+        expect(errorMessages).toContain(
+          PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+            .IBAN_ACCOUNT_INVALID,
+        );
+      }
+
+      expect(wrongLengthResult.success).toBe(false);
+      if (!wrongLengthResult.success) {
+        const errorMessages = wrongLengthResult.error.issues
+          .filter((issue) => issue.path[0] === 'ibanAccount')
+          .map((issue) => issue.message);
+        expect(errorMessages).toContain(
+          PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+            .IBAN_ACCOUNT_INVALID,
+        );
+      }
+
+      expect(invalidChecksumResult.success).toBe(false);
+      if (!invalidChecksumResult.success) {
+        const errorMessages = invalidChecksumResult.error.issues
+          .filter((issue) => issue.path[0] === 'ibanAccount')
+          .map((issue) => issue.message);
+        expect(errorMessages).toContain(
+          PHYSICAL_PERSON_CONTACT_ERRORS.COMMERCIAL_REFERENCE
+            .IBAN_ACCOUNT_INVALID,
+        );
+      }
+    });
+  });
+
+  it('accepts full valid 5-section PhysicalPersonContact payload', () => {
+    // Act
+    const result = PhysicalPersonContactSchema.safeParse({
+      commercialReference: {
+        companyReference: 'CoriMotors S.A.',
+        ibanAccount: 'CR05015202001026284066',
+        referencePhone: '+506 2200-0000',
+      },
+      contactInfo: {
+        cellPhone: '+506 8888-8888',
+        email: 'juan.perez@corimotors.com',
+        homePhone: '+506 2222-1111',
+      },
+      employmentData: {
+        employer: 'CoriMotors S.A.',
+        employmentStatus: EMPLOYMENT_STATUSES.SALARIED_PRIVATE,
+        entryDate: '01-01-2020',
+        officePhone: '+506 2200-0000',
+        profession: 'Asesor Comercial',
+      },
+      financialCapacity: {
+        currency: 'CRC',
+        grossIncome: 1500000,
+        netIncome: 1200000,
+        otherIncomes: 0,
+      },
+      residentialAddress: {
+        canton: 'Central',
+        district: 'Carmen',
+        exactAddress: 'Costado norte del Parque Central',
+        province: 'San José',
+      },
     });
 
     // Assert

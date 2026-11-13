@@ -216,6 +216,24 @@ export class PhysicalPersonContactStepViewPageObject {
     );
   }
 
+  public get section5Card(): ReactTestInstance {
+    return screen.getByTestId(
+      PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.SECTION_5_CARD,
+    );
+  }
+
+  public get section5Header(): ReactTestInstance {
+    return screen.getByTestId(
+      PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.SECTION_5_HEADER,
+    );
+  }
+
+  public get section5Icon(): ReactTestInstance {
+    return screen.getByTestId(
+      PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.SECTION_5_ICON,
+    );
+  }
+
   // =========================================================================
   // Form Field Getters
   // =========================================================================
@@ -313,6 +331,24 @@ export class PhysicalPersonContactStepViewPageObject {
   public get otherIncomesInput(): ReactTestInstance {
     return screen.getByTestId(
       PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.OTHER_INCOMES_INPUT,
+    );
+  }
+
+  public get companyReferenceInput(): ReactTestInstance {
+    return screen.getByTestId(
+      PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.COMPANY_REFERENCE_INPUT,
+    );
+  }
+
+  public get referencePhoneInput(): ReactTestInstance {
+    return screen.getByTestId(
+      PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.REFERENCE_PHONE_INPUT,
+    );
+  }
+
+  public get ibanAccountInput(): ReactTestInstance {
+    return screen.getByTestId(
+      PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS.IBAN_ACCOUNT_INPUT,
     );
   }
 
@@ -460,6 +496,33 @@ export class PhysicalPersonContactStepViewPageObject {
     return this;
   }
 
+  public fillCompanyReference(value: string): this {
+    fireEvent.changeText(this.companyReferenceInput, value);
+    return this;
+  }
+
+  public fillReferencePhone(value: string): this {
+    fireEvent.changeText(this.referencePhoneInput, value);
+    return this;
+  }
+
+  public fillIbanAccount(value: string): this {
+    fireEvent.changeText(this.ibanAccountInput, value);
+    return this;
+  }
+
+  public setCompanyReference(value: string): this {
+    return this.fillCompanyReference(value);
+  }
+
+  public setReferencePhone(value: string): this {
+    return this.fillReferencePhone(value);
+  }
+
+  public setIbanAccount(value: string): this {
+    return this.fillIbanAccount(value);
+  }
+
   public clickClose(): this {
     fireEvent.press(this.closeButton);
     return this;
@@ -476,7 +539,9 @@ export class PhysicalPersonContactStepViewPageObject {
   }
 
   public fillAllValidData(overrides?: {
+    canton?: string;
     cellPhone?: string;
+    companyReference?: string;
     currency?: string;
     district?: string;
     email?: string;
@@ -486,12 +551,13 @@ export class PhysicalPersonContactStepViewPageObject {
     exactAddress?: string;
     grossIncome?: number | string;
     homePhone?: string;
+    ibanAccount?: string;
     netIncome?: number | string;
     officePhone?: string;
     otherIncomes?: number | string;
     profession?: string;
     province?: string;
-    canton?: string;
+    referencePhone?: string;
   }): this {
     this.setEmail(overrides?.email ?? 'carlos.rodriguez@byc.cr')
       .setCellPhone(overrides?.cellPhone ?? '+506 8888-8888')
@@ -511,7 +577,10 @@ export class PhysicalPersonContactStepViewPageObject {
       .selectCurrency(overrides?.currency ?? 'CRC')
       .setGrossIncome(overrides?.grossIncome ?? 2500000)
       .setNetIncome(overrides?.netIncome ?? 2000000)
-      .setOtherIncomes(overrides?.otherIncomes ?? 500000);
+      .setOtherIncomes(overrides?.otherIncomes ?? 500000)
+      .fillCompanyReference(overrides?.companyReference ?? 'CoriMotors S.A.')
+      .fillReferencePhone(overrides?.referencePhone ?? '+506 2200-0000')
+      .fillIbanAccount(overrides?.ibanAccount ?? 'CR05015202001026284066');
 
     return this;
   }
@@ -572,27 +641,29 @@ export class PhysicalPersonContactStepViewPageObject {
       width?: number;
     },
   ): this {
+    const mockCallback = (
+      onSuccess: (
+        left: number,
+        top: number,
+        width: number,
+        height: number,
+      ) => void,
+    ) => {
+      onSuccess(
+        nodeMetrics?.left ?? 0,
+        nodeMetrics?.top ?? 1100,
+        nodeMetrics?.width ?? 180,
+        nodeMetrics?.height ?? 50,
+      );
+    };
+
     act(() => {
       fireEvent(input, 'focus', {
         nativeEvent: {
           target: {
-            measureLayout: jest.fn(
-              (
-                _relativeTo: unknown,
-                onSuccess: (
-                  left: number,
-                  top: number,
-                  width: number,
-                  height: number,
-                ) => void,
-              ) => {
-                onSuccess(
-                  nodeMetrics?.left ?? 0,
-                  nodeMetrics?.top ?? 1100,
-                  nodeMetrics?.width ?? 180,
-                  nodeMetrics?.height ?? 50,
-                );
-              },
+            measureInWindow: jest.fn(mockCallback),
+            measureLayout: jest.fn((_relativeTo: unknown, onSuccess: any) =>
+              mockCallback(onSuccess),
             ),
           },
         },

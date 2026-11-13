@@ -1,21 +1,25 @@
+import { useTranslation } from '@/shared/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { Resolver } from 'react-hook-form';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import {
-  PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES,
-  PHYSICAL_PERSON_CONTACT_ERRORS,
-} from '../constants/PhysicalPersonContact.constants';
+  getCantonOptions,
+  getDistrictOptions,
+  getProvinceOptions,
+} from '../constants/CostaRicaLocations.constants';
 import { PhysicalPersonContactSchema } from '../schemas/PhysicalPersonContact.schema';
 import type {
   PhysicalPersonContact,
   UsePhysicalPersonContactViewModelProps,
   UsePhysicalPersonContactViewModelReturn,
 } from '../types/PhysicalPersonContact.types';
+import { normalizePhysicalPersonContactPayload } from '../utils/contactPayloadNormalizer';
 
 export const usePhysicalPersonContactViewModel = (
   props?: UsePhysicalPersonContactViewModelProps,
 ): UsePhysicalPersonContactViewModelReturn => {
+  const { t } = useTranslation();
   const {
     defaultValues: defaultValuesProp,
     mode = 'onChange',
@@ -25,36 +29,59 @@ export const usePhysicalPersonContactViewModel = (
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const normalizedDefaultValues = useMemo(
+    () => normalizePhysicalPersonContactPayload(defaultValuesProp),
+    [defaultValuesProp],
+  );
+
   const {
     control,
     formState: { errors, isValid },
     handleSubmit,
+    setValue,
   } = useForm<PhysicalPersonContact>({
-    defaultValues: {
-      ...PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES,
-      ...defaultValuesProp,
-      contactInfo: {
-        ...PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES.contactInfo,
-        ...defaultValuesProp?.contactInfo,
-      },
-      employmentData: {
-        ...PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES.employmentData,
-        ...defaultValuesProp?.employmentData,
-      },
-      financialCapacity: {
-        ...PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES.financialCapacity,
-        ...defaultValuesProp?.financialCapacity,
-      },
-      residentialAddress: {
-        ...PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES.residentialAddress,
-        ...defaultValuesProp?.residentialAddress,
-      },
-    },
+    defaultValues: normalizedDefaultValues,
     mode,
     resolver: zodResolver(
       PhysicalPersonContactSchema,
     ) as unknown as Resolver<PhysicalPersonContact>,
   });
+
+  const selectedProvince = useWatch({
+    control,
+    name: 'residentialAddress.province',
+  });
+  const selectedCanton = useWatch({
+    control,
+    name: 'residentialAddress.canton',
+  });
+
+  const provinceOptions = useMemo(() => getProvinceOptions(), []);
+  const cantonOptions = useMemo(
+    () => getCantonOptions(selectedProvince),
+    [selectedProvince],
+  );
+  const districtOptions = useMemo(
+    () => getDistrictOptions(selectedProvince, selectedCanton),
+    [selectedCanton, selectedProvince],
+  );
+
+  const handleProvinceChange = useCallback(
+    (province: string): void => {
+      setValue('residentialAddress.canton', '', { shouldDirty: true });
+      setValue('residentialAddress.district', '', { shouldDirty: true });
+      setValue('residentialAddress.province', province, { shouldDirty: true });
+    },
+    [setValue],
+  );
+
+  const handleCantonChange = useCallback(
+    (canton: string): void => {
+      setValue('residentialAddress.district', '', { shouldDirty: true });
+      setValue('residentialAddress.canton', canton, { shouldDirty: true });
+    },
+    [setValue],
+  );
 
   const onValidSubmit = useCallback(
     async (data: PhysicalPersonContact): Promise<void> => {
@@ -71,10 +98,12 @@ export const usePhysicalPersonContactViewModel = (
         if (
           dataOrEvent &&
           typeof dataOrEvent === 'object' &&
-          'contactInfo' in dataOrEvent &&
-          'residentialAddress' in dataOrEvent
+          ('commercialReference' in dataOrEvent ||
+            'contactInfo' in dataOrEvent ||
+            'residentialAddress' in dataOrEvent)
         ) {
-          const parseResult = PhysicalPersonContactSchema.safeParse(dataOrEvent);
+          const parseResult =
+            PhysicalPersonContactSchema.safeParse(dataOrEvent);
           if (!parseResult.success) {
             throw new Error('Programmatic validation failed');
           }
@@ -83,21 +112,30 @@ export const usePhysicalPersonContactViewModel = (
         }
         await handleSubmit(onValidSubmit)(dataOrEvent as never);
       } catch {
-        setSubmitError(PHYSICAL_PERSON_CONTACT_ERRORS.SUBMIT_FAILED);
+        setSubmitError(t.creditWizard.step2PhysicalContact.errors.submitFailed);
       } finally {
         setIsSubmitting(false);
       }
     },
-    [handleSubmit, onValidSubmit],
+    [
+      handleSubmit,
+      onValidSubmit,
+      t.creditWizard.step2PhysicalContact.errors.submitFailed,
+    ],
   );
 
   return {
+    cantonOptions,
     control,
+    districtOptions,
     errors,
+    handleCantonChange,
     handleNextStep,
+    handleProvinceChange,
     handleSubmit,
     isSubmitting,
     isValid,
+    provinceOptions,
     submitError,
   };
 };

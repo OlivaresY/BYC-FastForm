@@ -13,7 +13,9 @@ export interface PhysicalPersonContactFormOptions {
 export interface PhysicalPersonContactFormProps {
   control: Control<PhysicalPersonContact>;
   disabled?: boolean;
+  onCantonChange?: (canton: string) => void;
   onInputFocus?: (event?: unknown) => void;
+  onProvinceChange?: (province: string) => void;
   options?: PhysicalPersonContactFormOptions;
   testID?: string;
 }
