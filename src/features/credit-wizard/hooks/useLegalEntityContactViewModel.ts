@@ -1,3 +1,4 @@
+import { useTranslation } from '@/shared/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useMemo, useState } from 'react';
 import type { Resolver } from 'react-hook-form';
@@ -7,10 +8,7 @@ import {
   getDistrictOptions,
   getProvinceOptions,
 } from '../constants/CostaRicaLocations.constants';
-import {
-  LEGAL_ENTITY_CONTACT_DEFAULT_VALUES,
-  LEGAL_ENTITY_CONTACT_ERRORS,
-} from '../constants/LegalEntityContact.constants';
+import { LEGAL_ENTITY_CONTACT_DEFAULT_VALUES } from '../constants/LegalEntityContact.constants';
 import { LegalEntityContactSchema } from '../schemas/LegalEntityContact.schema';
 import type {
   LegalEntityContact,
@@ -21,6 +19,7 @@ import type {
 export const useLegalEntityContactViewModel = (
   props?: UseLegalEntityContactViewModelProps,
 ): UseLegalEntityContactViewModelReturn => {
+  const { t } = useTranslation();
   const {
     defaultValues: defaultValuesProp,
     mode = 'onChange',
@@ -132,12 +131,16 @@ export const useLegalEntityContactViewModel = (
         }
         await handleSubmit(onValidSubmit)(dataOrEvent as never);
       } catch {
-        setSubmitError(LEGAL_ENTITY_CONTACT_ERRORS.SUBMIT_FAILED);
+        setSubmitError(t.creditWizard.step2LegalContact.errors.submitFailed);
       } finally {
         setIsSubmitting(false);
       }
     },
-    [handleSubmit, onValidSubmit],
+    [
+      handleSubmit,
+      onValidSubmit,
+      t.creditWizard.step2LegalContact.errors.submitFailed,
+    ],
   );
 
   return {

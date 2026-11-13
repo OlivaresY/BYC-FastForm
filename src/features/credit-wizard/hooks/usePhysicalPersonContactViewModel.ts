@@ -1,3 +1,4 @@
+import { useTranslation } from '@/shared/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useMemo, useState } from 'react';
 import type { Resolver } from 'react-hook-form';
@@ -7,10 +8,7 @@ import {
   getDistrictOptions,
   getProvinceOptions,
 } from '../constants/CostaRicaLocations.constants';
-import {
-  PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES,
-  PHYSICAL_PERSON_CONTACT_ERRORS,
-} from '../constants/PhysicalPersonContact.constants';
+import { PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES } from '../constants/PhysicalPersonContact.constants';
 import { PhysicalPersonContactSchema } from '../schemas/PhysicalPersonContact.schema';
 import type {
   PhysicalPersonContact,
@@ -21,6 +19,7 @@ import type {
 export const usePhysicalPersonContactViewModel = (
   props?: UsePhysicalPersonContactViewModelProps,
 ): UsePhysicalPersonContactViewModelReturn => {
+  const { t } = useTranslation();
   const {
     defaultValues: defaultValuesProp,
     mode = 'onChange',
@@ -131,12 +130,16 @@ export const usePhysicalPersonContactViewModel = (
         }
         await handleSubmit(onValidSubmit)(dataOrEvent as never);
       } catch {
-        setSubmitError(PHYSICAL_PERSON_CONTACT_ERRORS.SUBMIT_FAILED);
+        setSubmitError(t.creditWizard.step2PhysicalContact.errors.submitFailed);
       } finally {
         setIsSubmitting(false);
       }
     },
-    [handleSubmit, onValidSubmit],
+    [
+      handleSubmit,
+      onValidSubmit,
+      t.creditWizard.step2PhysicalContact.errors.submitFailed,
+    ],
   );
 
   return {

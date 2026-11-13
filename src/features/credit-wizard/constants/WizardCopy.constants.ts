@@ -1,3 +1,8 @@
+import { esCR } from '@/shared/i18n';
+
+const STEP_2_LEGAL = esCR.creditWizard.step2LegalContact;
+const STEP_2_PHYSICAL = esCR.creditWizard.step2PhysicalContact;
+
 export const WIZARD_COPY = {
   BUTTONS: {
     BACK: 'Atrás',
@@ -101,133 +106,164 @@ export const WIZARD_COPY = {
     TITLE: 'ENTIDAD Y PERSONAL',
   },
   STEP_2_LEGAL_CONTACT: {
-    DESCRIPTION:
-      'Ingresa la información legal, de contacto y financiera de la empresa para la evaluación y perfilado de crédito multi-banco.',
+    DESCRIPTION: STEP_2_LEGAL.description,
     ERRORS: {
       COMMERCIAL_ACTIVITY: {
         ACCOUNTING_PHONE_INVALID:
-          'El formato del teléfono de contabilidad no es válido.',
+          STEP_2_LEGAL.errors.commercialActivity.accountingPhoneInvalid,
         ACCOUNTING_PHONE_REQUIRED:
-          'El teléfono de contabilidad es obligatorio.',
+          STEP_2_LEGAL.errors.commercialActivity.accountingPhoneRequired,
         CONSTITUTION_DATE_FUTURE:
-          'La fecha de constitución no puede ser una fecha futura.',
+          STEP_2_LEGAL.errors.commercialActivity.constitutionDateFuture,
         CONSTITUTION_DATE_INVALID:
-          'La fecha de constitución debe tener un formato DD-MM-YYYY válido.',
-        CONSTITUTION_DATE_REQUIRED: 'La fecha de constitución es obligatoria.',
-        ECONOMIC_SECTOR_REQUIRED: 'El sector económico es obligatorio.',
+          STEP_2_LEGAL.errors.commercialActivity.constitutionDateInvalid,
+        CONSTITUTION_DATE_REQUIRED:
+          STEP_2_LEGAL.errors.commercialActivity.constitutionDateRequired,
+        ECONOMIC_SECTOR_REQUIRED:
+          STEP_2_LEGAL.errors.commercialActivity.economicSectorRequired,
         EMPLOYEES_COUNT_POSITIVE:
-          'La cantidad de empleados debe ser mayor a 0.',
-        EMPLOYEES_COUNT_REQUIRED: 'La cantidad de empleados es obligatoria.',
-        MAIN_ACTIVITY_REQUIRED: 'La actividad principal es obligatoria.',
+          STEP_2_LEGAL.errors.commercialActivity.employeesCountPositive,
+        EMPLOYEES_COUNT_REQUIRED:
+          STEP_2_LEGAL.errors.commercialActivity.employeesCountRequired,
+        MAIN_ACTIVITY_REQUIRED:
+          STEP_2_LEGAL.errors.commercialActivity.mainActivityRequired,
       },
       COMMERCIAL_ADDRESS: {
-        CANTON_INVALID: 'El cantón no pertenece a la provincia seleccionada.',
-        CANTON_REQUIRED: 'El cantón es obligatorio.',
-        DISTRICT_INVALID: 'El distrito no pertenece al cantón seleccionado.',
-        DISTRICT_REQUIRED: 'El distrito es obligatorio.',
-        EXACT_ADDRESS_REQUIRED: 'La dirección exacta es obligatoria.',
-        PROVINCE_REQUIRED: 'La provincia es obligatoria.',
+        CANTON_INVALID: STEP_2_LEGAL.errors.commercialAddress.cantonInvalid,
+        CANTON_REQUIRED: STEP_2_LEGAL.errors.commercialAddress.cantonRequired,
+        DISTRICT_INVALID: STEP_2_LEGAL.errors.commercialAddress.districtInvalid,
+        DISTRICT_REQUIRED:
+          STEP_2_LEGAL.errors.commercialAddress.districtRequired,
+        EXACT_ADDRESS_REQUIRED:
+          STEP_2_LEGAL.errors.commercialAddress.exactAddressRequired,
+        PROVINCE_REQUIRED:
+          STEP_2_LEGAL.errors.commercialAddress.provinceRequired,
       },
       COMMERCIAL_REFERENCE: {
         COMPANY_REFERENCE_MIN:
-          'El nombre de la empresa de referencia debe tener al menos 2 caracteres.',
+          STEP_2_LEGAL.errors.commercialReference.companyReferenceMin,
         COMPANY_REFERENCE_REQUIRED:
-          'El nombre de la empresa de referencia es obligatorio.',
+          STEP_2_LEGAL.errors.commercialReference.companyReferenceRequired,
         IBAN_ACCOUNT_INVALID:
-          'La cuenta IBAN debe tener un formato válido de Costa Rica (ej. CR05015202001026284066).',
-        IBAN_ACCOUNT_REQUIRED: 'La cuenta IBAN es obligatoria.',
+          STEP_2_LEGAL.errors.commercialReference.ibanAccountInvalid,
+        IBAN_ACCOUNT_REQUIRED:
+          STEP_2_LEGAL.errors.commercialReference.ibanAccountRequired,
         REFERENCE_PHONE_INVALID:
-          'El formato del teléfono de referencia no es válido.',
-        REFERENCE_PHONE_REQUIRED: 'El teléfono de referencia es obligatorio.',
+          STEP_2_LEGAL.errors.commercialReference.referencePhoneInvalid,
+        REFERENCE_PHONE_REQUIRED:
+          STEP_2_LEGAL.errors.commercialReference.referencePhoneRequired,
       },
       CONTACT_INFO: {
-        CELL_PHONE_INVALID: 'El formato del teléfono celular no es válido.',
-        CELL_PHONE_REQUIRED: 'El teléfono celular es obligatorio.',
-        EMAIL_INVALID: 'El formato del correo electrónico no es válido.',
-        EMAIL_REQUIRED: 'El correo electrónico es obligatorio.',
+        CELL_PHONE_INVALID: STEP_2_LEGAL.errors.contactInfo.cellPhoneInvalid,
+        CELL_PHONE_REQUIRED: STEP_2_LEGAL.errors.contactInfo.cellPhoneRequired,
+        EMAIL_INVALID: STEP_2_LEGAL.errors.contactInfo.emailInvalid,
+        EMAIL_REQUIRED: STEP_2_LEGAL.errors.contactInfo.emailRequired,
         OFFICE_PHONE_INVALID:
-          'El formato del teléfono de oficina no es válido.',
-        OFFICE_PHONE_REQUIRED: 'El teléfono de oficina es obligatorio.',
+          STEP_2_LEGAL.errors.contactInfo.officePhoneInvalid,
+        OFFICE_PHONE_REQUIRED:
+          STEP_2_LEGAL.errors.contactInfo.officePhoneRequired,
       },
       FINANCIAL_STATEMENTS: {
-        CURRENCY_INVALID: 'Seleccione una moneda válida (CRC o USD).',
-        GROSS_SALES_POSITIVE: 'Las ventas brutas deben ser mayores a 0.',
-        GROSS_SALES_REQUIRED: 'Las ventas brutas son obligatorias.',
+        CURRENCY_INVALID:
+          STEP_2_LEGAL.errors.financialStatements.currencyInvalid,
+        GROSS_SALES_POSITIVE:
+          STEP_2_LEGAL.errors.financialStatements.grossSalesPositive,
+        GROSS_SALES_REQUIRED:
+          STEP_2_LEGAL.errors.financialStatements.grossSalesRequired,
         NET_PROFIT_EXCEEDS_GROSS:
-          'La utilidad neta no puede ser mayor a las ventas brutas.',
-        NET_PROFIT_POSITIVE: 'La utilidad neta debe ser mayor a 0.',
-        NET_PROFIT_REQUIRED: 'La utilidad neta es obligatoria.',
-        OTHER_INCOMES_MIN: 'Otros ingresos no puede ser negativo.',
-        OTHER_INCOMES_REQUIRED: 'Otros ingresos debe ser un valor numérico.',
+          STEP_2_LEGAL.errors.financialStatements.netProfitExceedsGross,
+        NET_PROFIT_POSITIVE:
+          STEP_2_LEGAL.errors.financialStatements.netProfitPositive,
+        NET_PROFIT_REQUIRED:
+          STEP_2_LEGAL.errors.financialStatements.netProfitRequired,
+        OTHER_INCOMES_MIN:
+          STEP_2_LEGAL.errors.financialStatements.otherIncomesMin,
+        OTHER_INCOMES_REQUIRED:
+          STEP_2_LEGAL.errors.financialStatements.otherIncomesRequired,
       },
-      SUBMIT_FAILED:
-        'Ocurrió un error al procesar la solicitud. Intente nuevamente.',
+      SUBMIT_FAILED: STEP_2_LEGAL.errors.submitFailed,
     },
-    HEADER_SUBTITLE:
-      'Ingresa la información legal, de contacto y financiera de la empresa para la evaluación y perfilado de crédito multi-banco.',
-    HEADER_TITLE: 'Persona Jurídica',
-    SUBMIT_BUTTON: 'Siguiente',
-    TITLE: 'Contacto y Comercial',
+    HEADER_SUBTITLE: STEP_2_LEGAL.headerSubtitle,
+    HEADER_TITLE: STEP_2_LEGAL.headerTitle,
+    SUBMIT_BUTTON: STEP_2_LEGAL.submitButton,
+    TITLE: STEP_2_LEGAL.title,
   },
   STEP_2_PHYSICAL_CONTACT: {
-    DESCRIPTION:
-      'Ingresa la información de contacto, residencia y situación laboral/financiera del solicitante para el análisis de capacidad de pago.',
+    DESCRIPTION: STEP_2_PHYSICAL.description,
     ERRORS: {
       COMMERCIAL_REFERENCE: {
         COMPANY_REFERENCE_MIN:
-          'El nombre de la empresa de referencia debe tener al menos 2 caracteres.',
+          STEP_2_PHYSICAL.errors.commercialReference.companyReferenceMin,
         COMPANY_REFERENCE_REQUIRED:
-          'El nombre de la empresa de referencia es obligatorio.',
+          STEP_2_PHYSICAL.errors.commercialReference.companyReferenceRequired,
         IBAN_ACCOUNT_INVALID:
-          'La cuenta IBAN debe tener un formato válido de Costa Rica (ej. CR05015202001026284066).',
-        IBAN_ACCOUNT_REQUIRED: 'La cuenta IBAN es obligatoria.',
+          STEP_2_PHYSICAL.errors.commercialReference.ibanAccountInvalid,
+        IBAN_ACCOUNT_REQUIRED:
+          STEP_2_PHYSICAL.errors.commercialReference.ibanAccountRequired,
         REFERENCE_PHONE_INVALID:
-          'El formato del teléfono de referencia no es válido.',
-        REFERENCE_PHONE_REQUIRED: 'El teléfono de referencia es obligatorio.',
+          STEP_2_PHYSICAL.errors.commercialReference.referencePhoneInvalid,
+        REFERENCE_PHONE_REQUIRED:
+          STEP_2_PHYSICAL.errors.commercialReference.referencePhoneRequired,
       },
       CONTACT_INFO: {
-        CELL_PHONE_INVALID: 'El formato del teléfono celular no es válido.',
-        CELL_PHONE_REQUIRED: 'El teléfono celular es obligatorio.',
-        EMAIL_INVALID: 'El formato del correo electrónico no es válido.',
-        EMAIL_REQUIRED: 'El correo electrónico es obligatorio.',
-        HOME_PHONE_INVALID: 'El formato del teléfono fijo no es válido.',
+        CELL_PHONE_INVALID: STEP_2_PHYSICAL.errors.contactInfo.cellPhoneInvalid,
+        CELL_PHONE_REQUIRED:
+          STEP_2_PHYSICAL.errors.contactInfo.cellPhoneRequired,
+        EMAIL_INVALID: STEP_2_PHYSICAL.errors.contactInfo.emailInvalid,
+        EMAIL_REQUIRED: STEP_2_PHYSICAL.errors.contactInfo.emailRequired,
+        HOME_PHONE_INVALID: STEP_2_PHYSICAL.errors.contactInfo.homePhoneInvalid,
       },
       EMPLOYMENT_DATA: {
-        EMPLOYER_REQUIRED: 'El nombre del patrono o empresa es obligatorio.',
-        EMPLOYMENT_STATUS_REQUIRED: 'La situación laboral es obligatoria.',
-        ENTRY_DATE_FUTURE: 'La fecha de ingreso no puede ser una fecha futura.',
+        EMPLOYER_REQUIRED:
+          STEP_2_PHYSICAL.errors.employmentData.employerRequired,
+        EMPLOYMENT_STATUS_REQUIRED:
+          STEP_2_PHYSICAL.errors.employmentData.employmentStatusRequired,
+        ENTRY_DATE_FUTURE:
+          STEP_2_PHYSICAL.errors.employmentData.entryDateFuture,
         ENTRY_DATE_INVALID:
-          'La fecha de ingreso debe tener un formato DD-MM-YYYY válido.',
+          STEP_2_PHYSICAL.errors.employmentData.entryDateInvalid,
         OFFICE_PHONE_INVALID:
-          'El formato del teléfono de oficina no es válido.',
-        OFFICE_PHONE_REQUIRED: 'El teléfono de oficina es obligatorio.',
-        PROFESSION_REQUIRED: 'La profesión u ocupación es obligatoria.',
+          STEP_2_PHYSICAL.errors.employmentData.officePhoneInvalid,
+        OFFICE_PHONE_REQUIRED:
+          STEP_2_PHYSICAL.errors.employmentData.officePhoneRequired,
+        PROFESSION_REQUIRED:
+          STEP_2_PHYSICAL.errors.employmentData.professionRequired,
       },
       FINANCIAL_CAPACITY: {
-        CURRENCY_INVALID: 'Seleccione una moneda válida (CRC o USD).',
-        GROSS_INCOME_POSITIVE: 'El ingreso bruto debe ser mayor a 0.',
-        GROSS_INCOME_REQUIRED: 'El ingreso bruto es obligatorio.',
-        NET_INCOME_POSITIVE: 'El ingreso neto debe ser mayor a 0.',
-        NET_INCOME_REQUIRED: 'El ingreso neto es obligatorio.',
-        OTHER_INCOMES_MIN: 'Otros ingresos no puede ser negativo.',
-        OTHER_INCOMES_REQUIRED: 'Otros ingresos debe ser un valor numérico.',
+        CURRENCY_INVALID:
+          STEP_2_PHYSICAL.errors.financialCapacity.currencyInvalid,
+        GROSS_INCOME_POSITIVE:
+          STEP_2_PHYSICAL.errors.financialCapacity.grossIncomePositive,
+        GROSS_INCOME_REQUIRED:
+          STEP_2_PHYSICAL.errors.financialCapacity.grossIncomeRequired,
+        NET_INCOME_POSITIVE:
+          STEP_2_PHYSICAL.errors.financialCapacity.netIncomePositive,
+        NET_INCOME_REQUIRED:
+          STEP_2_PHYSICAL.errors.financialCapacity.netIncomeRequired,
+        OTHER_INCOMES_MIN:
+          STEP_2_PHYSICAL.errors.financialCapacity.otherIncomesMin,
+        OTHER_INCOMES_REQUIRED:
+          STEP_2_PHYSICAL.errors.financialCapacity.otherIncomesRequired,
       },
       RESIDENTIAL_ADDRESS: {
-        CANTON_INVALID: 'El cantón no pertenece a la provincia seleccionada.',
-        CANTON_REQUIRED: 'El cantón es obligatorio.',
-        DISTRICT_INVALID: 'El distrito no pertenece al cantón seleccionado.',
-        DISTRICT_REQUIRED: 'El distrito es obligatorio.',
-        EXACT_ADDRESS_REQUIRED: 'La dirección exacta es obligatoria.',
-        PROVINCE_REQUIRED: 'La provincia es obligatoria.',
+        CANTON_INVALID: STEP_2_PHYSICAL.errors.residentialAddress.cantonInvalid,
+        CANTON_REQUIRED:
+          STEP_2_PHYSICAL.errors.residentialAddress.cantonRequired,
+        DISTRICT_INVALID:
+          STEP_2_PHYSICAL.errors.residentialAddress.districtInvalid,
+        DISTRICT_REQUIRED:
+          STEP_2_PHYSICAL.errors.residentialAddress.districtRequired,
+        EXACT_ADDRESS_REQUIRED:
+          STEP_2_PHYSICAL.errors.residentialAddress.exactAddressRequired,
+        PROVINCE_REQUIRED:
+          STEP_2_PHYSICAL.errors.residentialAddress.provinceRequired,
       },
-      SUBMIT_FAILED:
-        'Ocurrió un error al procesar la solicitud. Intente nuevamente.',
+      SUBMIT_FAILED: STEP_2_PHYSICAL.errors.submitFailed,
     },
-    HEADER_SUBTITLE:
-      'Ingresa la información de contacto, residencia y situación laboral/financiera del solicitante para el análisis de capacidad de pago.',
-    HEADER_TITLE: 'Contacto y Laboral',
-    SUBMIT_BUTTON: 'Siguiente',
-    TITLE: 'Contacto y Laboral',
+    HEADER_SUBTITLE: STEP_2_PHYSICAL.headerSubtitle,
+    HEADER_TITLE: STEP_2_PHYSICAL.headerTitle,
+    SUBMIT_BUTTON: STEP_2_PHYSICAL.submitButton,
+    TITLE: STEP_2_PHYSICAL.title,
   },
 } as const;
 
