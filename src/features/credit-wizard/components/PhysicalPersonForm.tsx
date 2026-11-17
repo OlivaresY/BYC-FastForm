@@ -6,6 +6,7 @@ import {
   IdCardIcon as SharedIdCardIcon,
   UserIcon as SharedUserIcon,
 } from '@/shared/ui';
+import { formatDateDisplay } from '@/shared/utils';
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import {
@@ -13,6 +14,7 @@ import {
   PHYSICAL_PERSON_FORM_COPY,
   PHYSICAL_PERSON_FORM_DEFAULT_OPTIONS,
   PHYSICAL_PERSON_FORM_ICON_DIMENSIONS,
+  PHYSICAL_PERSON_FORM_NUMERICAL,
   PHYSICAL_PERSON_FORM_STYLES,
   PHYSICAL_PERSON_FORM_TEST_IDS,
 } from '../constants/PhysicalPersonForm.constants';
@@ -222,9 +224,13 @@ export const PhysicalPersonForm = ({
           editable={!disabled}
           error={errors?.birthDate}
           helperText={PHYSICAL_PERSON_FORM_COPY.BIRTH_DATE_HELPER}
+          keyboardType='numeric'
           label={PHYSICAL_PERSON_FORM_COPY.BIRTH_DATE_LABEL}
           leftIcon='calendar'
-          onChangeText={handlers.birthDate}
+          maxLength={PHYSICAL_PERSON_FORM_NUMERICAL.MAX_LENGTH_DATE}
+          onChangeText={(text: string): void => {
+            handlers.birthDate(formatDateDisplay(text));
+          }}
           placeholder={PHYSICAL_PERSON_FORM_COPY.BIRTH_DATE_PLACEHOLDER}
           required
           testID={PHYSICAL_PERSON_FORM_TEST_IDS.BIRTH_DATE_INPUT}

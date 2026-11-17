@@ -70,7 +70,7 @@ export const esCR = {
           companyReferenceRequired:
             'El nombre de la empresa de referencia es obligatorio.',
           ibanAccountInvalid:
-            'La cuenta IBAN debe tener un formato válido de Costa Rica (ej. CR05015202001026284066).',
+            'La cuenta IBAN debe tener 22 caracteres e iniciar con CR (ej. CR05015202001026284066). Verifique que los dígitos verificadores y de cuenta sean válidos.',
           ibanAccountRequired: 'La cuenta IBAN es obligatoria.',
           referencePhoneInvalid:
             'El formato del teléfono de referencia no es válido.',
@@ -173,7 +173,7 @@ export const esCR = {
           companyReferenceRequired:
             'El nombre de la empresa de referencia es obligatorio.',
           ibanAccountInvalid:
-            'La cuenta IBAN debe tener un formato válido de Costa Rica (ej. CR05015202001026284066).',
+            'La cuenta IBAN debe tener 22 caracteres e iniciar con CR (ej. CR05015202001026284066). Verifique que los dígitos verificadores y de cuenta sean válidos.',
           ibanAccountRequired: 'La cuenta IBAN es obligatoria.',
           referencePhoneInvalid:
             'El formato del teléfono de referencia no es válido.',

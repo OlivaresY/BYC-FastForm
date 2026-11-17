@@ -118,6 +118,17 @@ describe('LegalEntityContactStepView Integration', () => {
       expect(page.ibanAccountInput.props.value).toBe('CR05015202001026284066');
     });
 
+    it('sanitizes spaced and lowercase IBAN paste input to clean uppercase 22 characters', () => {
+      // Arrange
+      const page = LegalEntityContactStepViewPageObject.render();
+
+      // Act
+      page.fillIbanAccount('cr05 0152 0200 1026 2840 66');
+
+      // Assert
+      expect(page.ibanAccountInput.props.value).toBe('CR05015202001026284066');
+    });
+
     it('updates text inputs correctly across all sections', () => {
       // Arrange
       const page = LegalEntityContactStepViewPageObject.render();

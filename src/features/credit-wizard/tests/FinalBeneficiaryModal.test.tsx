@@ -167,6 +167,28 @@ describe('FinalBeneficiaryModal Component', () => {
     );
   });
 
+  it('auto-formats raw numeric date input to DD-MM-YYYY on thirdPartyBirthDate', () => {
+    // Arrange
+    const handleFieldChange = jest.fn();
+    const page = FinalBeneficiaryModalPageObject.render({
+      isOpen: true,
+      onClose: jest.fn(),
+      onFieldChange: handleFieldChange,
+      values: APPLICANT_STEP_VIEW_DEFAULT_VALUES.THIRD_PARTY,
+    });
+
+    // Act
+    page.fillBirthDate('15051990');
+
+    // Assert
+    expect(handleFieldChange).toHaveBeenCalledWith(
+      'thirdPartyBirthDate',
+      '15-05-1990',
+    );
+    expect(page.birthDateInput.props.keyboardType).toBe('numeric');
+    expect(page.birthDateInput.props.maxLength).toBe(10);
+  });
+
   it('renders the provided per-field error messages', () => {
     // Arrange & Act
     const page = FinalBeneficiaryModalPageObject.render({

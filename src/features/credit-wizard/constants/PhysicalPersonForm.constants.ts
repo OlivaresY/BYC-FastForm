@@ -66,6 +66,10 @@ export const PHYSICAL_PERSON_FORM_ICON_DIMENSIONS = {
   VIEW_BOX: '0 0 24 24',
 } as const;
 
+export const PHYSICAL_PERSON_FORM_NUMERICAL = {
+  MAX_LENGTH_DATE: 10,
+} as const;
+
 export const PHYSICAL_PERSON_FORM_STYLES = {
   CONTAINER: 'w-full gap-6',
   GRID_COLUMN: 'flex-1',

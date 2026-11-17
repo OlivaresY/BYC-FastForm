@@ -20,10 +20,12 @@ import {
   PhoneIcon,
   UserIcon,
 } from '@/shared/ui';
+import { formatDateDisplay } from '@/shared/utils';
 import {
   BENEFICIARY_MODAL_COLORS,
   BENEFICIARY_MODAL_COPY,
   BENEFICIARY_MODAL_DIMENSIONS,
+  BENEFICIARY_MODAL_NUMERICAL,
   BENEFICIARY_MODAL_OPTIONS,
   BENEFICIARY_MODAL_STYLES,
   BENEFICIARY_MODAL_TEST_IDS,
@@ -305,9 +307,13 @@ export const FinalBeneficiaryModal = ({
 
               <CustomTextInput
                 error={errors?.thirdPartyBirthDate}
+                keyboardType='numeric'
                 label={BENEFICIARY_MODAL_COPY.BIRTH_DATE_LABEL}
                 leftIcon='calendar'
-                onChangeText={handlers.thirdPartyBirthDate}
+                maxLength={BENEFICIARY_MODAL_NUMERICAL.MAX_LENGTH_DATE}
+                onChangeText={(text: string): void => {
+                  handlers.thirdPartyBirthDate(formatDateDisplay(text));
+                }}
                 placeholder={BENEFICIARY_MODAL_COPY.BIRTH_DATE_PLACEHOLDER}
                 required={true}
                 testID={BENEFICIARY_MODAL_TEST_IDS.BIRTH_DATE_INPUT}

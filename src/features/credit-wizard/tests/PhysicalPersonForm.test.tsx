@@ -226,6 +226,23 @@ describe('PhysicalPersonForm Component', () => {
       // Assert
       expect(handleFieldChange).toHaveBeenCalledWith('birthDate', '15-08-1988');
     });
+
+    it('auto-formats raw numeric date input to DD-MM-YYYY on birthDate', () => {
+      // Arrange
+      const handleFieldChange = jest.fn();
+      const page = PhysicalPersonFormPageObject.render({
+        onFieldChange: handleFieldChange,
+        values: initialValues,
+      });
+
+      // Act
+      page.fillField('birthDate', '15081988');
+
+      // Assert
+      expect(handleFieldChange).toHaveBeenCalledWith('birthDate', '15-08-1988');
+      expect(page.getTextInput('birthDate').props.keyboardType).toBe('numeric');
+      expect(page.getTextInput('birthDate').props.maxLength).toBe(10);
+    });
   });
 
   describe('Select Dropdown Interactions & Value Propagation', () => {

@@ -112,6 +112,10 @@ export const BENEFICIARY_MODAL_DIMENSIONS = {
   SECTION_ICON_STROKE_WIDTH: 2,
 } as const;
 
+export const BENEFICIARY_MODAL_NUMERICAL = {
+  MAX_LENGTH_DATE: 10,
+} as const;
+
 export const BENEFICIARY_MODAL_OPTIONS = {
   DOC_TYPE: [
     { label: 'Cédula Nacional (Física)', value: 'national_id' },

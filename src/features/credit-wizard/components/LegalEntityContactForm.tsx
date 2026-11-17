@@ -12,11 +12,17 @@ import {
 import {
   formatCurrencyDisplay,
   formatDateDisplay,
+  sanitizeIbanInput,
   sanitizeNumericDigits,
 } from '@/shared/utils';
 import React from 'react';
 import { Controller, useWatch } from 'react-hook-form';
 import { Text, View } from 'react-native';
+import {
+  getCantonOptions,
+  getDistrictOptions,
+  getProvinceOptions,
+} from '../constants/CostaRicaLocations.constants';
 import {
   LEGAL_ENTITY_CONTACT_FORM_COLORS,
   LEGAL_ENTITY_CONTACT_FORM_COPY,
@@ -26,11 +32,6 @@ import {
   LEGAL_ENTITY_CONTACT_FORM_TEST_IDS,
   RAW_ECONOMIC_SECTOR_OPTIONS,
 } from '../constants/LegalEntityContactForm.constants';
-import {
-  getCantonOptions,
-  getDistrictOptions,
-  getProvinceOptions,
-} from '../constants/CostaRicaLocations.constants';
 import { CURRENCY_OPTIONS } from '../constants/SharedCatalogs.constants';
 import type { LegalEntityContactFormProps } from '../types/LegalEntityContactForm.types';
 
@@ -130,8 +131,8 @@ const LegalEntityContactFormComponent = ({
       label:
         opt.value in t.common.catalogs.currencies
           ? t.common.catalogs.currencies[
-              opt.value as keyof typeof t.common.catalogs.currencies
-            ]
+          opt.value as keyof typeof t.common.catalogs.currencies
+          ]
           : opt.label,
       value: opt.value,
     }));
@@ -775,10 +776,12 @@ const LegalEntityContactFormComponent = ({
               keyboardType='default'
               label={LEGAL_ENTITY_CONTACT_FORM_COPY.IBAN_ACCOUNT_LABEL}
               leftIcon='banknote'
-              maxLength={LEGAL_ENTITY_CONTACT_FORM_NUMERICAL.MAX_LENGTH_IBAN}
+              maxLength={
+                LEGAL_ENTITY_CONTACT_FORM_NUMERICAL.MAX_LENGTH_IBAN_INPUT
+              }
               onBlur={onBlur}
               onChangeText={(text: string): void => {
-                onChange(text.toUpperCase());
+                onChange(sanitizeIbanInput(text));
               }}
               onFocus={onInputFocus}
               placeholder={
