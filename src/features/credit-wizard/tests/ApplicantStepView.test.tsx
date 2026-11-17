@@ -9,6 +9,7 @@ const createMockViewModel = (
   closeBeneficiaryModal: jest.fn(),
   handleNextStep: jest.fn().mockResolvedValue(undefined),
   handleSaveThirdPartyData: jest.fn().mockReturnValue(true),
+  hasSingleSurnameWarning: false,
   isBeneficiaryModalOpen: false,
   isIdentificationValid: true,
   isSubmitting: false,

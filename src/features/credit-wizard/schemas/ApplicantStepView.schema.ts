@@ -72,25 +72,37 @@ export const LegalIdentificationNumberSchema = identificationNumberSchema(
   APPLICANT_ERRORS.LEGAL.IDENTIFICATION_NUMBER,
 );
 
-export const PhysicalApplicantSchema = z.object({
-  birthDate: createDateDDMMYYYYSchema(APPLICANT_ERRORS.PHYSICAL.BIRTH_DATE),
-  firstLastName: requiredText(APPLICANT_ERRORS.PHYSICAL.FIRST_LAST_NAME),
-  firstName: requiredText(APPLICANT_ERRORS.PHYSICAL.FIRST_NAME),
-  gender: z.enum(['male', 'female', 'other'], {
-    error: APPLICANT_ERRORS.PHYSICAL.GENDER,
-  }),
-  identificationNumber: PhysicalIdentificationNumberSchema,
-  identificationType: z.enum(['national_id', 'dimex', 'passport'], {
-    error: APPLICANT_ERRORS.PHYSICAL.IDENTIFICATION_TYPE,
-  }),
-  maritalStatus: z.enum(
-    ['single', 'married', 'divorced', 'widowed', 'common_law'],
-    { error: APPLICANT_ERRORS.PHYSICAL.MARITAL_STATUS },
-  ),
-  middleName: z.string().trim().optional(),
-  nationality: requiredText(APPLICANT_ERRORS.PHYSICAL.NATIONALITY),
-  secondLastName: requiredText(APPLICANT_ERRORS.PHYSICAL.SECOND_LAST_NAME),
-});
+export const PhysicalApplicantSchema = z
+  .object({
+    birthDate: createDateDDMMYYYYSchema(APPLICANT_ERRORS.PHYSICAL.BIRTH_DATE),
+    firstLastName: requiredText(APPLICANT_ERRORS.PHYSICAL.FIRST_LAST_NAME),
+    firstName: requiredText(APPLICANT_ERRORS.PHYSICAL.FIRST_NAME),
+    gender: z.enum(['male', 'female', 'other'], {
+      error: APPLICANT_ERRORS.PHYSICAL.GENDER,
+    }),
+    identificationNumber: PhysicalIdentificationNumberSchema,
+    identificationType: z.enum(['national_id', 'dimex', 'passport'], {
+      error: APPLICANT_ERRORS.PHYSICAL.IDENTIFICATION_TYPE,
+    }),
+    maritalStatus: z.enum(
+      ['single', 'married', 'divorced', 'widowed', 'common_law'],
+      { error: APPLICANT_ERRORS.PHYSICAL.MARITAL_STATUS },
+    ),
+    middleName: z.string().trim().optional(),
+    nationality: requiredText(APPLICANT_ERRORS.PHYSICAL.NATIONALITY),
+    secondLastName: z.string().trim().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.identificationType === 'national_id') {
+      if (!data.secondLastName || data.secondLastName.trim().length === 0) {
+        ctx.addIssue({
+          code: 'custom',
+          message: APPLICANT_ERRORS.PHYSICAL.SECOND_LAST_NAME,
+          path: ['secondLastName'],
+        });
+      }
+    }
+  });
 
 export const LegalApplicantSchema = z.object({
   identificationNumber: LegalIdentificationNumberSchema,

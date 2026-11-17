@@ -224,6 +224,26 @@ export const useApplicantStepViewModel = (
       ? isPhysicalIdentificationValid
       : isLegalIdentificationValid;
 
+  const hasSingleSurnameWarning = useMemo<boolean>(() => {
+    if (regime !== 'physical') {
+      return false;
+    }
+    const idType = physicalValues.identificationType;
+    const isForeignId = idType === 'dimex' || idType === 'passport';
+    const hasFirstNames =
+      Boolean(physicalValues.firstName?.trim()) &&
+      Boolean(physicalValues.firstLastName?.trim());
+    const hasEmptySecondSurname = !physicalValues.secondLastName?.trim();
+
+    return isForeignId && hasFirstNames && hasEmptySecondSurname;
+  }, [
+    physicalValues.firstName,
+    physicalValues.firstLastName,
+    physicalValues.identificationType,
+    physicalValues.secondLastName,
+    regime,
+  ]);
+
   // ===========================================================================
   // Modal Handlers
   // ===========================================================================
@@ -490,13 +510,7 @@ export const useApplicantStepViewModel = (
         }
       })(dataOrEvent as React.BaseSyntheticEvent | undefined);
     },
-    [
-      editingThirdPartyValues,
-      getValues,
-      handleSubmit,
-      onValidSubmit,
-      setValue,
-    ],
+    [editingThirdPartyValues, getValues, handleSubmit, onValidSubmit, setValue],
   );
 
   const onSubmit = useCallback((): Promise<void> => {
@@ -507,6 +521,7 @@ export const useApplicantStepViewModel = (
     closeBeneficiaryModal,
     handleNextStep,
     handleSaveThirdPartyData,
+    hasSingleSurnameWarning,
     isBeneficiaryModalOpen,
     isIdentificationValid,
     isSubmitting,

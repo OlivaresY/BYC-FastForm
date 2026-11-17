@@ -35,6 +35,7 @@ export interface PhysicalPersonFormOptions {
 export interface PhysicalPersonFormProps {
   disabled?: boolean;
   errors?: Partial<Record<PhysicalPersonFormField, string>>;
+  hasSingleSurnameWarning?: boolean;
   isIdentificationValid?: boolean;
   onFieldChange: <K extends PhysicalPersonFormField>(
     field: K,

@@ -286,7 +286,9 @@ describe('useApplicantStepViewModel - Identification Normalization', () => {
       await page.waitFor(() => {
         expect(page.thirdPartyValues).toEqual(savedSnapshot);
         expect(page.thirdPartyValues.thirdPartyFullName).toBe('Carlos Mora');
-        expect(page.thirdPartyValues.thirdPartyEmail).toBe('carlos@example.com');
+        expect(page.thirdPartyValues.thirdPartyEmail).toBe(
+          'carlos@example.com',
+        );
         expect(page.thirdPartyErrors).toEqual({});
       });
     });
@@ -647,6 +649,90 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
       expect(page.physicalErrors.firstName).toBe(
         APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.FIRST_NAME,
       );
+    });
+
+    it('blocks national_id submission when secondLastName is missing', async () => {
+      const onSubmit = jest.fn();
+      const page = ApplicantStepViewModelPageObject.render({
+        initialPhysicalValues: {
+          ...VALID_PHYSICAL,
+          identificationType: 'national_id',
+          secondLastName: '',
+        },
+        initialRegime: 'physical',
+        onSubmit,
+      });
+
+      await page.submit();
+
+      expect(onSubmit).not.toHaveBeenCalled();
+      expect(page.physicalErrors.secondLastName).toBe(
+        APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.SECOND_LAST_NAME,
+      );
+      expect(page.isValid).toBe(false);
+      expect(page.hasSingleSurnameWarning).toBe(false);
+    });
+
+    it('allows dimex submission with single surname and activates warning', async () => {
+      const onSubmit = jest.fn();
+      const page = ApplicantStepViewModelPageObject.render({
+        initialPhysicalValues: {
+          ...VALID_PHYSICAL,
+          identificationType: 'dimex',
+          secondLastName: '',
+        },
+        initialRegime: 'physical',
+        onSubmit,
+      });
+
+      expect(page.isValid).toBe(true);
+      expect(page.hasSingleSurnameWarning).toBe(true);
+
+      await page.submit();
+
+      expect(onSubmit).toHaveBeenCalledTimes(1);
+      expect(page.physicalErrors.secondLastName).toBeUndefined();
+    });
+
+    it('allows passport submission with single surname and activates warning', async () => {
+      const onSubmit = jest.fn();
+      const page = ApplicantStepViewModelPageObject.render({
+        initialPhysicalValues: {
+          ...VALID_PHYSICAL,
+          identificationType: 'passport',
+          secondLastName: '',
+        },
+        initialRegime: 'physical',
+        onSubmit,
+      });
+
+      expect(page.isValid).toBe(true);
+      expect(page.hasSingleSurnameWarning).toBe(true);
+
+      await page.submit();
+
+      expect(onSubmit).toHaveBeenCalledTimes(1);
+      expect(page.physicalErrors.secondLastName).toBeUndefined();
+    });
+
+    it('deactivates warning when foreigner provides a second surname', async () => {
+      const onSubmit = jest.fn();
+      const page = ApplicantStepViewModelPageObject.render({
+        initialPhysicalValues: {
+          ...VALID_PHYSICAL,
+          identificationType: 'dimex',
+          secondLastName: 'Smith',
+        },
+        initialRegime: 'physical',
+        onSubmit,
+      });
+
+      expect(page.isValid).toBe(true);
+      expect(page.hasSingleSurnameWarning).toBe(false);
+
+      await page.submit();
+
+      expect(onSubmit).toHaveBeenCalledTimes(1);
     });
 
     it('reports every missing legal field with its own message', async () => {

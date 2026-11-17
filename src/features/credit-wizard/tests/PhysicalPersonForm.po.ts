@@ -155,7 +155,7 @@ export class PhysicalPersonFormPageObject {
   }
 
   public getFieldHelperText(
-    field: 'birthDate' | 'identificationNumber',
+    field: 'birthDate' | 'identificationNumber' | 'secondLastName',
   ): ReactTestInstance | null {
     const container = this.getFieldContainer(field);
     const baseId = TEXT_FIELD_TEST_ID_MAP[field];

@@ -35,6 +35,12 @@ export const esCR = {
   },
   creditWizard: {
     mockUserInitials: 'YO',
+    step1PhysicalIdentity: {
+      form: {
+        singleSurnameWarning:
+          'Titular extranjero: se registrará un único apellido.',
+      },
+    },
     step2LegalContact: {
       backButton: 'Atrás',
       description:

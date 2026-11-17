@@ -100,6 +100,8 @@ export const WIZARD_COPY = {
     },
     HEADER_SUBTITLE: 'Ingrese la información básica del solicitante.',
     HEADER_TITLE: 'Datos del Solicitante',
+    SINGLE_SURNAME_WARNING:
+      esCR.creditWizard.step1PhysicalIdentity.form.singleSurnameWarning,
     SUBMIT_BUTTON: 'Siguiente: Información de Contacto',
     SUBTITLE:
       'Ingresa los datos básicos del solicitante para iniciar la gestión y perfilado de crédito multi-banco.',

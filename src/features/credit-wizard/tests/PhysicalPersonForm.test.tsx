@@ -44,7 +44,7 @@ describe('PhysicalPersonForm Component', () => {
       const handleFieldChange = jest.fn();
       const page = PhysicalPersonFormPageObject.render({
         onFieldChange: handleFieldChange,
-        values: initialValues,
+        values: { ...initialValues, identificationType: 'national_id' },
       });
 
       const requiredFields: PhysicalPersonFormField[] = [
@@ -66,6 +66,49 @@ describe('PhysicalPersonForm Component', () => {
 
       // Assert - middleName is optional
       expect(page.getRequiredAsterisk('middleName')).toBeNull();
+    });
+
+    it('conditionally controls required asterisk on secondLastName based on identificationType', () => {
+      // Arrange & Assert for National ID
+      const nationalPage = PhysicalPersonFormPageObject.render({
+        onFieldChange: jest.fn(),
+        values: { ...initialValues, identificationType: 'national_id' },
+      });
+      expect(nationalPage.getRequiredAsterisk('secondLastName')).toBeTruthy();
+
+      // Arrange & Assert for DIMEX (foreigner)
+      const dimexPage = PhysicalPersonFormPageObject.render({
+        onFieldChange: jest.fn(),
+        values: { ...initialValues, identificationType: 'dimex' },
+      });
+      expect(dimexPage.getRequiredAsterisk('secondLastName')).toBeNull();
+
+      // Arrange & Assert for Passport (foreigner)
+      const passportPage = PhysicalPersonFormPageObject.render({
+        onFieldChange: jest.fn(),
+        values: { ...initialValues, identificationType: 'passport' },
+      });
+      expect(passportPage.getRequiredAsterisk('secondLastName')).toBeNull();
+    });
+
+    it('renders singleSurnameWarning helperText when hasSingleSurnameWarning is true', () => {
+      // Arrange
+      const page = PhysicalPersonFormPageObject.render({
+        hasSingleSurnameWarning: true,
+        onFieldChange: jest.fn(),
+        values: {
+          ...initialValues,
+          firstLastName: 'Smith',
+          firstName: 'John',
+          identificationType: 'dimex',
+          secondLastName: '',
+        },
+      });
+
+      // Assert
+      expect(page.getFieldHelperText('secondLastName')?.props.children).toBe(
+        PHYSICAL_PERSON_FORM_COPY.SINGLE_SURNAME_WARNING,
+      );
     });
 
     it('renders helper texts on identificationNumber and birthDate', () => {

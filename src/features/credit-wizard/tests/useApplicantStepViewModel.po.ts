@@ -52,6 +52,10 @@ export class ApplicantStepViewModelPageObject {
     return this.hookResult.result.current;
   }
 
+  public get hasSingleSurnameWarning(): boolean {
+    return this.current.hasSingleSurnameWarning;
+  }
+
   public get isBeneficiaryModalOpen(): boolean {
     return this.current.isBeneficiaryModalOpen;
   }

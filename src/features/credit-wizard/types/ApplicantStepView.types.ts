@@ -86,6 +86,7 @@ export interface UseApplicantStepViewModelProps {
 
 export interface UseApplicantStepViewModelReturn {
   // State
+  hasSingleSurnameWarning: boolean;
   isBeneficiaryModalOpen: boolean;
   isIdentificationValid: boolean;
   isSubmitting: boolean;

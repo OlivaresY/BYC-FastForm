@@ -53,6 +53,7 @@ const ClockIcon = (): React.JSX.Element => (
 export const PhysicalPersonForm = ({
   disabled = false,
   errors,
+  hasSingleSurnameWarning = false,
   isIdentificationValid = false,
   onFieldChange,
   options,
@@ -199,12 +200,17 @@ export const PhysicalPersonForm = ({
               autoCapitalize='words'
               editable={!disabled}
               error={errors?.secondLastName}
+              helperText={
+                hasSingleSurnameWarning
+                  ? PHYSICAL_PERSON_FORM_COPY.SINGLE_SURNAME_WARNING
+                  : undefined
+              }
               label={PHYSICAL_PERSON_FORM_COPY.SECOND_LAST_NAME_LABEL}
               onChangeText={handlers.secondLastName}
               placeholder={
                 PHYSICAL_PERSON_FORM_COPY.SECOND_LAST_NAME_PLACEHOLDER
               }
-              required
+              required={values.identificationType === 'national_id'}
               testID={PHYSICAL_PERSON_FORM_TEST_IDS.SECOND_LAST_NAME_INPUT}
               value={values.secondLastName}
             />
