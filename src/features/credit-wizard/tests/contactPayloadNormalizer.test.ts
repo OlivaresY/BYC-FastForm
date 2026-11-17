@@ -79,7 +79,9 @@ describe('contactPayloadNormalizer', () => {
       expect(result.residentialAddress.province).toBe('san_jose');
       expect(result.residentialAddress.canton).toBe('central');
       expect(result.residentialAddress.district).toBe('carmen');
-      expect(result.residentialAddress.exactAddress).toBe('100m norte del parque');
+      expect(result.residentialAddress.exactAddress).toBe(
+        '100m norte del parque',
+      );
 
       // Verify employmentData
       expect(result.employmentData.employer).toBe('Acme Corp');
@@ -93,7 +95,9 @@ describe('contactPayloadNormalizer', () => {
       expect(result.financialCapacity.netIncome).toBe(1200000);
 
       // Verify commercialReference
-      expect(result.commercialReference.companyReference).toBe('CoriMotors Test');
+      expect(result.commercialReference.companyReference).toBe(
+        'CoriMotors Test',
+      );
       expect(result.commercialReference.referencePhone).toBe('+506 2200-2222');
       expect(result.commercialReference.ibanAccount).toBe(
         'CR05015202001026284066',
@@ -147,7 +151,9 @@ describe('contactPayloadNormalizer', () => {
       expect(result.contactInfo.cellPhone).toBe('');
       expect(result.commercialAddress.canton).toBe('');
       expect(result.commercialActivity.mainActivity).toBe('');
-      expect(result.financialStatements.currency).toBe(FINANCIAL_CURRENCIES.CRC);
+      expect(result.financialStatements.currency).toBe(
+        FINANCIAL_CURRENCIES.CRC,
+      );
       expect(result.commercialReference.companyReference).toBe('');
       expect(result.commercialReference.ibanAccount).toBe('');
     });
@@ -196,6 +202,7 @@ describe('contactPayloadNormalizer', () => {
       );
       expect(result.commercialActivity.constitutionDate).toBe('15/05/2018');
       expect(result.commercialActivity.economicSector).toBe('Automotriz');
+      expect(result.commercialActivity.economicSectorOther).toBe('');
       expect(result.commercialActivity.employeesCount).toBe(45);
       expect(result.commercialActivity.accountingPhone).toBe('+506 2200-3333');
 
@@ -241,6 +248,19 @@ describe('contactPayloadNormalizer', () => {
       expect(result.financialStatements.grossSales).toBe(50000000);
       expect(result.financialStatements.netProfit).toBe(15000000);
     });
+
+    it('preserves economicSectorOther when provided in nested commercialActivity or flat payload', () => {
+      const result = normalizeLegalEntityContactPayload({
+        commercialActivity: {
+          economicSector: 'Otro',
+          economicSectorOther: 'Servicios de Consultoría',
+        },
+      });
+
+      expect(result.commercialActivity.economicSector).toBe('Otro');
+      expect(result.commercialActivity.economicSectorOther).toBe(
+        'Servicios de Consultoría',
+      );
+    });
   });
 });
-

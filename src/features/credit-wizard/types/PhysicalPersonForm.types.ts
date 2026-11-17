@@ -10,6 +10,7 @@ export type PhysicalPersonFormField =
   | 'maritalStatus'
   | 'middleName'
   | 'nationality'
+  | 'nationalityOther'
   | 'secondLastName';
 
 export interface PhysicalPersonFormValues {
@@ -22,6 +23,7 @@ export interface PhysicalPersonFormValues {
   maritalStatus: string;
   middleName: string;
   nationality: string;
+  nationalityOther?: string;
   secondLastName: string;
 }
 

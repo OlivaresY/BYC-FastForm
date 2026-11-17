@@ -9,6 +9,7 @@ export const LEGAL_ENTITY_CONTACT_DEFAULT_VALUES = {
     accountingPhone: '',
     constitutionDate: '',
     economicSector: '',
+    economicSectorOther: '',
     employeesCount: undefined,
     mainActivity: '',
   },

@@ -29,6 +29,7 @@ export const LegalEntityContactStepView = ({
     isSubmitting,
     isValid,
     provinceOptions,
+    setValue,
     submitError,
   } = viewModel;
 
@@ -69,6 +70,7 @@ export const LegalEntityContactStepView = ({
           onInputFocus={onInputFocus}
           onProvinceChange={handleProvinceChange}
           options={{ cantonOptions, districtOptions, provinceOptions }}
+          setValue={setValue}
           testID={LEGAL_ENTITY_CONTACT_STEP_VIEW_TEST_IDS.FORM}
         />
       )}

@@ -26,6 +26,8 @@ export const PHYSICAL_PERSON_FORM_COPY = {
   MIDDLE_NAME_LABEL: 'Segundo Nombre',
   MIDDLE_NAME_PLACEHOLDER: 'Alberto',
   NATIONALITY_LABEL: 'Nacionalidad',
+  NATIONALITY_OTHER_LABEL: 'Especifique su nacionalidad',
+  NATIONALITY_OTHER_PLACEHOLDER: 'Ingrese su nacionalidad',
   NATIONALITY_PLACEHOLDER: 'Seleccione nacionalidad',
   SECOND_LAST_NAME_LABEL: 'Segundo Apellido',
   SECOND_LAST_NAME_PLACEHOLDER: 'Castro',
@@ -34,6 +36,8 @@ export const PHYSICAL_PERSON_FORM_COPY = {
   SECTION_3_TITLE: 'DATOS DEMOGRÁFICOS',
   SINGLE_SURNAME_WARNING: WIZARD_COPY.STEP_1_APPLICANT.SINGLE_SURNAME_WARNING,
 } as const;
+
+export const OTHER_NATIONALITY_VALUE = 'other' as const;
 
 export const PHYSICAL_PERSON_FORM_DEFAULT_OPTIONS = {
   GENDER: [
@@ -58,7 +62,7 @@ export const PHYSICAL_PERSON_FORM_DEFAULT_OPTIONS = {
     { label: 'Nicaragüense', value: 'NI' },
     { label: 'Colombiana', value: 'CO' },
     { label: 'Estadounidense', value: 'US' },
-    { label: 'Otra', value: 'other' },
+    { label: 'Otra', value: OTHER_NATIONALITY_VALUE },
   ] as const satisfies readonly CustomSelectOption[],
 } as const;
 
@@ -101,6 +105,7 @@ export const PHYSICAL_PERSON_FORM_TEST_IDS = {
   MARITAL_STATUS_SELECT: 'physical-person-marital-status-dropdown',
   MIDDLE_NAME_INPUT: 'physical-person-middle-name-input',
   NATIONALITY_DROPDOWN: 'physical-person-nationality-dropdown',
+  NATIONALITY_OTHER_INPUT: 'physical-person-nationality-other-input',
   NATIONALITY_SELECT: 'physical-person-nationality-dropdown',
   SECOND_LAST_NAME_INPUT: 'physical-person-second-last-name-input',
   SECTION_1_HEADER: 'physical-person-section-1-header',

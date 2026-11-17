@@ -25,6 +25,8 @@ export const LEGAL_ENTITY_CONTACT_FORM_COPY = {
   DISTRICT_LABEL: FORM_I18N.labels.district,
   DISTRICT_PLACEHOLDER: FORM_I18N.placeholders.district,
   ECONOMIC_SECTOR_LABEL: FORM_I18N.labels.economicSector,
+  ECONOMIC_SECTOR_OTHER_LABEL: FORM_I18N.labels.economicSectorOther,
+  ECONOMIC_SECTOR_OTHER_PLACEHOLDER: FORM_I18N.placeholders.economicSectorOther,
   ECONOMIC_SECTOR_PLACEHOLDER: FORM_I18N.placeholders.economicSector,
   EMAIL_LABEL: FORM_I18N.labels.email,
   EMAIL_PLACEHOLDER: FORM_I18N.placeholders.email,
@@ -94,6 +96,8 @@ export interface RawEconomicSectorOption {
   value: string;
 }
 
+export const OTHER_ECONOMIC_SECTOR_VALUE = 'Otro' as const;
+
 export const RAW_ECONOMIC_SECTOR_OPTIONS: readonly RawEconomicSectorOption[] = [
   { key: ECONOMIC_SECTOR_KEYS.AGRICULTURE, value: 'Agricultura y Ganadería' },
   { key: ECONOMIC_SECTOR_KEYS.COMMERCE, value: 'Comercio' },
@@ -106,7 +110,7 @@ export const RAW_ECONOMIC_SECTOR_OPTIONS: readonly RawEconomicSectorOption[] = [
   },
   { key: ECONOMIC_SECTOR_KEYS.TRANSPORT, value: 'Transporte y Logística' },
   { key: ECONOMIC_SECTOR_KEYS.TOURISM, value: 'Turismo y Hospitalidad' },
-  { key: ECONOMIC_SECTOR_KEYS.OTHER, value: 'Otro' },
+  { key: ECONOMIC_SECTOR_KEYS.OTHER, value: OTHER_ECONOMIC_SECTOR_VALUE },
 ] as const;
 
 export const LEGAL_ENTITY_CONTACT_FORM_OPTIONS = {
@@ -143,6 +147,8 @@ export const LEGAL_ENTITY_CONTACT_FORM_TEST_IDS = {
   CORPORATE_NAME_INPUT: 'legal-entity-contact-corporate-name-input',
   CURRENCY_SELECT: 'legal-entity-contact-currency-select',
   DISTRICT_SELECT: 'legal-entity-contact-district-select',
+  ECONOMIC_SECTOR_OTHER_INPUT:
+    'legal-entity-contact-economic-sector-other-input',
   ECONOMIC_SECTOR_SELECT: 'legal-entity-contact-economic-sector-select',
   EMAIL_INPUT: 'legal-entity-contact-email-input',
   EMPLOYEES_COUNT_INPUT: 'legal-entity-contact-employees-count-input',

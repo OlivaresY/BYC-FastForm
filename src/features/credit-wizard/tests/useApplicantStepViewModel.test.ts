@@ -532,6 +532,7 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
     identificationType: 'national_id',
     maritalStatus: 'single',
     nationality: 'CR',
+    nationalityOther: '',
     secondLastName: 'Mora',
   };
 
@@ -735,6 +736,56 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
       expect(onSubmit).toHaveBeenCalledTimes(1);
     });
 
+    it('blocks submission and populates physicalErrors.nationalityOther when nationality is other and nationalityOther is missing', async () => {
+      const onSubmit = jest.fn();
+      const page = ApplicantStepViewModelPageObject.render({
+        initialPhysicalValues: {
+          ...VALID_PHYSICAL,
+          nationality: 'other',
+          nationalityOther: '',
+        },
+        initialRegime: 'physical',
+        onSubmit,
+      });
+
+      expect(page.isValid).toBe(false);
+
+      await page.submit();
+
+      expect(onSubmit).not.toHaveBeenCalled();
+      expect(page.physicalErrors.nationalityOther).toBe(
+        APPLICANT_STEP_VIEW_ERRORS.PHYSICAL.NATIONALITY_OTHER,
+      );
+    });
+
+    it('allows submission when nationality is other and nationalityOther is provided', async () => {
+      const onSubmit = jest.fn();
+      const page = ApplicantStepViewModelPageObject.render({
+        initialPhysicalValues: {
+          ...VALID_PHYSICAL,
+          nationality: 'other',
+          nationalityOther: 'Mexicana',
+        },
+        initialRegime: 'physical',
+        onSubmit,
+      });
+
+      expect(page.isValid).toBe(true);
+      expect(page.physicalErrors.nationalityOther).toBeUndefined();
+
+      await page.submit();
+
+      expect(onSubmit).toHaveBeenCalledTimes(1);
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          values: expect.objectContaining({
+            nationality: 'other',
+            nationalityOther: 'Mexicana',
+          }),
+        }),
+      );
+    });
+
     it('reports every missing legal field with its own message', async () => {
       const onSubmit = jest.fn();
       const page = ApplicantStepViewModelPageObject.render({
@@ -876,6 +927,7 @@ describe('useApplicantStepViewModel - Third-Party Submission UX (BYC-25)', () =>
     identificationType: 'national_id',
     maritalStatus: 'single',
     nationality: 'CR',
+    nationalityOther: '',
     secondLastName: 'Mora',
   };
 

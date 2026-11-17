@@ -1,4 +1,7 @@
-import { PHYSICAL_PERSON_FORM_COPY } from '../constants/PhysicalPersonForm.constants';
+import {
+  OTHER_NATIONALITY_VALUE,
+  PHYSICAL_PERSON_FORM_COPY,
+} from '../constants/PhysicalPersonForm.constants';
 import { PhysicalPersonFormPageObject } from './PhysicalPersonForm.po';
 import type {
   PhysicalPersonFormField,
@@ -487,6 +490,86 @@ describe('PhysicalPersonForm Component', () => {
 
       // Assert
       expect(page.container.props.testID).toBe('custom-physical-person-form');
+    });
+
+    it('does not render nationalityOther input when nationality is not other', () => {
+      // Arrange
+      const page = PhysicalPersonFormPageObject.render({
+        onFieldChange: jest.fn(),
+        values: {
+          ...initialValues,
+          nationality: 'CR',
+        },
+      });
+
+      // Assert
+      expect(page.queryTextInput('nationalityOther')).toBeNull();
+    });
+
+    it('renders nationalityOther input with label and handles text change when nationality is other', () => {
+      // Arrange
+      const handleFieldChange = jest.fn();
+      const page = PhysicalPersonFormPageObject.render({
+        onFieldChange: handleFieldChange,
+        values: {
+          ...initialValues,
+          nationality: 'other',
+          nationalityOther: '',
+        },
+      });
+
+      // Assert
+      expect(page.getTextInput('nationalityOther')).toBeTruthy();
+      expect(page.getRequiredAsterisk('nationalityOther')).toBeTruthy();
+
+      // Act
+      page.fillField('nationalityOther', 'Mexicana');
+
+      // Assert
+      expect(handleFieldChange).toHaveBeenCalledWith(
+        'nationalityOther',
+        'Mexicana',
+      );
+    });
+
+    it('displays error message for nationalityOther when provided', () => {
+      // Arrange
+      const page = PhysicalPersonFormPageObject.render({
+        errors: {
+          nationalityOther: 'Por favor, especifique su nacionalidad.',
+        },
+        onFieldChange: jest.fn(),
+        values: {
+          ...initialValues,
+          nationality: OTHER_NATIONALITY_VALUE,
+        },
+      });
+
+      // Assert
+      expect(page.getFieldError('nationalityOther')?.props.children).toBe(
+        'Por favor, especifique su nacionalidad.',
+      );
+    });
+
+    it('resets nationalityOther when nationality is changed to a non-other option', () => {
+      // Arrange
+      const handleFieldChange = jest.fn();
+      const page = PhysicalPersonFormPageObject.render({
+        onFieldChange: handleFieldChange,
+        values: {
+          ...initialValues,
+          nationality: OTHER_NATIONALITY_VALUE,
+          nationalityOther: 'Mexicana',
+        },
+      });
+
+      // Act
+      page.openSelect('nationality');
+      page.selectOption('CR');
+
+      // Assert
+      expect(handleFieldChange).toHaveBeenCalledWith('nationality', 'CR');
+      expect(handleFieldChange).toHaveBeenCalledWith('nationalityOther', '');
     });
   });
 });

@@ -137,6 +137,7 @@ export const useLegalEntityContactViewModel = (
     isSubmitting,
     isValid,
     provinceOptions,
+    setValue,
     submitError,
   };
 };

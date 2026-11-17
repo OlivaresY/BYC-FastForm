@@ -5,6 +5,7 @@ import {
 } from '@/shared/utils';
 import { z } from 'zod';
 import { APPLICANT_STEP_VIEW_NUMERICAL } from '../constants/ApplicantStepView.constants';
+import { OTHER_NATIONALITY_VALUE } from '../constants/PhysicalPersonForm.constants';
 import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import type {
   ThirdPartyBeneficiaryField,
@@ -90,6 +91,7 @@ export const PhysicalApplicantSchema = z
     ),
     middleName: z.string().trim().optional(),
     nationality: requiredText(APPLICANT_ERRORS.PHYSICAL.NATIONALITY),
+    nationalityOther: z.string().trim().optional(),
     secondLastName: z.string().trim().optional(),
   })
   .superRefine((data, ctx) => {
@@ -99,6 +101,16 @@ export const PhysicalApplicantSchema = z
           code: 'custom',
           message: APPLICANT_ERRORS.PHYSICAL.SECOND_LAST_NAME,
           path: ['secondLastName'],
+        });
+      }
+    }
+
+    if (data.nationality === OTHER_NATIONALITY_VALUE) {
+      if (!data.nationalityOther || data.nationalityOther.trim().length === 0) {
+        ctx.addIssue({
+          code: 'custom',
+          message: APPLICANT_ERRORS.PHYSICAL.NATIONALITY_OTHER,
+          path: ['nationalityOther'],
         });
       }
     }
@@ -126,6 +138,7 @@ export const PHYSICAL_APPLICANT_FIELDS = [
   'maritalStatus',
   'middleName',
   'nationality',
+  'nationalityOther',
   'secondLastName',
 ] as const satisfies readonly PhysicalPersonFormField[];
 

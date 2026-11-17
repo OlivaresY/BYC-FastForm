@@ -37,6 +37,7 @@ export const esCR = {
     mockUserInitials: 'YO',
     step1PhysicalIdentity: {
       form: {
+        nationalityOtherRequired: 'Por favor, especifique su nacionalidad.',
         singleSurnameWarning:
           'Titular extranjero: se registrará un único apellido.',
       },
@@ -56,6 +57,8 @@ export const esCR = {
           constitutionDateInvalid:
             'La fecha de constitución debe tener un formato DD-MM-YYYY válido.',
           constitutionDateRequired: 'La fecha de constitución es obligatoria.',
+          economicSectorOtherRequired:
+            'Por favor, especifique el sector económico.',
           economicSectorRequired: 'El sector económico es obligatorio.',
           employeesCountPositive:
             'La cantidad de empleados debe ser mayor a 0.',
@@ -121,6 +124,7 @@ export const esCR = {
           currency: 'MONEDA',
           district: 'DISTRITO',
           economicSector: 'SECTOR ECONÓMICO',
+          economicSectorOther: 'ESPECIFIQUE EL SECTOR ECONÓMICO',
           email: 'CORREO ELECTRÓNICO',
           employeesCount: 'CANTIDAD DE EMPLEADOS',
           exactAddress: 'DIRECCIÓN EXACTA',
@@ -142,6 +146,7 @@ export const esCR = {
           currency: 'Seleccione moneda',
           district: 'Seleccione distrito',
           economicSector: 'Seleccione sector económico',
+          economicSectorOther: 'Ingrese sector económico',
           email: 'contacto@empresa.cr',
           employeesCount: 'Ej: 25',
           exactAddress: 'Frente a parque, edificio corporativo, piso 3...',

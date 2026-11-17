@@ -30,6 +30,7 @@ import {
   LEGAL_ENTITY_CONTACT_FORM_NUMERICAL,
   LEGAL_ENTITY_CONTACT_FORM_STYLES,
   LEGAL_ENTITY_CONTACT_FORM_TEST_IDS,
+  OTHER_ECONOMIC_SECTOR_VALUE,
   RAW_ECONOMIC_SECTOR_OPTIONS,
 } from '../constants/LegalEntityContactForm.constants';
 import { CURRENCY_OPTIONS } from '../constants/SharedCatalogs.constants';
@@ -92,6 +93,7 @@ const LegalEntityContactFormComponent = ({
   onInputFocus,
   onProvinceChange,
   options,
+  setValue,
   testID,
 }: LegalEntityContactFormProps): React.JSX.Element => {
   const { t } = useTranslation();
@@ -116,6 +118,10 @@ const LegalEntityContactFormComponent = ({
     control,
     name: 'commercialAddress.canton',
   });
+  const selectedEconomicSector = useWatch({
+    control,
+    name: 'commercialActivity.economicSector',
+  });
   const provinceOptions = options?.provinceOptions ?? getProvinceOptions();
   const cantonOptions =
     options?.cantonOptions ?? getCantonOptions(selectedProvince);
@@ -131,8 +137,8 @@ const LegalEntityContactFormComponent = ({
       label:
         opt.value in t.common.catalogs.currencies
           ? t.common.catalogs.currencies[
-          opt.value as keyof typeof t.common.catalogs.currencies
-          ]
+              opt.value as keyof typeof t.common.catalogs.currencies
+            ]
           : opt.label,
       value: opt.value,
     }));
@@ -389,7 +395,12 @@ const LegalEntityContactFormComponent = ({
               errorMessage={error?.message}
               label={LEGAL_ENTITY_CONTACT_FORM_COPY.ECONOMIC_SECTOR_LABEL}
               onFocus={onInputFocus}
-              onValueChange={onChange}
+              onValueChange={(val: string): void => {
+                onChange(val);
+                if (val !== OTHER_ECONOMIC_SECTOR_VALUE) {
+                  setValue?.('commercialActivity.economicSectorOther', '');
+                }
+              }}
               options={economicSectorOptions}
               placeholder={
                 LEGAL_ENTITY_CONTACT_FORM_COPY.ECONOMIC_SECTOR_PLACEHOLDER
@@ -400,6 +411,37 @@ const LegalEntityContactFormComponent = ({
             />
           )}
         />
+
+        {selectedEconomicSector === OTHER_ECONOMIC_SECTOR_VALUE && (
+          <Controller
+            control={control}
+            name='commercialActivity.economicSectorOther'
+            render={({
+              field: { onBlur, onChange, value },
+              fieldState: { error },
+            }) => (
+              <CustomTextInput
+                autoCapitalize='words'
+                editable={!disabled}
+                error={error?.message}
+                label={
+                  LEGAL_ENTITY_CONTACT_FORM_COPY.ECONOMIC_SECTOR_OTHER_LABEL
+                }
+                onBlur={onBlur}
+                onChangeText={onChange}
+                onFocus={onInputFocus}
+                placeholder={
+                  LEGAL_ENTITY_CONTACT_FORM_COPY.ECONOMIC_SECTOR_OTHER_PLACEHOLDER
+                }
+                required
+                testID={
+                  LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.ECONOMIC_SECTOR_OTHER_INPUT
+                }
+                value={value ?? ''}
+              />
+            )}
+          />
+        )}
 
         {/* Actividad Principal (Full Width) */}
         <Controller

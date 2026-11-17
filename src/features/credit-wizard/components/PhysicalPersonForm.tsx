@@ -10,6 +10,7 @@ import { formatDateDisplay } from '@/shared/utils';
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import {
+  OTHER_NATIONALITY_VALUE,
   PHYSICAL_PERSON_FORM_COLORS,
   PHYSICAL_PERSON_FORM_COPY,
   PHYSICAL_PERSON_FORM_DEFAULT_OPTIONS,
@@ -87,7 +88,14 @@ export const PhysicalPersonForm = ({
         onFieldChange('identificationType', val),
       maritalStatus: (val: string): void => onFieldChange('maritalStatus', val),
       middleName: (val: string): void => onFieldChange('middleName', val),
-      nationality: (val: string): void => onFieldChange('nationality', val),
+      nationality: (val: string): void => {
+        onFieldChange('nationality', val);
+        if (val !== OTHER_NATIONALITY_VALUE) {
+          onFieldChange('nationalityOther', '');
+        }
+      },
+      nationalityOther: (val: string): void =>
+        onFieldChange('nationalityOther', val),
       secondLastName: (val: string): void =>
         onFieldChange('secondLastName', val),
     }),
@@ -255,6 +263,22 @@ export const PhysicalPersonForm = ({
           testID={PHYSICAL_PERSON_FORM_TEST_IDS.NATIONALITY_DROPDOWN}
           value={values.nationality}
         />
+
+        {values.nationality === OTHER_NATIONALITY_VALUE && (
+          <CustomTextInput
+            autoCapitalize='words'
+            editable={!disabled}
+            error={errors?.nationalityOther}
+            label={PHYSICAL_PERSON_FORM_COPY.NATIONALITY_OTHER_LABEL}
+            onChangeText={handlers.nationalityOther}
+            placeholder={
+              PHYSICAL_PERSON_FORM_COPY.NATIONALITY_OTHER_PLACEHOLDER
+            }
+            required
+            testID={PHYSICAL_PERSON_FORM_TEST_IDS.NATIONALITY_OTHER_INPUT}
+            value={values.nationalityOther ?? ''}
+          />
+        )}
 
         {/* 2-Column Row: Estado Civil & Género */}
         <View className={PHYSICAL_PERSON_FORM_STYLES.GRID_ROW}>
