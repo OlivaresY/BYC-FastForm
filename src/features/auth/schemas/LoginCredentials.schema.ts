@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import type { LoginCredentials } from '../types/Auth.types';
 
 export const LOGIN_CREDENTIALS_ERRORS = {
   EMAIL_INVALID: 'Correo electrónico inválido',
@@ -7,7 +6,7 @@ export const LOGIN_CREDENTIALS_ERRORS = {
   PASSWORD_REQUIRED: 'La contraseña es obligatoria',
 } as const;
 
-export const LoginCredentialsSchema: z.ZodType<LoginCredentials> = z.object({
+export const LoginCredentialsSchema = z.object({
   email: z
     .string({ error: LOGIN_CREDENTIALS_ERRORS.EMAIL_REQUIRED })
     .trim()
