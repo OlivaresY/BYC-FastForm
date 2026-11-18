@@ -16,10 +16,28 @@ export {
 
 export {
   useApplicantStepViewModel,
+  useDraftSubmissionViewModel,
   useLegalEntityContactViewModel,
   usePhysicalPersonContactViewModel,
   useWizardProgressHeaderViewModel,
 } from './hooks';
+
+export type {
+  UseDraftSubmissionViewModelProps,
+  UseDraftSubmissionViewModelReturn,
+} from './hooks/useDraftSubmissionViewModel';
+
+export {
+  CREDIT_APPLICATIONS_TABLE,
+  SupabaseCreditApplicationRepository,
+  mapMasterPayloadToInsertRow,
+  supabaseCreditApplicationRepository,
+} from './services';
+
+export type {
+  CreditApplicationInsertRow,
+  ICreditApplicationRepository,
+} from './services';
 
 export {
   APPLICANT_STEP_VIEW_CONSTANTS,

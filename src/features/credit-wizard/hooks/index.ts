@@ -1,5 +1,6 @@
 export { useApplicantStepViewModel } from './useApplicantStepViewModel';
 export { useBankAuthorizationsViewModel } from './useBankAuthorizationsViewModel';
+export { useDraftSubmissionViewModel } from './useDraftSubmissionViewModel';
 export { useKeyboardAutoScroll } from './useKeyboardAutoScroll';
 export { useLegalEntityContactViewModel } from './useLegalEntityContactViewModel';
 export { usePhysicalPersonContactViewModel } from './usePhysicalPersonContactViewModel';

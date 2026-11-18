@@ -96,6 +96,7 @@ LegalConsentItem.displayName = 'LegalConsentItem';
 export interface BankAuthorizationsStepViewProps {
   currentStep?: number;
   disabled?: boolean;
+  isSubmitting?: boolean;
   onBack?: () => void;
   onClose?: () => void;
   onSubmit?: (data: BankAuthorizationsFormValues) => void | Promise<void>;
@@ -108,6 +109,7 @@ export const BankAuthorizationsStepView = React.memo(
   ({
     currentStep = BANK_AUTHORIZATIONS_STEP_NUMERICAL.CURRENT_STEP,
     disabled = false,
+    isSubmitting: isSubmittingProp = false,
     onBack,
     onClose,
     onSubmit,
@@ -125,10 +127,12 @@ export const BankAuthorizationsStepView = React.memo(
       errors,
       handleNext,
       isAllBanksSelected,
-      isSubmitting,
+      isSubmitting: isViewModelSubmitting,
       isValid,
       toggleAllBanks,
     } = viewModel;
+
+    const isSubmitting = isSubmittingProp || isViewModelSubmitting;
 
     const submitIcon = (
       <DocumentIcon
@@ -145,7 +149,7 @@ export const BankAuthorizationsStepView = React.memo(
         currentStep={currentStep}
         description={BANK_AUTHORIZATIONS_STEP_COPY.DESCRIPTION}
         disabled={disabled}
-        isSubmitDisabled={!isValid}
+        isSubmitDisabled={!isValid || isSubmitting}
         isSubmitting={isSubmitting}
         onBack={onBack}
         onClose={onClose}
