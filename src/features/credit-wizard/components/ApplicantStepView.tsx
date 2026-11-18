@@ -7,6 +7,7 @@ import {
   APPLICANT_STEP_VIEW_STYLES,
   APPLICANT_STEP_VIEW_TEST_IDS,
 } from '../constants/ApplicantStepView.constants';
+import { LEGAL_ENTITY_SELECTOR_ENTITIES } from '../constants/LegalEntitySelector.constants';
 import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import { useApplicantStepViewModel } from '../hooks/useApplicantStepViewModel';
 import type { ApplicantStepViewProps } from '../types/ApplicantStepView.types';
@@ -22,6 +23,7 @@ const NOOP_FIELD_CHANGE = (): void => undefined;
 
 export const ApplicantStepView = React.memo(
   ({
+    defaultValues,
     disabled = false,
     onClose,
     onSubmit,
@@ -29,6 +31,29 @@ export const ApplicantStepView = React.memo(
     viewModel: viewModelProp,
   }: ApplicantStepViewProps): React.JSX.Element => {
     const defaultViewModel = useApplicantStepViewModel({
+      initialLegalValues:
+        defaultValues?.regime === LEGAL_ENTITY_SELECTOR_ENTITIES.LEGAL
+          ? defaultValues.values
+          : undefined,
+      initialPhysicalValues:
+        defaultValues?.regime === LEGAL_ENTITY_SELECTOR_ENTITIES.PHYSICAL
+          ? defaultValues.values
+          : undefined,
+      initialRegime: defaultValues?.regime,
+      initialThirdPartyValues: defaultValues
+        ? {
+            isThirdPartyRegistration: defaultValues.isThirdPartyRegistration,
+            thirdPartyBirthDate: defaultValues.thirdPartyBirthDate,
+            thirdPartyDocNumber: defaultValues.thirdPartyDocNumber,
+            thirdPartyDocType: defaultValues.thirdPartyDocType,
+            thirdPartyEmail: defaultValues.thirdPartyEmail,
+            thirdPartyFullName: defaultValues.thirdPartyFullName,
+            thirdPartyNationality: defaultValues.thirdPartyNationality,
+            thirdPartyPhone: defaultValues.thirdPartyPhone,
+            thirdPartyRelationship: defaultValues.thirdPartyRelationship,
+          }
+        : undefined,
+      initialVehicleBeneficiary: defaultValues?.vehicleBeneficiary,
       onSubmit,
     });
 

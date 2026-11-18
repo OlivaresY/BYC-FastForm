@@ -34,6 +34,14 @@ export const esCR = {
     },
   },
   creditWizard: {
+    masterDraftSubmission: {
+      errorMessage:
+        'No pudimos procesar tu solicitud. Por favor, revisa tu conexión e inténtalo de nuevo.',
+      errorTitle: 'Error de Envío',
+      successMessage:
+        'El trámite ha sido guardado exitosamente y está pendiente de revisión por el Súper Administrador.',
+      successTitle: '¡Trámite Enviado!',
+    },
     mockUserInitials: 'YO',
     step1PhysicalIdentity: {
       form: {

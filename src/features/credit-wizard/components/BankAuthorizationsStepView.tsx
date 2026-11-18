@@ -95,6 +95,7 @@ LegalConsentItem.displayName = 'LegalConsentItem';
 
 export interface BankAuthorizationsStepViewProps {
   currentStep?: number;
+  defaultValues?: Partial<BankAuthorizationsFormValues>;
   disabled?: boolean;
   isSubmitting?: boolean;
   onBack?: () => void;
@@ -108,6 +109,7 @@ export interface BankAuthorizationsStepViewProps {
 export const BankAuthorizationsStepView = React.memo(
   ({
     currentStep = BANK_AUTHORIZATIONS_STEP_NUMERICAL.CURRENT_STEP,
+    defaultValues,
     disabled = false,
     isSubmitting: isSubmittingProp = false,
     onBack,
@@ -118,6 +120,7 @@ export const BankAuthorizationsStepView = React.memo(
     viewModel: viewModelProp,
   }: BankAuthorizationsStepViewProps): React.JSX.Element => {
     const defaultViewModel = useBankAuthorizationsViewModel({
+      defaultValues,
       onSuccess: onSubmit,
     });
     const viewModel = viewModelProp ?? defaultViewModel;

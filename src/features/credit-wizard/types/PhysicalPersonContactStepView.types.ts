@@ -6,7 +6,9 @@ import type { PhysicalPersonContactFormOptions } from './PhysicalPersonContactFo
 
 export interface PhysicalPersonContactStepViewProps {
   currentStep: number;
+  defaultValues?: Partial<PhysicalPersonContact>;
   disabled?: boolean;
+  onBack?: () => void;
   onClose?: () => void;
   onSubmit?: (data: PhysicalPersonContact) => void;
   options?: PhysicalPersonContactFormOptions;

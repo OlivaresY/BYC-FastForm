@@ -1,6 +1,8 @@
 export {
   ApplicantStepView,
+  BankAuthorizationsStepView,
   CloseProcessModal,
+  CreditWizardOrchestratorView,
   FinalBeneficiaryModal,
   LegalEntityContactForm,
   LegalEntityContactStepView,
@@ -14,13 +16,28 @@ export {
   WizardStepLayout,
 } from './components';
 
+export type { CreditWizardOrchestratorViewProps } from './components/CreditWizardOrchestratorView';
+
 export {
   useApplicantStepViewModel,
+  useCreditWizardOrchestrator,
   useDraftSubmissionViewModel,
   useLegalEntityContactViewModel,
   usePhysicalPersonContactViewModel,
   useWizardProgressHeaderViewModel,
 } from './hooks';
+
+export {
+  MOCK_AUTH_USER_ID,
+  WIZARD_STEPS,
+} from './hooks/useCreditWizardOrchestrator';
+
+export type {
+  CreditWizardDraftState,
+  UseCreditWizardOrchestratorProps,
+  UseCreditWizardOrchestratorReturn,
+  WizardStepNumber,
+} from './hooks/useCreditWizardOrchestrator';
 
 export type {
   UseDraftSubmissionViewModelProps,

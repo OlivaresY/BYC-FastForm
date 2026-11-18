@@ -8,7 +8,9 @@ import { WizardStepLayout } from './WizardStepLayout';
 
 export const LegalEntityContactStepView = ({
   currentStep,
+  defaultValues,
   disabled = false,
+  onBack,
   onClose,
   onSubmit,
   testID,
@@ -17,7 +19,10 @@ export const LegalEntityContactStepView = ({
 }: LegalEntityContactStepViewProps): React.JSX.Element => {
   const { t } = useTranslation();
   const stepCopy = t.creditWizard.step2LegalContact;
-  const defaultViewModel = useLegalEntityContactViewModel({ onSubmit });
+  const defaultViewModel = useLegalEntityContactViewModel({
+    defaultValues,
+    onSubmit,
+  });
   const viewModel = viewModelProp ?? defaultViewModel;
   const {
     cantonOptions,
@@ -40,7 +45,7 @@ export const LegalEntityContactStepView = ({
       disabled={disabled}
       isSubmitDisabled={!isValid}
       isSubmitting={isSubmitting}
-      onBack={onClose}
+      onBack={onBack ?? onClose}
       onClose={onClose}
       onNext={(): void => {
         void handleNextStep();

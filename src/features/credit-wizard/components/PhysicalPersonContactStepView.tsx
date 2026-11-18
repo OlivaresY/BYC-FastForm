@@ -8,7 +8,9 @@ import { WizardStepLayout } from './WizardStepLayout';
 
 export const PhysicalPersonContactStepView = ({
   currentStep,
+  defaultValues,
   disabled = false,
+  onBack,
   onClose,
   onSubmit,
   options,
@@ -18,7 +20,10 @@ export const PhysicalPersonContactStepView = ({
 }: PhysicalPersonContactStepViewProps): React.JSX.Element => {
   const { t } = useTranslation();
   const stepCopy = t.creditWizard.step2PhysicalContact;
-  const defaultViewModel = usePhysicalPersonContactViewModel({ onSubmit });
+  const defaultViewModel = usePhysicalPersonContactViewModel({
+    defaultValues,
+    onSubmit,
+  });
   const viewModel = viewModelProp ?? defaultViewModel;
   const {
     cantonOptions,
@@ -40,7 +45,7 @@ export const PhysicalPersonContactStepView = ({
       disabled={disabled}
       isSubmitDisabled={!isValid}
       isSubmitting={isSubmitting}
-      onBack={onClose}
+      onBack={onBack ?? onClose}
       onClose={onClose}
       onNext={(): void => {
         void handleNextStep();
