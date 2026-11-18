@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useMemo, useState } from 'react';
 import type { Resolver } from 'react-hook-form';
 import { useForm, useWatch } from 'react-hook-form';
+import { ECONOMIC_SECTOR_OTHER_VALUE } from '../constants';
 import {
   getCantonOptions,
   getDistrictOptions,
@@ -83,6 +84,20 @@ export const useLegalEntityContactViewModel = (
     [setValue],
   );
 
+  const handleEconomicSectorChange = useCallback(
+    (economicSector: string): void => {
+      setValue('commercialActivity.economicSector', economicSector, {
+        shouldDirty: true,
+      });
+      if (economicSector !== ECONOMIC_SECTOR_OTHER_VALUE) {
+        setValue('commercialActivity.economicSectorOther', '', {
+          shouldDirty: true,
+        });
+      }
+    },
+    [setValue],
+  );
+
   const onValidSubmit = useCallback(
     async (data: LegalEntityContact): Promise<void> => {
       await onSubmitProp?.(data);
@@ -131,13 +146,13 @@ export const useLegalEntityContactViewModel = (
     districtOptions,
     errors,
     handleCantonChange,
+    handleEconomicSectorChange,
     handleNextStep,
     handleProvinceChange,
     handleSubmit,
     isSubmitting,
     isValid,
     provinceOptions,
-    setValue,
     submitError,
   };
 };

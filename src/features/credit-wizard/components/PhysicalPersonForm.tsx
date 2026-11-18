@@ -10,7 +10,10 @@ import { formatDateDisplay } from '@/shared/utils';
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import {
-  OTHER_NATIONALITY_VALUE,
+  NATIONALITY_OTHER_VALUE,
+  PHYSICAL_IDENTIFICATION_TYPES,
+} from '../constants';
+import {
   PHYSICAL_PERSON_FORM_COLORS,
   PHYSICAL_PERSON_FORM_COPY,
   PHYSICAL_PERSON_FORM_DEFAULT_OPTIONS,
@@ -57,6 +60,7 @@ export const PhysicalPersonForm = ({
   hasSingleSurnameWarning = false,
   isIdentificationValid = false,
   onFieldChange,
+  onNationalityChange,
   options,
   testID,
   values,
@@ -89,17 +93,18 @@ export const PhysicalPersonForm = ({
       maritalStatus: (val: string): void => onFieldChange('maritalStatus', val),
       middleName: (val: string): void => onFieldChange('middleName', val),
       nationality: (val: string): void => {
-        onFieldChange('nationality', val);
-        if (val !== OTHER_NATIONALITY_VALUE) {
-          onFieldChange('nationalityOther', '');
+        if (onNationalityChange) {
+          onNationalityChange(val);
+          return;
         }
+        onFieldChange('nationality', val);
       },
       nationalityOther: (val: string): void =>
         onFieldChange('nationalityOther', val),
       secondLastName: (val: string): void =>
         onFieldChange('secondLastName', val),
     }),
-    [onFieldChange],
+    [onFieldChange, onNationalityChange],
   );
 
   return (
@@ -218,7 +223,10 @@ export const PhysicalPersonForm = ({
               placeholder={
                 PHYSICAL_PERSON_FORM_COPY.SECOND_LAST_NAME_PLACEHOLDER
               }
-              required={values.identificationType === 'national_id'}
+              required={
+                values.identificationType ===
+                PHYSICAL_IDENTIFICATION_TYPES.NATIONAL_ID
+              }
               testID={PHYSICAL_PERSON_FORM_TEST_IDS.SECOND_LAST_NAME_INPUT}
               value={values.secondLastName}
             />
@@ -264,7 +272,7 @@ export const PhysicalPersonForm = ({
           value={values.nationality}
         />
 
-        {values.nationality === OTHER_NATIONALITY_VALUE && (
+        {values.nationality === NATIONALITY_OTHER_VALUE && (
           <CustomTextInput
             autoCapitalize='words'
             editable={!disabled}

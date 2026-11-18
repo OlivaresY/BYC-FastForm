@@ -1,3 +1,4 @@
+import { ECONOMIC_SECTOR_OTHER_VALUE } from '../constants';
 import {
   FINANCIAL_CURRENCIES,
   LEGAL_ENTITY_CONTACT_DEFAULT_VALUES,
@@ -11,6 +12,7 @@ const validData: LegalEntityContact = {
     accountingPhone: '+506 2200-1111',
     constitutionDate: '15-05-2015',
     economicSector: 'Automotriz y Repuestos',
+    economicSectorOther: '',
     employeesCount: 25,
     mainActivity: 'Venta de repuestos y mantenimiento vehicular',
   },
@@ -166,9 +168,9 @@ describe('useLegalEntityContactViewModel', () => {
     expect(page.current.control._defaultValues.commercialAddress?.canton).toBe(
       'central',
     );
-    expect(page.current.control._defaultValues.commercialAddress?.province).toBe(
-      'San José',
-    );
+    expect(
+      page.current.control._defaultValues.commercialAddress?.province,
+    ).toBe('San José');
 
     // Assert - Flat income fields mapped to financialStatements
     expect(
@@ -185,5 +187,39 @@ describe('useLegalEntityContactViewModel', () => {
     expect(
       page.current.control._defaultValues.commercialReference?.ibanAccount,
     ).toBe('');
+  });
+
+  it('clears residual economicSectorOther via handleEconomicSectorChange when switching away from Otro', async () => {
+    const onSubmit = jest.fn();
+    const page = LegalEntityContactViewModelPageObject.render({
+      defaultValues: {
+        ...validData,
+        commercialActivity: {
+          ...validData.commercialActivity,
+          economicSector: ECONOMIC_SECTOR_OTHER_VALUE,
+          economicSectorOther: 'Energías Renovables',
+        },
+        commercialAddress: {
+          canton: 'Alajuela',
+          district: 'Alajuela',
+          exactAddress: '200 metros norte del parque',
+          province: 'Alajuela',
+        },
+      },
+      onSubmit,
+    });
+
+    page.changeEconomicSector('Comercio');
+    await page.handleNextStep();
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        commercialActivity: expect.objectContaining({
+          economicSector: 'Comercio',
+          economicSectorOther: '',
+        }),
+      }),
+    );
   });
 });

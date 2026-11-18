@@ -40,6 +40,13 @@ export class LegalEntityContactViewModelPageObject {
     return this.hookResult.result.current.isValid;
   }
 
+  public changeEconomicSector(economicSector: string): this {
+    act(() => {
+      this.hookResult.result.current.handleEconomicSectorChange(economicSector);
+    });
+    return this;
+  }
+
   public async handleNextStep(dataOrEvent?: unknown): Promise<void> {
     await act(async () => {
       await this.hookResult.result.current.handleNextStep(dataOrEvent);

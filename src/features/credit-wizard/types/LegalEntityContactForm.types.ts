@@ -1,4 +1,4 @@
-import type { Control, UseFormSetValue } from 'react-hook-form';
+import type { Control } from 'react-hook-form';
 import type { CustomSelectOption } from '@/shared/ui';
 import type { LegalEntityContact } from './LegalEntityContact.types';
 
@@ -14,9 +14,9 @@ export interface LegalEntityContactFormProps {
   control: Control<LegalEntityContact>;
   disabled?: boolean;
   onCantonChange?: (canton: string) => void;
+  onEconomicSectorChange?: (economicSector: string) => void;
   onInputFocus?: (event?: unknown) => void;
   onProvinceChange?: (province: string) => void;
   options?: LegalEntityContactFormOptions;
-  setValue?: UseFormSetValue<LegalEntityContact>;
   testID?: string;
 }
