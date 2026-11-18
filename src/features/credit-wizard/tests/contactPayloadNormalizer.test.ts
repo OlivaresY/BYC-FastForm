@@ -1,3 +1,4 @@
+import { ECONOMIC_SECTOR_OTHER_VALUE } from '../constants';
 import { FINANCIAL_CURRENCIES } from '../constants/SharedCatalogs.constants';
 import {
   normalizeCantonValue,
@@ -252,15 +253,39 @@ describe('contactPayloadNormalizer', () => {
     it('preserves economicSectorOther when provided in nested commercialActivity or flat payload', () => {
       const result = normalizeLegalEntityContactPayload({
         commercialActivity: {
-          economicSector: 'Otro',
+          economicSector: ECONOMIC_SECTOR_OTHER_VALUE,
           economicSectorOther: 'Servicios de Consultoría',
         },
       });
 
-      expect(result.commercialActivity.economicSector).toBe('Otro');
+      expect(result.commercialActivity.economicSector).toBe(
+        ECONOMIC_SECTOR_OTHER_VALUE,
+      );
       expect(result.commercialActivity.economicSectorOther).toBe(
         'Servicios de Consultoría',
       );
+    });
+
+    it('wipes economicSectorOther ghost data from legacy flat payload when economicSector is not Otro', () => {
+      const result = normalizeLegalEntityContactPayload({
+        economicSector: 'Comercio',
+        economicSectorOther: 'GhostData',
+      });
+
+      expect(result.commercialActivity.economicSector).toBe('Comercio');
+      expect(result.commercialActivity.economicSectorOther).toBe('');
+    });
+
+    it('wipes economicSectorOther ghost data from nested commercialActivity when economicSector is not Otro', () => {
+      const result = normalizeLegalEntityContactPayload({
+        commercialActivity: {
+          economicSector: 'Comercio',
+          economicSectorOther: 'GhostData',
+        },
+      });
+
+      expect(result.commercialActivity.economicSector).toBe('Comercio');
+      expect(result.commercialActivity.economicSectorOther).toBe('');
     });
   });
 });

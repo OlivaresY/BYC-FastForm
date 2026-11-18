@@ -680,4 +680,38 @@ describe('LegalEntityContactSchema', () => {
       );
     });
   });
+
+  describe('economicSectorOther ghost data eradication', () => {
+    it('wipes residual economicSectorOther ghost data when economicSector is not Otro', () => {
+      const parsed = LegalEntityContactSchema.parse({
+        ...createValidLegalEntity(),
+        commercialActivity: {
+          ...createValidLegalEntity().commercialActivity,
+          economicSector: 'Comercio',
+          economicSectorOther: 'GhostData',
+        },
+      });
+
+      expect(parsed.commercialActivity.economicSector).toBe('Comercio');
+      expect(parsed.commercialActivity.economicSectorOther).toBe('');
+    });
+
+    it('preserves trimmed economicSectorOther when economicSector is Otro', () => {
+      const parsed = LegalEntityContactSchema.parse({
+        ...createValidLegalEntity(),
+        commercialActivity: {
+          ...createValidLegalEntity().commercialActivity,
+          economicSector: OTHER_ECONOMIC_SECTOR_VALUE,
+          economicSectorOther: '  Energías Renovables  ',
+        },
+      });
+
+      expect(parsed.commercialActivity.economicSector).toBe(
+        OTHER_ECONOMIC_SECTOR_VALUE,
+      );
+      expect(parsed.commercialActivity.economicSectorOther).toBe(
+        'Energías Renovables',
+      );
+    });
+  });
 });
