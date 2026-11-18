@@ -1,4 +1,4 @@
-import { OTHER_ECONOMIC_SECTOR_VALUE } from '../constants/LegalEntityContactForm.constants';
+import { ECONOMIC_SECTOR_OTHER_VALUE } from '../constants';
 import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import { LegalEntityContactStepViewPageObject } from './LegalEntityContactStepView.po';
 
@@ -90,7 +90,7 @@ describe('LegalEntityContactStepView Integration', () => {
       expect(page.queryEconomicSectorOtherInput()).toBeNull();
 
       // Act
-      page.selectEconomicSector(OTHER_ECONOMIC_SECTOR_VALUE);
+      page.selectEconomicSector(ECONOMIC_SECTOR_OTHER_VALUE);
 
       // Assert input appears
       await page.waitFor(() => {
@@ -107,7 +107,7 @@ describe('LegalEntityContactStepView Integration', () => {
       const page = LegalEntityContactStepViewPageObject.render();
 
       // Act: select Otro and fill custom value
-      page.selectEconomicSector(OTHER_ECONOMIC_SECTOR_VALUE);
+      page.selectEconomicSector(ECONOMIC_SECTOR_OTHER_VALUE);
       await page.waitFor(() => {
         expect(page.economicSectorOtherInput).toBeTruthy();
       });
@@ -120,7 +120,7 @@ describe('LegalEntityContactStepView Integration', () => {
       });
 
       // Act: switch to Otro again -> should be clean
-      page.selectEconomicSector(OTHER_ECONOMIC_SECTOR_VALUE);
+      page.selectEconomicSector(ECONOMIC_SECTOR_OTHER_VALUE);
       await page.waitFor(() => {
         expect(page.economicSectorOtherInput).toBeTruthy();
         expect(page.economicSectorOtherInput.props.value).toBe('');

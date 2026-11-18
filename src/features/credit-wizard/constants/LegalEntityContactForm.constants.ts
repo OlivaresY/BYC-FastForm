@@ -3,10 +3,7 @@ import type { CustomSelectOption } from '@/shared/ui';
 import { CR_IBAN_LENGTH, MAX_LENGTH_IBAN_INPUT } from '@/shared/utils';
 import { ECONOMIC_SECTOR_OTHER_VALUE } from './WizardDomain.constants';
 
-export {
-  ECONOMIC_SECTOR_OTHER_VALUE,
-  ECONOMIC_SECTOR_OTHER_VALUE as OTHER_ECONOMIC_SECTOR_VALUE,
-};
+export { ECONOMIC_SECTOR_OTHER_VALUE };
 
 export const LEGAL_ENTITY_CONTACT_FORM_COLORS = {
   HEADER_ICON_STROKE: '#111111',

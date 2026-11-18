@@ -317,18 +317,25 @@ export const normalizeLegalEntityContactPayload = (
     raw.constitutionDate ??
     defaults.commercialActivity.constitutionDate) as string;
 
-  const economicSector = (nestedActivity.economicSector ??
+  const rawEconomicSector =
+    nestedActivity.economicSector ??
     raw.economicSector ??
-    defaults.commercialActivity.economicSector) as string;
+    defaults.commercialActivity.economicSector;
+  const economicSector =
+    typeof rawEconomicSector === 'string' ? rawEconomicSector : '';
 
-  const rawEconomicSectorOther = (nestedActivity.economicSectorOther ??
+  const rawEconomicSectorOther =
+    nestedActivity.economicSectorOther ??
     raw.economicSectorOther ??
-    defaults.commercialActivity.economicSectorOther) as string;
+    defaults.commercialActivity.economicSectorOther;
+  const safeEconomicSectorOther =
+    typeof rawEconomicSectorOther === 'string'
+      ? rawEconomicSectorOther.trim()
+      : '';
 
   const economicSectorOther =
-    typeof economicSector === 'string' &&
     economicSector.trim() === ECONOMIC_SECTOR_OTHER_VALUE
-      ? rawEconomicSectorOther
+      ? safeEconomicSectorOther
       : '';
 
   const employeesCount = (nestedActivity.employeesCount ??

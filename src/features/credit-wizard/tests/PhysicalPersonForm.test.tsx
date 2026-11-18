@@ -1,7 +1,5 @@
-import {
-  OTHER_NATIONALITY_VALUE,
-  PHYSICAL_PERSON_FORM_COPY,
-} from '../constants/PhysicalPersonForm.constants';
+import { NATIONALITY_OTHER_VALUE } from '../constants';
+import { PHYSICAL_PERSON_FORM_COPY } from '../constants/PhysicalPersonForm.constants';
 import type {
   PhysicalPersonFormField,
   PhysicalPersonFormValues,
@@ -541,7 +539,7 @@ describe('PhysicalPersonForm Component', () => {
         onFieldChange: jest.fn(),
         values: {
           ...initialValues,
-          nationality: OTHER_NATIONALITY_VALUE,
+          nationality: NATIONALITY_OTHER_VALUE,
         },
       });
 
@@ -560,7 +558,7 @@ describe('PhysicalPersonForm Component', () => {
         onNationalityChange: handleNationalityChange,
         values: {
           ...initialValues,
-          nationality: OTHER_NATIONALITY_VALUE,
+          nationality: NATIONALITY_OTHER_VALUE,
           nationalityOther: 'Mexicana',
         },
       });

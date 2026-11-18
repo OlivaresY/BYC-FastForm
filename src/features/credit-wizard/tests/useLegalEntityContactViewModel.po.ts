@@ -59,4 +59,20 @@ export class LegalEntityContactViewModelPageObject {
     });
     return this;
   }
+
+  public async waitForEconomicSectorOtherError(
+    expectedDefined: boolean,
+  ): Promise<this> {
+    await waitFor(() => {
+      const error =
+        this.hookResult.result.current.errors.commercialActivity
+          ?.economicSectorOther;
+      if (expectedDefined) {
+        expect(error?.message).toBeTruthy();
+      } else {
+        expect(error).toBeUndefined();
+      }
+    });
+    return this;
+  }
 }

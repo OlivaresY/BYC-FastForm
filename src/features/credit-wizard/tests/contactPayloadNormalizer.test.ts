@@ -287,5 +287,22 @@ describe('contactPayloadNormalizer', () => {
       expect(result.commercialActivity.economicSector).toBe('Comercio');
       expect(result.commercialActivity.economicSectorOther).toBe('');
     });
+
+    it('safely coerces corrupted non-string economicSector and economicSectorOther legacy payloads to empty strings', () => {
+      const corruptedNested = normalizeLegalEntityContactPayload({
+        commercialActivity: {
+          economicSector: ECONOMIC_SECTOR_OTHER_VALUE,
+          economicSectorOther: 12345 as unknown as string,
+        },
+      });
+      const corruptedFlat = normalizeLegalEntityContactPayload({
+        economicSector: { invalid: true },
+        economicSectorOther: ['bad'],
+      });
+
+      expect(corruptedNested.commercialActivity.economicSectorOther).toBe('');
+      expect(corruptedFlat.commercialActivity.economicSector).toBe('');
+      expect(corruptedFlat.commercialActivity.economicSectorOther).toBe('');
+    });
   });
 });

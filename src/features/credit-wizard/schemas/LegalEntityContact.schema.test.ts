@@ -2,7 +2,7 @@ import {
   LEGAL_ENTITY_CONTACT_DEFAULT_VALUES,
   LEGAL_ENTITY_CONTACT_ERRORS,
 } from '../constants/LegalEntityContact.constants';
-import { OTHER_ECONOMIC_SECTOR_VALUE } from '../constants/LegalEntityContactForm.constants';
+import { ECONOMIC_SECTOR_OTHER_VALUE } from '../constants';
 import { LegalEntityContactSchema } from './LegalEntityContact.schema';
 import type { LegalEntityContact } from '../types/LegalEntityContact.types';
 
@@ -296,7 +296,7 @@ describe('LegalEntityContactSchema', () => {
         ...createValidLegalEntity(),
         commercialActivity: {
           ...createValidLegalEntity().commercialActivity,
-          economicSector: OTHER_ECONOMIC_SECTOR_VALUE,
+          economicSector: ECONOMIC_SECTOR_OTHER_VALUE,
           economicSectorOther: '   ',
         },
       };
@@ -320,7 +320,7 @@ describe('LegalEntityContactSchema', () => {
         ...createValidLegalEntity(),
         commercialActivity: {
           ...createValidLegalEntity().commercialActivity,
-          economicSector: OTHER_ECONOMIC_SECTOR_VALUE,
+          economicSector: ECONOMIC_SECTOR_OTHER_VALUE,
           economicSectorOther: 'Consultoría y Auditoría Especializada',
         },
       };
@@ -701,13 +701,13 @@ describe('LegalEntityContactSchema', () => {
         ...createValidLegalEntity(),
         commercialActivity: {
           ...createValidLegalEntity().commercialActivity,
-          economicSector: OTHER_ECONOMIC_SECTOR_VALUE,
+          economicSector: ECONOMIC_SECTOR_OTHER_VALUE,
           economicSectorOther: '  Energías Renovables  ',
         },
       });
 
       expect(parsed.commercialActivity.economicSector).toBe(
-        OTHER_ECONOMIC_SECTOR_VALUE,
+        ECONOMIC_SECTOR_OTHER_VALUE,
       );
       expect(parsed.commercialActivity.economicSectorOther).toBe(
         'Energías Renovables',

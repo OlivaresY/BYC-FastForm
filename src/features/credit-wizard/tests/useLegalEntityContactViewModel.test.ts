@@ -222,4 +222,31 @@ describe('useLegalEntityContactViewModel', () => {
       }),
     );
   });
+
+  it('immediately clears lingering economicSectorOther validation error when switching away from Otro', async () => {
+    const page = LegalEntityContactViewModelPageObject.render({
+      defaultValues: {
+        ...validData,
+        commercialActivity: {
+          ...validData.commercialActivity,
+          economicSector: ECONOMIC_SECTOR_OTHER_VALUE,
+          economicSectorOther: '',
+        },
+        commercialAddress: {
+          canton: 'Alajuela',
+          district: 'Alajuela',
+          exactAddress: '200 metros norte del parque',
+          province: 'Alajuela',
+        },
+      },
+    });
+
+    await page.handleNextStep();
+    await page.waitForEconomicSectorOtherError(true);
+
+    page.changeEconomicSector('Comercio');
+
+    await page.waitForEconomicSectorOtherError(false);
+    await page.waitForValid(true);
+  });
 });

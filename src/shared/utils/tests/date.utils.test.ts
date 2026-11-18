@@ -26,7 +26,7 @@ describe('formatDateDisplay', () => {
     });
   });
 
-  describe('clipboard paste normalization', () => {
+  describe('clipboard paste normalization and zero-padding', () => {
     it('normalizes slash-separated dates from calendar or clipboard', () => {
       expect(formatDateDisplay('15/08/1988')).toBe('15-08-1988');
       expect(formatDateDisplay(' 15/08/1988 ')).toBe('15-08-1988');
@@ -35,6 +35,21 @@ describe('formatDateDisplay', () => {
     it('normalizes dot-separated and hyphen-separated dates', () => {
       expect(formatDateDisplay('15.08.1988')).toBe('15-08-1988');
       expect(formatDateDisplay('15-08-1988')).toBe('15-08-1988');
+    });
+
+    it('zero-pads single-digit day and month segments when pasting D/M/YYYY, D-M-YYYY, and DD/M/YYYY', () => {
+      expect(formatDateDisplay('5/8/1988')).toBe('05-08-1988');
+      expect(formatDateDisplay('5-8-1988')).toBe('05-08-1988');
+      expect(formatDateDisplay('15/8/1988')).toBe('15-08-1988');
+      expect(formatDateDisplay('15.8.1988')).toBe('15-08-1988');
+    });
+
+    it('keeps single-digit input unpadded until a separator is introduced', () => {
+      expect(formatDateDisplay('5')).toBe('5');
+      expect(formatDateDisplay('5-')).toBe('05-');
+      expect(formatDateDisplay('05-8')).toBe('05-8');
+      expect(formatDateDisplay('05-8-')).toBe('05-08-');
+      expect(formatDateDisplay('05-08-1988')).toBe('05-08-1988');
     });
   });
 
@@ -55,14 +70,13 @@ describe('formatDateDisplay', () => {
 
   describe('in-place segment editing without corrupting neighboring segments', () => {
     it('preserves month and year when editing the first (day) segment', () => {
-      expect(formatDateDisplay('1-08-1988')).toBe('1-08-1988');
       expect(formatDateDisplay('-08-1988')).toBe('-08-1988');
-      expect(formatDateDisplay('2-08-1988')).toBe('2-08-1988');
+      expect(formatDateDisplay('1-08-1988')).toBe('01-08-1988');
       expect(formatDateDisplay('24-08-1988')).toBe('24-08-1988');
     });
 
     it('preserves day and year when editing the month segment', () => {
-      expect(formatDateDisplay('15-0-1988')).toBe('15-0-1988');
+      expect(formatDateDisplay('15-9-1988')).toBe('15-09-1988');
       expect(formatDateDisplay('15-09-1988')).toBe('15-09-1988');
     });
 
