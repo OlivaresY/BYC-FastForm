@@ -1,5 +1,15 @@
 import type { CustomSelectOption } from '@/shared/ui';
 import { WIZARD_COPY } from './WizardCopy.constants';
+import {
+  NATIONALITY_OTHER_VALUE,
+  PHYSICAL_IDENTIFICATION_TYPES,
+} from './WizardDomain.constants';
+
+export {
+  NATIONALITY_OTHER_VALUE,
+  NATIONALITY_OTHER_VALUE as OTHER_NATIONALITY_VALUE,
+  PHYSICAL_IDENTIFICATION_TYPES,
+};
 
 export const PHYSICAL_PERSON_FORM_COLORS = {
   HEADER_ICON_STROKE: '#111111',
@@ -37,8 +47,6 @@ export const PHYSICAL_PERSON_FORM_COPY = {
   SINGLE_SURNAME_WARNING: WIZARD_COPY.STEP_1_APPLICANT.SINGLE_SURNAME_WARNING,
 } as const;
 
-export const OTHER_NATIONALITY_VALUE = 'other' as const;
-
 export const PHYSICAL_PERSON_FORM_DEFAULT_OPTIONS = {
   GENDER: [
     { label: 'Masculino', value: 'male' },
@@ -46,9 +54,18 @@ export const PHYSICAL_PERSON_FORM_DEFAULT_OPTIONS = {
     { label: 'Otro', value: 'other' },
   ] as const satisfies readonly CustomSelectOption[],
   IDENTIFICATION_TYPE: [
-    { label: 'Cédula Nacional (Física)', value: 'national_id' },
-    { label: 'DIMEX / Residencia', value: 'dimex' },
-    { label: 'Pasaporte', value: 'passport' },
+    {
+      label: 'Cédula Nacional (Física)',
+      value: PHYSICAL_IDENTIFICATION_TYPES.NATIONAL_ID,
+    },
+    {
+      label: 'DIMEX / Residencia',
+      value: PHYSICAL_IDENTIFICATION_TYPES.DIMEX,
+    },
+    {
+      label: 'Pasaporte',
+      value: PHYSICAL_IDENTIFICATION_TYPES.PASSPORT,
+    },
   ] as const satisfies readonly CustomSelectOption[],
   MARITAL_STATUS: [
     { label: 'Casado(a)', value: 'married' },
@@ -62,7 +79,7 @@ export const PHYSICAL_PERSON_FORM_DEFAULT_OPTIONS = {
     { label: 'Nicaragüense', value: 'NI' },
     { label: 'Colombiana', value: 'CO' },
     { label: 'Estadounidense', value: 'US' },
-    { label: 'Otra', value: OTHER_NATIONALITY_VALUE },
+    { label: 'Otra', value: NATIONALITY_OTHER_VALUE },
   ] as const satisfies readonly CustomSelectOption[],
 } as const;
 

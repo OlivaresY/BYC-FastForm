@@ -1,8 +1,18 @@
+export const CR_IBAN_LENGTH = 22 as const;
+
+export const MAX_LENGTH_IBAN_INPUT = 30 as const;
+
 export const CR_IBAN_REGEX = /^CR\d{20}$/;
 
+const IBAN_STRIPPABLE_SEPARATORS_REGEX = /[\s-]+/g;
+
+const normalizeIbanString = (value: string): string =>
+  value.replace(IBAN_STRIPPABLE_SEPARATORS_REGEX, '').toUpperCase();
+
 /**
- * Sanitizes raw IBAN user input by removing all whitespace, converting
- * to uppercase, and capping at 22 contiguous characters.
+ * Sanitizes raw IBAN user input by removing all whitespace (spaces, tabs,
+ * newlines) and hyphen separators, converting to uppercase, and capping at
+ * 22 contiguous characters.
  *
  * @param value - The raw string value entered or pasted by the user.
  * @returns Clean, uppercase IBAN string capped at 22 characters.
@@ -11,14 +21,15 @@ export const sanitizeIbanInput = (value: string): string => {
   if (typeof value !== 'string') {
     return '';
   }
-  return value.replace(/\s+/g, '').toUpperCase().slice(0, 22);
+  return normalizeIbanString(value).slice(0, CR_IBAN_LENGTH);
 };
 
 /**
  * Validates a Costa Rican IBAN using the ISO 7064 Mod 97-10 algorithm.
  *
  * Algorithm requirements:
- * 1. Must match regex ^CR\d{20}$ (22 characters) after stripping whitespace and uppercasing.
+ * 1. Must match regex ^CR\d{20}$ (22 characters) after stripping whitespace,
+ *    hyphens, and uppercasing.
  * 2. Move the first 4 characters to the end.
  * 3. Replace letters with numbers (C=12, R=27).
  * 4. Modulo 97 of the resulting numeric string must equal 1n (BigInt % 97n === 1n).
@@ -31,7 +42,7 @@ export const isValidCostaRicaIban = (iban: string): boolean => {
     return false;
   }
 
-  const normalized = iban.replace(/\s+/g, '').toUpperCase();
+  const normalized = normalizeIbanString(iban);
   if (!CR_IBAN_REGEX.test(normalized)) {
     return false;
   }

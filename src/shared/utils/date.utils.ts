@@ -3,6 +3,101 @@ export const DATE_DD_MM_YYYY_REGEX =
 
 export const DATE_DD_MM_YYYY = DATE_DD_MM_YYYY_REGEX;
 
+const DATE_DISPLAY_LIMITS = {
+  DAY_LENGTH: 2,
+  MAX_DIGITS: 8,
+  MONTH_END: 4,
+  MONTH_LENGTH: 2,
+  YEAR_LENGTH: 4,
+} as const;
+
+const DATE_SEPARATORS_REGEX = /[-/.]/;
+const NON_DIGITS_REGEX = /\D/g;
+const DATE_SEPARATOR_CHAR = '-' as const;
+const EMPTY_STRING = '' as const;
+
+const formatContiguousDateDigits = (digits: string): string => {
+  const capped = digits.slice(0, DATE_DISPLAY_LIMITS.MAX_DIGITS);
+  if (capped.length <= DATE_DISPLAY_LIMITS.DAY_LENGTH) {
+    return capped;
+  }
+  if (capped.length <= DATE_DISPLAY_LIMITS.MONTH_END) {
+    return `${capped.slice(0, DATE_DISPLAY_LIMITS.DAY_LENGTH)}${DATE_SEPARATOR_CHAR}${capped.slice(DATE_DISPLAY_LIMITS.DAY_LENGTH)}`;
+  }
+  return `${capped.slice(0, DATE_DISPLAY_LIMITS.DAY_LENGTH)}${DATE_SEPARATOR_CHAR}${capped.slice(DATE_DISPLAY_LIMITS.DAY_LENGTH, DATE_DISPLAY_LIMITS.MONTH_END)}${DATE_SEPARATOR_CHAR}${capped.slice(DATE_DISPLAY_LIMITS.MONTH_END)}`;
+};
+
+/**
+ * Deterministically formats user-typed or pasted date text into `DD-MM-YYYY`:
+ * - Normalizes `/`, `.`, and `-` separators into `-`.
+ * - Handles partial deletion cleanly at separator boundaries (`15-` -> `15`,
+ *   `15-08-` -> `15-08`) without shifting or corrupting remaining segments.
+ * - Preserves individual segments when editing day, month, or year in-place.
+ */
+export const formatDateDisplay = (text: string): string => {
+  if (typeof text !== 'string' || text.length === 0) {
+    return EMPTY_STRING;
+  }
+
+  if (!DATE_SEPARATORS_REGEX.test(text)) {
+    return formatContiguousDateDigits(
+      text.replace(NON_DIGITS_REGEX, EMPTY_STRING),
+    );
+  }
+
+  const rawParts = text.split(DATE_SEPARATORS_REGEX);
+  const rawDay = (rawParts[0] ?? EMPTY_STRING).replace(
+    NON_DIGITS_REGEX,
+    EMPTY_STRING,
+  );
+  const rawMonth = (rawParts[1] ?? EMPTY_STRING).replace(
+    NON_DIGITS_REGEX,
+    EMPTY_STRING,
+  );
+  const rawYear = (rawParts[2] ?? EMPTY_STRING).replace(
+    NON_DIGITS_REGEX,
+    EMPTY_STRING,
+  );
+
+  if (rawParts.length === 2) {
+    if (rawDay === EMPTY_STRING && rawMonth === EMPTY_STRING) {
+      return EMPTY_STRING;
+    }
+    if (rawMonth === EMPTY_STRING) {
+      return formatContiguousDateDigits(rawDay);
+    }
+    if (
+      rawDay.length > DATE_DISPLAY_LIMITS.DAY_LENGTH &&
+      rawMonth.length > DATE_DISPLAY_LIMITS.MONTH_LENGTH
+    ) {
+      return formatContiguousDateDigits(`${rawDay}${rawMonth}`);
+    }
+    if (rawMonth.length > DATE_DISPLAY_LIMITS.MONTH_LENGTH) {
+      const day = rawDay.slice(0, DATE_DISPLAY_LIMITS.DAY_LENGTH);
+      const month = rawMonth.slice(0, DATE_DISPLAY_LIMITS.MONTH_LENGTH);
+      const year = rawMonth.slice(
+        DATE_DISPLAY_LIMITS.MONTH_LENGTH,
+        DATE_DISPLAY_LIMITS.MONTH_LENGTH + DATE_DISPLAY_LIMITS.YEAR_LENGTH,
+      );
+      return `${day}${DATE_SEPARATOR_CHAR}${month}${DATE_SEPARATOR_CHAR}${year}`;
+    }
+    return `${rawDay.slice(0, DATE_DISPLAY_LIMITS.DAY_LENGTH)}${DATE_SEPARATOR_CHAR}${rawMonth}`;
+  }
+
+  const day = rawDay.slice(0, DATE_DISPLAY_LIMITS.DAY_LENGTH);
+  const month = rawMonth.slice(0, DATE_DISPLAY_LIMITS.MONTH_LENGTH);
+  const year = rawYear.slice(0, DATE_DISPLAY_LIMITS.YEAR_LENGTH);
+
+  if (year === EMPTY_STRING) {
+    if (month === EMPTY_STRING) {
+      return day;
+    }
+    return `${day}${DATE_SEPARATOR_CHAR}${month}`;
+  }
+
+  return `${day}${DATE_SEPARATOR_CHAR}${month}${DATE_SEPARATOR_CHAR}${year}`;
+};
+
 export const isValidCalendarDate = (
   year: number,
   month: number,

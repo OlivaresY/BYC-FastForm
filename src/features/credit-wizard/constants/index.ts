@@ -1,0 +1,13 @@
+export {
+  ECONOMIC_SECTOR_OTHER_VALUE,
+  ECONOMIC_SECTOR_OTHER_VALUE as OTHER_ECONOMIC_SECTOR_VALUE,
+  FOREIGN_IDENTIFICATION_TYPES,
+  NATIONALITY_OTHER_VALUE,
+  NATIONALITY_OTHER_VALUE as OTHER_NATIONALITY_VALUE,
+  PHYSICAL_IDENTIFICATION_TYPES,
+} from './WizardDomain.constants';
+
+export type {
+  ForeignIdentificationType,
+  PhysicalIdentificationType,
+} from './WizardDomain.constants';
