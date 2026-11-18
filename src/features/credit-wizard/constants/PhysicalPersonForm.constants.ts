@@ -1,4 +1,11 @@
 import type { CustomSelectOption } from '@/shared/ui';
+import { WIZARD_COPY } from './WizardCopy.constants';
+import {
+  NATIONALITY_OTHER_VALUE,
+  PHYSICAL_IDENTIFICATION_TYPES,
+} from './WizardDomain.constants';
+
+export { NATIONALITY_OTHER_VALUE, PHYSICAL_IDENTIFICATION_TYPES };
 
 export const PHYSICAL_PERSON_FORM_COLORS = {
   HEADER_ICON_STROKE: '#111111',
@@ -25,12 +32,15 @@ export const PHYSICAL_PERSON_FORM_COPY = {
   MIDDLE_NAME_LABEL: 'Segundo Nombre',
   MIDDLE_NAME_PLACEHOLDER: 'Alberto',
   NATIONALITY_LABEL: 'Nacionalidad',
+  NATIONALITY_OTHER_LABEL: 'Especifique su nacionalidad',
+  NATIONALITY_OTHER_PLACEHOLDER: 'Ingrese su nacionalidad',
   NATIONALITY_PLACEHOLDER: 'Seleccione nacionalidad',
   SECOND_LAST_NAME_LABEL: 'Segundo Apellido',
   SECOND_LAST_NAME_PLACEHOLDER: 'Castro',
   SECTION_1_TITLE: 'DOCUMENTO DE IDENTIDAD',
   SECTION_2_TITLE: 'NOMBRES Y APELLIDOS OFICIALES',
   SECTION_3_TITLE: 'DATOS DEMOGRÁFICOS',
+  SINGLE_SURNAME_WARNING: WIZARD_COPY.STEP_1_APPLICANT.SINGLE_SURNAME_WARNING,
 } as const;
 
 export const PHYSICAL_PERSON_FORM_DEFAULT_OPTIONS = {
@@ -40,9 +50,18 @@ export const PHYSICAL_PERSON_FORM_DEFAULT_OPTIONS = {
     { label: 'Otro', value: 'other' },
   ] as const satisfies readonly CustomSelectOption[],
   IDENTIFICATION_TYPE: [
-    { label: 'Cédula Nacional (Física)', value: 'national_id' },
-    { label: 'DIMEX / Residencia', value: 'dimex' },
-    { label: 'Pasaporte', value: 'passport' },
+    {
+      label: 'Cédula Nacional (Física)',
+      value: PHYSICAL_IDENTIFICATION_TYPES.NATIONAL_ID,
+    },
+    {
+      label: 'DIMEX / Residencia',
+      value: PHYSICAL_IDENTIFICATION_TYPES.DIMEX,
+    },
+    {
+      label: 'Pasaporte',
+      value: PHYSICAL_IDENTIFICATION_TYPES.PASSPORT,
+    },
   ] as const satisfies readonly CustomSelectOption[],
   MARITAL_STATUS: [
     { label: 'Casado(a)', value: 'married' },
@@ -56,7 +75,7 @@ export const PHYSICAL_PERSON_FORM_DEFAULT_OPTIONS = {
     { label: 'Nicaragüense', value: 'NI' },
     { label: 'Colombiana', value: 'CO' },
     { label: 'Estadounidense', value: 'US' },
-    { label: 'Otra', value: 'other' },
+    { label: 'Otra', value: NATIONALITY_OTHER_VALUE },
   ] as const satisfies readonly CustomSelectOption[],
 } as const;
 
@@ -64,6 +83,10 @@ export const PHYSICAL_PERSON_FORM_ICON_DIMENSIONS = {
   SIZE_PX: 18,
   STROKE_WIDTH_PX: 2,
   VIEW_BOX: '0 0 24 24',
+} as const;
+
+export const PHYSICAL_PERSON_FORM_NUMERICAL = {
+  MAX_LENGTH_DATE: 10,
 } as const;
 
 export const PHYSICAL_PERSON_FORM_STYLES = {
@@ -95,6 +118,7 @@ export const PHYSICAL_PERSON_FORM_TEST_IDS = {
   MARITAL_STATUS_SELECT: 'physical-person-marital-status-dropdown',
   MIDDLE_NAME_INPUT: 'physical-person-middle-name-input',
   NATIONALITY_DROPDOWN: 'physical-person-nationality-dropdown',
+  NATIONALITY_OTHER_INPUT: 'physical-person-nationality-other-input',
   NATIONALITY_SELECT: 'physical-person-nationality-dropdown',
   SECOND_LAST_NAME_INPUT: 'physical-person-second-last-name-input',
   SECTION_1_HEADER: 'physical-person-section-1-header',

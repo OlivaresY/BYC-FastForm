@@ -1,3 +1,4 @@
+import { ECONOMIC_SECTOR_OTHER_VALUE } from '../constants';
 import { LEGAL_ENTITY_CONTACT_DEFAULT_VALUES } from '../constants/LegalEntityContact.constants';
 import { PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES } from '../constants/PhysicalPersonContact.constants';
 import type { LegalEntityContact } from '../types/LegalEntityContact.types';
@@ -43,6 +44,7 @@ export interface NormalizedLegalEntityContact {
     accountingPhone: string;
     constitutionDate: string;
     economicSector: string;
+    economicSectorOther: string;
     employeesCount?: number;
     mainActivity: string;
   };
@@ -86,9 +88,7 @@ export const normalizeCantonValue = (canton?: unknown): string => {
   return trimmed;
 };
 
-const isRecordObject = (
-  value: unknown,
-): value is Record<string, unknown> => {
+const isRecordObject = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 };
 
@@ -166,8 +166,7 @@ export const normalizePhysicalPersonContactPayload = (
   const employmentStatus = (nestedEmployment.employmentStatus ??
     raw.employmentStatus ??
     defaults.employmentData.employmentStatus) as
-    | PhysicalPersonContact['employmentData']['employmentStatus']
-    | undefined;
+    PhysicalPersonContact['employmentData']['employmentStatus'] | undefined;
 
   const entryDate = (nestedEmployment.entryDate ??
     raw.entryDate ??
@@ -183,7 +182,8 @@ export const normalizePhysicalPersonContactPayload = (
 
   const currency = (nestedFinancial.currency ??
     raw.currency ??
-    defaults.financialCapacity.currency) as PhysicalPersonContact['financialCapacity']['currency'];
+    defaults.financialCapacity
+      .currency) as PhysicalPersonContact['financialCapacity']['currency'];
 
   const grossIncome = (nestedFinancial.grossIncome ??
     raw.grossIncome ??
@@ -317,9 +317,26 @@ export const normalizeLegalEntityContactPayload = (
     raw.constitutionDate ??
     defaults.commercialActivity.constitutionDate) as string;
 
-  const economicSector = (nestedActivity.economicSector ??
+  const rawEconomicSector =
+    nestedActivity.economicSector ??
     raw.economicSector ??
-    defaults.commercialActivity.economicSector) as string;
+    defaults.commercialActivity.economicSector;
+  const economicSector =
+    typeof rawEconomicSector === 'string' ? rawEconomicSector : '';
+
+  const rawEconomicSectorOther =
+    nestedActivity.economicSectorOther ??
+    raw.economicSectorOther ??
+    defaults.commercialActivity.economicSectorOther;
+  const safeEconomicSectorOther =
+    typeof rawEconomicSectorOther === 'string'
+      ? rawEconomicSectorOther.trim()
+      : '';
+
+  const economicSectorOther =
+    economicSector.trim() === ECONOMIC_SECTOR_OTHER_VALUE
+      ? safeEconomicSectorOther
+      : '';
 
   const employeesCount = (nestedActivity.employeesCount ??
     raw.employeesCount ??
@@ -331,7 +348,8 @@ export const normalizeLegalEntityContactPayload = (
 
   const currency = (nestedFinancial.currency ??
     raw.currency ??
-    defaults.financialStatements.currency) as LegalEntityContact['financialStatements']['currency'];
+    defaults.financialStatements
+      .currency) as LegalEntityContact['financialStatements']['currency'];
 
   const grossSales = (nestedFinancial.grossSales ??
     raw.grossSales ??
@@ -364,6 +382,7 @@ export const normalizeLegalEntityContactPayload = (
       accountingPhone,
       constitutionDate,
       economicSector,
+      economicSectorOther,
       employeesCount,
       mainActivity,
     },

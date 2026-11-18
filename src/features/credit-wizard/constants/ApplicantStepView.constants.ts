@@ -5,7 +5,6 @@ import type { LegalEntityFormValues } from '../types/LegalEntityForm.types';
 import type { PhysicalPersonFormValues } from '../types/PhysicalPersonForm.types';
 import { WIZARD_COPY } from './WizardCopy.constants';
 
-
 export const APPLICANT_STEP_VIEW_COPY = {
   DESCRIPTION: WIZARD_COPY.STEP_1_APPLICANT.DESCRIPTION,
   HEADER_SUBTITLE: WIZARD_COPY.STEP_1_APPLICANT.HEADER_SUBTITLE,
@@ -41,6 +40,7 @@ export const APPLICANT_STEP_VIEW_DEFAULT_VALUES: {
     maritalStatus: '',
     middleName: '',
     nationality: '',
+    nationalityOther: '',
     secondLastName: '',
   },
   THIRD_PARTY: {
@@ -57,7 +57,6 @@ export const APPLICANT_STEP_VIEW_DEFAULT_VALUES: {
 } as const;
 
 export const APPLICANT_STEP_VIEW_ERRORS = WIZARD_COPY.STEP_1_APPLICANT.ERRORS;
-
 
 export const APPLICANT_STEP_VIEW_NUMERICAL = {
   CURRENT_STEP: 1,
@@ -110,6 +109,10 @@ export const BENEFICIARY_MODAL_DIMENSIONS = {
   CLOSE_ICON_SIZE: 20,
   SECTION_ICON_SIZE: 20,
   SECTION_ICON_STROKE_WIDTH: 2,
+} as const;
+
+export const BENEFICIARY_MODAL_NUMERICAL = {
+  MAX_LENGTH_DATE: 10,
 } as const;
 
 export const BENEFICIARY_MODAL_OPTIONS = {

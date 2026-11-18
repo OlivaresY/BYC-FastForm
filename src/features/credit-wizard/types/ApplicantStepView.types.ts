@@ -86,6 +86,7 @@ export interface UseApplicantStepViewModelProps {
 
 export interface UseApplicantStepViewModelReturn {
   // State
+  hasSingleSurnameWarning: boolean;
   isBeneficiaryModalOpen: boolean;
   isIdentificationValid: boolean;
   isSubmitting: boolean;
@@ -108,6 +109,7 @@ export interface UseApplicantStepViewModelReturn {
     field: K,
     value: LegalEntityFormValues[K],
   ) => void;
+  onNationalityChange: (nationality: string) => void;
   onPhysicalFieldChange: <K extends PhysicalPersonFormField>(
     field: K,
     value: PhysicalPersonFormValues[K],

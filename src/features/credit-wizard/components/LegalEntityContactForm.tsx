@@ -12,11 +12,18 @@ import {
 import {
   formatCurrencyDisplay,
   formatDateDisplay,
+  sanitizeIbanInput,
   sanitizeNumericDigits,
 } from '@/shared/utils';
 import React from 'react';
 import { Controller, useWatch } from 'react-hook-form';
 import { Text, View } from 'react-native';
+import { ECONOMIC_SECTOR_OTHER_VALUE } from '../constants';
+import {
+  getCantonOptions,
+  getDistrictOptions,
+  getProvinceOptions,
+} from '../constants/CostaRicaLocations.constants';
 import {
   LEGAL_ENTITY_CONTACT_FORM_COLORS,
   LEGAL_ENTITY_CONTACT_FORM_COPY,
@@ -26,11 +33,6 @@ import {
   LEGAL_ENTITY_CONTACT_FORM_TEST_IDS,
   RAW_ECONOMIC_SECTOR_OPTIONS,
 } from '../constants/LegalEntityContactForm.constants';
-import {
-  getCantonOptions,
-  getDistrictOptions,
-  getProvinceOptions,
-} from '../constants/CostaRicaLocations.constants';
 import { CURRENCY_OPTIONS } from '../constants/SharedCatalogs.constants';
 import type { LegalEntityContactFormProps } from '../types/LegalEntityContactForm.types';
 
@@ -88,6 +90,7 @@ const LegalEntityContactFormComponent = ({
   control,
   disabled = false,
   onCantonChange,
+  onEconomicSectorChange,
   onInputFocus,
   onProvinceChange,
   options,
@@ -114,6 +117,10 @@ const LegalEntityContactFormComponent = ({
   const selectedCanton = useWatch({
     control,
     name: 'commercialAddress.canton',
+  });
+  const selectedEconomicSector = useWatch({
+    control,
+    name: 'commercialActivity.economicSector',
   });
   const provinceOptions = options?.provinceOptions ?? getProvinceOptions();
   const cantonOptions =
@@ -388,7 +395,10 @@ const LegalEntityContactFormComponent = ({
               errorMessage={error?.message}
               label={LEGAL_ENTITY_CONTACT_FORM_COPY.ECONOMIC_SECTOR_LABEL}
               onFocus={onInputFocus}
-              onValueChange={onChange}
+              onValueChange={(val: string): void => {
+                onChange(val);
+                onEconomicSectorChange?.(val);
+              }}
               options={economicSectorOptions}
               placeholder={
                 LEGAL_ENTITY_CONTACT_FORM_COPY.ECONOMIC_SECTOR_PLACEHOLDER
@@ -399,6 +409,37 @@ const LegalEntityContactFormComponent = ({
             />
           )}
         />
+
+        {selectedEconomicSector === ECONOMIC_SECTOR_OTHER_VALUE && (
+          <Controller
+            control={control}
+            name='commercialActivity.economicSectorOther'
+            render={({
+              field: { onBlur, onChange, value },
+              fieldState: { error },
+            }) => (
+              <CustomTextInput
+                autoCapitalize='words'
+                editable={!disabled}
+                error={error?.message}
+                label={
+                  LEGAL_ENTITY_CONTACT_FORM_COPY.ECONOMIC_SECTOR_OTHER_LABEL
+                }
+                onBlur={onBlur}
+                onChangeText={onChange}
+                onFocus={onInputFocus}
+                placeholder={
+                  LEGAL_ENTITY_CONTACT_FORM_COPY.ECONOMIC_SECTOR_OTHER_PLACEHOLDER
+                }
+                required
+                testID={
+                  LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.ECONOMIC_SECTOR_OTHER_INPUT
+                }
+                value={value ?? ''}
+              />
+            )}
+          />
+        )}
 
         {/* Actividad Principal (Full Width) */}
         <Controller
@@ -775,10 +816,12 @@ const LegalEntityContactFormComponent = ({
               keyboardType='default'
               label={LEGAL_ENTITY_CONTACT_FORM_COPY.IBAN_ACCOUNT_LABEL}
               leftIcon='banknote'
-              maxLength={LEGAL_ENTITY_CONTACT_FORM_NUMERICAL.MAX_LENGTH_IBAN}
+              maxLength={
+                LEGAL_ENTITY_CONTACT_FORM_NUMERICAL.MAX_LENGTH_IBAN_INPUT
+              }
               onBlur={onBlur}
               onChangeText={(text: string): void => {
-                onChange(text.toUpperCase());
+                onChange(sanitizeIbanInput(text));
               }}
               onFocus={onInputFocus}
               placeholder={

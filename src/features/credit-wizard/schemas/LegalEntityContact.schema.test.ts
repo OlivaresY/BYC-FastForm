@@ -2,6 +2,7 @@ import {
   LEGAL_ENTITY_CONTACT_DEFAULT_VALUES,
   LEGAL_ENTITY_CONTACT_ERRORS,
 } from '../constants/LegalEntityContact.constants';
+import { ECONOMIC_SECTOR_OTHER_VALUE } from '../constants';
 import { LegalEntityContactSchema } from './LegalEntityContact.schema';
 import type { LegalEntityContact } from '../types/LegalEntityContact.types';
 
@@ -287,6 +288,66 @@ describe('LegalEntityContactSchema', () => {
         LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_REFERENCE
           .COMPANY_REFERENCE_REQUIRED,
       ]);
+    });
+
+    it('rejects economicSector Otro when economicSectorOther is missing or empty', () => {
+      // Arrange
+      const data = {
+        ...createValidLegalEntity(),
+        commercialActivity: {
+          ...createValidLegalEntity().commercialActivity,
+          economicSector: ECONOMIC_SECTOR_OTHER_VALUE,
+          economicSectorOther: '   ',
+        },
+      };
+
+      // Act
+      const result = LegalEntityContactSchema.safeParse(data);
+
+      // Assert
+      expect(result.success).toBe(false);
+      expect(
+        getMessages(result, ['commercialActivity', 'economicSectorOther']),
+      ).toEqual([
+        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+          .ECONOMIC_SECTOR_OTHER_REQUIRED,
+      ]);
+    });
+
+    it('accepts economicSector Otro when economicSectorOther is provided', () => {
+      // Arrange
+      const data = {
+        ...createValidLegalEntity(),
+        commercialActivity: {
+          ...createValidLegalEntity().commercialActivity,
+          economicSector: ECONOMIC_SECTOR_OTHER_VALUE,
+          economicSectorOther: 'Consultoría y Auditoría Especializada',
+        },
+      };
+
+      // Act
+      const result = LegalEntityContactSchema.safeParse(data);
+
+      // Assert
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts standard economicSector with empty economicSectorOther', () => {
+      // Arrange
+      const data = {
+        ...createValidLegalEntity(),
+        commercialActivity: {
+          ...createValidLegalEntity().commercialActivity,
+          economicSector: 'Comercio',
+          economicSectorOther: '',
+        },
+      };
+
+      // Act
+      const result = LegalEntityContactSchema.safeParse(data);
+
+      // Assert
+      expect(result.success).toBe(true);
     });
   });
 
@@ -616,6 +677,40 @@ describe('LegalEntityContactSchema', () => {
       ).not.toContain(
         LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS
           .NET_PROFIT_EXCEEDS_GROSS,
+      );
+    });
+  });
+
+  describe('economicSectorOther ghost data eradication', () => {
+    it('wipes residual economicSectorOther ghost data when economicSector is not Otro', () => {
+      const parsed = LegalEntityContactSchema.parse({
+        ...createValidLegalEntity(),
+        commercialActivity: {
+          ...createValidLegalEntity().commercialActivity,
+          economicSector: 'Comercio',
+          economicSectorOther: 'GhostData',
+        },
+      });
+
+      expect(parsed.commercialActivity.economicSector).toBe('Comercio');
+      expect(parsed.commercialActivity.economicSectorOther).toBe('');
+    });
+
+    it('preserves trimmed economicSectorOther when economicSector is Otro', () => {
+      const parsed = LegalEntityContactSchema.parse({
+        ...createValidLegalEntity(),
+        commercialActivity: {
+          ...createValidLegalEntity().commercialActivity,
+          economicSector: ECONOMIC_SECTOR_OTHER_VALUE,
+          economicSectorOther: '  Energías Renovables  ',
+        },
+      });
+
+      expect(parsed.commercialActivity.economicSector).toBe(
+        ECONOMIC_SECTOR_OTHER_VALUE,
+      );
+      expect(parsed.commercialActivity.economicSectorOther).toBe(
+        'Energías Renovables',
       );
     });
   });

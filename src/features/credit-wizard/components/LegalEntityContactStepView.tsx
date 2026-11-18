@@ -24,6 +24,7 @@ export const LegalEntityContactStepView = ({
     control,
     districtOptions,
     handleCantonChange,
+    handleEconomicSectorChange,
     handleNextStep,
     handleProvinceChange,
     isSubmitting,
@@ -66,6 +67,7 @@ export const LegalEntityContactStepView = ({
           control={control}
           disabled={disabled || isSubmitting}
           onCantonChange={handleCantonChange}
+          onEconomicSectorChange={handleEconomicSectorChange}
           onInputFocus={onInputFocus}
           onProvinceChange={handleProvinceChange}
           options={{ cantonOptions, districtOptions, provinceOptions }}

@@ -1,3 +1,4 @@
+import { ECONOMIC_SECTOR_OTHER_VALUE } from '../constants';
 import { FINANCIAL_CURRENCIES } from '../constants/SharedCatalogs.constants';
 import {
   normalizeCantonValue,
@@ -79,7 +80,9 @@ describe('contactPayloadNormalizer', () => {
       expect(result.residentialAddress.province).toBe('san_jose');
       expect(result.residentialAddress.canton).toBe('central');
       expect(result.residentialAddress.district).toBe('carmen');
-      expect(result.residentialAddress.exactAddress).toBe('100m norte del parque');
+      expect(result.residentialAddress.exactAddress).toBe(
+        '100m norte del parque',
+      );
 
       // Verify employmentData
       expect(result.employmentData.employer).toBe('Acme Corp');
@@ -93,7 +96,9 @@ describe('contactPayloadNormalizer', () => {
       expect(result.financialCapacity.netIncome).toBe(1200000);
 
       // Verify commercialReference
-      expect(result.commercialReference.companyReference).toBe('CoriMotors Test');
+      expect(result.commercialReference.companyReference).toBe(
+        'CoriMotors Test',
+      );
       expect(result.commercialReference.referencePhone).toBe('+506 2200-2222');
       expect(result.commercialReference.ibanAccount).toBe(
         'CR05015202001026284066',
@@ -147,7 +152,9 @@ describe('contactPayloadNormalizer', () => {
       expect(result.contactInfo.cellPhone).toBe('');
       expect(result.commercialAddress.canton).toBe('');
       expect(result.commercialActivity.mainActivity).toBe('');
-      expect(result.financialStatements.currency).toBe(FINANCIAL_CURRENCIES.CRC);
+      expect(result.financialStatements.currency).toBe(
+        FINANCIAL_CURRENCIES.CRC,
+      );
       expect(result.commercialReference.companyReference).toBe('');
       expect(result.commercialReference.ibanAccount).toBe('');
     });
@@ -196,6 +203,7 @@ describe('contactPayloadNormalizer', () => {
       );
       expect(result.commercialActivity.constitutionDate).toBe('15/05/2018');
       expect(result.commercialActivity.economicSector).toBe('Automotriz');
+      expect(result.commercialActivity.economicSectorOther).toBe('');
       expect(result.commercialActivity.employeesCount).toBe(45);
       expect(result.commercialActivity.accountingPhone).toBe('+506 2200-3333');
 
@@ -241,6 +249,60 @@ describe('contactPayloadNormalizer', () => {
       expect(result.financialStatements.grossSales).toBe(50000000);
       expect(result.financialStatements.netProfit).toBe(15000000);
     });
+
+    it('preserves economicSectorOther when provided in nested commercialActivity or flat payload', () => {
+      const result = normalizeLegalEntityContactPayload({
+        commercialActivity: {
+          economicSector: ECONOMIC_SECTOR_OTHER_VALUE,
+          economicSectorOther: 'Servicios de Consultoría',
+        },
+      });
+
+      expect(result.commercialActivity.economicSector).toBe(
+        ECONOMIC_SECTOR_OTHER_VALUE,
+      );
+      expect(result.commercialActivity.economicSectorOther).toBe(
+        'Servicios de Consultoría',
+      );
+    });
+
+    it('wipes economicSectorOther ghost data from legacy flat payload when economicSector is not Otro', () => {
+      const result = normalizeLegalEntityContactPayload({
+        economicSector: 'Comercio',
+        economicSectorOther: 'GhostData',
+      });
+
+      expect(result.commercialActivity.economicSector).toBe('Comercio');
+      expect(result.commercialActivity.economicSectorOther).toBe('');
+    });
+
+    it('wipes economicSectorOther ghost data from nested commercialActivity when economicSector is not Otro', () => {
+      const result = normalizeLegalEntityContactPayload({
+        commercialActivity: {
+          economicSector: 'Comercio',
+          economicSectorOther: 'GhostData',
+        },
+      });
+
+      expect(result.commercialActivity.economicSector).toBe('Comercio');
+      expect(result.commercialActivity.economicSectorOther).toBe('');
+    });
+
+    it('safely coerces corrupted non-string economicSector and economicSectorOther legacy payloads to empty strings', () => {
+      const corruptedNested = normalizeLegalEntityContactPayload({
+        commercialActivity: {
+          economicSector: ECONOMIC_SECTOR_OTHER_VALUE,
+          economicSectorOther: 12345 as unknown as string,
+        },
+      });
+      const corruptedFlat = normalizeLegalEntityContactPayload({
+        economicSector: { invalid: true },
+        economicSectorOther: ['bad'],
+      });
+
+      expect(corruptedNested.commercialActivity.economicSectorOther).toBe('');
+      expect(corruptedFlat.commercialActivity.economicSector).toBe('');
+      expect(corruptedFlat.commercialActivity.economicSectorOther).toBe('');
+    });
   });
 });
-

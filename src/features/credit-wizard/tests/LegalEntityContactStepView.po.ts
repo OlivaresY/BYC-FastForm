@@ -81,10 +81,7 @@ export class LegalEntityContactStepViewPageObject {
     props?: LegalEntityContactStepViewTestContainerProps,
   ): LegalEntityContactStepViewPageObject {
     render(
-      React.createElement(
-        LegalEntityContactStepViewTestContainer,
-        props ?? {},
-      ),
+      React.createElement(LegalEntityContactStepViewTestContainer, props ?? {}),
     );
     return new LegalEntityContactStepViewPageObject(props?.testID);
   }
@@ -271,6 +268,18 @@ export class LegalEntityContactStepViewPageObject {
   public get economicSectorTrigger(): ReactTestInstance {
     return screen.getByTestId(
       `${LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.ECONOMIC_SECTOR_SELECT}-trigger`,
+    );
+  }
+
+  public get economicSectorOtherInput(): ReactTestInstance {
+    return screen.getByTestId(
+      LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.ECONOMIC_SECTOR_OTHER_INPUT,
+    );
+  }
+
+  public queryEconomicSectorOtherInput(): ReactTestInstance | null {
+    return screen.queryByTestId(
+      LEGAL_ENTITY_CONTACT_FORM_TEST_IDS.ECONOMIC_SECTOR_OTHER_INPUT,
     );
   }
 
@@ -473,6 +482,11 @@ export class LegalEntityContactStepViewPageObject {
       `${CUSTOM_SELECT_TEST_IDS.OPTION_ITEM_PREFIX}${value}`,
     );
     fireEvent.press(option);
+    return this;
+  }
+
+  public setEconomicSectorOther(text: string): this {
+    fireEvent.changeText(this.economicSectorOtherInput, text);
     return this;
   }
 
@@ -717,7 +731,7 @@ export class LegalEntityContactStepViewPageObject {
   public isSubmitButtonDisabled(): boolean {
     return Boolean(
       this.submitButton.props.accessibilityState?.disabled ??
-        this.submitButton.props.disabled,
+      this.submitButton.props.disabled,
     );
   }
 

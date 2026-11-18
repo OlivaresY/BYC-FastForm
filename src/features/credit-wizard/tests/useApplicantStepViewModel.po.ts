@@ -52,6 +52,10 @@ export class ApplicantStepViewModelPageObject {
     return this.hookResult.result.current;
   }
 
+  public get hasSingleSurnameWarning(): boolean {
+    return this.current.hasSingleSurnameWarning;
+  }
+
   public get isBeneficiaryModalOpen(): boolean {
     return this.current.isBeneficiaryModalOpen;
   }
@@ -127,6 +131,13 @@ export class ApplicantStepViewModelPageObject {
     value: PhysicalPersonFormValues[K],
   ): this {
     return this.setPhysicalField(field, value);
+  }
+
+  public changeNationality(nationality: string): this {
+    act(() => {
+      this.current.onNationalityChange(nationality);
+    });
+    return this;
   }
 
   public fillPhysicalFields(fields: Partial<PhysicalPersonFormValues>): this {

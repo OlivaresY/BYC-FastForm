@@ -14,6 +14,7 @@ export interface LegalEntityContactFormProps {
   control: Control<LegalEntityContact>;
   disabled?: boolean;
   onCantonChange?: (canton: string) => void;
+  onEconomicSectorChange?: (economicSector: string) => void;
   onInputFocus?: (event?: unknown) => void;
   onProvinceChange?: (province: string) => void;
   options?: LegalEntityContactFormOptions;

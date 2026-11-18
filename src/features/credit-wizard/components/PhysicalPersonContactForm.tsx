@@ -12,11 +12,17 @@ import {
 import {
   formatCurrencyDisplay,
   formatDateDisplay,
+  sanitizeIbanInput,
   sanitizeNumericDigits,
 } from '@/shared/utils';
 import React from 'react';
 import { Controller, useWatch } from 'react-hook-form';
 import { Text, View } from 'react-native';
+import {
+  getCantonOptions,
+  getDistrictOptions,
+  getProvinceOptions,
+} from '../constants/CostaRicaLocations.constants';
 import {
   PHYSICAL_PERSON_CONTACT_FORM_COLORS,
   PHYSICAL_PERSON_CONTACT_FORM_COPY,
@@ -26,11 +32,6 @@ import {
   PHYSICAL_PERSON_CONTACT_FORM_STYLES,
   PHYSICAL_PERSON_CONTACT_FORM_TEST_IDS,
 } from '../constants/PhysicalPersonContactForm.constants';
-import {
-  getCantonOptions,
-  getDistrictOptions,
-  getProvinceOptions,
-} from '../constants/CostaRicaLocations.constants';
 import { CURRENCY_OPTIONS } from '../constants/SharedCatalogs.constants';
 import type { PhysicalPersonContactFormProps } from '../types/PhysicalPersonContactForm.types';
 
@@ -121,8 +122,8 @@ const PhysicalPersonContactFormComponent = ({
       label:
         opt.value in t.common.catalogs.currencies
           ? t.common.catalogs.currencies[
-              opt.value as keyof typeof t.common.catalogs.currencies
-            ]
+          opt.value as keyof typeof t.common.catalogs.currencies
+          ]
           : opt.label,
       value: opt.value,
     }));
@@ -771,10 +772,12 @@ const PhysicalPersonContactFormComponent = ({
               keyboardType='default'
               label={PHYSICAL_PERSON_CONTACT_FORM_COPY.IBAN_ACCOUNT_LABEL}
               leftIcon='banknote'
-              maxLength={PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL.MAX_LENGTH_IBAN}
+              maxLength={
+                PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL.MAX_LENGTH_IBAN_INPUT
+              }
               onBlur={onBlur}
               onChangeText={(text: string): void => {
-                onChange(text.toUpperCase());
+                onChange(sanitizeIbanInput(text));
               }}
               onFocus={onInputFocus}
               placeholder={

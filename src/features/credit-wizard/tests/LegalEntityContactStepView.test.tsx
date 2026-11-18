@@ -1,3 +1,4 @@
+import { ECONOMIC_SECTOR_OTHER_VALUE } from '../constants';
 import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import { LegalEntityContactStepViewPageObject } from './LegalEntityContactStepView.po';
 
@@ -81,6 +82,51 @@ describe('LegalEntityContactStepView Integration', () => {
   });
 
   describe('Input Masks & Form Interactions', () => {
+    it('conditionally renders economicSectorOther input when Otro is selected', async () => {
+      // Arrange
+      const page = LegalEntityContactStepViewPageObject.render();
+
+      // Assert initially hidden
+      expect(page.queryEconomicSectorOtherInput()).toBeNull();
+
+      // Act
+      page.selectEconomicSector(ECONOMIC_SECTOR_OTHER_VALUE);
+
+      // Assert input appears
+      await page.waitFor(() => {
+        expect(page.economicSectorOtherInput).toBeTruthy();
+      });
+
+      // Act: fill economicSectorOther
+      page.setEconomicSectorOther('Consultoría');
+      expect(page.economicSectorOtherInput.props.value).toBe('Consultoría');
+    });
+
+    it('resets economicSectorOther when economicSector is changed away from Otro', async () => {
+      // Arrange
+      const page = LegalEntityContactStepViewPageObject.render();
+
+      // Act: select Otro and fill custom value
+      page.selectEconomicSector(ECONOMIC_SECTOR_OTHER_VALUE);
+      await page.waitFor(() => {
+        expect(page.economicSectorOtherInput).toBeTruthy();
+      });
+      page.setEconomicSectorOther('Consultoría');
+
+      // Act: switch back to Comercio
+      page.selectEconomicSector('Comercio');
+      await page.waitFor(() => {
+        expect(page.queryEconomicSectorOtherInput()).toBeNull();
+      });
+
+      // Act: switch to Otro again -> should be clean
+      page.selectEconomicSector(ECONOMIC_SECTOR_OTHER_VALUE);
+      await page.waitFor(() => {
+        expect(page.economicSectorOtherInput).toBeTruthy();
+        expect(page.economicSectorOtherInput.props.value).toBe('');
+      });
+    });
+
     it('formats constitution date with slot-preserving mask', () => {
       // Arrange
       const page = LegalEntityContactStepViewPageObject.render();
@@ -113,6 +159,17 @@ describe('LegalEntityContactStepView Integration', () => {
 
       // Act
       page.fillIbanAccount('cr05015202001026284066');
+
+      // Assert
+      expect(page.ibanAccountInput.props.value).toBe('CR05015202001026284066');
+    });
+
+    it('sanitizes spaced and lowercase IBAN paste input to clean uppercase 22 characters', () => {
+      // Arrange
+      const page = LegalEntityContactStepViewPageObject.render();
+
+      // Act
+      page.fillIbanAccount('cr05 0152 0200 1026 2840 66');
 
       // Assert
       expect(page.ibanAccountInput.props.value).toBe('CR05015202001026284066');
@@ -193,6 +250,7 @@ describe('LegalEntityContactStepView Integration', () => {
             accountingPhone: '+506 2200-1111',
             constitutionDate: '15-05-2015',
             economicSector: 'Comercio',
+            economicSectorOther: '',
             employeesCount: 25,
             mainActivity: 'Venta de repuestos y mantenimiento vehicular',
           },

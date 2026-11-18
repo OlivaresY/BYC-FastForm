@@ -1,9 +1,10 @@
+import { NATIONALITY_OTHER_VALUE } from '../constants';
 import { PHYSICAL_PERSON_FORM_COPY } from '../constants/PhysicalPersonForm.constants';
-import { PhysicalPersonFormPageObject } from './PhysicalPersonForm.po';
 import type {
   PhysicalPersonFormField,
   PhysicalPersonFormValues,
 } from '../types/PhysicalPersonForm.types';
+import { PhysicalPersonFormPageObject } from './PhysicalPersonForm.po';
 
 const initialValues: PhysicalPersonFormValues = {
   birthDate: '',
@@ -44,7 +45,7 @@ describe('PhysicalPersonForm Component', () => {
       const handleFieldChange = jest.fn();
       const page = PhysicalPersonFormPageObject.render({
         onFieldChange: handleFieldChange,
-        values: initialValues,
+        values: { ...initialValues, identificationType: 'national_id' },
       });
 
       const requiredFields: PhysicalPersonFormField[] = [
@@ -66,6 +67,49 @@ describe('PhysicalPersonForm Component', () => {
 
       // Assert - middleName is optional
       expect(page.getRequiredAsterisk('middleName')).toBeNull();
+    });
+
+    it('conditionally controls required asterisk on secondLastName based on identificationType', () => {
+      // Arrange & Assert for National ID
+      const nationalPage = PhysicalPersonFormPageObject.render({
+        onFieldChange: jest.fn(),
+        values: { ...initialValues, identificationType: 'national_id' },
+      });
+      expect(nationalPage.getRequiredAsterisk('secondLastName')).toBeTruthy();
+
+      // Arrange & Assert for DIMEX (foreigner)
+      const dimexPage = PhysicalPersonFormPageObject.render({
+        onFieldChange: jest.fn(),
+        values: { ...initialValues, identificationType: 'dimex' },
+      });
+      expect(dimexPage.getRequiredAsterisk('secondLastName')).toBeNull();
+
+      // Arrange & Assert for Passport (foreigner)
+      const passportPage = PhysicalPersonFormPageObject.render({
+        onFieldChange: jest.fn(),
+        values: { ...initialValues, identificationType: 'passport' },
+      });
+      expect(passportPage.getRequiredAsterisk('secondLastName')).toBeNull();
+    });
+
+    it('renders singleSurnameWarning helperText when hasSingleSurnameWarning is true', () => {
+      // Arrange
+      const page = PhysicalPersonFormPageObject.render({
+        hasSingleSurnameWarning: true,
+        onFieldChange: jest.fn(),
+        values: {
+          ...initialValues,
+          firstLastName: 'Smith',
+          firstName: 'John',
+          identificationType: 'dimex',
+          secondLastName: '',
+        },
+      });
+
+      // Assert
+      expect(page.getFieldHelperText('secondLastName')?.props.children).toBe(
+        PHYSICAL_PERSON_FORM_COPY.SINGLE_SURNAME_WARNING,
+      );
     });
 
     it('renders helper texts on identificationNumber and birthDate', () => {
@@ -225,6 +269,23 @@ describe('PhysicalPersonForm Component', () => {
 
       // Assert
       expect(handleFieldChange).toHaveBeenCalledWith('birthDate', '15-08-1988');
+    });
+
+    it('auto-formats raw numeric date input to DD-MM-YYYY on birthDate', () => {
+      // Arrange
+      const handleFieldChange = jest.fn();
+      const page = PhysicalPersonFormPageObject.render({
+        onFieldChange: handleFieldChange,
+        values: initialValues,
+      });
+
+      // Act
+      page.fillField('birthDate', '15081988');
+
+      // Assert
+      expect(handleFieldChange).toHaveBeenCalledWith('birthDate', '15-08-1988');
+      expect(page.getTextInput('birthDate').props.keyboardType).toBe('numeric');
+      expect(page.getTextInput('birthDate').props.maxLength).toBe(10);
     });
   });
 
@@ -427,6 +488,89 @@ describe('PhysicalPersonForm Component', () => {
 
       // Assert
       expect(page.container.props.testID).toBe('custom-physical-person-form');
+    });
+
+    it('does not render nationalityOther input when nationality is not other', () => {
+      // Arrange
+      const page = PhysicalPersonFormPageObject.render({
+        onFieldChange: jest.fn(),
+        values: {
+          ...initialValues,
+          nationality: 'CR',
+        },
+      });
+
+      // Assert
+      expect(page.queryTextInput('nationalityOther')).toBeNull();
+    });
+
+    it('renders nationalityOther input with label and handles text change when nationality is other', () => {
+      // Arrange
+      const handleFieldChange = jest.fn();
+      const page = PhysicalPersonFormPageObject.render({
+        onFieldChange: handleFieldChange,
+        values: {
+          ...initialValues,
+          nationality: 'other',
+          nationalityOther: '',
+        },
+      });
+
+      // Assert
+      expect(page.getTextInput('nationalityOther')).toBeTruthy();
+      expect(page.getRequiredAsterisk('nationalityOther')).toBeTruthy();
+
+      // Act
+      page.fillField('nationalityOther', 'Mexicana');
+
+      // Assert
+      expect(handleFieldChange).toHaveBeenCalledWith(
+        'nationalityOther',
+        'Mexicana',
+      );
+    });
+
+    it('displays error message for nationalityOther when provided', () => {
+      // Arrange
+      const page = PhysicalPersonFormPageObject.render({
+        errors: {
+          nationalityOther: 'Por favor, especifique su nacionalidad.',
+        },
+        onFieldChange: jest.fn(),
+        values: {
+          ...initialValues,
+          nationality: NATIONALITY_OTHER_VALUE,
+        },
+      });
+
+      // Assert
+      expect(page.getFieldError('nationalityOther')?.props.children).toBe(
+        'Por favor, especifique su nacionalidad.',
+      );
+    });
+
+    it('invokes semantic onNationalityChange callback when nationality changes', () => {
+      // Arrange
+      const handleFieldChange = jest.fn();
+      const handleNationalityChange = jest.fn();
+      const page = PhysicalPersonFormPageObject.render({
+        onFieldChange: handleFieldChange,
+        onNationalityChange: handleNationalityChange,
+        values: {
+          ...initialValues,
+          nationality: NATIONALITY_OTHER_VALUE,
+          nationalityOther: 'Mexicana',
+        },
+      });
+
+      // Act
+      page.openSelect('nationality');
+      page.selectOption('CR');
+
+      // Assert
+      expect(handleNationalityChange).toHaveBeenCalledTimes(1);
+      expect(handleNationalityChange).toHaveBeenCalledWith('CR');
+      expect(handleFieldChange).not.toHaveBeenCalled();
     });
   });
 });

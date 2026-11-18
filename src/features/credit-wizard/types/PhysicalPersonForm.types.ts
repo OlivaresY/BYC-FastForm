@@ -10,6 +10,7 @@ export type PhysicalPersonFormField =
   | 'maritalStatus'
   | 'middleName'
   | 'nationality'
+  | 'nationalityOther'
   | 'secondLastName';
 
 export interface PhysicalPersonFormValues {
@@ -22,6 +23,7 @@ export interface PhysicalPersonFormValues {
   maritalStatus: string;
   middleName: string;
   nationality: string;
+  nationalityOther?: string;
   secondLastName: string;
 }
 
@@ -35,11 +37,13 @@ export interface PhysicalPersonFormOptions {
 export interface PhysicalPersonFormProps {
   disabled?: boolean;
   errors?: Partial<Record<PhysicalPersonFormField, string>>;
+  hasSingleSurnameWarning?: boolean;
   isIdentificationValid?: boolean;
   onFieldChange: <K extends PhysicalPersonFormField>(
     field: K,
     value: PhysicalPersonFormValues[K],
   ) => void;
+  onNationalityChange?: (value: string) => void;
   options?: PhysicalPersonFormOptions;
   testID?: string;
   values: PhysicalPersonFormValues;

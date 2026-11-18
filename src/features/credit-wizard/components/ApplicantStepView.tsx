@@ -38,6 +38,7 @@ export const ApplicantStepView = React.memo(
       closeBeneficiaryModal,
       handleNextStep,
       handleSaveThirdPartyData,
+      hasSingleSurnameWarning,
       isBeneficiaryModalOpen,
       isIdentificationValid,
       isSubmitting = false,
@@ -45,6 +46,7 @@ export const ApplicantStepView = React.memo(
       legalErrors,
       legalValues,
       onLegalFieldChange,
+      onNationalityChange,
       onPhysicalFieldChange,
       onRegimeChange,
       onThirdPartyFieldChange,
@@ -106,8 +108,10 @@ export const ApplicantStepView = React.memo(
               <PhysicalPersonForm
                 disabled={disabled || isSubmitting}
                 errors={physicalErrors}
+                hasSingleSurnameWarning={hasSingleSurnameWarning}
                 isIdentificationValid={isIdentificationValid}
                 onFieldChange={onPhysicalFieldChange}
+                onNationalityChange={onNationalityChange}
                 testID={APPLICANT_STEP_VIEW_TEST_IDS.PHYSICAL_FORM}
                 values={physicalValues}
               />

@@ -35,6 +35,13 @@ export const esCR = {
   },
   creditWizard: {
     mockUserInitials: 'YO',
+    step1PhysicalIdentity: {
+      form: {
+        nationalityOtherRequired: 'Por favor, especifique su nacionalidad.',
+        singleSurnameWarning:
+          'Titular extranjero: se registrará un único apellido.',
+      },
+    },
     step2LegalContact: {
       backButton: 'Atrás',
       description:
@@ -50,6 +57,8 @@ export const esCR = {
           constitutionDateInvalid:
             'La fecha de constitución debe tener un formato DD-MM-YYYY válido.',
           constitutionDateRequired: 'La fecha de constitución es obligatoria.',
+          economicSectorOtherRequired:
+            'Por favor, especifique el sector económico.',
           economicSectorRequired: 'El sector económico es obligatorio.',
           employeesCountPositive:
             'La cantidad de empleados debe ser mayor a 0.',
@@ -70,7 +79,7 @@ export const esCR = {
           companyReferenceRequired:
             'El nombre de la empresa de referencia es obligatorio.',
           ibanAccountInvalid:
-            'La cuenta IBAN debe tener un formato válido de Costa Rica (ej. CR05015202001026284066).',
+            'La cuenta IBAN debe tener 22 caracteres e iniciar con CR (ej. CR05015202001026284066). Verifique que los dígitos verificadores y de cuenta sean válidos.',
           ibanAccountRequired: 'La cuenta IBAN es obligatoria.',
           referencePhoneInvalid:
             'El formato del teléfono de referencia no es válido.',
@@ -115,6 +124,7 @@ export const esCR = {
           currency: 'MONEDA',
           district: 'DISTRITO',
           economicSector: 'SECTOR ECONÓMICO',
+          economicSectorOther: 'ESPECIFIQUE EL SECTOR ECONÓMICO',
           email: 'CORREO ELECTRÓNICO',
           employeesCount: 'CANTIDAD DE EMPLEADOS',
           exactAddress: 'DIRECCIÓN EXACTA',
@@ -136,6 +146,7 @@ export const esCR = {
           currency: 'Seleccione moneda',
           district: 'Seleccione distrito',
           economicSector: 'Seleccione sector económico',
+          economicSectorOther: 'Ingrese sector económico',
           email: 'contacto@empresa.cr',
           employeesCount: 'Ej: 25',
           exactAddress: 'Frente a parque, edificio corporativo, piso 3...',
@@ -173,7 +184,7 @@ export const esCR = {
           companyReferenceRequired:
             'El nombre de la empresa de referencia es obligatorio.',
           ibanAccountInvalid:
-            'La cuenta IBAN debe tener un formato válido de Costa Rica (ej. CR05015202001026284066).',
+            'La cuenta IBAN debe tener 22 caracteres e iniciar con CR (ej. CR05015202001026284066). Verifique que los dígitos verificadores y de cuenta sean válidos.',
           ibanAccountRequired: 'La cuenta IBAN es obligatoria.',
           referencePhoneInvalid:
             'El formato del teléfono de referencia no es válido.',

@@ -6,13 +6,19 @@ import {
   IdCardIcon as SharedIdCardIcon,
   UserIcon as SharedUserIcon,
 } from '@/shared/ui';
+import { formatDateDisplay } from '@/shared/utils';
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
+import {
+  NATIONALITY_OTHER_VALUE,
+  PHYSICAL_IDENTIFICATION_TYPES,
+} from '../constants';
 import {
   PHYSICAL_PERSON_FORM_COLORS,
   PHYSICAL_PERSON_FORM_COPY,
   PHYSICAL_PERSON_FORM_DEFAULT_OPTIONS,
   PHYSICAL_PERSON_FORM_ICON_DIMENSIONS,
+  PHYSICAL_PERSON_FORM_NUMERICAL,
   PHYSICAL_PERSON_FORM_STYLES,
   PHYSICAL_PERSON_FORM_TEST_IDS,
 } from '../constants/PhysicalPersonForm.constants';
@@ -51,8 +57,10 @@ const ClockIcon = (): React.JSX.Element => (
 export const PhysicalPersonForm = ({
   disabled = false,
   errors,
+  hasSingleSurnameWarning = false,
   isIdentificationValid = false,
   onFieldChange,
+  onNationalityChange,
   options,
   testID,
   values,
@@ -84,11 +92,19 @@ export const PhysicalPersonForm = ({
         onFieldChange('identificationType', val),
       maritalStatus: (val: string): void => onFieldChange('maritalStatus', val),
       middleName: (val: string): void => onFieldChange('middleName', val),
-      nationality: (val: string): void => onFieldChange('nationality', val),
+      nationality: (val: string): void => {
+        if (onNationalityChange) {
+          onNationalityChange(val);
+          return;
+        }
+        onFieldChange('nationality', val);
+      },
+      nationalityOther: (val: string): void =>
+        onFieldChange('nationalityOther', val),
       secondLastName: (val: string): void =>
         onFieldChange('secondLastName', val),
     }),
-    [onFieldChange],
+    [onFieldChange, onNationalityChange],
   );
 
   return (
@@ -197,12 +213,20 @@ export const PhysicalPersonForm = ({
               autoCapitalize='words'
               editable={!disabled}
               error={errors?.secondLastName}
+              helperText={
+                hasSingleSurnameWarning
+                  ? PHYSICAL_PERSON_FORM_COPY.SINGLE_SURNAME_WARNING
+                  : undefined
+              }
               label={PHYSICAL_PERSON_FORM_COPY.SECOND_LAST_NAME_LABEL}
               onChangeText={handlers.secondLastName}
               placeholder={
                 PHYSICAL_PERSON_FORM_COPY.SECOND_LAST_NAME_PLACEHOLDER
               }
-              required
+              required={
+                values.identificationType ===
+                PHYSICAL_IDENTIFICATION_TYPES.NATIONAL_ID
+              }
               testID={PHYSICAL_PERSON_FORM_TEST_IDS.SECOND_LAST_NAME_INPUT}
               value={values.secondLastName}
             />
@@ -222,9 +246,13 @@ export const PhysicalPersonForm = ({
           editable={!disabled}
           error={errors?.birthDate}
           helperText={PHYSICAL_PERSON_FORM_COPY.BIRTH_DATE_HELPER}
+          keyboardType='numeric'
           label={PHYSICAL_PERSON_FORM_COPY.BIRTH_DATE_LABEL}
           leftIcon='calendar'
-          onChangeText={handlers.birthDate}
+          maxLength={PHYSICAL_PERSON_FORM_NUMERICAL.MAX_LENGTH_DATE}
+          onChangeText={(text: string): void => {
+            handlers.birthDate(formatDateDisplay(text));
+          }}
           placeholder={PHYSICAL_PERSON_FORM_COPY.BIRTH_DATE_PLACEHOLDER}
           required
           testID={PHYSICAL_PERSON_FORM_TEST_IDS.BIRTH_DATE_INPUT}
@@ -243,6 +271,22 @@ export const PhysicalPersonForm = ({
           testID={PHYSICAL_PERSON_FORM_TEST_IDS.NATIONALITY_DROPDOWN}
           value={values.nationality}
         />
+
+        {values.nationality === NATIONALITY_OTHER_VALUE && (
+          <CustomTextInput
+            autoCapitalize='words'
+            editable={!disabled}
+            error={errors?.nationalityOther}
+            label={PHYSICAL_PERSON_FORM_COPY.NATIONALITY_OTHER_LABEL}
+            onChangeText={handlers.nationalityOther}
+            placeholder={
+              PHYSICAL_PERSON_FORM_COPY.NATIONALITY_OTHER_PLACEHOLDER
+            }
+            required
+            testID={PHYSICAL_PERSON_FORM_TEST_IDS.NATIONALITY_OTHER_INPUT}
+            value={values.nationalityOther ?? ''}
+          />
+        )}
 
         {/* 2-Column Row: Estado Civil & Género */}
         <View className={PHYSICAL_PERSON_FORM_STYLES.GRID_ROW}>

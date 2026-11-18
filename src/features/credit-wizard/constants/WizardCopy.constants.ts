@@ -82,6 +82,8 @@ export const WIZARD_COPY = {
         IDENTIFICATION_TYPE: 'Seleccione un tipo de identificación.',
         MARITAL_STATUS: 'Seleccione el estado civil.',
         NATIONALITY: 'Seleccione la nacionalidad.',
+        NATIONALITY_OTHER:
+          esCR.creditWizard.step1PhysicalIdentity.form.nationalityOtherRequired,
         SECOND_LAST_NAME: 'El segundo apellido es obligatorio.',
       },
       SUBMIT_FAILED:
@@ -100,6 +102,8 @@ export const WIZARD_COPY = {
     },
     HEADER_SUBTITLE: 'Ingrese la información básica del solicitante.',
     HEADER_TITLE: 'Datos del Solicitante',
+    SINGLE_SURNAME_WARNING:
+      esCR.creditWizard.step1PhysicalIdentity.form.singleSurnameWarning,
     SUBMIT_BUTTON: 'Siguiente: Información de Contacto',
     SUBTITLE:
       'Ingresa los datos básicos del solicitante para iniciar la gestión y perfilado de crédito multi-banco.',
@@ -119,6 +123,8 @@ export const WIZARD_COPY = {
           STEP_2_LEGAL.errors.commercialActivity.constitutionDateInvalid,
         CONSTITUTION_DATE_REQUIRED:
           STEP_2_LEGAL.errors.commercialActivity.constitutionDateRequired,
+        ECONOMIC_SECTOR_OTHER_REQUIRED:
+          STEP_2_LEGAL.errors.commercialActivity.economicSectorOtherRequired,
         ECONOMIC_SECTOR_REQUIRED:
           STEP_2_LEGAL.errors.commercialActivity.economicSectorRequired,
         EMPLOYEES_COUNT_POSITIVE:

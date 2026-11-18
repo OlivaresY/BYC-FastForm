@@ -12,6 +12,7 @@ import {
   FINANCIAL_CURRENCIES,
   LEGAL_ENTITY_CONTACT_PATTERNS,
 } from '../constants/LegalEntityContact.constants';
+import { ECONOMIC_SECTOR_OTHER_VALUE } from '../constants';
 import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 
 const LEGAL_ENTITY_CONTACT_ERRORS = WIZARD_COPY.STEP_2_LEGAL_CONTACT.ERRORS;
@@ -21,88 +22,122 @@ export const INTERNATIONAL_PHONE_REGEX =
 
 export { isNotFutureDateDDMMYYYY };
 
-export const CommercialActivitySchema = z.object({
-  accountingPhone: z
-    .string({
-      error:
-        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
-          .ACCOUNTING_PHONE_REQUIRED,
-    })
-    .trim()
-    .min(1, {
-      message:
-        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
-          .ACCOUNTING_PHONE_REQUIRED,
-    })
-    .pipe(
-      z
-        .string()
-        .regex(
-          INTERNATIONAL_PHONE_REGEX,
+export const CommercialActivitySchema = z
+  .object({
+    accountingPhone: z
+      .string({
+        error:
           LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
-            .ACCOUNTING_PHONE_INVALID,
-        ),
-    ),
-  constitutionDate: z
-    .string({
-      error:
+            .ACCOUNTING_PHONE_REQUIRED,
+      })
+      .trim()
+      .min(1, {
+        message:
+          LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+            .ACCOUNTING_PHONE_REQUIRED,
+      })
+      .pipe(
+        z
+          .string()
+          .regex(
+            INTERNATIONAL_PHONE_REGEX,
+            LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+              .ACCOUNTING_PHONE_INVALID,
+          ),
+      ),
+    constitutionDate: z
+      .string({
+        error:
+          LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+            .CONSTITUTION_DATE_REQUIRED,
+      })
+      .trim()
+      .min(1, {
+        message:
+          LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+            .CONSTITUTION_DATE_REQUIRED,
+      })
+      .pipe(
+        z
+          .string()
+          .refine(isValidDateDDMMYYYY, {
+            message:
+              LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+                .CONSTITUTION_DATE_INVALID,
+          })
+          .refine(isNotFutureDateDDMMYYYY, {
+            message:
+              LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+                .CONSTITUTION_DATE_FUTURE,
+          }),
+      ),
+    economicSector: z
+      .string({
+        error:
+          LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+            .ECONOMIC_SECTOR_REQUIRED,
+      })
+      .trim()
+      .min(1, {
+        message:
+          LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+            .ECONOMIC_SECTOR_REQUIRED,
+      }),
+    economicSectorOther: z.string().trim().optional(),
+    employeesCount: z.coerce
+      .number({
+        error:
+          LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+            .EMPLOYEES_COUNT_REQUIRED,
+      })
+      .int()
+      .gt(
+        0,
         LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
-          .CONSTITUTION_DATE_REQUIRED,
-    })
-    .trim()
-    .min(1, {
-      message:
-        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
-          .CONSTITUTION_DATE_REQUIRED,
-    })
-    .pipe(
-      z
-        .string()
-        .refine(isValidDateDDMMYYYY, {
+          .EMPLOYEES_COUNT_POSITIVE,
+      ),
+    mainActivity: z
+      .string({
+        error:
+          LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+            .MAIN_ACTIVITY_REQUIRED,
+      })
+      .trim()
+      .min(1, {
+        message:
+          LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
+            .MAIN_ACTIVITY_REQUIRED,
+      }),
+  })
+  .superRefine((data, ctx) => {
+    if (data.economicSector === ECONOMIC_SECTOR_OTHER_VALUE) {
+      if (
+        !data.economicSectorOther ||
+        data.economicSectorOther.trim().length === 0
+      ) {
+        ctx.addIssue({
+          code: 'custom',
           message:
             LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
-              .CONSTITUTION_DATE_INVALID,
-        })
-        .refine(isNotFutureDateDDMMYYYY, {
-          message:
-            LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
-              .CONSTITUTION_DATE_FUTURE,
-        }),
-    ),
-  economicSector: z
-    .string({
-      error:
-        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
-          .ECONOMIC_SECTOR_REQUIRED,
-    })
-    .trim()
-    .min(1, {
-      message:
-        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
-          .ECONOMIC_SECTOR_REQUIRED,
+              .ECONOMIC_SECTOR_OTHER_REQUIRED,
+          path: ['economicSectorOther'],
+        });
+      }
+    }
+  })
+  .transform(
+    (
+      data,
+    ): Omit<typeof data, 'economicSectorOther'> & {
+      economicSectorOther?: string;
+    } => ({
+      ...data,
+      economicSectorOther:
+        data.economicSector === ECONOMIC_SECTOR_OTHER_VALUE
+          ? (data.economicSectorOther ?? '')
+          : '',
     }),
-  employeesCount: z.coerce
-    .number({
-      error:
-        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY
-          .EMPLOYEES_COUNT_REQUIRED,
-    })
-    .int()
-    .gt(
-      0,
-      LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY.EMPLOYEES_COUNT_POSITIVE,
-    ),
-  mainActivity: z
-    .string({
-      error:
-        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY.MAIN_ACTIVITY_REQUIRED,
-    })
-    .trim()
-    .min(1, {
-      message:
-        LEGAL_ENTITY_CONTACT_ERRORS.COMMERCIAL_ACTIVITY.MAIN_ACTIVITY_REQUIRED,
-    }),
-});
+  );
 
 export const CommercialAddressSchema = z
   .object({

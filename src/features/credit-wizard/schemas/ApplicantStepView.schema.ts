@@ -5,6 +5,10 @@ import {
 } from '@/shared/utils';
 import { z } from 'zod';
 import { APPLICANT_STEP_VIEW_NUMERICAL } from '../constants/ApplicantStepView.constants';
+import {
+  NATIONALITY_OTHER_VALUE,
+  PHYSICAL_IDENTIFICATION_TYPES,
+} from '../constants';
 import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 import type {
   ThirdPartyBeneficiaryField,
@@ -72,25 +76,66 @@ export const LegalIdentificationNumberSchema = identificationNumberSchema(
   APPLICANT_ERRORS.LEGAL.IDENTIFICATION_NUMBER,
 );
 
-export const PhysicalApplicantSchema = z.object({
-  birthDate: createDateDDMMYYYYSchema(APPLICANT_ERRORS.PHYSICAL.BIRTH_DATE),
-  firstLastName: requiredText(APPLICANT_ERRORS.PHYSICAL.FIRST_LAST_NAME),
-  firstName: requiredText(APPLICANT_ERRORS.PHYSICAL.FIRST_NAME),
-  gender: z.enum(['male', 'female', 'other'], {
-    error: APPLICANT_ERRORS.PHYSICAL.GENDER,
-  }),
-  identificationNumber: PhysicalIdentificationNumberSchema,
-  identificationType: z.enum(['national_id', 'dimex', 'passport'], {
-    error: APPLICANT_ERRORS.PHYSICAL.IDENTIFICATION_TYPE,
-  }),
-  maritalStatus: z.enum(
-    ['single', 'married', 'divorced', 'widowed', 'common_law'],
-    { error: APPLICANT_ERRORS.PHYSICAL.MARITAL_STATUS },
-  ),
-  middleName: z.string().trim().optional(),
-  nationality: requiredText(APPLICANT_ERRORS.PHYSICAL.NATIONALITY),
-  secondLastName: requiredText(APPLICANT_ERRORS.PHYSICAL.SECOND_LAST_NAME),
-});
+export const PhysicalApplicantSchema = z
+  .object({
+    birthDate: createDateDDMMYYYYSchema(APPLICANT_ERRORS.PHYSICAL.BIRTH_DATE),
+    firstLastName: requiredText(APPLICANT_ERRORS.PHYSICAL.FIRST_LAST_NAME),
+    firstName: requiredText(APPLICANT_ERRORS.PHYSICAL.FIRST_NAME),
+    gender: z.enum(['male', 'female', 'other'], {
+      error: APPLICANT_ERRORS.PHYSICAL.GENDER,
+    }),
+    identificationNumber: PhysicalIdentificationNumberSchema,
+    identificationType: z.enum(
+      [
+        PHYSICAL_IDENTIFICATION_TYPES.NATIONAL_ID,
+        PHYSICAL_IDENTIFICATION_TYPES.DIMEX,
+        PHYSICAL_IDENTIFICATION_TYPES.PASSPORT,
+      ],
+      {
+        error: APPLICANT_ERRORS.PHYSICAL.IDENTIFICATION_TYPE,
+      },
+    ),
+    maritalStatus: z.enum(
+      ['single', 'married', 'divorced', 'widowed', 'common_law'],
+      { error: APPLICANT_ERRORS.PHYSICAL.MARITAL_STATUS },
+    ),
+    middleName: z.string().trim().optional(),
+    nationality: requiredText(APPLICANT_ERRORS.PHYSICAL.NATIONALITY),
+    nationalityOther: z.string().trim().optional(),
+    secondLastName: z
+      .string()
+      .trim()
+      .optional()
+      .transform((value): string => value ?? ''),
+  })
+  .superRefine((data, ctx) => {
+    if (data.identificationType === PHYSICAL_IDENTIFICATION_TYPES.NATIONAL_ID) {
+      if (data.secondLastName.length === 0) {
+        ctx.addIssue({
+          code: 'custom',
+          message: APPLICANT_ERRORS.PHYSICAL.SECOND_LAST_NAME,
+          path: ['secondLastName'],
+        });
+      }
+    }
+
+    if (data.nationality === NATIONALITY_OTHER_VALUE) {
+      if (!data.nationalityOther || data.nationalityOther.trim().length === 0) {
+        ctx.addIssue({
+          code: 'custom',
+          message: APPLICANT_ERRORS.PHYSICAL.NATIONALITY_OTHER,
+          path: ['nationalityOther'],
+        });
+      }
+    }
+  })
+  .transform((data) => ({
+    ...data,
+    nationalityOther:
+      data.nationality === NATIONALITY_OTHER_VALUE
+        ? (data.nationalityOther ?? '')
+        : '',
+  }));
 
 export const LegalApplicantSchema = z.object({
   identificationNumber: LegalIdentificationNumberSchema,
@@ -114,6 +159,7 @@ export const PHYSICAL_APPLICANT_FIELDS = [
   'maritalStatus',
   'middleName',
   'nationality',
+  'nationalityOther',
   'secondLastName',
 ] as const satisfies readonly PhysicalPersonFormField[];
 

@@ -2,6 +2,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import {
+  FOREIGN_IDENTIFICATION_TYPES,
+  NATIONALITY_OTHER_VALUE,
+} from '../constants';
+import {
   APPLICANT_STEP_VIEW_DEFAULT_VALUES,
   APPLICANT_STEP_VIEW_ERRORS,
   APPLICANT_STEP_VIEW_NUMERICAL,
@@ -224,6 +228,22 @@ export const useApplicantStepViewModel = (
       ? isPhysicalIdentificationValid
       : isLegalIdentificationValid;
 
+  const hasSingleSurnameWarning = useMemo<boolean>(() => {
+    if (regime !== 'physical') {
+      return false;
+    }
+    const isForeignId = FOREIGN_IDENTIFICATION_TYPES.some(
+      (type) => type === physicalValues.identificationType,
+    );
+    const hasEmptySecondSurname = !physicalValues.secondLastName?.trim();
+
+    return isForeignId && hasEmptySecondSurname;
+  }, [
+    physicalValues.identificationType,
+    physicalValues.secondLastName,
+    regime,
+  ]);
+
   // ===========================================================================
   // Modal Handlers
   // ===========================================================================
@@ -314,18 +334,40 @@ export const useApplicantStepViewModel = (
     [setValue],
   );
 
+  const onNationalityChange = useCallback(
+    (nationality: string): void => {
+      setValue('physicalValues.nationality', nationality, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      });
+      if (nationality !== NATIONALITY_OTHER_VALUE) {
+        setValue('physicalValues.nationalityOther', '', {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+      }
+    },
+    [setValue],
+  );
+
   const onPhysicalFieldChange = useCallback(
     <K extends PhysicalPersonFormField>(
       field: K,
       value: PhysicalPersonFormValues[K],
     ): void => {
+      if (field === 'nationality') {
+        onNationalityChange(String(value ?? ''));
+        return;
+      }
       setValue(`physicalValues.${field}` as never, value as never, {
         shouldDirty: true,
         shouldTouch: true,
         shouldValidate: true,
       });
     },
-    [setValue],
+    [onNationalityChange, setValue],
   );
 
   const onLegalFieldChange = useCallback(
@@ -490,13 +532,7 @@ export const useApplicantStepViewModel = (
         }
       })(dataOrEvent as React.BaseSyntheticEvent | undefined);
     },
-    [
-      editingThirdPartyValues,
-      getValues,
-      handleSubmit,
-      onValidSubmit,
-      setValue,
-    ],
+    [editingThirdPartyValues, getValues, handleSubmit, onValidSubmit, setValue],
   );
 
   const onSubmit = useCallback((): Promise<void> => {
@@ -507,6 +543,7 @@ export const useApplicantStepViewModel = (
     closeBeneficiaryModal,
     handleNextStep,
     handleSaveThirdPartyData,
+    hasSingleSurnameWarning,
     isBeneficiaryModalOpen,
     isIdentificationValid,
     isSubmitting,
@@ -514,6 +551,7 @@ export const useApplicantStepViewModel = (
     legalErrors,
     legalValues,
     onLegalFieldChange,
+    onNationalityChange,
     onPhysicalFieldChange,
     onRegimeChange,
     onSubmit,

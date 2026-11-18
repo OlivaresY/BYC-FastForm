@@ -20,6 +20,7 @@ export type TextInputField =
   | 'firstName'
   | 'identificationNumber'
   | 'middleName'
+  | 'nationalityOther'
   | 'secondLastName';
 
 export type SelectField =
@@ -32,6 +33,7 @@ const TEXT_FIELD_TEST_ID_MAP: Record<TextInputField, string> = {
   identificationNumber:
     PHYSICAL_PERSON_FORM_TEST_IDS.IDENTIFICATION_NUMBER_INPUT,
   middleName: PHYSICAL_PERSON_FORM_TEST_IDS.MIDDLE_NAME_INPUT,
+  nationalityOther: PHYSICAL_PERSON_FORM_TEST_IDS.NATIONALITY_OTHER_INPUT,
   secondLastName: PHYSICAL_PERSON_FORM_TEST_IDS.SECOND_LAST_NAME_INPUT,
 };
 
@@ -108,6 +110,11 @@ export class PhysicalPersonFormPageObject {
     return within(container).getByTestId(TEXT_FIELD_TEST_ID_MAP[field]);
   }
 
+  public queryTextInput(field: TextInputField): ReactTestInstance | null {
+    const baseId = TEXT_FIELD_TEST_ID_MAP[field];
+    return screen.queryByTestId(baseId);
+  }
+
   public getSelectTrigger(field: SelectField): ReactTestInstance {
     const container = this.getFieldContainer(field);
     const baseId = SELECT_FIELD_TEST_ID_MAP[field];
@@ -155,7 +162,7 @@ export class PhysicalPersonFormPageObject {
   }
 
   public getFieldHelperText(
-    field: 'birthDate' | 'identificationNumber',
+    field: 'birthDate' | 'identificationNumber' | 'secondLastName',
   ): ReactTestInstance | null {
     const container = this.getFieldContainer(field);
     const baseId = TEXT_FIELD_TEST_ID_MAP[field];

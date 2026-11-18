@@ -35,6 +35,7 @@ export interface UseLegalEntityContactViewModelReturn {
   districtOptions: readonly CustomSelectOption[];
   errors: FieldErrors<LegalEntityContact>;
   handleCantonChange: (canton: string) => void;
+  handleEconomicSectorChange: (economicSector: string) => void;
   handleNextStep: (dataOrEvent?: unknown) => Promise<void> | void;
   handleProvinceChange: (province: string) => void;
   handleSubmit: UseFormHandleSubmit<LegalEntityContact>;
