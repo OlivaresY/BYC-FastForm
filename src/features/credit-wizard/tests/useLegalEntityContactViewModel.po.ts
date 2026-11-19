@@ -40,6 +40,13 @@ export class LegalEntityContactViewModelPageObject {
     return this.hookResult.result.current.isValid;
   }
 
+  public changeEconomicSector(economicSector: string): this {
+    act(() => {
+      this.hookResult.result.current.handleEconomicSectorChange(economicSector);
+    });
+    return this;
+  }
+
   public async handleNextStep(dataOrEvent?: unknown): Promise<void> {
     await act(async () => {
       await this.hookResult.result.current.handleNextStep(dataOrEvent);
@@ -49,6 +56,22 @@ export class LegalEntityContactViewModelPageObject {
   public async waitForValid(expected = true): Promise<this> {
     await waitFor(() => {
       expect(this.hookResult.result.current.isValid).toBe(expected);
+    });
+    return this;
+  }
+
+  public async waitForEconomicSectorOtherError(
+    expectedDefined: boolean,
+  ): Promise<this> {
+    await waitFor(() => {
+      const error =
+        this.hookResult.result.current.errors.commercialActivity
+          ?.economicSectorOther;
+      if (expectedDefined) {
+        expect(error?.message).toBeTruthy();
+      } else {
+        expect(error).toBeUndefined();
+      }
     });
     return this;
   }

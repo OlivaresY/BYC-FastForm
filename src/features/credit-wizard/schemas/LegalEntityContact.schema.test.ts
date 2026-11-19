@@ -2,7 +2,7 @@ import {
   LEGAL_ENTITY_CONTACT_DEFAULT_VALUES,
   LEGAL_ENTITY_CONTACT_ERRORS,
 } from '../constants/LegalEntityContact.constants';
-import { OTHER_ECONOMIC_SECTOR_VALUE } from '../constants/LegalEntityContactForm.constants';
+import { ECONOMIC_SECTOR_OTHER_VALUE } from '../constants';
 import { LegalEntityContactSchema } from './LegalEntityContact.schema';
 import type { LegalEntityContact } from '../types/LegalEntityContact.types';
 
@@ -296,7 +296,7 @@ describe('LegalEntityContactSchema', () => {
         ...createValidLegalEntity(),
         commercialActivity: {
           ...createValidLegalEntity().commercialActivity,
-          economicSector: OTHER_ECONOMIC_SECTOR_VALUE,
+          economicSector: ECONOMIC_SECTOR_OTHER_VALUE,
           economicSectorOther: '   ',
         },
       };
@@ -320,7 +320,7 @@ describe('LegalEntityContactSchema', () => {
         ...createValidLegalEntity(),
         commercialActivity: {
           ...createValidLegalEntity().commercialActivity,
-          economicSector: OTHER_ECONOMIC_SECTOR_VALUE,
+          economicSector: ECONOMIC_SECTOR_OTHER_VALUE,
           economicSectorOther: 'Consultoría y Auditoría Especializada',
         },
       };
@@ -677,6 +677,40 @@ describe('LegalEntityContactSchema', () => {
       ).not.toContain(
         LEGAL_ENTITY_CONTACT_ERRORS.FINANCIAL_STATEMENTS
           .NET_PROFIT_EXCEEDS_GROSS,
+      );
+    });
+  });
+
+  describe('economicSectorOther ghost data eradication', () => {
+    it('wipes residual economicSectorOther ghost data when economicSector is not Otro', () => {
+      const parsed = LegalEntityContactSchema.parse({
+        ...createValidLegalEntity(),
+        commercialActivity: {
+          ...createValidLegalEntity().commercialActivity,
+          economicSector: 'Comercio',
+          economicSectorOther: 'GhostData',
+        },
+      });
+
+      expect(parsed.commercialActivity.economicSector).toBe('Comercio');
+      expect(parsed.commercialActivity.economicSectorOther).toBe('');
+    });
+
+    it('preserves trimmed economicSectorOther when economicSector is Otro', () => {
+      const parsed = LegalEntityContactSchema.parse({
+        ...createValidLegalEntity(),
+        commercialActivity: {
+          ...createValidLegalEntity().commercialActivity,
+          economicSector: ECONOMIC_SECTOR_OTHER_VALUE,
+          economicSectorOther: '  Energías Renovables  ',
+        },
+      });
+
+      expect(parsed.commercialActivity.economicSector).toBe(
+        ECONOMIC_SECTOR_OTHER_VALUE,
+      );
+      expect(parsed.commercialActivity.economicSectorOther).toBe(
+        'Energías Renovables',
       );
     });
   });

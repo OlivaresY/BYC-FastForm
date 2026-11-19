@@ -736,6 +736,48 @@ describe('useApplicantStepViewModel - Submission Characterization (BYC-25)', () 
       expect(onSubmit).toHaveBeenCalledTimes(1);
     });
 
+    it('activates single surname warning immediately for dimex and passport even when firstName and firstLastName are empty', () => {
+      const dimexPage = ApplicantStepViewModelPageObject.render({
+        initialPhysicalValues: {
+          firstLastName: '',
+          firstName: '',
+          identificationType: 'dimex',
+          secondLastName: '',
+        },
+        initialRegime: 'physical',
+      });
+      const passportPage = ApplicantStepViewModelPageObject.render({
+        initialPhysicalValues: {
+          firstLastName: '',
+          firstName: '',
+          identificationType: 'passport',
+          secondLastName: '',
+        },
+        initialRegime: 'physical',
+      });
+
+      expect(dimexPage.hasSingleSurnameWarning).toBe(true);
+      expect(passportPage.hasSingleSurnameWarning).toBe(true);
+    });
+
+    it('clears residual nationalityOther via onNationalityChange when switching away from other', () => {
+      const page = ApplicantStepViewModelPageObject.render({
+        initialPhysicalValues: {
+          ...VALID_PHYSICAL,
+          nationality: 'other',
+          nationalityOther: 'Mexicana',
+        },
+        initialRegime: 'physical',
+      });
+
+      expect(page.physicalValues.nationalityOther).toBe('Mexicana');
+
+      page.changeNationality('CR');
+
+      expect(page.physicalValues.nationality).toBe('CR');
+      expect(page.physicalValues.nationalityOther).toBe('');
+    });
+
     it('blocks submission and populates physicalErrors.nationalityOther when nationality is other and nationalityOther is missing', async () => {
       const onSubmit = jest.fn();
       const page = ApplicantStepViewModelPageObject.render({

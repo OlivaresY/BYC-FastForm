@@ -17,6 +17,7 @@ const createMockViewModel = (
   legalErrors: {},
   legalValues: APPLICANT_STEP_VIEW_DEFAULT_VALUES.LEGAL,
   onLegalFieldChange: jest.fn(),
+  onNationalityChange: jest.fn(),
   onPhysicalFieldChange: jest.fn(),
   onRegimeChange: jest.fn(),
   onSubmit: jest.fn(),

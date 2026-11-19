@@ -71,6 +71,7 @@ export const ApplicantStepView = React.memo(
       legalErrors,
       legalValues,
       onLegalFieldChange,
+      onNationalityChange,
       onPhysicalFieldChange,
       onRegimeChange,
       onThirdPartyFieldChange,
@@ -135,6 +136,7 @@ export const ApplicantStepView = React.memo(
                 hasSingleSurnameWarning={hasSingleSurnameWarning}
                 isIdentificationValid={isIdentificationValid}
                 onFieldChange={onPhysicalFieldChange}
+                onNationalityChange={onNationalityChange}
                 testID={APPLICANT_STEP_VIEW_TEST_IDS.PHYSICAL_FORM}
                 values={physicalValues}
               />

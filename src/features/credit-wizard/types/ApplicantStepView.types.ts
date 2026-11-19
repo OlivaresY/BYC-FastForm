@@ -109,6 +109,7 @@ export interface UseApplicantStepViewModelReturn {
     field: K,
     value: LegalEntityFormValues[K],
   ) => void;
+  onNationalityChange: (nationality: string) => void;
   onPhysicalFieldChange: <K extends PhysicalPersonFormField>(
     field: K,
     value: PhysicalPersonFormValues[K],

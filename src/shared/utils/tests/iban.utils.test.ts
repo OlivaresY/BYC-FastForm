@@ -1,5 +1,7 @@
 import {
+  CR_IBAN_LENGTH,
   CR_IBAN_REGEX,
+  MAX_LENGTH_IBAN_INPUT,
   isValidCostaRicaIban,
   sanitizeIbanInput,
 } from '../iban.utils';
@@ -20,6 +22,16 @@ describe('isValidCostaRicaIban', () => {
 
     it('validates an IBAN with internal spaces', () => {
       expect(isValidCostaRicaIban('CR05 0152 0200 1026 2840 66')).toBe(true);
+    });
+
+    it('validates an IBAN with hyphen separators', () => {
+      expect(isValidCostaRicaIban('CR05-0152-0200-1026-2840-66')).toBe(true);
+    });
+
+    it('validates hybrid clipboard input with tabs, newlines, hyphens, and spaces', () => {
+      expect(
+        isValidCostaRicaIban('  \tcr05-0152 0200\n1026-2840\r\n 66  '),
+      ).toBe(true);
     });
 
     it('validates a lowercase IBAN', () => {
@@ -70,7 +82,7 @@ describe('isValidCostaRicaIban', () => {
     });
   });
 
-  describe('CR_IBAN_REGEX', () => {
+  describe('CR_IBAN_REGEX and clipboard buffer constants', () => {
     it('matches valid format pattern', () => {
       expect(CR_IBAN_REGEX.test('CR05015202001026284066')).toBe(true);
     });
@@ -78,24 +90,57 @@ describe('isValidCostaRicaIban', () => {
     it('rejects non-CR prefix', () => {
       expect(CR_IBAN_REGEX.test('US05015202001026284066')).toBe(false);
     });
+
+    it('configures MAX_LENGTH_IBAN_INPUT large enough for hyphenated and spaced banking pastes', () => {
+      expect(CR_IBAN_LENGTH).toBe(22);
+      expect(MAX_LENGTH_IBAN_INPUT).toBeGreaterThanOrEqual(
+        'CR05-0152-0200-1026-2840-66'.length,
+      );
+    });
   });
 });
 
 describe('sanitizeIbanInput', () => {
-  it('removes spaces and transforms to uppercase', () => {
+  it('strips spaces and transforms to uppercase', () => {
+    expect(sanitizeIbanInput('CR05 0152 0200 1026 2840 66')).toBe(
+      'CR05015202001026284066',
+    );
     expect(sanitizeIbanInput('cr05 0152 0200 1026 2840 66')).toBe(
       'CR05015202001026284066',
     );
   });
 
-  it('caps output at 22 characters', () => {
-    expect(sanitizeIbanInput('CR0501520200102628406699999')).toBe(
+  it('strips hyphens and transforms to uppercase', () => {
+    expect(sanitizeIbanInput('CR05-0152-0200-1026-2840-66')).toBe(
+      'CR05015202001026284066',
+    );
+    expect(sanitizeIbanInput('cr05-0152-0200-1026-2840-66')).toBe(
       'CR05015202001026284066',
     );
   });
 
-  it('handles empty and whitespace-only strings', () => {
+  it('strips hybrid clipboard separators including tabs, newlines, and leading/trailing spaces', () => {
+    expect(sanitizeIbanInput('  \tcr05-0152 0200\n1026-2840\r\n 66  ')).toBe(
+      'CR05015202001026284066',
+    );
+  });
+
+  it('enforces the exact 22-character sanitized output ceiling even when input exceeds MAX_LENGTH_IBAN_INPUT', () => {
+    const oversizedClipboardInput =
+      '   CR05-0152-0200-1026-2840-66-9999-8888-7777   ';
+    expect(oversizedClipboardInput.length).toBeGreaterThan(
+      MAX_LENGTH_IBAN_INPUT,
+    );
+
+    const sanitized = sanitizeIbanInput(oversizedClipboardInput);
+
+    expect(sanitized).toBe('CR05015202001026284066');
+    expect(sanitized).toHaveLength(CR_IBAN_LENGTH);
+  });
+
+  it('handles empty, whitespace-only, and separator-only strings', () => {
     expect(sanitizeIbanInput('   ')).toBe('');
+    expect(sanitizeIbanInput('--- \t\n ---')).toBe('');
     expect(sanitizeIbanInput('')).toBe('');
   });
 

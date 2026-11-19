@@ -18,6 +18,7 @@ import {
 import React from 'react';
 import { Controller, useWatch } from 'react-hook-form';
 import { Text, View } from 'react-native';
+import { ECONOMIC_SECTOR_OTHER_VALUE } from '../constants';
 import {
   getCantonOptions,
   getDistrictOptions,
@@ -30,7 +31,6 @@ import {
   LEGAL_ENTITY_CONTACT_FORM_NUMERICAL,
   LEGAL_ENTITY_CONTACT_FORM_STYLES,
   LEGAL_ENTITY_CONTACT_FORM_TEST_IDS,
-  OTHER_ECONOMIC_SECTOR_VALUE,
   RAW_ECONOMIC_SECTOR_OPTIONS,
 } from '../constants/LegalEntityContactForm.constants';
 import { CURRENCY_OPTIONS } from '../constants/SharedCatalogs.constants';
@@ -90,10 +90,10 @@ const LegalEntityContactFormComponent = ({
   control,
   disabled = false,
   onCantonChange,
+  onEconomicSectorChange,
   onInputFocus,
   onProvinceChange,
   options,
-  setValue,
   testID,
 }: LegalEntityContactFormProps): React.JSX.Element => {
   const { t } = useTranslation();
@@ -397,9 +397,7 @@ const LegalEntityContactFormComponent = ({
               onFocus={onInputFocus}
               onValueChange={(val: string): void => {
                 onChange(val);
-                if (val !== OTHER_ECONOMIC_SECTOR_VALUE) {
-                  setValue?.('commercialActivity.economicSectorOther', '');
-                }
+                onEconomicSectorChange?.(val);
               }}
               options={economicSectorOptions}
               placeholder={
@@ -412,7 +410,7 @@ const LegalEntityContactFormComponent = ({
           )}
         />
 
-        {selectedEconomicSector === OTHER_ECONOMIC_SECTOR_VALUE && (
+        {selectedEconomicSector === ECONOMIC_SECTOR_OTHER_VALUE && (
           <Controller
             control={control}
             name='commercialActivity.economicSectorOther'

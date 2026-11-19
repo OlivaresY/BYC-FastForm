@@ -1,5 +1,6 @@
 import { esCR } from '@/shared/i18n';
 import type { CustomSelectOption } from '@/shared/ui';
+import { CR_IBAN_LENGTH, MAX_LENGTH_IBAN_INPUT } from '@/shared/utils';
 import { EMPLOYMENT_STATUSES } from './PhysicalPersonContact.constants';
 
 export const PHYSICAL_PERSON_CONTACT_FORM_COLORS = {
@@ -67,8 +68,8 @@ export const PHYSICAL_PERSON_CONTACT_FORM_ICON_DIMENSIONS = {
 export const PHYSICAL_PERSON_CONTACT_FORM_NUMERICAL = {
   EXACT_ADDRESS_NUMBER_OF_LINES: 3,
   MAX_LENGTH_DATE: 14,
-  MAX_LENGTH_IBAN: 22,
-  MAX_LENGTH_IBAN_INPUT: 26,
+  MAX_LENGTH_IBAN: CR_IBAN_LENGTH,
+  MAX_LENGTH_IBAN_INPUT,
   MAX_LENGTH_INCOME: 15,
 } as const;
 

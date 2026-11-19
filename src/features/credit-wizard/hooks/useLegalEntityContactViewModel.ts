@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useMemo, useState } from 'react';
 import type { Resolver } from 'react-hook-form';
 import { useForm, useWatch } from 'react-hook-form';
+import { ECONOMIC_SECTOR_OTHER_VALUE } from '../constants';
 import {
   getCantonOptions,
   getDistrictOptions,
@@ -36,7 +37,7 @@ export const useLegalEntityContactViewModel = (
 
   const {
     control,
-    formState: { errors, isValid },
+    formState: { errors },
     handleSubmit,
     setValue,
   } = useForm<LegalEntityContact>({
@@ -47,14 +48,14 @@ export const useLegalEntityContactViewModel = (
     ) as unknown as Resolver<LegalEntityContact>,
   });
 
-  const selectedProvince = useWatch({
-    control,
-    name: 'commercialAddress.province',
-  });
-  const selectedCanton = useWatch({
-    control,
-    name: 'commercialAddress.canton',
-  });
+  const watchedValues = useWatch({ control });
+  const selectedProvince = watchedValues.commercialAddress?.province ?? '';
+  const selectedCanton = watchedValues.commercialAddress?.canton ?? '';
+
+  const isValid = useMemo<boolean>(
+    () => LegalEntityContactSchema.safeParse(watchedValues).success,
+    [watchedValues],
+  );
 
   const provinceOptions = useMemo(() => getProvinceOptions(), []);
   const cantonOptions = useMemo(
@@ -79,6 +80,22 @@ export const useLegalEntityContactViewModel = (
     (canton: string): void => {
       setValue('commercialAddress.district', '', { shouldDirty: true });
       setValue('commercialAddress.canton', canton, { shouldDirty: true });
+    },
+    [setValue],
+  );
+
+  const handleEconomicSectorChange = useCallback(
+    (economicSector: string): void => {
+      setValue('commercialActivity.economicSector', economicSector, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      if (economicSector !== ECONOMIC_SECTOR_OTHER_VALUE) {
+        setValue('commercialActivity.economicSectorOther', '', {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+      }
     },
     [setValue],
   );
@@ -131,13 +148,13 @@ export const useLegalEntityContactViewModel = (
     districtOptions,
     errors,
     handleCantonChange,
+    handleEconomicSectorChange,
     handleNextStep,
     handleProvinceChange,
     handleSubmit,
     isSubmitting,
     isValid,
     provinceOptions,
-    setValue,
     submitError,
   };
 };

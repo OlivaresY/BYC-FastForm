@@ -1,12 +1,10 @@
-import {
-  OTHER_NATIONALITY_VALUE,
-  PHYSICAL_PERSON_FORM_COPY,
-} from '../constants/PhysicalPersonForm.constants';
-import { PhysicalPersonFormPageObject } from './PhysicalPersonForm.po';
+import { NATIONALITY_OTHER_VALUE } from '../constants';
+import { PHYSICAL_PERSON_FORM_COPY } from '../constants/PhysicalPersonForm.constants';
 import type {
   PhysicalPersonFormField,
   PhysicalPersonFormValues,
 } from '../types/PhysicalPersonForm.types';
+import { PhysicalPersonFormPageObject } from './PhysicalPersonForm.po';
 
 const initialValues: PhysicalPersonFormValues = {
   birthDate: '',
@@ -541,7 +539,7 @@ describe('PhysicalPersonForm Component', () => {
         onFieldChange: jest.fn(),
         values: {
           ...initialValues,
-          nationality: OTHER_NATIONALITY_VALUE,
+          nationality: NATIONALITY_OTHER_VALUE,
         },
       });
 
@@ -551,14 +549,16 @@ describe('PhysicalPersonForm Component', () => {
       );
     });
 
-    it('resets nationalityOther when nationality is changed to a non-other option', () => {
+    it('invokes semantic onNationalityChange callback when nationality changes', () => {
       // Arrange
       const handleFieldChange = jest.fn();
+      const handleNationalityChange = jest.fn();
       const page = PhysicalPersonFormPageObject.render({
         onFieldChange: handleFieldChange,
+        onNationalityChange: handleNationalityChange,
         values: {
           ...initialValues,
-          nationality: OTHER_NATIONALITY_VALUE,
+          nationality: NATIONALITY_OTHER_VALUE,
           nationalityOther: 'Mexicana',
         },
       });
@@ -568,8 +568,9 @@ describe('PhysicalPersonForm Component', () => {
       page.selectOption('CR');
 
       // Assert
-      expect(handleFieldChange).toHaveBeenCalledWith('nationality', 'CR');
-      expect(handleFieldChange).toHaveBeenCalledWith('nationalityOther', '');
+      expect(handleNationalityChange).toHaveBeenCalledTimes(1);
+      expect(handleNationalityChange).toHaveBeenCalledWith('CR');
+      expect(handleFieldChange).not.toHaveBeenCalled();
     });
   });
 });

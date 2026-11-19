@@ -2,7 +2,6 @@ import type {
   Control,
   FieldErrors,
   UseFormHandleSubmit,
-  UseFormSetValue,
 } from 'react-hook-form';
 import type { z } from 'zod';
 import type { CustomSelectOption } from '@/shared/ui';
@@ -36,12 +35,12 @@ export interface UseLegalEntityContactViewModelReturn {
   districtOptions: readonly CustomSelectOption[];
   errors: FieldErrors<LegalEntityContact>;
   handleCantonChange: (canton: string) => void;
+  handleEconomicSectorChange: (economicSector: string) => void;
   handleNextStep: (dataOrEvent?: unknown) => Promise<void> | void;
   handleProvinceChange: (province: string) => void;
   handleSubmit: UseFormHandleSubmit<LegalEntityContact>;
   isSubmitting: boolean;
   isValid: boolean;
   provinceOptions: readonly CustomSelectOption[];
-  setValue: UseFormSetValue<LegalEntityContact>;
   submitError: string | null;
 }

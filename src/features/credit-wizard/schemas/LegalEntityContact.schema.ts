@@ -12,7 +12,7 @@ import {
   FINANCIAL_CURRENCIES,
   LEGAL_ENTITY_CONTACT_PATTERNS,
 } from '../constants/LegalEntityContact.constants';
-import { OTHER_ECONOMIC_SECTOR_VALUE } from '../constants/LegalEntityContactForm.constants';
+import { ECONOMIC_SECTOR_OTHER_VALUE } from '../constants';
 import { WIZARD_COPY } from '../constants/WizardCopy.constants';
 
 const LEGAL_ENTITY_CONTACT_ERRORS = WIZARD_COPY.STEP_2_LEGAL_CONTACT.ERRORS;
@@ -110,7 +110,7 @@ export const CommercialActivitySchema = z
       }),
   })
   .superRefine((data, ctx) => {
-    if (data.economicSector === OTHER_ECONOMIC_SECTOR_VALUE) {
+    if (data.economicSector === ECONOMIC_SECTOR_OTHER_VALUE) {
       if (
         !data.economicSectorOther ||
         data.economicSectorOther.trim().length === 0
@@ -124,7 +124,20 @@ export const CommercialActivitySchema = z
         });
       }
     }
-  });
+  })
+  .transform(
+    (
+      data,
+    ): Omit<typeof data, 'economicSectorOther'> & {
+      economicSectorOther?: string;
+    } => ({
+      ...data,
+      economicSectorOther:
+        data.economicSector === ECONOMIC_SECTOR_OTHER_VALUE
+          ? (data.economicSectorOther ?? '')
+          : '',
+    }),
+  );
 
 export const CommercialAddressSchema = z
   .object({
