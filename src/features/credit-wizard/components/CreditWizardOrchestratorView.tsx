@@ -4,6 +4,7 @@ import { LEGAL_ENTITY_SELECTOR_ENTITIES } from '../constants/LegalEntitySelector
 import {
   WIZARD_STEPS,
   useCreditWizardOrchestrator,
+  type AuthenticatedUserIdResolver,
   type UseCreditWizardOrchestratorReturn,
 } from '../hooks/useCreditWizardOrchestrator';
 import type { ICreditApplicationRepository } from '../services/creditApplication.service';
@@ -32,6 +33,7 @@ export interface CreditWizardOrchestratorViewProps {
   onClose?: () => void;
   onSubmissionSuccess?: () => void | Promise<void>;
   repository?: ICreditApplicationRepository;
+  resolveAuthenticatedUserId?: AuthenticatedUserIdResolver;
   testID?: string;
   userId?: string;
   viewModel?: UseCreditWizardOrchestratorReturn;
@@ -52,6 +54,7 @@ export const CreditWizardOrchestratorView = React.memo(
     onClose,
     onSubmissionSuccess,
     repository,
+    resolveAuthenticatedUserId,
     testID = CREDIT_WIZARD_ORCHESTRATOR_TEST_IDS.CONTAINER,
     userId,
     viewModel: viewModelProp,
@@ -59,11 +62,13 @@ export const CreditWizardOrchestratorView = React.memo(
     const defaultViewModel = useCreditWizardOrchestrator({
       onSubmissionSuccess,
       repository,
+      resolveAuthenticatedUserId,
       userId,
     });
     const viewModel = viewModelProp ?? defaultViewModel;
 
     const {
+      clearSubmitError,
       currentStep,
       draftState,
       handlePreviousStep,
@@ -71,7 +76,10 @@ export const CreditWizardOrchestratorView = React.memo(
       handleStep2Submit,
       handleStep3Submit,
       handleStep4Submit,
+      hasSubmittedSuccessfully,
+      isSubmitted,
       isSubmitting,
+      submitError,
     } = viewModel;
 
     const renderCurrentStep = (): React.JSX.Element => {
@@ -138,10 +146,14 @@ export const CreditWizardOrchestratorView = React.memo(
             <BankAuthorizationsStepView
               currentStep={WIZARD_STEPS.STEP_4}
               defaultValues={draftState.step4}
+              hasSubmittedSuccessfully={hasSubmittedSuccessfully}
+              isSubmitted={isSubmitted}
               isSubmitting={isSubmitting}
+              onAuthorizationChange={clearSubmitError}
               onBack={handlePreviousStep}
               onClose={onClose}
               onSubmit={handleStep4Submit}
+              submitError={submitError}
               totalSteps={WIZARD_STEPS.TOTAL_STEPS}
             />
           );

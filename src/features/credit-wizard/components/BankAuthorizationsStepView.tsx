@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { Controller } from 'react-hook-form';
+import { AlertCircle } from 'lucide-react-native';
+import { esCR } from '@/shared/i18n';
 import {
   BuildingIcon,
   CheckmarkIcon,
@@ -23,6 +25,25 @@ import {
 } from '../hooks/useBankAuthorizationsViewModel';
 import type { BankAuthorizationsFormValues } from '../types/BankAuthorizations.types';
 import { WizardStepLayout } from './WizardStepLayout';
+
+const STEP4_SUBMIT_ERROR_BANNER_TEST_ID = 'step4-submit-error-banner' as const;
+const STEP4_SUBMIT_ERROR_MESSAGE_TEST_ID =
+  'step4-submit-error-message' as const;
+
+const SUBMIT_ERROR_BANNER_COLORS = {
+  ICON: '#B91C1C',
+} as const;
+
+const SUBMIT_ERROR_BANNER_DIMENSIONS = {
+  ICON_SIZE: 18,
+  ICON_STROKE_WIDTH: 2,
+} as const;
+
+const SUBMIT_ERROR_BANNER_STYLES = {
+  CONTAINER:
+    'w-full flex-row items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-3.5',
+  MESSAGE: 'flex-1 text-sm font-medium text-brand-red',
+} as const;
 
 export interface LegalConsentItemProps {
   description: string;
@@ -50,7 +71,7 @@ export const LegalConsentItem = React.memo(
       <Pressable
         accessibilityLabel={title}
         accessibilityRole='checkbox'
-        accessibilityState={{ checked: isChecked }}
+        accessibilityState={{ checked: isChecked, disabled }}
         className='flex-row items-start gap-3 p-3.5 bg-white rounded-xl border border-stone-200'
         disabled={disabled}
         onPress={onToggle}
@@ -97,10 +118,15 @@ export interface BankAuthorizationsStepViewProps {
   currentStep?: number;
   defaultValues?: Partial<BankAuthorizationsFormValues>;
   disabled?: boolean;
+  hasSubmittedSuccessfully?: boolean;
+  isSubmitted?: boolean;
   isSubmitting?: boolean;
+  onAuthorizationChange?: () => void;
   onBack?: () => void;
+  onClearSubmitError?: () => void;
   onClose?: () => void;
   onSubmit?: (data: BankAuthorizationsFormValues) => void | Promise<void>;
+  submitError?: string | null;
   testID?: string;
   totalSteps?: number;
   viewModel?: UseBankAuthorizationsViewModelReturn;
@@ -111,17 +137,50 @@ export const BankAuthorizationsStepView = React.memo(
     currentStep = BANK_AUTHORIZATIONS_STEP_NUMERICAL.CURRENT_STEP,
     defaultValues,
     disabled = false,
+    hasSubmittedSuccessfully = false,
+    isSubmitted: isSubmittedProp = false,
     isSubmitting: isSubmittingProp = false,
+    onAuthorizationChange,
     onBack,
+    onClearSubmitError,
     onClose,
     onSubmit,
+    submitError: submitErrorProp,
     testID = BANK_AUTHORIZATIONS_STEP_TEST_IDS.CONTAINER,
     totalSteps = BANK_AUTHORIZATIONS_STEP_NUMERICAL.TOTAL_STEPS,
     viewModel: viewModelProp,
   }: BankAuthorizationsStepViewProps): React.JSX.Element => {
+    const isSubmitted = Boolean(isSubmittedProp || hasSubmittedSuccessfully);
+    const [localSubmitError, setLocalSubmitError] = useState<string | null>(
+      null,
+    );
+    const [isErrorDismissed, setIsErrorDismissed] = useState<boolean>(false);
+
+    useEffect(() => {
+      setIsErrorDismissed(false);
+    }, [submitErrorProp]);
+
+    const handleWrappedSubmit = useCallback(
+      async (data: BankAuthorizationsFormValues): Promise<void> => {
+        if (isSubmitted) {
+          return;
+        }
+        setIsErrorDismissed(false);
+        setLocalSubmitError(null);
+        try {
+          await onSubmit?.(data);
+        } catch {
+          setLocalSubmitError(
+            esCR.creditWizard.masterDraftSubmission.errorMessage,
+          );
+        }
+      },
+      [isSubmitted, onSubmit],
+    );
+
     const defaultViewModel = useBankAuthorizationsViewModel({
       defaultValues,
-      onSuccess: onSubmit,
+      onSuccess: handleWrappedSubmit,
     });
     const viewModel = viewModelProp ?? defaultViewModel;
 
@@ -136,6 +195,36 @@ export const BankAuthorizationsStepView = React.memo(
     } = viewModel;
 
     const isSubmitting = isSubmittingProp || isViewModelSubmitting;
+    const isInteractionDisabled = disabled || isSubmitting || isSubmitted;
+    const displayedSubmitError = isErrorDismissed
+      ? null
+      : (submitErrorProp ?? localSubmitError);
+
+    const handleAuthorizationInteraction = useCallback((): void => {
+      if (isInteractionDisabled) {
+        return;
+      }
+      setLocalSubmitError(null);
+      setIsErrorDismissed(true);
+      onAuthorizationChange?.();
+      onClearSubmitError?.();
+    }, [isInteractionDisabled, onAuthorizationChange, onClearSubmitError]);
+
+    const handleToggleAllBanks = useCallback((): void => {
+      if (isInteractionDisabled) {
+        return;
+      }
+      handleAuthorizationInteraction();
+      toggleAllBanks();
+    }, [handleAuthorizationInteraction, isInteractionDisabled, toggleAllBanks]);
+
+    const handleSubmitPress = useCallback((): Promise<void> | void => {
+      if (isInteractionDisabled) {
+        return;
+      }
+      setIsErrorDismissed(false);
+      return handleNext();
+    }, [handleNext, isInteractionDisabled]);
 
     const submitIcon = (
       <DocumentIcon
@@ -151,12 +240,12 @@ export const BankAuthorizationsStepView = React.memo(
       <WizardStepLayout
         currentStep={currentStep}
         description={BANK_AUTHORIZATIONS_STEP_COPY.DESCRIPTION}
-        disabled={disabled}
-        isSubmitDisabled={!isValid || isSubmitting}
+        disabled={disabled || isSubmitted}
+        isSubmitDisabled={!isValid || isSubmitting || isSubmitted}
         isSubmitting={isSubmitting}
         onBack={onBack}
         onClose={onClose}
-        onNext={handleNext}
+        onNext={handleSubmitPress}
         submitButtonIcon={submitIcon}
         submitButtonLabel={BANK_AUTHORIZATIONS_STEP_COPY.SUBMIT_BUTTON_LABEL}
         testID={testID}
@@ -197,14 +286,15 @@ export const BankAuthorizationsStepView = React.memo(
                   BANK_AUTHORIZATIONS_STEP_COPY.TOGGLE_ALL_BANKS
                 }
                 accessibilityRole='button'
+                accessibilityState={{ disabled: isInteractionDisabled }}
                 className={`${BANK_AUTHORIZATIONS_STEP_STYLES.TOGGLE_ALL_BUTTON} ${
                   isAllBanksSelected
                     ? BANK_AUTHORIZATIONS_STEP_STYLES.TOGGLE_ALL_BUTTON_ACTIVE
                     : BANK_AUTHORIZATIONS_STEP_STYLES.TOGGLE_ALL_BUTTON_INACTIVE
                 }`}
-                disabled={disabled || isSubmitting}
+                disabled={isInteractionDisabled}
                 hitSlop={8}
-                onPress={toggleAllBanks}
+                onPress={handleToggleAllBanks}
                 testID={BANK_AUTHORIZATIONS_STEP_TEST_IDS.TOGGLE_ALL_BUTTON}
               >
                 <CheckSquareIcon
@@ -239,10 +329,19 @@ export const BankAuthorizationsStepView = React.memo(
                   <Pressable
                     accessibilityLabel={bank.label}
                     accessibilityRole='checkbox'
-                    accessibilityState={{ checked: value }}
+                    accessibilityState={{
+                      checked: value,
+                      disabled: isInteractionDisabled,
+                    }}
                     className='flex-row items-center justify-between p-3.5 bg-white rounded-xl border border-stone-200'
-                    disabled={disabled || isSubmitting}
-                    onPress={() => onChange(!value)}
+                    disabled={isInteractionDisabled}
+                    onPress={(): void => {
+                      if (isInteractionDisabled) {
+                        return;
+                      }
+                      handleAuthorizationInteraction();
+                      onChange(!value);
+                    }}
                     testID={bank.testID}
                   >
                     {/* LEFT: Checkbox */}
@@ -328,13 +427,19 @@ export const BankAuthorizationsStepView = React.memo(
               render={({ field: { onChange, value } }) => (
                 <LegalConsentItem
                   description={BANK_AUTHORIZATIONS_STEP_COPY.LEGAL_DESC_1}
-                  disabled={disabled || isSubmitting}
+                  disabled={isInteractionDisabled}
                   errorMessage={errors.autoriza_sugef_cic?.message}
                   errorTestID={
                     BANK_AUTHORIZATIONS_STEP_TEST_IDS.AUTORIZA_SUGEF_CIC_ERROR
                   }
                   isChecked={value}
-                  onToggle={() => onChange(!value)}
+                  onToggle={(): void => {
+                    if (isInteractionDisabled) {
+                      return;
+                    }
+                    handleAuthorizationInteraction();
+                    onChange(!value);
+                  }}
                   testID={
                     BANK_AUTHORIZATIONS_STEP_TEST_IDS.AUTORIZA_SUGEF_CIC_CHECKBOX
                   }
@@ -350,13 +455,19 @@ export const BankAuthorizationsStepView = React.memo(
               render={({ field: { onChange, value } }) => (
                 <LegalConsentItem
                   description={BANK_AUTHORIZATIONS_STEP_COPY.LEGAL_DESC_2}
-                  disabled={disabled || isSubmitting}
+                  disabled={isInteractionDisabled}
                   errorMessage={errors.autoriza_buros_credito?.message}
                   errorTestID={
                     BANK_AUTHORIZATIONS_STEP_TEST_IDS.AUTORIZA_BUROS_CREDITO_ERROR
                   }
                   isChecked={value}
-                  onToggle={() => onChange(!value)}
+                  onToggle={(): void => {
+                    if (isInteractionDisabled) {
+                      return;
+                    }
+                    handleAuthorizationInteraction();
+                    onChange(!value);
+                  }}
                   testID={
                     BANK_AUTHORIZATIONS_STEP_TEST_IDS.AUTORIZA_BUROS_CREDITO_CHECKBOX
                   }
@@ -365,6 +476,27 @@ export const BankAuthorizationsStepView = React.memo(
               )}
             />
           </View>
+
+          {displayedSubmitError ? (
+            <View
+              accessible
+              accessibilityRole='alert'
+              className={SUBMIT_ERROR_BANNER_STYLES.CONTAINER}
+              testID={STEP4_SUBMIT_ERROR_BANNER_TEST_ID}
+            >
+              <AlertCircle
+                color={SUBMIT_ERROR_BANNER_COLORS.ICON}
+                size={SUBMIT_ERROR_BANNER_DIMENSIONS.ICON_SIZE}
+                strokeWidth={SUBMIT_ERROR_BANNER_DIMENSIONS.ICON_STROKE_WIDTH}
+              />
+              <Text
+                className={SUBMIT_ERROR_BANNER_STYLES.MESSAGE}
+                testID={STEP4_SUBMIT_ERROR_MESSAGE_TEST_ID}
+              >
+                {displayedSubmitError}
+              </Text>
+            </View>
+          ) : null}
         </View>
       </WizardStepLayout>
     );
