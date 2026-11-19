@@ -12,9 +12,18 @@ export const CREDIT_APPLICATIONS_TABLE = 'credit_applications' as const;
 export const CREDIT_APPLICATION_SERVICE_ERRORS = {
   AUTH_REQUIRED:
     'La sesión de usuario es inválida o ha expirado. Inicia sesión nuevamente antes de enviar la solicitud.',
+  SUBMIT_ABORTED: 'La solicitud de crédito fue cancelada antes de completarse.',
   SUBMIT_FAILED:
     'No se pudo enviar la solicitud de crédito. Por favor, intenta de nuevo más tarde.',
 } as const;
+
+const createAbortError = (): Error => {
+  const abortError = new Error(
+    CREDIT_APPLICATION_SERVICE_ERRORS.SUBMIT_ABORTED,
+  );
+  abortError.name = 'AbortError';
+  return abortError;
+};
 
 const INVALID_PLACEHOLDER_USER_ID_PATTERN =
   /(?:mock|placeholder|dummy|fake|until-auth)/i;
@@ -39,8 +48,24 @@ export interface CreditApplicationInsertRow {
   user_id: MasterCreditApplicationPayload['userId'];
 }
 
+export interface SubmitMasterDraftOptions {
+  idempotencyKey?: string;
+  signal?: AbortSignal;
+}
+
 export interface ICreditApplicationRepository {
-  submitMasterDraft: (payload: MasterCreditApplicationPayload) => Promise<void>;
+  submitMasterDraft: (
+    payload: MasterCreditApplicationPayload,
+    options?: SubmitMasterDraftOptions,
+  ) => Promise<void>;
+}
+
+interface InsertQueryResponse {
+  error: unknown;
+}
+
+interface AbortableInsertQuery extends PromiseLike<InsertQueryResponse> {
+  abortSignal?: (signal: AbortSignal) => PromiseLike<InsertQueryResponse>;
 }
 
 export const mapMasterPayloadToInsertRow = (
@@ -54,6 +79,20 @@ export const mapMasterPayloadToInsertRow = (
   user_id: payload.userId,
 });
 
+/**
+ * Supabase persistence repository for credit applications.
+ *
+ * Architectural RLS Contract (`public.credit_applications`):
+ * ```sql
+ * CREATE POLICY "Advisors insert own applications"
+ * ON public.credit_applications
+ * FOR INSERT
+ * TO authenticated
+ * WITH CHECK (auth.uid() = user_id);
+ * ```
+ * Every insert enforces parity between the active authenticated session
+ * (`auth.uid()`) and the persisted `user_id` column.
+ */
 export class SupabaseCreditApplicationRepository implements ICreditApplicationRepository {
   private readonly client: SupabaseClient;
 
@@ -63,7 +102,12 @@ export class SupabaseCreditApplicationRepository implements ICreditApplicationRe
 
   public readonly submitMasterDraft = async (
     payload: MasterCreditApplicationPayload,
+    options?: SubmitMasterDraftOptions,
   ): Promise<void> => {
+    if (options?.signal?.aborted) {
+      throw createAbortError();
+    }
+
     let validatedPayload: MasterCreditApplicationSchemaOutput;
 
     try {
@@ -84,10 +128,38 @@ export class SupabaseCreditApplicationRepository implements ICreditApplicationRe
       throw new Error(CREDIT_APPLICATION_SERVICE_ERRORS.AUTH_REQUIRED);
     }
 
+    if (typeof this.client.auth?.getUser === 'function') {
+      const { data: authData } = await this.client.auth.getUser();
+
+      if (authData?.user) {
+        if (
+          !isValidAuthenticatedUserId(authData.user.id) ||
+          authData.user.id.trim() !== validatedPayload.userId.trim()
+        ) {
+          throw new Error(CREDIT_APPLICATION_SERVICE_ERRORS.AUTH_REQUIRED);
+        }
+      }
+    }
+
+    if (options?.signal?.aborted) {
+      throw createAbortError();
+    }
+
     const insertRow = mapMasterPayloadToInsertRow(validatedPayload);
-    const { error } = await this.client
+    const insertBuilder: AbortableInsertQuery = this.client
       .from(CREDIT_APPLICATIONS_TABLE)
       .insert(insertRow);
+
+    const executableQuery =
+      options?.signal && typeof insertBuilder?.abortSignal === 'function'
+        ? insertBuilder.abortSignal(options.signal)
+        : insertBuilder;
+
+    const { error } = await executableQuery;
+
+    if (options?.signal?.aborted) {
+      throw createAbortError();
+    }
 
     if (error) {
       throw new Error(CREDIT_APPLICATION_SERVICE_ERRORS.SUBMIT_FAILED);

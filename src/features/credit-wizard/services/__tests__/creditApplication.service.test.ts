@@ -99,30 +99,67 @@ const createValidPayload = (
 });
 
 interface MockSupabaseHarness {
+  abortSignalMock: jest.Mock;
   client: SupabaseClient;
   fromMock: jest.Mock;
+  getUserMock: jest.Mock;
   insertMock: jest.Mock;
 }
 
-const createMockSupabaseClient = (
-  insertResult: {
+interface MockSupabaseOptions {
+  authenticatedUserId?: string | null;
+  insertResult?: {
     error: { code?: string; details?: string; message: string } | null;
-  } = {
-    error: null,
-  },
+  };
+  withAbortSignalBuilder?: boolean;
+  withAuthClient?: boolean;
+}
+
+const createMockSupabaseClient = (
+  optionsOrInsertResult:
+    | MockSupabaseOptions
+    | {
+        error: { code?: string; details?: string; message: string } | null;
+      } = {},
 ): MockSupabaseHarness => {
-  const insertMock = jest.fn().mockResolvedValue(insertResult);
+  const normalizedOptions: MockSupabaseOptions =
+    'error' in optionsOrInsertResult
+      ? { insertResult: optionsOrInsertResult }
+      : optionsOrInsertResult;
+
+  const insertResult = normalizedOptions.insertResult ?? { error: null };
+  const abortSignalMock = jest.fn().mockResolvedValue(insertResult);
+  const insertMock = normalizedOptions.withAbortSignalBuilder
+    ? jest.fn().mockReturnValue({
+        abortSignal: abortSignalMock,
+      })
+    : jest.fn().mockResolvedValue(insertResult);
   const fromMock = jest.fn().mockReturnValue({
     insert: insertMock,
   });
+  const getUserMock = jest.fn().mockResolvedValue({
+    data: {
+      user:
+        normalizedOptions.authenticatedUserId === null ||
+        normalizedOptions.authenticatedUserId === undefined
+          ? null
+          : { id: normalizedOptions.authenticatedUserId },
+    },
+    error: null,
+  });
 
   const client = {
+    ...(normalizedOptions.withAuthClient
+      ? { auth: { getUser: getUserMock } }
+      : {}),
     from: fromMock,
   } as unknown as SupabaseClient;
 
   return {
+    abortSignalMock,
     client,
     fromMock,
+    getUserMock,
     insertMock,
   };
 };
@@ -246,5 +283,85 @@ describe('SupabaseCreditApplicationRepository', () => {
     expect(message).not.toContain('42501');
     expect(message).not.toContain('row-level security');
     expect(message).not.toContain('secret-sql-column');
+  });
+
+  it('rejects immediately without calling Supabase insert when given an already-aborted AbortSignal', async () => {
+    // Arrange
+    const { client, fromMock, insertMock } = createMockSupabaseClient();
+    const repository = new SupabaseCreditApplicationRepository(client);
+    const payload = createValidPayload();
+    const abortController = new AbortController();
+    abortController.abort();
+
+    // Act & Assert
+    await expect(
+      repository.submitMasterDraft(payload, { signal: abortController.signal }),
+    ).rejects.toMatchObject({
+      message: CREDIT_APPLICATION_SERVICE_ERRORS.SUBMIT_ABORTED,
+      name: 'AbortError',
+    });
+    expect(fromMock).not.toHaveBeenCalled();
+    expect(insertMock).not.toHaveBeenCalled();
+  });
+
+  it('forwards options.signal to the Supabase query builder .abortSignal() when supported', async () => {
+    // Arrange
+    const { abortSignalMock, client, fromMock, insertMock } =
+      createMockSupabaseClient({
+        withAbortSignalBuilder: true,
+      });
+    const repository = new SupabaseCreditApplicationRepository(client);
+    const payload = createValidPayload();
+    const abortController = new AbortController();
+
+    // Act
+    await repository.submitMasterDraft(payload, {
+      idempotencyKey: 'byc-draft-test-key',
+      signal: abortController.signal,
+    });
+
+    // Assert
+    expect(fromMock).toHaveBeenCalledWith(CREDIT_APPLICATIONS_TABLE);
+    expect(insertMock).toHaveBeenCalledTimes(1);
+    expect(abortSignalMock).toHaveBeenCalledTimes(1);
+    expect(abortSignalMock).toHaveBeenCalledWith(abortController.signal);
+  });
+
+  it('rejects with AUTH_REQUIRED before .insert() when client.auth.getUser() returns a mismatched user ID', async () => {
+    // Arrange
+    const { client, fromMock, getUserMock, insertMock } =
+      createMockSupabaseClient({
+        authenticatedUserId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+        withAuthClient: true,
+      });
+    const repository = new SupabaseCreditApplicationRepository(client);
+    const payload = createValidPayload();
+
+    // Act & Assert
+    await expect(repository.submitMasterDraft(payload)).rejects.toThrow(
+      CREDIT_APPLICATION_SERVICE_ERRORS.AUTH_REQUIRED,
+    );
+    expect(getUserMock).toHaveBeenCalledTimes(1);
+    expect(fromMock).not.toHaveBeenCalled();
+    expect(insertMock).not.toHaveBeenCalled();
+  });
+
+  it('allows insert when client.auth.getUser() confirms user ID matches payload.userId', async () => {
+    // Arrange
+    const { client, fromMock, getUserMock, insertMock } =
+      createMockSupabaseClient({
+        authenticatedUserId: AUTHENTICATED_USER_ID,
+        withAuthClient: true,
+      });
+    const repository = new SupabaseCreditApplicationRepository(client);
+    const payload = createValidPayload();
+
+    // Act
+    await repository.submitMasterDraft(payload);
+
+    // Assert
+    expect(getUserMock).toHaveBeenCalledTimes(1);
+    expect(fromMock).toHaveBeenCalledWith(CREDIT_APPLICATIONS_TABLE);
+    expect(insertMock).toHaveBeenCalledTimes(1);
   });
 });

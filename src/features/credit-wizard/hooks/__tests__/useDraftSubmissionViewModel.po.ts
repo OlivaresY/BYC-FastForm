@@ -91,4 +91,10 @@ export class DraftSubmissionViewModelPageObject {
       await operation();
     });
   };
+
+  public unmount = (): void => {
+    act(() => {
+      this.hookResult.unmount();
+    });
+  };
 }

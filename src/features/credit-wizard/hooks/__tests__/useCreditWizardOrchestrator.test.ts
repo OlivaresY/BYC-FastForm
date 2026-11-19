@@ -148,6 +148,10 @@ describe('useCreditWizardOrchestrator', () => {
         userId: AUTHENTICATED_USER_ID,
         vehicleCredit: mockStep3Data,
       }),
+      expect.objectContaining({
+        idempotencyKey: expect.any(String),
+        signal: expect.any(AbortSignal),
+      }),
     );
     expect(onSubmissionSuccess).toHaveBeenCalledTimes(1);
     expect(page.current.hasSubmittedSuccessfully).toBe(true);

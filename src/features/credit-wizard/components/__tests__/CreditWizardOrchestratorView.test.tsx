@@ -420,6 +420,10 @@ describe('CreditWizardOrchestratorView Integration Suite', () => {
         userId: TEST_AUTHENTICATED_USER_ID,
         vehicleCredit: mockStep3Data,
       }),
+      expect.objectContaining({
+        idempotencyKey: expect.any(String),
+        signal: expect.any(AbortSignal),
+      }),
     );
 
     await page.flushAsync(async () => {
@@ -485,6 +489,10 @@ describe('CreditWizardOrchestratorView Integration Suite', () => {
         templateVersion: DEFAULT_TEMPLATE_VERSION,
         userId: TEST_AUTHENTICATED_USER_ID,
         vehicleCredit: mockStep3Data,
+      }),
+      expect.objectContaining({
+        idempotencyKey: expect.any(String),
+        signal: expect.any(AbortSignal),
       }),
     );
     expect(onSubmissionSuccess).toHaveBeenCalledTimes(1);

@@ -6,6 +6,7 @@ import { VEHICLE_BENEFICIARY_SECTION_ENTITIES } from '../../constants/VehicleBen
 import {
   CREDIT_APPLICATION_SERVICE_ERRORS,
   type ICreditApplicationRepository,
+  type SubmitMasterDraftOptions,
 } from '../../services/creditApplication.service';
 import type { BankAuthorizationsFormValues } from '../../types/BankAuthorizations.types';
 import {
@@ -14,7 +15,10 @@ import {
   SELECTED_BANK_CODES,
   type MasterCreditApplicationPayload,
 } from '../../types/MasterCreditApplication.types';
-import { SUBMISSION_TIMEOUT_MS } from '../useDraftSubmissionViewModel';
+import {
+  SUBMISSION_TIMEOUT_MS,
+  buildPayloadIdempotencyKey,
+} from '../useDraftSubmissionViewModel';
 import { DraftSubmissionViewModelPageObject } from './useDraftSubmissionViewModel.po';
 
 const INITIAL_AUTHORIZATIONS: BankAuthorizationsFormValues = {
@@ -149,7 +153,10 @@ describe('useDraftSubmissionViewModel', () => {
     expect(page.isSubmitting).toBe(true);
     expect(page.submitError).toBeNull();
     expect(submitMasterDraft).toHaveBeenCalledTimes(1);
-    expect(submitMasterDraft).toHaveBeenCalledWith(payload);
+    expect(submitMasterDraft).toHaveBeenCalledWith(payload, {
+      idempotencyKey: buildPayloadIdempotencyKey(payload),
+      signal: expect.any(AbortSignal),
+    });
     expect(onSuccess).not.toHaveBeenCalled();
 
     await page.settle(async () => {
@@ -308,11 +315,19 @@ describe('useDraftSubmissionViewModel', () => {
     expect(submitMasterDraft).toHaveBeenCalledTimes(3);
   });
 
-  it('rejects hanging submissions after SUBMISSION_TIMEOUT_MS and populates Spanish timeout message', async () => {
+  it('aborts the active request signal after SUBMISSION_TIMEOUT_MS and populates Spanish timeout message', async () => {
     jest.useFakeTimers();
 
-    const neverResolvingPromise = new Promise<void>(() => undefined);
-    const submitMasterDraft = jest.fn().mockReturnValue(neverResolvingPromise);
+    const capturedOptions: (SubmitMasterDraftOptions | undefined)[] = [];
+    const submitMasterDraft = jest.fn(
+      (
+        _payload: MasterCreditApplicationPayload,
+        options?: SubmitMasterDraftOptions,
+      ) => {
+        capturedOptions.push(options);
+        return new Promise<void>(() => undefined);
+      },
+    );
     const repository: ICreditApplicationRepository = {
       submitMasterDraft,
     };
@@ -326,16 +341,120 @@ describe('useDraftSubmissionViewModel', () => {
 
     const pendingCall = page.startHandleSubmit(payload);
     expect(page.isSubmitting).toBe(true);
+    expect(capturedOptions[0]?.signal).toBeInstanceOf(AbortSignal);
+    expect(capturedOptions[0]?.signal?.aborted).toBe(false);
 
     await page.advanceTimers(SUBMISSION_TIMEOUT_MS);
     await page.settle(async () => {
       await pendingCall;
     });
 
+    expect(capturedOptions[0]?.signal?.aborted).toBe(true);
     expect(page.isSubmitting).toBe(false);
     expect(onSuccess).not.toHaveBeenCalled();
     expect(page.submitError).toBe(
       esCR.creditWizard.masterDraftSubmission.timeoutErrorMessage,
     );
+  });
+
+  it('reuses identical deterministic idempotencyKey when retrying the same payload after a timeout and aborts the previous controller cleanly', async () => {
+    jest.useFakeTimers();
+
+    const capturedOptions: (SubmitMasterDraftOptions | undefined)[] = [];
+    const submitMasterDraft = jest
+      .fn<
+        Promise<void>,
+        [MasterCreditApplicationPayload, SubmitMasterDraftOptions?]
+      >()
+      .mockImplementationOnce((_payload, options) => {
+        capturedOptions.push(options);
+        return new Promise<void>(() => undefined);
+      })
+      .mockImplementationOnce((_payload, options) => {
+        capturedOptions.push(options);
+        return Promise.resolve();
+      });
+
+    const repository: ICreditApplicationRepository = {
+      submitMasterDraft,
+    };
+    const onSuccess = jest.fn();
+    const payload = createMockMasterPayload();
+
+    const page = DraftSubmissionViewModelPageObject.render({
+      onSuccess,
+      repository,
+    });
+
+    const timedOutAttempt = page.startHandleSubmit(payload);
+    await page.advanceTimers(SUBMISSION_TIMEOUT_MS);
+    await page.settle(async () => {
+      await timedOutAttempt;
+    });
+
+    expect(capturedOptions).toHaveLength(1);
+    expect(capturedOptions[0]?.signal?.aborted).toBe(true);
+    expect(page.submitError).toBe(
+      esCR.creditWizard.masterDraftSubmission.timeoutErrorMessage,
+    );
+
+    await page.settle(async () => {
+      await page.startHandleSubmit(payload);
+    });
+
+    expect(capturedOptions).toHaveLength(2);
+    expect(capturedOptions[0]?.idempotencyKey).toBe(
+      buildPayloadIdempotencyKey(payload),
+    );
+    expect(capturedOptions[1]?.idempotencyKey).toBe(
+      capturedOptions[0]?.idempotencyKey,
+    );
+    expect(capturedOptions[1]?.signal).not.toBe(capturedOptions[0]?.signal);
+    expect(capturedOptions[1]?.signal?.aborted).toBe(false);
+    expect(page.isSubmitting).toBe(false);
+    expect(page.submitError).toBeNull();
+    expect(onSuccess).toHaveBeenCalledTimes(1);
+  });
+
+  it('produces a new idempotencyKey when any draft field changes and aborts in-flight signal on unmount', async () => {
+    const capturedSignals: (AbortSignal | undefined)[] = [];
+    const submitMasterDraft = jest.fn(
+      (
+        _payload: MasterCreditApplicationPayload,
+        options?: SubmitMasterDraftOptions,
+      ) => {
+        capturedSignals.push(options?.signal);
+        return new Promise<void>(() => undefined);
+      },
+    );
+    const repository: ICreditApplicationRepository = {
+      submitMasterDraft,
+    };
+    const initialPayload = createMockMasterPayload();
+    const modifiedPayload: MasterCreditApplicationPayload = {
+      ...initialPayload,
+      vehicleCredit: {
+        ...initialPayload.vehicleCredit,
+        monto_financiar: 23000,
+      },
+    };
+
+    expect(buildPayloadIdempotencyKey(initialPayload)).not.toBe(
+      buildPayloadIdempotencyKey(modifiedPayload),
+    );
+
+    const page = DraftSubmissionViewModelPageObject.render({
+      repository,
+    });
+
+    const pendingCall = page.startHandleSubmit(initialPayload);
+    expect(capturedSignals[0]?.aborted).toBe(false);
+
+    page.unmount();
+    expect(capturedSignals[0]?.aborted).toBe(true);
+
+    await page.settle(async () => {
+      await pendingCall;
+    });
   });
 });
