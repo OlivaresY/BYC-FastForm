@@ -1,6 +1,7 @@
 export { ApplicantStepView } from './ApplicantStepView';
 export { BankAuthorizationsStepView } from './BankAuthorizationsStepView';
 export { CloseProcessModal } from './CloseProcessModal';
+export { CreditWizardOrchestratorView } from './CreditWizardOrchestratorView';
 export { FinalBeneficiaryModal } from './FinalBeneficiaryModal';
 export { LegalEntityContactForm } from './LegalEntityContactForm';
 export { LegalEntityContactStepView } from './LegalEntityContactStepView';

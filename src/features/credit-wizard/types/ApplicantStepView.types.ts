@@ -129,6 +129,7 @@ export interface UseApplicantStepViewModelReturn {
 // =============================================================================
 
 export interface ApplicantStepViewProps {
+  defaultValues?: ApplicantStepData;
   disabled?: boolean;
   onClose?: () => void;
   onSubmit?: (data?: ApplicantStepData) => void;

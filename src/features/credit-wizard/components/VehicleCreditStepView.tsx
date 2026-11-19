@@ -27,6 +27,7 @@ import { WizardStepLayout } from './WizardStepLayout';
 
 export interface VehicleCreditStepViewProps {
   currentStep?: number;
+  defaultValues?: Partial<VehicleCreditFormValues>;
   disabled?: boolean;
   onBack?: () => void;
   onClose?: () => void;
@@ -39,6 +40,7 @@ export interface VehicleCreditStepViewProps {
 export const VehicleCreditStepView = React.memo(
   ({
     currentStep = VEHICLE_CREDIT_STEP_NUMERICAL.CURRENT_STEP,
+    defaultValues,
     disabled = false,
     onBack,
     onClose,
@@ -47,7 +49,10 @@ export const VehicleCreditStepView = React.memo(
     totalSteps = VEHICLE_CREDIT_STEP_NUMERICAL.TOTAL_STEPS,
     viewModel: viewModelProp,
   }: VehicleCreditStepViewProps): React.JSX.Element => {
-    const defaultViewModel = useVehicleCreditViewModel({ onSuccess: onSubmit });
+    const defaultViewModel = useVehicleCreditViewModel({
+      defaultValues,
+      onSuccess: onSubmit,
+    });
     const viewModel = viewModelProp ?? defaultViewModel;
 
     const {
