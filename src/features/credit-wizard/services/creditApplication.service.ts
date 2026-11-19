@@ -10,7 +10,9 @@ import type { MasterCreditApplicationPayload } from '../types/MasterCreditApplic
 export const CREDIT_APPLICATIONS_TABLE = 'credit_applications' as const;
 
 const IDEMPOTENCY_KEY_COLUMN = 'idempotency_key' as const;
-const IDEMPOTENCY_RECOVERY_SELECT_COLUMNS = 'id, status, created_at' as const;
+const USER_ID_COLUMN = 'user_id' as const;
+const IDEMPOTENCY_RECOVERY_SELECT_COLUMNS =
+  'id, status, created_at, user_id, payload' as const;
 const UNIQUE_VIOLATION_SQLSTATE = '23505' as const;
 
 export const CREDIT_APPLICATION_SERVICE_ERRORS = {
@@ -34,6 +36,26 @@ const isUniqueViolationError = (error: unknown): boolean =>
   error !== null &&
   'code' in error &&
   (error as { code?: unknown }).code === UNIQUE_VIOLATION_SQLSTATE;
+
+const canonicalizeJsonValue = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.map(canonicalizeJsonValue);
+  }
+
+  if (value !== null && typeof value === 'object') {
+    const sortedEntries = Object.entries(value)
+      .filter(([, entryValue]) => entryValue !== undefined)
+      .sort(([keyA], [keyB]) => (keyA < keyB ? -1 : keyA > keyB ? 1 : 0))
+      .map(([key, entryValue]) => [key, canonicalizeJsonValue(entryValue)]);
+
+    return Object.fromEntries(sortedEntries);
+  }
+
+  return value;
+};
+
+const serializeCanonicalJson = (value: unknown): string =>
+  JSON.stringify(canonicalizeJsonValue(value));
 
 const INVALID_PLACEHOLDER_USER_ID_PATTERN =
   /(?:mock|placeholder|dummy|fake|until-auth)/i;
@@ -62,7 +84,9 @@ export interface CreditApplicationInsertRow {
 export interface RecoveredCreditApplicationRecord {
   created_at: string;
   id: string;
+  payload?: unknown;
   status: string;
+  user_id?: string;
 }
 
 export interface SubmitMasterDraftOptions {
@@ -141,12 +165,15 @@ export class SupabaseCreditApplicationRepository implements ICreditApplicationRe
 
   private readonly recoverIdempotentSubmission = async (
     idempotencyKey: string,
+    expectedUserId: string,
+    expectedPayload: MasterCreditApplicationPayload,
     signal?: AbortSignal,
   ): Promise<RecoveredCreditApplicationRecord> => {
     const recoveryQuery = this.client
       .from(CREDIT_APPLICATIONS_TABLE)
       .select(IDEMPOTENCY_RECOVERY_SELECT_COLUMNS)
       .eq(IDEMPOTENCY_KEY_COLUMN, idempotencyKey)
+      .eq(USER_ID_COLUMN, expectedUserId)
       .single();
 
     const abortableRecoveryQuery: AbortableRecoveryQuery = recoveryQuery;
@@ -162,7 +189,14 @@ export class SupabaseCreditApplicationRepository implements ICreditApplicationRe
       throw createAbortError();
     }
 
-    if (recoveryError || !existingRecord) {
+    if (
+      recoveryError ||
+      !existingRecord ||
+      typeof existingRecord.user_id !== 'string' ||
+      existingRecord.user_id.trim() !== expectedUserId.trim() ||
+      serializeCanonicalJson(existingRecord.payload) !==
+        serializeCanonicalJson(expectedPayload)
+    ) {
       throw new Error(CREDIT_APPLICATION_SERVICE_ERRORS.SUBMIT_FAILED);
     }
 
@@ -239,6 +273,8 @@ export class SupabaseCreditApplicationRepository implements ICreditApplicationRe
       if (normalizedIdempotencyKey && isUniqueViolationError(error)) {
         return this.recoverIdempotentSubmission(
           normalizedIdempotencyKey,
+          insertRow.user_id,
+          insertRow.payload,
           options?.signal,
         );
       }

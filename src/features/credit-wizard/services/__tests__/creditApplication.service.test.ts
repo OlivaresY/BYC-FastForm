@@ -116,7 +116,13 @@ interface MockSupabaseOptions {
     error: { code?: string; details?: string; message: string } | null;
   };
   recoveryResult?: {
-    data: { created_at: string; id: string; status: string } | null;
+    data: {
+      created_at: string;
+      id: string;
+      payload?: unknown;
+      status: string;
+      user_id?: string;
+    } | null;
     error: { message: string } | null;
   };
   withAbortSignalBuilder?: boolean;
@@ -147,7 +153,9 @@ const createMockSupabaseClient = (
       })
     : jest.fn().mockResolvedValue(insertResult);
   const singleMock = jest.fn().mockResolvedValue(recoveryResult);
-  const eqMock = jest.fn().mockReturnValue({
+  const eqMock = jest.fn();
+  eqMock.mockReturnValue({
+    eq: eqMock,
     single: singleMock,
   });
   const selectMock = jest.fn().mockReturnValue({
@@ -449,12 +457,26 @@ describe('SupabaseCreditApplicationRepository', () => {
     });
   });
 
-  it('recovers existing persisted record without throwing when .insert() returns SQLSTATE 23505 unique violation', async () => {
+  it('recovers existing persisted record without throwing when .insert() returns SQLSTATE 23505 unique violation and user_id + canonical payload match', async () => {
     // Arrange
+    const payload = createValidPayload();
+    const reorderedRecoveredPayload = {
+      vehicleCredit: { ...payload.vehicleCredit },
+      userId: payload.userId,
+      templateVersion: payload.templateVersion,
+      status: payload.status,
+      selectedBanks: [...payload.selectedBanks],
+      regime: payload.regime,
+      contact: { ...payload.contact },
+      bankAuthorizations: { ...payload.bankAuthorizations },
+      applicant: { ...payload.applicant },
+    };
     const existingRecord = {
       created_at: '2026-11-19T00:00:00.000Z',
       id: 'app-existing-uuid-001',
+      payload: reorderedRecoveredPayload,
       status: APPLICATION_STATUS.PENDING,
+      user_id: AUTHENTICATED_USER_ID,
     };
     const { client, eqMock, fromMock, insertMock, selectMock, singleMock } =
       createMockSupabaseClient({
@@ -471,7 +493,6 @@ describe('SupabaseCreditApplicationRepository', () => {
         },
       });
     const repository = new SupabaseCreditApplicationRepository(client);
-    const payload = createValidPayload();
     const idempotencyKey = 'byc-draft-duplicate-key';
 
     // Act
@@ -484,8 +505,95 @@ describe('SupabaseCreditApplicationRepository', () => {
     expect(insertMock).toHaveBeenCalledTimes(1);
     expect(fromMock).toHaveBeenNthCalledWith(1, CREDIT_APPLICATIONS_TABLE);
     expect(fromMock).toHaveBeenNthCalledWith(2, CREDIT_APPLICATIONS_TABLE);
-    expect(selectMock).toHaveBeenCalledWith('id, status, created_at');
-    expect(eqMock).toHaveBeenCalledWith('idempotency_key', idempotencyKey);
+    expect(selectMock).toHaveBeenCalledWith(
+      'id, status, created_at, user_id, payload',
+    );
+    expect(eqMock).toHaveBeenNthCalledWith(
+      1,
+      'idempotency_key',
+      idempotencyKey,
+    );
+    expect(eqMock).toHaveBeenNthCalledWith(2, 'user_id', AUTHENTICATED_USER_ID);
+    expect(singleMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects with SUBMIT_FAILED on SQLSTATE 23505 when the recovered record belongs to a different user_id', async () => {
+    // Arrange
+    const payload = createValidPayload();
+    const { client, eqMock, selectMock, singleMock } = createMockSupabaseClient(
+      {
+        insertResult: {
+          error: {
+            code: '23505',
+            message: 'duplicate key value violates unique constraint',
+          },
+        },
+        recoveryResult: {
+          data: {
+            created_at: '2026-11-19T00:00:00.000Z',
+            id: 'app-foreign-uuid-002',
+            payload,
+            status: APPLICATION_STATUS.PENDING,
+            user_id: '99999999-8888-4777-8666-555555555555',
+          },
+          error: null,
+        },
+      },
+    );
+    const repository = new SupabaseCreditApplicationRepository(client);
+    const idempotencyKey = 'byc-draft-collision-key';
+
+    // Act & Assert
+    await expect(
+      repository.submitMasterDraft(payload, { idempotencyKey }),
+    ).rejects.toThrow(CREDIT_APPLICATION_SERVICE_ERRORS.SUBMIT_FAILED);
+    expect(selectMock).toHaveBeenCalledWith(
+      'id, status, created_at, user_id, payload',
+    );
+    expect(eqMock).toHaveBeenNthCalledWith(
+      1,
+      'idempotency_key',
+      idempotencyKey,
+    );
+    expect(eqMock).toHaveBeenNthCalledWith(2, 'user_id', AUTHENTICATED_USER_ID);
+    expect(singleMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects with SUBMIT_FAILED on SQLSTATE 23505 when the recovered record payload differs from the submitted payload', async () => {
+    // Arrange
+    const payload = createValidPayload();
+    const mismatchedPayload = createValidPayload({
+      vehicleCredit: {
+        ...payload.vehicleCredit,
+        monto_financiar: 19999,
+      },
+    });
+    const { client, singleMock } = createMockSupabaseClient({
+      insertResult: {
+        error: {
+          code: '23505',
+          message: 'duplicate key value violates unique constraint',
+        },
+      },
+      recoveryResult: {
+        data: {
+          created_at: '2026-11-19T00:00:00.000Z',
+          id: 'app-tampered-uuid-003',
+          payload: mismatchedPayload,
+          status: APPLICATION_STATUS.PENDING,
+          user_id: AUTHENTICATED_USER_ID,
+        },
+        error: null,
+      },
+    });
+    const repository = new SupabaseCreditApplicationRepository(client);
+
+    // Act & Assert
+    await expect(
+      repository.submitMasterDraft(payload, {
+        idempotencyKey: 'byc-draft-tampered-key',
+      }),
+    ).rejects.toThrow(CREDIT_APPLICATION_SERVICE_ERRORS.SUBMIT_FAILED);
     expect(singleMock).toHaveBeenCalledTimes(1);
   });
 });
