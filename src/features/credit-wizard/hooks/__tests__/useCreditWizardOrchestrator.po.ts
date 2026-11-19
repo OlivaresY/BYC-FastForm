@@ -96,6 +96,12 @@ export class CreditWizardOrchestratorHookPageObject {
     });
   };
 
+  public advanceTimers = async (ms: number): Promise<void> => {
+    await act(async () => {
+      jest.advanceTimersByTime(ms);
+    });
+  };
+
   public goBack = (): this => {
     act(() => {
       this.hookResult.result.current.handlePreviousStep();

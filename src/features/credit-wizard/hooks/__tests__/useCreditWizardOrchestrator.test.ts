@@ -14,11 +14,15 @@ import {
 } from '../../types/MasterCreditApplication.types';
 import type { PhysicalPersonContact } from '../../types/PhysicalPersonContact.types';
 import type { VehicleCreditFormValues } from '../../types/VehicleCredit.types';
-import { WIZARD_STEPS } from '../useCreditWizardOrchestrator';
+import {
+  AUTH_RESOLUTION_TIMEOUT_MS,
+  WIZARD_STEPS,
+} from '../useCreditWizardOrchestrator';
 import { CreditWizardOrchestratorHookPageObject } from './useCreditWizardOrchestrator.po';
 
 const VALID_CR_IBAN = 'CR05015202001026284066';
 const AUTHENTICATED_USER_ID = '550e8400-e29b-41d4-a716-446655440000';
+const DIFFERENT_USER_ID = '660e8400-e29b-41d4-a716-446655449999';
 
 const mockPhysicalStep1Data: PhysicalApplicantStepData = {
   regime: LEGAL_ENTITY_SELECTOR_ENTITIES.PHYSICAL,
@@ -98,6 +102,10 @@ describe('useCreditWizardOrchestrator', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('resolves the real authenticated user ID via resolveAuthenticatedUserId and passes it to submitMasterDraft', async () => {
     // Arrange
     const submitMasterDraft = jest.fn().mockResolvedValue(undefined);
@@ -148,12 +156,12 @@ describe('useCreditWizardOrchestrator', () => {
     expect(page.current.submitError).toBeNull();
   });
 
-  it('resolves user ID from supabase.auth.getUser() by default when no injectable resolver is supplied', async () => {
+  it('always invokes default supabase.auth.getUser() even when explicit userId is provided and blocks mismatches', async () => {
     // Arrange
     const getUserSpy = jest.spyOn(supabase.auth, 'getUser').mockResolvedValue({
       data: {
         user: {
-          id: AUTHENTICATED_USER_ID,
+          id: DIFFERENT_USER_ID,
         },
       },
       error: null,
@@ -161,7 +169,43 @@ describe('useCreditWizardOrchestrator', () => {
     const submitMasterDraft = jest.fn().mockResolvedValue(undefined);
     const repository: ICreditApplicationRepository = { submitMasterDraft };
 
-    const page = CreditWizardOrchestratorHookPageObject.render({ repository });
+    const page = CreditWizardOrchestratorHookPageObject.render({
+      repository,
+      userId: AUTHENTICATED_USER_ID,
+    });
+
+    page.completeThroughStep3(
+      mockPhysicalStep1Data,
+      mockPhysicalStep2Data,
+      mockStep3Data,
+    );
+
+    // Act
+    await page.submitStep4(mockStep4Data);
+
+    // Assert: auth check was NOT bypassed, mismatch rejected submission
+    expect(getUserSpy).toHaveBeenCalledTimes(1);
+    expect(submitMasterDraft).not.toHaveBeenCalled();
+    expect(page.current.hasSubmittedSuccessfully).toBe(false);
+    expect(page.current.submitError).toBe(
+      esCR.creditWizard.masterDraftSubmission.authErrorMessage,
+    );
+  });
+
+  it('allows submission when explicit userId matches resolveAuthenticatedUserId result', async () => {
+    // Arrange
+    const submitMasterDraft = jest.fn().mockResolvedValue(undefined);
+    const repository: ICreditApplicationRepository = { submitMasterDraft };
+    const resolveAuthenticatedUserId = jest
+      .fn()
+      .mockResolvedValue(AUTHENTICATED_USER_ID);
+
+    const page = CreditWizardOrchestratorHookPageObject.render({
+      repository,
+      resolveAuthenticatedUserId,
+      userId: AUTHENTICATED_USER_ID,
+    });
+
     page.completeThroughStep3(
       mockPhysicalStep1Data,
       mockPhysicalStep2Data,
@@ -172,13 +216,9 @@ describe('useCreditWizardOrchestrator', () => {
     await page.submitStep4(mockStep4Data);
 
     // Assert
-    expect(getUserSpy).toHaveBeenCalledTimes(1);
+    expect(resolveAuthenticatedUserId).toHaveBeenCalledTimes(1);
     expect(submitMasterDraft).toHaveBeenCalledTimes(1);
-    expect(submitMasterDraft).toHaveBeenCalledWith(
-      expect.objectContaining({
-        userId: AUTHENTICATED_USER_ID,
-      }),
-    );
+    expect(page.current.isSubmitted).toBe(true);
   });
 
   it('blocks submission with a Spanish authentication error and never calls submitMasterDraft when session user is missing or invalid', async () => {
@@ -241,6 +281,86 @@ describe('useCreditWizardOrchestrator', () => {
     expect(page.current.submitError).toBe(
       esCR.creditWizard.masterDraftSubmission.authErrorMessage,
     );
+  });
+
+  it('enforces AUTH_RESOLUTION_TIMEOUT_MS on stalled auth calls, exposes Spanish timeout error, and resets isSubmitting', async () => {
+    // Arrange
+    jest.useFakeTimers();
+
+    const stalledAuthResolver = jest.fn(
+      () => new Promise<string | null>(() => undefined),
+    );
+    const submitMasterDraft = jest.fn().mockResolvedValue(undefined);
+    const repository: ICreditApplicationRepository = { submitMasterDraft };
+
+    const page = CreditWizardOrchestratorHookPageObject.render({
+      repository,
+      resolveAuthenticatedUserId: stalledAuthResolver,
+    });
+
+    page.completeThroughStep3(
+      mockPhysicalStep1Data,
+      mockPhysicalStep2Data,
+      mockStep3Data,
+    );
+
+    // Act
+    const pendingSubmit = page.startSubmitStep4(mockStep4Data);
+    expect(page.current.isSubmitting).toBe(true);
+
+    await page.advanceTimers(AUTH_RESOLUTION_TIMEOUT_MS);
+    await page.settle(async () => {
+      await pendingSubmit;
+    });
+
+    // Assert
+    expect(stalledAuthResolver).toHaveBeenCalledTimes(1);
+    expect(submitMasterDraft).not.toHaveBeenCalled();
+    expect(page.current.isSubmitting).toBe(false);
+    expect(page.current.isSubmitted).toBe(false);
+    expect(page.current.submitError).toBe(
+      esCR.creditWizard.masterDraftSubmission.timeoutErrorMessage,
+    );
+  });
+
+  it('preserves strict isSubmitted invariant (submitError remains null) even if onSubmissionSuccess throws after persistence succeeds', async () => {
+    // Arrange
+    const submitMasterDraft = jest.fn().mockResolvedValue(undefined);
+    const repository: ICreditApplicationRepository = { submitMasterDraft };
+    const resolveAuthenticatedUserId = jest
+      .fn()
+      .mockResolvedValue(AUTHENTICATED_USER_ID);
+    const onSubmissionSuccess = jest
+      .fn()
+      .mockRejectedValue(new Error('Navigation stack error'));
+
+    const page = CreditWizardOrchestratorHookPageObject.render({
+      onSubmissionSuccess,
+      repository,
+      resolveAuthenticatedUserId,
+    });
+
+    page.completeThroughStep3(
+      mockPhysicalStep1Data,
+      mockPhysicalStep2Data,
+      mockStep3Data,
+    );
+
+    // Act
+    await page.submitStep4(mockStep4Data);
+
+    // Assert: committed persistence guarantees isSubmitted=true and submitError=null
+    expect(submitMasterDraft).toHaveBeenCalledTimes(1);
+    expect(onSubmissionSuccess).toHaveBeenCalledTimes(1);
+    expect(page.current.hasSubmittedSuccessfully).toBe(true);
+    expect(page.current.isSubmitted).toBe(true);
+    expect(page.current.isSubmitting).toBe(false);
+    expect(page.current.draftState).toEqual({});
+    expect(page.current.submitError).toBeNull();
+
+    // Subsequent clicks remain blocked
+    await page.submitStep4(mockStep4Data);
+    expect(submitMasterDraft).toHaveBeenCalledTimes(1);
   });
 
   it('atomically marks submitted and blocks duplicate resubmission or backwards navigation until restarted', async () => {

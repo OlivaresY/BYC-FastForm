@@ -373,7 +373,7 @@ describe('CreditWizardOrchestratorView Integration Suite', () => {
     const page = CreditWizardOrchestratorPageObject.render({
       onSubmissionSuccess,
       repository,
-      userId: TEST_AUTHENTICATED_USER_ID,
+      resolveAuthenticatedUserId: async () => TEST_AUTHENTICATED_USER_ID,
     });
 
     // Step 1 -> Step 2 (Physical)
@@ -396,6 +396,13 @@ describe('CreditWizardOrchestratorView Integration Suite', () => {
 
     // Step 4 -> Final Master Draft Submission
     page.pressButton(MOCK_STEP_TEST_IDS.STEP_4_SUBMIT);
+    expect(page.getStep4SubmittingText()).toBe('true');
+
+    // Flush async auth resolution so in-flight repository submission starts
+    await page.flushAsync(async () => {
+      await Promise.resolve();
+    });
+
     expect(page.getStep4SubmittingText()).toBe('true');
     expect(submitMasterDraft).toHaveBeenCalledTimes(1);
     expect(submitMasterDraft).toHaveBeenCalledWith(
@@ -442,7 +449,7 @@ describe('CreditWizardOrchestratorView Integration Suite', () => {
     const page = CreditWizardOrchestratorPageObject.render({
       onSubmissionSuccess,
       repository,
-      userId: TEST_AUTHENTICATED_USER_ID,
+      resolveAuthenticatedUserId: async () => TEST_AUTHENTICATED_USER_ID,
     });
 
     // Step 1 (Legal) -> Step 2 (Legal)

@@ -18,6 +18,8 @@ import {
   useDraftSubmissionViewModel,
 } from './useDraftSubmissionViewModel';
 
+export const AUTH_RESOLUTION_TIMEOUT_MS = 8000 as const;
+
 export const WIZARD_STEPS = {
   STEP_1: 1,
   STEP_2: 2,
@@ -53,6 +55,27 @@ const defaultResolveAuthenticatedUserId = async (): Promise<string | null> => {
   return data.user.id;
 };
 
+const executeAuthResolutionWithTimeout = async (
+  authResolver: AuthenticatedUserIdResolver,
+  timeoutMs: number,
+): Promise<string | null> => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(SUBMISSION_MESSAGES.timeoutErrorMessage));
+    }, timeoutMs);
+  });
+
+  try {
+    return await Promise.race([authResolver(), timeoutPromise]);
+  } finally {
+    if (timeoutId !== undefined) {
+      clearTimeout(timeoutId);
+    }
+  }
+};
+
 export interface CreditWizardDraftState {
   step1?: ApplicantStepData;
   step2?: LegalEntityContact | PhysicalPersonContact;
@@ -63,6 +86,8 @@ export interface CreditWizardDraftState {
 export type AuthenticatedUserIdResolver = () => Promise<string | null>;
 
 export interface UseCreditWizardOrchestratorProps {
+  authTimeoutMs?: number;
+  expectedUserId?: string;
   onSubmissionSuccess?: () => void | Promise<void>;
   repository?: ICreditApplicationRepository;
   resolveAuthenticatedUserId?: AuthenticatedUserIdResolver;
@@ -100,12 +125,16 @@ export const useCreditWizardOrchestrator = (
   props?: UseCreditWizardOrchestratorProps,
 ): UseCreditWizardOrchestratorReturn => {
   const {
+    authTimeoutMs = AUTH_RESOLUTION_TIMEOUT_MS,
+    expectedUserId,
     onSubmissionSuccess,
     repository = supabaseCreditApplicationRepository,
-    resolveAuthenticatedUserId,
+    resolveAuthenticatedUserId = defaultResolveAuthenticatedUserId,
     submissionTimeoutMs = SUBMISSION_TIMEOUT_MS,
     userId: explicitUserId,
   } = props ?? {};
+
+  const expectedSessionUserId = expectedUserId ?? explicitUserId;
 
   const [currentStep, setCurrentStep] = useState<WizardStepNumber>(
     WIZARD_STEPS.STEP_1,
@@ -128,7 +157,13 @@ export const useCreditWizardOrchestrator = (
     setHasSubmittedSuccessfully(true);
     setDraftState({});
     setOrchestrationError(null);
-    await onSubmissionSuccess?.();
+
+    try {
+      await onSubmissionSuccess?.();
+    } catch {
+      // Persistence is already committed; isolate post-submission UI callback
+      // errors so submitError never contradicts a committed submission.
+    }
   }, [onSubmissionSuccess]);
 
   const {
@@ -309,45 +344,44 @@ export const useCreditWizardOrchestrator = (
         return;
       }
 
-      if (
-        resolveAuthenticatedUserId === undefined &&
-        explicitUserId !== undefined
-      ) {
-        if (!isValidAuthenticatedUserId(explicitUserId)) {
-          isSubmissionLockedRef.current = false;
-          setOrchestrationError(SUBMISSION_MESSAGES.authErrorMessage);
-          return;
-        }
-
-        try {
-          await submitMasterFlow(
-            explicitUserId.trim(),
-            step1,
-            step2,
-            step3,
-            step4Data,
-          );
-        } finally {
-          isSubmissionLockedRef.current = false;
-        }
-        return;
-      }
-
       setIsResolvingAuth(true);
       let resolvedUserId: string | null = null;
-      let authFailed = false;
+      let authErrorMessage: string | null = null;
 
       try {
-        const authResolver =
-          resolveAuthenticatedUserId ?? defaultResolveAuthenticatedUserId;
-        resolvedUserId = await authResolver();
-      } catch {
-        authFailed = true;
+        resolvedUserId = await executeAuthResolutionWithTimeout(
+          resolveAuthenticatedUserId,
+          authTimeoutMs,
+        );
+      } catch (error) {
+        authErrorMessage =
+          error instanceof Error &&
+          error.message === SUBMISSION_MESSAGES.timeoutErrorMessage
+            ? SUBMISSION_MESSAGES.timeoutErrorMessage
+            : SUBMISSION_MESSAGES.authErrorMessage;
       } finally {
         setIsResolvingAuth(false);
       }
 
-      if (authFailed || !isValidAuthenticatedUserId(resolvedUserId)) {
+      if (authErrorMessage !== null) {
+        isSubmissionLockedRef.current = false;
+        setOrchestrationError(authErrorMessage);
+        return;
+      }
+
+      if (!isValidAuthenticatedUserId(resolvedUserId)) {
+        isSubmissionLockedRef.current = false;
+        setOrchestrationError(SUBMISSION_MESSAGES.authErrorMessage);
+        return;
+      }
+
+      const normalizedResolvedUserId = resolvedUserId.trim();
+      const hasExpectedUserMismatch =
+        expectedSessionUserId !== undefined &&
+        (!isValidAuthenticatedUserId(expectedSessionUserId) ||
+          normalizedResolvedUserId !== expectedSessionUserId.trim());
+
+      if (hasExpectedUserMismatch) {
         isSubmissionLockedRef.current = false;
         setOrchestrationError(SUBMISSION_MESSAGES.authErrorMessage);
         return;
@@ -355,7 +389,7 @@ export const useCreditWizardOrchestrator = (
 
       try {
         await submitMasterFlow(
-          resolvedUserId.trim(),
+          normalizedResolvedUserId,
           step1,
           step2,
           step3,
@@ -366,8 +400,9 @@ export const useCreditWizardOrchestrator = (
       }
     },
     [
+      authTimeoutMs,
       clearSubmitError,
-      explicitUserId,
+      expectedSessionUserId,
       resolveAuthenticatedUserId,
       submitMasterFlow,
     ],
@@ -388,6 +423,8 @@ export const useCreditWizardOrchestrator = (
     resetDraft: resetWizard,
     resetWizard,
     restartWizard: resetWizard,
-    submitError: orchestrationError ?? draftSubmitError,
+    submitError: hasSubmittedSuccessfully
+      ? null
+      : (orchestrationError ?? draftSubmitError),
   };
 };
