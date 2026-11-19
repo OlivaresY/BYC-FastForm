@@ -9,6 +9,10 @@ import type { MasterCreditApplicationPayload } from '../types/MasterCreditApplic
 
 export const CREDIT_APPLICATIONS_TABLE = 'credit_applications' as const;
 
+const IDEMPOTENCY_KEY_COLUMN = 'idempotency_key' as const;
+const IDEMPOTENCY_RECOVERY_SELECT_COLUMNS = 'id, status, created_at' as const;
+const UNIQUE_VIOLATION_SQLSTATE = '23505' as const;
+
 export const CREDIT_APPLICATION_SERVICE_ERRORS = {
   AUTH_REQUIRED:
     'La sesión de usuario es inválida o ha expirado. Inicia sesión nuevamente antes de enviar la solicitud.',
@@ -25,6 +29,12 @@ const createAbortError = (): Error => {
   return abortError;
 };
 
+const isUniqueViolationError = (error: unknown): boolean =>
+  typeof error === 'object' &&
+  error !== null &&
+  'code' in error &&
+  (error as { code?: unknown }).code === UNIQUE_VIOLATION_SQLSTATE;
+
 const INVALID_PLACEHOLDER_USER_ID_PATTERN =
   /(?:mock|placeholder|dummy|fake|until-auth)/i;
 
@@ -40,12 +50,19 @@ const isValidAuthenticatedUserId = (userId: unknown): userId is string => {
 };
 
 export interface CreditApplicationInsertRow {
+  idempotency_key?: string;
   payload: MasterCreditApplicationPayload;
   regime: MasterCreditApplicationPayload['regime'];
   selected_banks: MasterCreditApplicationPayload['selectedBanks'];
   status: MasterCreditApplicationPayload['status'];
   template_version: MasterCreditApplicationPayload['templateVersion'];
   user_id: MasterCreditApplicationPayload['userId'];
+}
+
+export interface RecoveredCreditApplicationRecord {
+  created_at: string;
+  id: string;
+  status: string;
 }
 
 export interface SubmitMasterDraftOptions {
@@ -57,7 +74,7 @@ export interface ICreditApplicationRepository {
   submitMasterDraft: (
     payload: MasterCreditApplicationPayload,
     options?: SubmitMasterDraftOptions,
-  ) => Promise<void>;
+  ) => Promise<RecoveredCreditApplicationRecord | void>;
 }
 
 interface InsertQueryResponse {
@@ -68,30 +85,52 @@ interface AbortableInsertQuery extends PromiseLike<InsertQueryResponse> {
   abortSignal?: (signal: AbortSignal) => PromiseLike<InsertQueryResponse>;
 }
 
+interface RecoveryQueryResponse {
+  data: RecoveredCreditApplicationRecord | null;
+  error: unknown;
+}
+
+interface AbortableRecoveryQuery extends PromiseLike<RecoveryQueryResponse> {
+  abortSignal?: (signal: AbortSignal) => PromiseLike<RecoveryQueryResponse>;
+}
+
 export const mapMasterPayloadToInsertRow = (
   payload: MasterCreditApplicationPayload,
-): CreditApplicationInsertRow => ({
-  payload,
-  regime: payload.regime,
-  selected_banks: payload.selectedBanks,
-  status: payload.status,
-  template_version: payload.templateVersion,
-  user_id: payload.userId,
-});
+  idempotencyKey?: string,
+): CreditApplicationInsertRow => {
+  const normalizedIdempotencyKey = idempotencyKey?.trim();
+
+  return {
+    ...(normalizedIdempotencyKey
+      ? { idempotency_key: normalizedIdempotencyKey }
+      : {}),
+    payload,
+    regime: payload.regime,
+    selected_banks: payload.selectedBanks,
+    status: payload.status,
+    template_version: payload.templateVersion,
+    user_id: payload.userId,
+  };
+};
 
 /**
  * Supabase persistence repository for credit applications.
  *
- * Architectural RLS Contract (`public.credit_applications`):
+ * Architectural RLS & Idempotency Contract (`public.credit_applications`):
  * ```sql
- * CREATE POLICY "Advisors insert own applications"
- * ON public.credit_applications
- * FOR INSERT
- * TO authenticated
- * WITH CHECK (auth.uid() = user_id);
+ * CREATE UNIQUE INDEX IF NOT EXISTS credit_applications_idempotency_key_unique
+ *   ON public.credit_applications (idempotency_key)
+ *   WHERE idempotency_key IS NOT NULL;
+ *
+ * CREATE POLICY credit_applications_insert_own
+ *   ON public.credit_applications
+ *   FOR INSERT
+ *   TO authenticated
+ *   WITH CHECK (auth.uid() = user_id);
  * ```
- * Every insert enforces parity between the active authenticated session
- * (`auth.uid()`) and the persisted `user_id` column.
+ * Every insert enforces fail-closed parity between the active authenticated
+ * session (`auth.uid()`) and the persisted `user_id` column, and persists
+ * `idempotency_key` so retries recover cleanly on SQLSTATE `23505`.
  */
 export class SupabaseCreditApplicationRepository implements ICreditApplicationRepository {
   private readonly client: SupabaseClient;
@@ -100,10 +139,40 @@ export class SupabaseCreditApplicationRepository implements ICreditApplicationRe
     this.client = client;
   }
 
+  private readonly recoverIdempotentSubmission = async (
+    idempotencyKey: string,
+    signal?: AbortSignal,
+  ): Promise<RecoveredCreditApplicationRecord> => {
+    const recoveryQuery = this.client
+      .from(CREDIT_APPLICATIONS_TABLE)
+      .select(IDEMPOTENCY_RECOVERY_SELECT_COLUMNS)
+      .eq(IDEMPOTENCY_KEY_COLUMN, idempotencyKey)
+      .single();
+
+    const abortableRecoveryQuery: AbortableRecoveryQuery = recoveryQuery;
+    const executableRecoveryQuery =
+      signal && typeof abortableRecoveryQuery?.abortSignal === 'function'
+        ? abortableRecoveryQuery.abortSignal(signal)
+        : recoveryQuery;
+
+    const { data: existingRecord, error: recoveryError } =
+      await executableRecoveryQuery;
+
+    if (signal?.aborted) {
+      throw createAbortError();
+    }
+
+    if (recoveryError || !existingRecord) {
+      throw new Error(CREDIT_APPLICATION_SERVICE_ERRORS.SUBMIT_FAILED);
+    }
+
+    return existingRecord;
+  };
+
   public readonly submitMasterDraft = async (
     payload: MasterCreditApplicationPayload,
     options?: SubmitMasterDraftOptions,
-  ): Promise<void> => {
+  ): Promise<RecoveredCreditApplicationRecord | void> => {
     if (options?.signal?.aborted) {
       throw createAbortError();
     }
@@ -129,15 +198,16 @@ export class SupabaseCreditApplicationRepository implements ICreditApplicationRe
     }
 
     if (typeof this.client.auth?.getUser === 'function') {
-      const { data: authData } = await this.client.auth.getUser();
+      const { data: authData, error: authError } =
+        await this.client.auth.getUser();
 
-      if (authData?.user) {
-        if (
-          !isValidAuthenticatedUserId(authData.user.id) ||
-          authData.user.id.trim() !== validatedPayload.userId.trim()
-        ) {
-          throw new Error(CREDIT_APPLICATION_SERVICE_ERRORS.AUTH_REQUIRED);
-        }
+      if (
+        authError ||
+        !authData?.user ||
+        !isValidAuthenticatedUserId(authData.user.id) ||
+        authData.user.id.trim() !== validatedPayload.userId.trim()
+      ) {
+        throw new Error(CREDIT_APPLICATION_SERVICE_ERRORS.AUTH_REQUIRED);
       }
     }
 
@@ -145,7 +215,11 @@ export class SupabaseCreditApplicationRepository implements ICreditApplicationRe
       throw createAbortError();
     }
 
-    const insertRow = mapMasterPayloadToInsertRow(validatedPayload);
+    const normalizedIdempotencyKey = options?.idempotencyKey?.trim();
+    const insertRow = mapMasterPayloadToInsertRow(
+      validatedPayload,
+      normalizedIdempotencyKey,
+    );
     const insertBuilder: AbortableInsertQuery = this.client
       .from(CREDIT_APPLICATIONS_TABLE)
       .insert(insertRow);
@@ -162,6 +236,13 @@ export class SupabaseCreditApplicationRepository implements ICreditApplicationRe
     }
 
     if (error) {
+      if (normalizedIdempotencyKey && isUniqueViolationError(error)) {
+        return this.recoverIdempotentSubmission(
+          normalizedIdempotencyKey,
+          options?.signal,
+        );
+      }
+
       throw new Error(CREDIT_APPLICATION_SERVICE_ERRORS.SUBMIT_FAILED);
     }
   };

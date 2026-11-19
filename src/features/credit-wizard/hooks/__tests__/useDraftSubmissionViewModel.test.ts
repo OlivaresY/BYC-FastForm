@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { esCR } from '@/shared/i18n';
 import { LEGAL_ENTITY_SELECTOR_ENTITIES } from '../../constants/LegalEntitySelector.constants';
 import { EMPLOYMENT_STATUSES } from '../../constants/PhysicalPersonContact.constants';
@@ -14,6 +15,7 @@ import {
   DEFAULT_TEMPLATE_VERSION,
   SELECTED_BANK_CODES,
   type MasterCreditApplicationPayload,
+  type PhysicalMasterCreditApplicationPayload,
 } from '../../types/MasterCreditApplication.types';
 import {
   SUBMISSION_TIMEOUT_MS,
@@ -31,7 +33,7 @@ const INITIAL_AUTHORIZATIONS: BankAuthorizationsFormValues = {
   banco_scotiabank: false,
 };
 
-const createMockMasterPayload = (): MasterCreditApplicationPayload => ({
+const createMockMasterPayload = (): PhysicalMasterCreditApplicationPayload => ({
   applicant: {
     regime: LEGAL_ENTITY_SELECTOR_ENTITIES.PHYSICAL,
     values: {
@@ -456,5 +458,128 @@ describe('useDraftSubmissionViewModel', () => {
     await page.settle(async () => {
       await pendingCall;
     });
+  });
+
+  it('produces a deterministic 64-char SHA-256 hex digest matching UTF-8 canonical payload bytes and changing on any edit', () => {
+    const payload = createMockMasterPayload();
+    const idempotencyKey = buildPayloadIdempotencyKey(payload);
+
+    const sha256Pattern = new RegExp(
+      `^byc-draft-${payload.userId}-([0-9a-f]{64})$`,
+    );
+    const match = idempotencyKey.match(sha256Pattern);
+    expect(match).not.toBeNull();
+
+    const canonicalJson = JSON.stringify({
+      applicant: {
+        regime: payload.applicant.regime,
+        values: {
+          birthDate: payload.applicant.values.birthDate,
+          firstLastName: payload.applicant.values.firstLastName,
+          firstName: payload.applicant.values.firstName,
+          gender: payload.applicant.values.gender,
+          identificationNumber: payload.applicant.values.identificationNumber,
+          identificationType: payload.applicant.values.identificationType,
+          maritalStatus: payload.applicant.values.maritalStatus,
+          middleName: payload.applicant.values.middleName,
+          nationality: payload.applicant.values.nationality,
+          nationalityOther: payload.applicant.values.nationalityOther,
+          secondLastName: payload.applicant.values.secondLastName,
+        },
+        vehicleBeneficiary: payload.applicant.vehicleBeneficiary,
+      },
+      bankAuthorizations: {
+        autoriza_buros_credito:
+          payload.bankAuthorizations.autoriza_buros_credito,
+        autoriza_sugef_cic: payload.bankAuthorizations.autoriza_sugef_cic,
+        banco_bac: payload.bankAuthorizations.banco_bac,
+        banco_bncr: payload.bankAuthorizations.banco_bncr,
+        banco_carro_facil: payload.bankAuthorizations.banco_carro_facil,
+        banco_promerica: payload.bankAuthorizations.banco_promerica,
+        banco_scotiabank: payload.bankAuthorizations.banco_scotiabank,
+      },
+      contact: {
+        commercialReference: {
+          companyReference:
+            payload.contact.commercialReference.companyReference,
+          ibanAccount: payload.contact.commercialReference.ibanAccount,
+          referencePhone: payload.contact.commercialReference.referencePhone,
+        },
+        contactInfo: {
+          cellPhone: payload.contact.contactInfo.cellPhone,
+          email: payload.contact.contactInfo.email,
+          homePhone: payload.contact.contactInfo.homePhone,
+        },
+        employmentData: {
+          employer: payload.contact.employmentData.employer,
+          employmentStatus: payload.contact.employmentData.employmentStatus,
+          entryDate: payload.contact.employmentData.entryDate,
+          officePhone: payload.contact.employmentData.officePhone,
+          profession: payload.contact.employmentData.profession,
+        },
+        financialCapacity: {
+          currency: payload.contact.financialCapacity.currency,
+          grossIncome: payload.contact.financialCapacity.grossIncome,
+          netIncome: payload.contact.financialCapacity.netIncome,
+          otherIncomes: payload.contact.financialCapacity.otherIncomes,
+        },
+        residentialAddress: {
+          canton: payload.contact.residentialAddress.canton,
+          district: payload.contact.residentialAddress.district,
+          exactAddress: payload.contact.residentialAddress.exactAddress,
+          province: payload.contact.residentialAddress.province,
+        },
+      },
+      regime: payload.regime,
+      selectedBanks: payload.selectedBanks,
+      status: payload.status,
+      templateVersion: payload.templateVersion,
+      userId: payload.userId,
+      vehicleCredit: {
+        anio: payload.vehicleCredit.anio,
+        color: payload.vehicleCredit.color,
+        marca: payload.vehicleCredit.marca,
+        modelo: payload.vehicleCredit.modelo,
+        moneda: payload.vehicleCredit.moneda,
+        monto_financiar: payload.vehicleCredit.monto_financiar,
+        monto_prima: payload.vehicleCredit.monto_prima,
+        plazo_meses: payload.vehicleCredit.plazo_meses,
+        valor_vehiculo: payload.vehicleCredit.valor_vehiculo,
+      },
+    });
+    const expectedSha256 = createHash('sha256')
+      .update(canonicalJson, 'utf8')
+      .digest('hex');
+
+    expect(match?.[1]).toBe(expectedSha256);
+
+    const reorderedKeysPayload: PhysicalMasterCreditApplicationPayload = {
+      userId: payload.userId,
+      templateVersion: payload.templateVersion,
+      status: payload.status,
+      selectedBanks: [...payload.selectedBanks],
+      regime: payload.regime,
+      vehicleCredit: { ...payload.vehicleCredit },
+      contact: { ...payload.contact },
+      bankAuthorizations: { ...payload.bankAuthorizations },
+      applicant: { ...payload.applicant },
+    };
+    expect(buildPayloadIdempotencyKey(reorderedKeysPayload)).toBe(
+      idempotencyKey,
+    );
+
+    const editedPayload: PhysicalMasterCreditApplicationPayload = {
+      ...payload,
+      applicant: {
+        ...payload.applicant,
+        values: {
+          ...payload.applicant.values,
+          firstName: 'María José',
+        },
+      },
+    };
+    const editedKey = buildPayloadIdempotencyKey(editedPayload);
+    expect(editedKey).toMatch(sha256Pattern);
+    expect(editedKey).not.toBe(idempotencyKey);
   });
 });

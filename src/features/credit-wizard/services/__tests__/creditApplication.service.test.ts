@@ -101,15 +101,23 @@ const createValidPayload = (
 interface MockSupabaseHarness {
   abortSignalMock: jest.Mock;
   client: SupabaseClient;
+  eqMock: jest.Mock;
   fromMock: jest.Mock;
   getUserMock: jest.Mock;
   insertMock: jest.Mock;
+  selectMock: jest.Mock;
+  singleMock: jest.Mock;
 }
 
 interface MockSupabaseOptions {
   authenticatedUserId?: string | null;
+  authError?: { message: string } | null;
   insertResult?: {
     error: { code?: string; details?: string; message: string } | null;
+  };
+  recoveryResult?: {
+    data: { created_at: string; id: string; status: string } | null;
+    error: { message: string } | null;
   };
   withAbortSignalBuilder?: boolean;
   withAuthClient?: boolean;
@@ -128,14 +136,26 @@ const createMockSupabaseClient = (
       : optionsOrInsertResult;
 
   const insertResult = normalizedOptions.insertResult ?? { error: null };
+  const recoveryResult = normalizedOptions.recoveryResult ?? {
+    data: null,
+    error: null,
+  };
   const abortSignalMock = jest.fn().mockResolvedValue(insertResult);
   const insertMock = normalizedOptions.withAbortSignalBuilder
     ? jest.fn().mockReturnValue({
         abortSignal: abortSignalMock,
       })
     : jest.fn().mockResolvedValue(insertResult);
+  const singleMock = jest.fn().mockResolvedValue(recoveryResult);
+  const eqMock = jest.fn().mockReturnValue({
+    single: singleMock,
+  });
+  const selectMock = jest.fn().mockReturnValue({
+    eq: eqMock,
+  });
   const fromMock = jest.fn().mockReturnValue({
     insert: insertMock,
+    select: selectMock,
   });
   const getUserMock = jest.fn().mockResolvedValue({
     data: {
@@ -145,7 +165,7 @@ const createMockSupabaseClient = (
           ? null
           : { id: normalizedOptions.authenticatedUserId },
     },
-    error: null,
+    error: normalizedOptions.authError ?? null,
   });
 
   const client = {
@@ -158,9 +178,12 @@ const createMockSupabaseClient = (
   return {
     abortSignalMock,
     client,
+    eqMock,
     fromMock,
     getUserMock,
     insertMock,
+    selectMock,
+    singleMock,
   };
 };
 
@@ -363,5 +386,106 @@ describe('SupabaseCreditApplicationRepository', () => {
     expect(getUserMock).toHaveBeenCalledTimes(1);
     expect(fromMock).toHaveBeenCalledWith(CREDIT_APPLICATIONS_TABLE);
     expect(insertMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('fails closed with AUTH_REQUIRED before .insert() when client.auth.getUser() resolves with user null or authError', async () => {
+    // Arrange - missing active user with null error
+    const missingUserHarness = createMockSupabaseClient({
+      authenticatedUserId: null,
+      withAuthClient: true,
+    });
+    const missingUserRepository = new SupabaseCreditApplicationRepository(
+      missingUserHarness.client,
+    );
+
+    // Arrange - explicit Supabase auth error
+    const errorHarness = createMockSupabaseClient({
+      authenticatedUserId: AUTHENTICATED_USER_ID,
+      authError: { message: 'JWT expired' },
+      withAuthClient: true,
+    });
+    const errorRepository = new SupabaseCreditApplicationRepository(
+      errorHarness.client,
+    );
+    const payload = createValidPayload();
+
+    // Act & Assert
+    await expect(
+      missingUserRepository.submitMasterDraft(payload),
+    ).rejects.toThrow(CREDIT_APPLICATION_SERVICE_ERRORS.AUTH_REQUIRED);
+    expect(missingUserHarness.getUserMock).toHaveBeenCalledTimes(1);
+    expect(missingUserHarness.fromMock).not.toHaveBeenCalled();
+    expect(missingUserHarness.insertMock).not.toHaveBeenCalled();
+
+    await expect(errorRepository.submitMasterDraft(payload)).rejects.toThrow(
+      CREDIT_APPLICATION_SERVICE_ERRORS.AUTH_REQUIRED,
+    );
+    expect(errorHarness.getUserMock).toHaveBeenCalledTimes(1);
+    expect(errorHarness.fromMock).not.toHaveBeenCalled();
+    expect(errorHarness.insertMock).not.toHaveBeenCalled();
+  });
+
+  it('persists trimmed idempotency_key in .insert() row when options.idempotencyKey is provided', async () => {
+    // Arrange
+    const { client, insertMock } = createMockSupabaseClient({ error: null });
+    const repository = new SupabaseCreditApplicationRepository(client);
+    const payload = createValidPayload();
+
+    // Act
+    await repository.submitMasterDraft(payload, {
+      idempotencyKey: '  byc-draft-idempotency-123  ',
+    });
+
+    // Assert
+    expect(insertMock).toHaveBeenCalledTimes(1);
+    expect(insertMock).toHaveBeenCalledWith({
+      idempotency_key: 'byc-draft-idempotency-123',
+      payload,
+      regime: payload.regime,
+      selected_banks: payload.selectedBanks,
+      status: payload.status,
+      template_version: payload.templateVersion,
+      user_id: AUTHENTICATED_USER_ID,
+    });
+  });
+
+  it('recovers existing persisted record without throwing when .insert() returns SQLSTATE 23505 unique violation', async () => {
+    // Arrange
+    const existingRecord = {
+      created_at: '2026-11-19T00:00:00.000Z',
+      id: 'app-existing-uuid-001',
+      status: APPLICATION_STATUS.PENDING,
+    };
+    const { client, eqMock, fromMock, insertMock, selectMock, singleMock } =
+      createMockSupabaseClient({
+        insertResult: {
+          error: {
+            code: '23505',
+            message:
+              'duplicate key value violates unique constraint "credit_applications_idempotency_key_unique"',
+          },
+        },
+        recoveryResult: {
+          data: existingRecord,
+          error: null,
+        },
+      });
+    const repository = new SupabaseCreditApplicationRepository(client);
+    const payload = createValidPayload();
+    const idempotencyKey = 'byc-draft-duplicate-key';
+
+    // Act
+    const recovered = await repository.submitMasterDraft(payload, {
+      idempotencyKey,
+    });
+
+    // Assert
+    expect(recovered).toEqual(existingRecord);
+    expect(insertMock).toHaveBeenCalledTimes(1);
+    expect(fromMock).toHaveBeenNthCalledWith(1, CREDIT_APPLICATIONS_TABLE);
+    expect(fromMock).toHaveBeenNthCalledWith(2, CREDIT_APPLICATIONS_TABLE);
+    expect(selectMock).toHaveBeenCalledWith('id, status, created_at');
+    expect(eqMock).toHaveBeenCalledWith('idempotency_key', idempotencyKey);
+    expect(singleMock).toHaveBeenCalledTimes(1);
   });
 });
