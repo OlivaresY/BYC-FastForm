@@ -35,12 +35,18 @@ export const esCR = {
   },
   creditWizard: {
     masterDraftSubmission: {
+      authErrorMessage:
+        'Tu sesión ha expirado o no es válida. Inicia sesión nuevamente.',
       errorMessage:
         'No pudimos procesar tu solicitud. Por favor, revisa tu conexión e inténtalo de nuevo.',
       errorTitle: 'Error de Envío',
+      incompleteDraftErrorMessage:
+        'Completa todos los pasos anteriores antes de enviar la solicitud.',
       successMessage:
         'El trámite ha sido guardado exitosamente y está pendiente de revisión por el Súper Administrador.',
       successTitle: '¡Trámite Enviado!',
+      timeoutErrorMessage:
+        'La solicitud tardó demasiado. Verifica tu conexión e intenta nuevamente.',
     },
     mockUserInitials: 'YO',
     step1PhysicalIdentity: {

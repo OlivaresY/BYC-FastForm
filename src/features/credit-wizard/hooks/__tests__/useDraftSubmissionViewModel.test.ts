@@ -1,15 +1,31 @@
+import { esCR } from '@/shared/i18n';
 import { LEGAL_ENTITY_SELECTOR_ENTITIES } from '../../constants/LegalEntitySelector.constants';
 import { EMPLOYMENT_STATUSES } from '../../constants/PhysicalPersonContact.constants';
 import { FINANCIAL_CURRENCIES } from '../../constants/SharedCatalogs.constants';
 import { VEHICLE_BENEFICIARY_SECTION_ENTITIES } from '../../constants/VehicleBeneficiarySection.constants';
-import type { ICreditApplicationRepository } from '../../services/creditApplication.service';
+import {
+  CREDIT_APPLICATION_SERVICE_ERRORS,
+  type ICreditApplicationRepository,
+} from '../../services/creditApplication.service';
+import type { BankAuthorizationsFormValues } from '../../types/BankAuthorizations.types';
 import {
   APPLICATION_STATUS,
   DEFAULT_TEMPLATE_VERSION,
   SELECTED_BANK_CODES,
   type MasterCreditApplicationPayload,
 } from '../../types/MasterCreditApplication.types';
+import { SUBMISSION_TIMEOUT_MS } from '../useDraftSubmissionViewModel';
 import { DraftSubmissionViewModelPageObject } from './useDraftSubmissionViewModel.po';
+
+const INITIAL_AUTHORIZATIONS: BankAuthorizationsFormValues = {
+  autoriza_buros_credito: true,
+  autoriza_sugef_cic: true,
+  banco_bac: true,
+  banco_bncr: false,
+  banco_carro_facil: false,
+  banco_promerica: false,
+  banco_scotiabank: false,
+};
 
 const createMockMasterPayload = (): MasterCreditApplicationPayload => ({
   applicant: {
@@ -29,15 +45,7 @@ const createMockMasterPayload = (): MasterCreditApplicationPayload => ({
     },
     vehicleBeneficiary: VEHICLE_BENEFICIARY_SECTION_ENTITIES.SAME_HOLDER,
   },
-  bankAuthorizations: {
-    autoriza_buros_credito: true,
-    autoriza_sugef_cic: true,
-    banco_bac: true,
-    banco_bncr: false,
-    banco_carro_facil: false,
-    banco_promerica: false,
-    banco_scotiabank: false,
-  },
+  bankAuthorizations: { ...INITIAL_AUTHORIZATIONS },
   contact: {
     commercialReference: {
       companyReference: 'Corporación CoriMotors S.A.',
@@ -73,7 +81,7 @@ const createMockMasterPayload = (): MasterCreditApplicationPayload => ({
   selectedBanks: [SELECTED_BANK_CODES.BAC],
   status: APPLICATION_STATUS.PENDING,
   templateVersion: DEFAULT_TEMPLATE_VERSION,
-  userId: 'advisor-uuid-001',
+  userId: '550e8400-e29b-41d4-a716-446655440000',
   vehicleCredit: {
     anio: '2026',
     color: 'Blanco Perla',
@@ -98,10 +106,11 @@ describe('useDraftSubmissionViewModel', () => {
   });
 
   afterEach(() => {
+    jest.useRealTimers();
     consoleErrorSpy.mockRestore();
   });
 
-  it('initializes with isSubmitting as false', () => {
+  it('initializes with isSubmitting as false and submitError as null', () => {
     const repository: ICreditApplicationRepository = {
       submitMasterDraft: jest.fn().mockResolvedValue(undefined),
     };
@@ -113,6 +122,7 @@ describe('useDraftSubmissionViewModel', () => {
     });
 
     expect(page.isSubmitting).toBe(false);
+    expect(page.submitError).toBeNull();
     expect(repository.submitMasterDraft).not.toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();
   });
@@ -134,11 +144,10 @@ describe('useDraftSubmissionViewModel', () => {
       repository,
     });
 
-    expect(page.isSubmitting).toBe(false);
-
     const pendingCall = page.startSubmitDraft(payload);
 
     expect(page.isSubmitting).toBe(true);
+    expect(page.submitError).toBeNull();
     expect(submitMasterDraft).toHaveBeenCalledTimes(1);
     expect(submitMasterDraft).toHaveBeenCalledWith(payload);
     expect(onSuccess).not.toHaveBeenCalled();
@@ -149,6 +158,7 @@ describe('useDraftSubmissionViewModel', () => {
     });
 
     expect(page.isSubmitting).toBe(false);
+    expect(page.submitError).toBeNull();
     expect(onSuccess).toHaveBeenCalledTimes(1);
   });
 
@@ -183,12 +193,11 @@ describe('useDraftSubmissionViewModel', () => {
     expect(onSuccess).toHaveBeenCalledTimes(1);
   });
 
-  it('resets isSubmitting to false and does not call onSuccess when repository throws an error', async () => {
+  it('populates Spanish submitError without silent console.error swallowing when repository rejects with a network error', async () => {
     let rejectSubmission!: (reason: Error) => void;
     const submissionPromise = new Promise<void>((_, reject) => {
       rejectSubmission = reject;
     });
-    const submissionError = new Error('Network failure');
     const submitMasterDraft = jest.fn().mockReturnValue(submissionPromise);
     const repository: ICreditApplicationRepository = {
       submitMasterDraft,
@@ -201,17 +210,132 @@ describe('useDraftSubmissionViewModel', () => {
       repository,
     });
 
-    const pendingCall = page.startSubmitDraft(payload);
+    const pendingCall = page.startHandleSubmit(payload);
 
     expect(page.isSubmitting).toBe(true);
 
     await page.settle(async () => {
-      rejectSubmission(submissionError);
+      rejectSubmission(new Error('Network failure'));
       await pendingCall;
     });
 
     expect(page.isSubmitting).toBe(false);
     expect(onSuccess).not.toHaveBeenCalled();
-    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+    expect(page.submitError).toBe(
+      esCR.creditWizard.masterDraftSubmission.errorMessage,
+    );
+  });
+
+  it('preserves canonical Spanish domain auth error messages from the repository', async () => {
+    const submitMasterDraft = jest
+      .fn()
+      .mockRejectedValue(
+        new Error(CREDIT_APPLICATION_SERVICE_ERRORS.AUTH_REQUIRED),
+      );
+    const repository: ICreditApplicationRepository = {
+      submitMasterDraft,
+    };
+    const onSuccess = jest.fn();
+    const payload = createMockMasterPayload();
+
+    const page = DraftSubmissionViewModelPageObject.render({
+      onSuccess,
+      repository,
+    });
+
+    await page.settle(async () => {
+      await page.startHandleSubmit(payload);
+    });
+
+    expect(onSuccess).not.toHaveBeenCalled();
+    expect(page.submitError).toBe(
+      CREDIT_APPLICATION_SERVICE_ERRORS.AUTH_REQUIRED,
+    );
+  });
+
+  it('clears submitError immediately on retry, via clearSubmitError(), or when authorization checkboxes change', async () => {
+    const submitMasterDraft = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('Network timeout'))
+      .mockRejectedValueOnce(new Error('Connection lost'))
+      .mockResolvedValueOnce(undefined);
+    const repository: ICreditApplicationRepository = {
+      submitMasterDraft,
+    };
+    const onSuccess = jest.fn();
+    const initialProps = {
+      authorizationValues: INITIAL_AUTHORIZATIONS,
+      onSuccess,
+      repository,
+    };
+    const payload = createMockMasterPayload();
+
+    const page = DraftSubmissionViewModelPageObject.render(initialProps);
+
+    await page.settle(async () => {
+      await page.startHandleSubmit(payload);
+    });
+    expect(page.submitError).toBe(
+      esCR.creditWizard.masterDraftSubmission.errorMessage,
+    );
+
+    // Clear automatically when any authorization checkbox toggles
+    page.rerenderWithAuthorizations(initialProps, {
+      ...INITIAL_AUTHORIZATIONS,
+      banco_bncr: true,
+    });
+    expect(page.submitError).toBeNull();
+
+    // Verify manual clearSubmitError() and safe retry after another failure
+    await page.settle(async () => {
+      await page.startHandleSubmit(payload);
+    });
+    expect(page.submitError).toBe(
+      esCR.creditWizard.masterDraftSubmission.errorMessage,
+    );
+
+    page.clearSubmitError();
+    expect(page.submitError).toBeNull();
+
+    // Retry succeeds cleanly without duplicating submissions
+    await page.settle(async () => {
+      await page.startHandleSubmit(payload);
+    });
+
+    expect(page.submitError).toBeNull();
+    expect(onSuccess).toHaveBeenCalledTimes(1);
+    expect(submitMasterDraft).toHaveBeenCalledTimes(3);
+  });
+
+  it('rejects hanging submissions after SUBMISSION_TIMEOUT_MS and populates Spanish timeout message', async () => {
+    jest.useFakeTimers();
+
+    const neverResolvingPromise = new Promise<void>(() => undefined);
+    const submitMasterDraft = jest.fn().mockReturnValue(neverResolvingPromise);
+    const repository: ICreditApplicationRepository = {
+      submitMasterDraft,
+    };
+    const onSuccess = jest.fn();
+    const payload = createMockMasterPayload();
+
+    const page = DraftSubmissionViewModelPageObject.render({
+      onSuccess,
+      repository,
+    });
+
+    const pendingCall = page.startHandleSubmit(payload);
+    expect(page.isSubmitting).toBe(true);
+
+    await page.advanceTimers(SUBMISSION_TIMEOUT_MS);
+    await page.settle(async () => {
+      await pendingCall;
+    });
+
+    expect(page.isSubmitting).toBe(false);
+    expect(onSuccess).not.toHaveBeenCalled();
+    expect(page.submitError).toBe(
+      esCR.creditWizard.masterDraftSubmission.timeoutErrorMessage,
+    );
   });
 });

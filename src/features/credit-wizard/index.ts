@@ -27,12 +27,10 @@ export {
   useWizardProgressHeaderViewModel,
 } from './hooks';
 
-export {
-  MOCK_AUTH_USER_ID,
-  WIZARD_STEPS,
-} from './hooks/useCreditWizardOrchestrator';
+export { WIZARD_STEPS } from './hooks/useCreditWizardOrchestrator';
 
 export type {
+  AuthenticatedUserIdResolver,
   CreditWizardDraftState,
   UseCreditWizardOrchestratorProps,
   UseCreditWizardOrchestratorReturn,

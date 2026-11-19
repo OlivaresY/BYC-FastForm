@@ -1,4 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
+import { esCR } from '@/shared/i18n';
+import { supabase } from '@/shared/lib/supabaseClient';
 import { LEGAL_ENTITY_SELECTOR_ENTITIES } from '../constants/LegalEntitySelector.constants';
 import {
   supabaseCreditApplicationRepository,
@@ -11,7 +13,10 @@ import type { MasterDraftAggregatorInput } from '../types/MasterCreditApplicatio
 import type { PhysicalPersonContact } from '../types/PhysicalPersonContact.types';
 import type { VehicleCreditFormValues } from '../types/VehicleCredit.types';
 import { buildMasterSubmissionPayload } from '../utils/masterDraftAggregator';
-import { useDraftSubmissionViewModel } from './useDraftSubmissionViewModel';
+import {
+  SUBMISSION_TIMEOUT_MS,
+  useDraftSubmissionViewModel,
+} from './useDraftSubmissionViewModel';
 
 export const WIZARD_STEPS = {
   STEP_1: 1,
@@ -27,7 +32,26 @@ export type WizardStepNumber =
   | typeof WIZARD_STEPS.STEP_3
   | typeof WIZARD_STEPS.STEP_4;
 
-export const MOCK_AUTH_USER_ID = 'mock-uuid-until-auth' as const;
+const SUBMISSION_MESSAGES = esCR.creditWizard.masterDraftSubmission;
+
+const INVALID_SESSION_USER_ID_PATTERN =
+  /(?:mock|placeholder|dummy|fake|until-auth)/i;
+
+const isValidAuthenticatedUserId = (value: unknown): value is string => {
+  if (typeof value !== 'string') {
+    return false;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 && !INVALID_SESSION_USER_ID_PATTERN.test(trimmed);
+};
+
+const defaultResolveAuthenticatedUserId = async (): Promise<string | null> => {
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user?.id) {
+    return null;
+  }
+  return data.user.id;
+};
 
 export interface CreditWizardDraftState {
   step1?: ApplicantStepData;
@@ -36,13 +60,18 @@ export interface CreditWizardDraftState {
   step4?: BankAuthorizationsFormValues;
 }
 
+export type AuthenticatedUserIdResolver = () => Promise<string | null>;
+
 export interface UseCreditWizardOrchestratorProps {
   onSubmissionSuccess?: () => void | Promise<void>;
   repository?: ICreditApplicationRepository;
+  resolveAuthenticatedUserId?: AuthenticatedUserIdResolver;
+  submissionTimeoutMs?: number;
   userId?: string;
 }
 
 export interface UseCreditWizardOrchestratorReturn {
+  clearSubmitError: () => void;
   currentStep: WizardStepNumber;
   draftState: CreditWizardDraftState;
   handlePreviousStep: () => void;
@@ -50,8 +79,13 @@ export interface UseCreditWizardOrchestratorReturn {
   handleStep2Submit: (data: LegalEntityContact | PhysicalPersonContact) => void;
   handleStep3Submit: (data: VehicleCreditFormValues) => void;
   handleStep4Submit: (step4Data: BankAuthorizationsFormValues) => Promise<void>;
+  hasSubmittedSuccessfully: boolean;
+  isSubmitted: boolean;
   isSubmitting: boolean;
   resetDraft: () => void;
+  resetWizard: () => void;
+  restartWizard: () => void;
+  submitError: string | null;
 }
 
 const isLegalEntityContact = (
@@ -68,34 +102,65 @@ export const useCreditWizardOrchestrator = (
   const {
     onSubmissionSuccess,
     repository = supabaseCreditApplicationRepository,
-    userId = MOCK_AUTH_USER_ID,
+    resolveAuthenticatedUserId,
+    submissionTimeoutMs = SUBMISSION_TIMEOUT_MS,
+    userId: explicitUserId,
   } = props ?? {};
 
   const [currentStep, setCurrentStep] = useState<WizardStepNumber>(
     WIZARD_STEPS.STEP_1,
   );
   const [draftState, setDraftState] = useState<CreditWizardDraftState>({});
-  const draftStateRef = useRef<CreditWizardDraftState>({});
+  const [hasSubmittedSuccessfully, setHasSubmittedSuccessfully] =
+    useState<boolean>(false);
+  const [isResolvingAuth, setIsResolvingAuth] = useState<boolean>(false);
+  const [orchestrationError, setOrchestrationError] = useState<string | null>(
+    null,
+  );
 
-  const resetDraft = useCallback((): void => {
-    draftStateRef.current = {};
-    setDraftState({});
-    setCurrentStep(WIZARD_STEPS.STEP_1);
-  }, []);
+  const draftStateRef = useRef<CreditWizardDraftState>({});
+  const hasSubmittedSuccessfullyRef = useRef<boolean>(false);
+  const isSubmissionLockedRef = useRef<boolean>(false);
 
   const handleSubmissionComplete = useCallback(async (): Promise<void> => {
+    hasSubmittedSuccessfullyRef.current = true;
     draftStateRef.current = {};
+    setHasSubmittedSuccessfully(true);
     setDraftState({});
+    setOrchestrationError(null);
     await onSubmissionSuccess?.();
   }, [onSubmissionSuccess]);
 
-  const { isSubmitting, submitDraft } = useDraftSubmissionViewModel({
+  const {
+    clearSubmitError: clearDraftSubmitError,
+    isSubmitting: isDraftSubmitting,
+    submitDraft,
+    submitError: draftSubmitError,
+  } = useDraftSubmissionViewModel({
     onSuccess: handleSubmissionComplete,
     repository,
+    timeoutMs: submissionTimeoutMs,
   });
 
+  const clearSubmitError = useCallback((): void => {
+    setOrchestrationError(null);
+    clearDraftSubmitError();
+  }, [clearDraftSubmitError]);
+
+  const resetWizard = useCallback((): void => {
+    hasSubmittedSuccessfullyRef.current = false;
+    isSubmissionLockedRef.current = false;
+    draftStateRef.current = {};
+    setHasSubmittedSuccessfully(false);
+    setIsResolvingAuth(false);
+    setOrchestrationError(null);
+    clearDraftSubmitError();
+    setDraftState({});
+    setCurrentStep(WIZARD_STEPS.STEP_1);
+  }, [clearDraftSubmitError]);
+
   const handleStep1Submit = useCallback((data?: ApplicantStepData): void => {
-    if (!data) {
+    if (!data || hasSubmittedSuccessfullyRef.current) {
       return;
     }
 
@@ -117,6 +182,10 @@ export const useCreditWizardOrchestrator = (
 
   const handleStep2Submit = useCallback(
     (data: LegalEntityContact | PhysicalPersonContact): void => {
+      if (hasSubmittedSuccessfullyRef.current) {
+        return;
+      }
+
       const nextState: CreditWizardDraftState = {
         ...draftStateRef.current,
         step2: data,
@@ -131,6 +200,10 @@ export const useCreditWizardOrchestrator = (
 
   const handleStep3Submit = useCallback(
     (data: VehicleCreditFormValues): void => {
+      if (hasSubmittedSuccessfullyRef.current) {
+        return;
+      }
+
       const nextState: CreditWizardDraftState = {
         ...draftStateRef.current,
         step3: data,
@@ -144,6 +217,12 @@ export const useCreditWizardOrchestrator = (
   );
 
   const handlePreviousStep = useCallback((): void => {
+    if (hasSubmittedSuccessfullyRef.current || isSubmissionLockedRef.current) {
+      return;
+    }
+
+    clearSubmitError();
+
     setCurrentStep((previousStep): WizardStepNumber => {
       if (previousStep === WIZARD_STEPS.STEP_4) {
         return WIZARD_STEPS.STEP_3;
@@ -153,10 +232,67 @@ export const useCreditWizardOrchestrator = (
       }
       return WIZARD_STEPS.STEP_1;
     });
-  }, []);
+  }, [clearSubmitError]);
+
+  const submitMasterFlow = useCallback(
+    async (
+      authenticatedUserId: string,
+      step1: ApplicantStepData,
+      step2: LegalEntityContact | PhysicalPersonContact,
+      step3: VehicleCreditFormValues,
+      step4Data: BankAuthorizationsFormValues,
+    ): Promise<void> => {
+      let aggregatorInput: MasterDraftAggregatorInput;
+
+      if (
+        step1.regime === LEGAL_ENTITY_SELECTOR_ENTITIES.PHYSICAL &&
+        isPhysicalPersonContact(step2)
+      ) {
+        aggregatorInput = {
+          applicant: step1,
+          bankAuthorizations: step4Data,
+          contact: step2,
+          userId: authenticatedUserId,
+          vehicleCredit: step3,
+        };
+      } else if (
+        step1.regime === LEGAL_ENTITY_SELECTOR_ENTITIES.LEGAL &&
+        isLegalEntityContact(step2)
+      ) {
+        aggregatorInput = {
+          applicant: step1,
+          bankAuthorizations: step4Data,
+          contact: step2,
+          userId: authenticatedUserId,
+          vehicleCredit: step3,
+        };
+      } else {
+        setOrchestrationError(SUBMISSION_MESSAGES.incompleteDraftErrorMessage);
+        return;
+      }
+
+      try {
+        const masterPayload = buildMasterSubmissionPayload(aggregatorInput);
+        await submitDraft(masterPayload);
+      } catch {
+        setOrchestrationError(SUBMISSION_MESSAGES.errorMessage);
+      }
+    },
+    [submitDraft],
+  );
 
   const handleStep4Submit = useCallback(
     async (step4Data: BankAuthorizationsFormValues): Promise<void> => {
+      if (
+        hasSubmittedSuccessfullyRef.current ||
+        isSubmissionLockedRef.current
+      ) {
+        return;
+      }
+
+      isSubmissionLockedRef.current = true;
+      clearSubmitError();
+
       const nextState: CreditWizardDraftState = {
         ...draftStateRef.current,
         step4: step4Data,
@@ -168,57 +304,77 @@ export const useCreditWizardOrchestrator = (
       const { step1, step2, step3 } = nextState;
 
       if (!step1 || !step2 || !step3) {
-        console.error(
-          '[useCreditWizardOrchestrator] Cannot submit incomplete wizard draft.',
-        );
+        isSubmissionLockedRef.current = false;
+        setOrchestrationError(SUBMISSION_MESSAGES.incompleteDraftErrorMessage);
         return;
       }
 
-      let aggregatorInput: MasterDraftAggregatorInput;
-
       if (
-        step1.regime === LEGAL_ENTITY_SELECTOR_ENTITIES.PHYSICAL &&
-        isPhysicalPersonContact(step2)
+        resolveAuthenticatedUserId === undefined &&
+        explicitUserId !== undefined
       ) {
-        aggregatorInput = {
-          applicant: step1,
-          bankAuthorizations: step4Data,
-          contact: step2,
-          userId,
-          vehicleCredit: step3,
-        };
-      } else if (
-        step1.regime === LEGAL_ENTITY_SELECTOR_ENTITIES.LEGAL &&
-        isLegalEntityContact(step2)
-      ) {
-        aggregatorInput = {
-          applicant: step1,
-          bankAuthorizations: step4Data,
-          contact: step2,
-          userId,
-          vehicleCredit: step3,
-        };
-      } else {
-        console.error(
-          '[useCreditWizardOrchestrator] Step 1 regime does not match Step 2 contact payload.',
-        );
+        if (!isValidAuthenticatedUserId(explicitUserId)) {
+          isSubmissionLockedRef.current = false;
+          setOrchestrationError(SUBMISSION_MESSAGES.authErrorMessage);
+          return;
+        }
+
+        try {
+          await submitMasterFlow(
+            explicitUserId.trim(),
+            step1,
+            step2,
+            step3,
+            step4Data,
+          );
+        } finally {
+          isSubmissionLockedRef.current = false;
+        }
+        return;
+      }
+
+      setIsResolvingAuth(true);
+      let resolvedUserId: string | null = null;
+      let authFailed = false;
+
+      try {
+        const authResolver =
+          resolveAuthenticatedUserId ?? defaultResolveAuthenticatedUserId;
+        resolvedUserId = await authResolver();
+      } catch {
+        authFailed = true;
+      } finally {
+        setIsResolvingAuth(false);
+      }
+
+      if (authFailed || !isValidAuthenticatedUserId(resolvedUserId)) {
+        isSubmissionLockedRef.current = false;
+        setOrchestrationError(SUBMISSION_MESSAGES.authErrorMessage);
         return;
       }
 
       try {
-        const masterPayload = buildMasterSubmissionPayload(aggregatorInput);
-        await submitDraft(masterPayload);
-      } catch (error) {
-        console.error(
-          '[useCreditWizardOrchestrator] Master payload validation failed:',
-          error,
+        await submitMasterFlow(
+          resolvedUserId.trim(),
+          step1,
+          step2,
+          step3,
+          step4Data,
         );
+      } finally {
+        isSubmissionLockedRef.current = false;
       }
     },
-    [submitDraft, userId],
+    [
+      clearSubmitError,
+      explicitUserId,
+      resolveAuthenticatedUserId,
+      submitMasterFlow,
+    ],
   );
 
   return {
+    clearSubmitError,
     currentStep,
     draftState,
     handlePreviousStep,
@@ -226,7 +382,12 @@ export const useCreditWizardOrchestrator = (
     handleStep2Submit,
     handleStep3Submit,
     handleStep4Submit,
-    isSubmitting,
-    resetDraft,
+    hasSubmittedSuccessfully,
+    isSubmitted: hasSubmittedSuccessfully,
+    isSubmitting: isResolvingAuth || isDraftSubmitting,
+    resetDraft: resetWizard,
+    resetWizard,
+    restartWizard: resetWizard,
+    submitError: orchestrationError ?? draftSubmitError,
   };
 };

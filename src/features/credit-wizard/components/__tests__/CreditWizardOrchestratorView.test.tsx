@@ -3,7 +3,6 @@ import { LEGAL_ENTITY_SELECTOR_ENTITIES } from '../../constants/LegalEntitySelec
 import { EMPLOYMENT_STATUSES } from '../../constants/PhysicalPersonContact.constants';
 import { FINANCIAL_CURRENCIES } from '../../constants/SharedCatalogs.constants';
 import { VEHICLE_BENEFICIARY_SECTION_ENTITIES } from '../../constants/VehicleBeneficiarySection.constants';
-import { MOCK_AUTH_USER_ID } from '../../hooks/useCreditWizardOrchestrator';
 import type { ICreditApplicationRepository } from '../../services/creditApplication.service';
 import type {
   ApplicantStepViewProps,
@@ -29,6 +28,7 @@ import {
 } from './CreditWizardOrchestratorView.po';
 
 const VALID_CR_IBAN = 'CR05015202001026284066';
+const TEST_AUTHENTICATED_USER_ID = '550e8400-e29b-41d4-a716-446655440000';
 
 const mockPhysicalStep1Data: PhysicalApplicantStepData = {
   regime: LEGAL_ENTITY_SELECTOR_ENTITIES.PHYSICAL,
@@ -338,6 +338,7 @@ describe('CreditWizardOrchestratorView Integration Suite', () => {
     const page = CreditWizardOrchestratorPageObject.render({
       onSubmissionSuccess,
       repository,
+      userId: TEST_AUTHENTICATED_USER_ID,
     });
 
     // Step 1 -> Step 2 (Physical)
@@ -374,7 +375,7 @@ describe('CreditWizardOrchestratorView Integration Suite', () => {
         ],
         status: APPLICATION_STATUS.PENDING,
         templateVersion: DEFAULT_TEMPLATE_VERSION,
-        userId: MOCK_AUTH_USER_ID,
+        userId: TEST_AUTHENTICATED_USER_ID,
         vehicleCredit: mockStep3Data,
       }),
     );
@@ -398,6 +399,7 @@ describe('CreditWizardOrchestratorView Integration Suite', () => {
     const page = CreditWizardOrchestratorPageObject.render({
       onSubmissionSuccess,
       repository,
+      userId: TEST_AUTHENTICATED_USER_ID,
     });
 
     // Step 1 (Legal) -> Step 2 (Legal)
@@ -431,7 +433,7 @@ describe('CreditWizardOrchestratorView Integration Suite', () => {
         ],
         status: APPLICATION_STATUS.PENDING,
         templateVersion: DEFAULT_TEMPLATE_VERSION,
-        userId: MOCK_AUTH_USER_ID,
+        userId: TEST_AUTHENTICATED_USER_ID,
         vehicleCredit: mockStep3Data,
       }),
     );
