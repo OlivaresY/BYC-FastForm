@@ -20,7 +20,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
 import { BASE_BUTTON_VARIANTS, BaseButton, CustomTextInput } from '@/shared/ui';
 import {
   LOGIN_SCREEN_COLORS,
@@ -39,44 +38,6 @@ import type { LoginCredentials } from '../types/Auth.types';
 
 const NOOP_VOID = (): void => undefined;
 
-const GoogleBrandIcon = (): React.JSX.Element => (
-  <Svg
-    height={LOGIN_SCREEN_NUMERICAL.SOCIAL_ICON_SIZE}
-    viewBox='0 0 24 24'
-    width={LOGIN_SCREEN_NUMERICAL.SOCIAL_ICON_SIZE}
-  >
-    <Path
-      d='M21.805 10.023H12v3.955h5.614c-.242 1.298-.977 2.398-2.082 3.137v2.605h3.367c1.97-1.814 3.106-4.486 3.106-7.66 0-.695-.063-1.363-.2-2.037Z'
-      fill={LOGIN_SCREEN_COLORS.GOOGLE_BLUE}
-    />
-    <Path
-      d='M12 22c2.7 0 4.965-.895 6.62-2.426l-3.367-2.605c-.934.625-2.129.996-3.253.996-2.504 0-4.625-1.691-5.383-3.965H3.14v2.69C4.785 19.957 8.133 22 12 22Z'
-      fill={LOGIN_SCREEN_COLORS.GOOGLE_GREEN}
-    />
-    <Path
-      d='M6.617 14a5.967 5.967 0 0 1 0-4V7.31H3.14a10.004 10.004 0 0 0 0 9.38L6.617 14Z'
-      fill={LOGIN_SCREEN_COLORS.GOOGLE_YELLOW}
-    />
-    <Path
-      d='M12 6.035c1.469 0 2.789.504 3.828 1.496l2.871-2.871C16.961 3.043 14.695 2 12 2 8.133 2 4.785 4.043 3.14 7.31L6.617 10c.758-2.274 2.879-3.965 5.383-3.965Z'
-      fill={LOGIN_SCREEN_COLORS.GOOGLE_RED}
-    />
-  </Svg>
-);
-
-const FacebookBrandIcon = (): React.JSX.Element => (
-  <Svg
-    height={LOGIN_SCREEN_NUMERICAL.SOCIAL_ICON_SIZE}
-    viewBox='0 0 24 24'
-    width={LOGIN_SCREEN_NUMERICAL.SOCIAL_ICON_SIZE}
-  >
-    <Path
-      d='M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3V2Z'
-      fill={LOGIN_SCREEN_COLORS.WHITE}
-    />
-  </Svg>
-);
-
 const cardShadowStyles = StyleSheet.create({
   cardShadow: {
     elevation: 4,
@@ -93,9 +54,7 @@ const cardShadowStyles = StyleSheet.create({
 
 export interface LoginScreenViewProps {
   authProvider?: IAuthProvider;
-  onFacebookPress?: () => void;
   onForgotPasswordPress?: () => void;
-  onGooglePress?: () => void;
   onSuccess?: () => void | Promise<void>;
   testID?: string;
 }
@@ -103,9 +62,7 @@ export interface LoginScreenViewProps {
 export const LoginScreenView = React.memo(
   ({
     authProvider = supabaseAuthProvider,
-    onFacebookPress = NOOP_VOID,
     onForgotPasswordPress = NOOP_VOID,
-    onGooglePress = NOOP_VOID,
     onSuccess,
     testID = LOGIN_SCREEN_TEST_IDS.CONTAINER,
   }: LoginScreenViewProps): React.JSX.Element => {
@@ -398,67 +355,6 @@ export const LoginScreenView = React.memo(
                     testID={LOGIN_SCREEN_TEST_IDS.SUBMIT_BUTTON}
                     variant={BASE_BUTTON_VARIANTS.PRIMARY}
                   />
-
-                  {/* Divider */}
-                  <View
-                    className={LOGIN_SCREEN_STYLES.DIVIDER_ROW}
-                    testID={LOGIN_SCREEN_TEST_IDS.DIVIDER}
-                  >
-                    <View className={LOGIN_SCREEN_STYLES.DIVIDER_LINE} />
-                    <Text className={LOGIN_SCREEN_STYLES.DIVIDER_TEXT}>
-                      {LOGIN_SCREEN_COPY.DIVIDER_TEXT}
-                    </Text>
-                    <View className={LOGIN_SCREEN_STYLES.DIVIDER_LINE} />
-                  </View>
-
-                  {/* Social Buttons Row */}
-                  <View className={LOGIN_SCREEN_STYLES.SOCIAL_ROW}>
-                    <TouchableOpacity
-                      accessibilityLabel={LOGIN_SCREEN_COPY.GOOGLE_BUTTON}
-                      accessibilityRole='button'
-                      className={`${LOGIN_SCREEN_STYLES.SOCIAL_BUTTON_GOOGLE} ${
-                        isLoading
-                          ? LOGIN_SCREEN_STYLES.SOCIAL_BUTTON_DISABLED
-                          : ''
-                      }`}
-                      disabled={isLoading}
-                      onPress={onGooglePress}
-                      testID={LOGIN_SCREEN_TEST_IDS.GOOGLE_BUTTON}
-                    >
-                      <GoogleBrandIcon />
-                      <Text
-                        className={
-                          LOGIN_SCREEN_STYLES.SOCIAL_BUTTON_GOOGLE_TEXT
-                        }
-                        numberOfLines={1}
-                      >
-                        {LOGIN_SCREEN_COPY.GOOGLE_BUTTON}
-                      </Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      accessibilityLabel={LOGIN_SCREEN_COPY.FACEBOOK_BUTTON}
-                      accessibilityRole='button'
-                      className={`${LOGIN_SCREEN_STYLES.SOCIAL_BUTTON_FACEBOOK} ${
-                        isLoading
-                          ? LOGIN_SCREEN_STYLES.SOCIAL_BUTTON_DISABLED
-                          : ''
-                      }`}
-                      disabled={isLoading}
-                      onPress={onFacebookPress}
-                      testID={LOGIN_SCREEN_TEST_IDS.FACEBOOK_BUTTON}
-                    >
-                      <FacebookBrandIcon />
-                      <Text
-                        className={
-                          LOGIN_SCREEN_STYLES.SOCIAL_BUTTON_FACEBOOK_TEXT
-                        }
-                        numberOfLines={1}
-                      >
-                        {LOGIN_SCREEN_COPY.FACEBOOK_BUTTON}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
                 </View>
               </View>
 

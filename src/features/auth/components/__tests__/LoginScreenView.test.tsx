@@ -48,7 +48,7 @@ describe('LoginScreenView Component Tests', () => {
     mockedUseAuthViewModel.mockReturnValue(createMockAuthViewModel());
   });
 
-  it('renders all visual sections including Header, Badge, Logo, Login Card, Social Buttons, and Footer', () => {
+  it('renders Header, Badge, Logo, Login Card, and HTTPS/TLS Footer without non-functional social login buttons', () => {
     const page = LoginScreenViewPageObject.render();
 
     expect(page.header).toBeTruthy();
@@ -70,11 +70,20 @@ describe('LoginScreenView Component Tests', () => {
     expect(page.passwordToggleButton).toBeTruthy();
     expect(page.forgotPasswordButton).toBeTruthy();
     expect(page.submitButton).toBeTruthy();
-    expect(page.divider).toBeTruthy();
-    expect(page.googleButton).toBeTruthy();
-    expect(page.facebookButton).toBeTruthy();
+
+    // Corporate auth only: Google/Facebook social buttons and divider are removed
+    expect(page.querySocialDivider()).toBeNull();
+    expect(page.queryGoogleButton()).toBeNull();
+    expect(page.queryFacebookButton()).toBeNull();
+    expect(page.queryByText('Google')).toBeNull();
+    expect(page.queryByText('Facebook')).toBeNull();
 
     expect(page.footer).toBeTruthy();
+    expect(
+      page.getByText(
+        'Conexión cifrada mediante HTTPS/TLS — Uso interno CoriMotors',
+      ),
+    ).toBeTruthy();
     expect(page.getByText(LOGIN_SCREEN_COPY.FOOTER_SECURITY)).toBeTruthy();
     expect(page.getByText(LOGIN_SCREEN_COPY.FOOTER_COPYRIGHT)).toBeTruthy();
   });
@@ -167,6 +176,19 @@ describe('LoginScreenView Component Tests', () => {
 
     page.fillEmail('nuevo@corimotors.com');
     expect(mockVm.clearError).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders generic sanitized Spanish service error message cleanly when authError is SERVICE_ERROR', () => {
+    const mockVm = createMockAuthViewModel({
+      authError: AUTH_SERVICE_ERRORS.SERVICE_ERROR,
+    });
+    mockedUseAuthViewModel.mockReturnValue(mockVm);
+
+    const page = LoginScreenViewPageObject.render();
+
+    expect(page.queryAuthError()?.props.children).toBe(
+      AUTH_SERVICE_ERRORS.SERVICE_ERROR,
+    );
   });
 
   it('disables submit button and renders loader spinner when isLoading is true', () => {

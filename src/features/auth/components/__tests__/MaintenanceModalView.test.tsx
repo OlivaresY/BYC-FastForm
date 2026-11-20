@@ -43,4 +43,22 @@ describe('MaintenanceModalView Component Tests', () => {
     expect(page.modalRoot.props.visible).toBe(true);
     expect(page.title.props.children).toBe(MAINTENANCE_MODAL_COPY.TITLE);
   });
+
+  it('renders custom maintenance message when provided and defaults when blank', () => {
+    const customMessage =
+      'Ventana de mantenimiento programada hasta las 02:00 AM.';
+    const customPage = MaintenanceModalViewPageObject.render({
+      isVisible: true,
+      message: customMessage,
+    });
+
+    expect(customPage.body.props.children).toBe(customMessage);
+
+    const blankPage = MaintenanceModalViewPageObject.render({
+      isVisible: true,
+      message: '   ',
+    });
+
+    expect(blankPage.body.props.children).toBe(MAINTENANCE_MODAL_COPY.BODY);
+  });
 });

@@ -1,14 +1,11 @@
+import { esCR } from '@/shared/i18n';
+
 export const LOGIN_SCREEN_COLORS = {
   BADGE_BACKGROUND: '#DEE8E0',
   BADGE_TEXT: '#3A5C45',
   BRAND_BLACK: '#111111',
   BRAND_RED: '#B91C1C',
   CARD_SURFACE: '#CCC7BD',
-  FACEBOOK_BLUE: '#1877F2',
-  GOOGLE_BLUE: '#4285F4',
-  GOOGLE_GREEN: '#34A853',
-  GOOGLE_RED: '#EA4335',
-  GOOGLE_YELLOW: '#FBBC05',
   ICON_SECONDARY: '#5A6B80',
   INPUT_BORDER_BASE: '#A39F97',
   INPUT_BORDER_ERROR: '#DC2626',
@@ -24,14 +21,11 @@ export const LOGIN_SCREEN_COPY = {
   BRAND_SEPARATOR_BYC: ' | BYC',
   CARD_SUBTITLE: 'Ingresa tus credenciales para acceder a los formularios.',
   CARD_TITLE: 'Bienvenido',
-  DIVIDER_TEXT: 'O CONTINUAR CON',
   EMAIL_LABEL: 'Correo electrónico',
   EMAIL_PLACEHOLDER: 'ejemplo@corimotors.com',
-  FACEBOOK_BUTTON: 'Facebook',
-  FOOTER_COPYRIGHT: '©YOR. Todos los derechos reservados.',
-  FOOTER_SECURITY: 'Conexión segura cifrada SSL de extremo a extremo',
+  FOOTER_COPYRIGHT: esCR.auth.login.footerCopyright,
+  FOOTER_SECURITY: esCR.auth.login.footerSecurity,
   FORGOT_PASSWORD: '¿Olvidaste tu contraseña?',
-  GOOGLE_BUTTON: 'Google',
   HIDE_PASSWORD_A11Y: 'Ocultar contraseña',
   LOGO_B: 'B',
   LOGO_C_FASTFORM: 'C FastForm',
@@ -47,7 +41,6 @@ export const LOGIN_SCREEN_NUMERICAL = {
   BADGE_ICON_SIZE: 16,
   FOOTER_ICON_SIZE: 16,
   INPUT_ICON_SIZE: 18,
-  SOCIAL_ICON_SIZE: 18,
   SUBMIT_ICON_SIZE: 18,
 } as const;
 
@@ -59,9 +52,6 @@ export const LOGIN_SCREEN_STYLES = {
   CARD_CONTAINER: 'w-full rounded-2xl bg-[#CCC7BD] p-6',
   CARD_SUBTITLE: 'mb-5 mt-1 text-sm leading-5 text-[#5A6B80]',
   CARD_TITLE: 'text-2xl font-bold text-[#111111]',
-  DIVIDER_LINE: 'h-[1px] flex-1 bg-[#A39F97]',
-  DIVIDER_ROW: 'my-5 flex-row items-center',
-  DIVIDER_TEXT: 'mx-3 text-[11px] font-semibold uppercase text-[#5A6B80]',
   FIELD_SPACING: 'mb-4',
   FOOTER_CONTAINER: 'mt-8 items-center pb-4',
   FOOTER_COPYRIGHT: 'mt-1 text-center text-xs text-[#5A6B80]',
@@ -90,16 +80,6 @@ export const LOGIN_SCREEN_STYLES = {
     'min-h-[48px] min-w-[48px] items-center justify-center',
   SCREEN_CONTAINER: 'flex-1 bg-[#F7F7F6]',
   SCROLL_CONTENT: 'flex-grow justify-between px-5 py-6',
-  SOCIAL_BUTTON_DISABLED: 'opacity-40',
-  SOCIAL_BUTTON_FACEBOOK:
-    'min-h-[48px] min-w-[48px] flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-[#1877F2] px-3',
-  SOCIAL_BUTTON_FACEBOOK_TEXT:
-    'flex-shrink text-center text-sm font-semibold text-white',
-  SOCIAL_BUTTON_GOOGLE:
-    'min-h-[48px] min-w-[48px] flex-1 flex-row items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-3',
-  SOCIAL_BUTTON_GOOGLE_TEXT:
-    'flex-shrink text-center text-sm font-semibold text-[#111111]',
-  SOCIAL_ROW: 'flex-row gap-3',
   SUBMIT_BUTTON: 'bg-[#B91C1C]',
 } as const;
 
@@ -108,13 +88,10 @@ export const LOGIN_SCREEN_TEST_IDS = {
   BADGE: 'login-screen-badge',
   CARD: 'login-screen-card',
   CONTAINER: 'login-screen-container',
-  DIVIDER: 'login-screen-divider',
   EMAIL_ERROR: 'login-screen-email-input-error',
   EMAIL_INPUT: 'login-screen-email-input',
-  FACEBOOK_BUTTON: 'login-screen-facebook-button',
   FOOTER: 'login-screen-footer',
   FORGOT_PASSWORD_BUTTON: 'login-screen-forgot-password-button',
-  GOOGLE_BUTTON: 'login-screen-google-button',
   HEADER: 'login-screen-header',
   LOGO: 'login-screen-logo',
   PASSWORD_ERROR: 'login-screen-password-error',

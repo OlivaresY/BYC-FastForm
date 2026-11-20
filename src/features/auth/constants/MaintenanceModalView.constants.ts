@@ -1,3 +1,5 @@
+import { esCR } from '@/shared/i18n';
+
 export const MAINTENANCE_MODAL_COLORS = {
   BACKDROP: 'rgba(0,0,0,0.5)',
   CARD_BACKGROUND: '#FFFFFF',
@@ -9,8 +11,8 @@ export const MAINTENANCE_MODAL_COLORS = {
 } as const;
 
 export const MAINTENANCE_MODAL_COPY = {
-  BODY: 'Estamos realizando tareas de optimización en el sistema central. El acceso se encuentra temporalmente deshabilitado para garantizar la integridad de los datos. Por favor, intente ingresar nuevamente en unos minutos.',
-  TITLE: 'Sistema en Mantenimiento',
+  BODY: esCR.auth.maintenance.body,
+  TITLE: esCR.auth.maintenance.title,
 } as const;
 
 export const MAINTENANCE_MODAL_NUMERICAL = {

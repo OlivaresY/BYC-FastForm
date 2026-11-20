@@ -26,62 +26,71 @@ const modalStyles = StyleSheet.create({
 
 export interface MaintenanceModalViewProps {
   isVisible: boolean;
+  message?: string;
   testID?: string;
 }
 
 export const MaintenanceModalView = React.memo(
   ({
     isVisible,
+    message,
     testID = MAINTENANCE_MODAL_TEST_IDS.MODAL,
-  }: MaintenanceModalViewProps): React.JSX.Element => (
-    <Modal
-      animationType='fade'
-      onRequestClose={NOOP_VOID}
-      statusBarTranslucent
-      testID={testID}
-      transparent
-      visible={isVisible}
-    >
-      <View
-        className={MAINTENANCE_MODAL_STYLES.BACKDROP}
-        style={modalStyles.backdrop}
-        testID={MAINTENANCE_MODAL_TEST_IDS.BACKDROP}
+  }: MaintenanceModalViewProps): React.JSX.Element => {
+    const resolvedBodyMessage =
+      message && message.trim().length > 0
+        ? message.trim()
+        : MAINTENANCE_MODAL_COPY.BODY;
+
+    return (
+      <Modal
+        animationType='fade'
+        onRequestClose={NOOP_VOID}
+        statusBarTranslucent
+        testID={testID}
+        transparent
+        visible={isVisible}
       >
         <View
-          accessibilityViewIsModal
-          className={MAINTENANCE_MODAL_STYLES.CARD}
-          style={modalStyles.cardShadow}
-          testID={MAINTENANCE_MODAL_TEST_IDS.CARD}
+          className={MAINTENANCE_MODAL_STYLES.BACKDROP}
+          style={modalStyles.backdrop}
+          testID={MAINTENANCE_MODAL_TEST_IDS.BACKDROP}
         >
           <View
-            className={MAINTENANCE_MODAL_STYLES.ICON_CONTAINER}
-            testID={MAINTENANCE_MODAL_TEST_IDS.ICON_CONTAINER}
+            accessibilityViewIsModal
+            className={MAINTENANCE_MODAL_STYLES.CARD}
+            style={modalStyles.cardShadow}
+            testID={MAINTENANCE_MODAL_TEST_IDS.CARD}
           >
-            <Wrench
-              color={MAINTENANCE_MODAL_COLORS.ICON_COLOR}
-              size={MAINTENANCE_MODAL_NUMERICAL.ICON_SIZE}
-              strokeWidth={MAINTENANCE_MODAL_NUMERICAL.ICON_STROKE_WIDTH}
-            />
+            <View
+              className={MAINTENANCE_MODAL_STYLES.ICON_CONTAINER}
+              testID={MAINTENANCE_MODAL_TEST_IDS.ICON_CONTAINER}
+            >
+              <Wrench
+                color={MAINTENANCE_MODAL_COLORS.ICON_COLOR}
+                size={MAINTENANCE_MODAL_NUMERICAL.ICON_SIZE}
+                strokeWidth={MAINTENANCE_MODAL_NUMERICAL.ICON_STROKE_WIDTH}
+              />
+            </View>
+
+            <Text
+              accessibilityRole='header'
+              className={MAINTENANCE_MODAL_STYLES.TITLE}
+              testID={MAINTENANCE_MODAL_TEST_IDS.TITLE}
+            >
+              {MAINTENANCE_MODAL_COPY.TITLE}
+            </Text>
+
+            <Text
+              className={MAINTENANCE_MODAL_STYLES.BODY}
+              testID={MAINTENANCE_MODAL_TEST_IDS.BODY}
+            >
+              {resolvedBodyMessage}
+            </Text>
           </View>
-
-          <Text
-            accessibilityRole='header'
-            className={MAINTENANCE_MODAL_STYLES.TITLE}
-            testID={MAINTENANCE_MODAL_TEST_IDS.TITLE}
-          >
-            {MAINTENANCE_MODAL_COPY.TITLE}
-          </Text>
-
-          <Text
-            className={MAINTENANCE_MODAL_STYLES.BODY}
-            testID={MAINTENANCE_MODAL_TEST_IDS.BODY}
-          >
-            {MAINTENANCE_MODAL_COPY.BODY}
-          </Text>
         </View>
-      </View>
-    </Modal>
-  ),
+      </Modal>
+    );
+  },
 );
 
 MaintenanceModalView.displayName = 'MaintenanceModalView';

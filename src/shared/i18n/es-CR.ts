@@ -14,6 +14,15 @@ export const esCR = {
       unexpectedLoginError:
         'Ocurrió un error al iniciar sesión. Por favor, inténtalo de nuevo.',
     },
+    login: {
+      footerCopyright: '©YOR. Todos los derechos reservados.',
+      footerSecurity:
+        'Conexión cifrada mediante HTTPS/TLS — Uso interno CoriMotors',
+    },
+    maintenance: {
+      body: 'Estamos realizando tareas de optimización en el sistema central. El acceso se encuentra temporalmente deshabilitado para garantizar la integridad de los datos. Por favor, intente ingresar nuevamente en unos minutos.',
+      title: 'Sistema en Mantenimiento',
+    },
   },
   common: {
     badges: {

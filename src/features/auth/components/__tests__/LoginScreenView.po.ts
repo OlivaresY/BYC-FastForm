@@ -5,6 +5,12 @@ import { BASE_BUTTON_TEST_IDS } from '@/shared/ui';
 import { LOGIN_SCREEN_TEST_IDS } from '../../constants/LoginScreenView.constants';
 import { LoginScreenView, type LoginScreenViewProps } from '../LoginScreenView';
 
+const REMOVED_SOCIAL_TEST_IDS = {
+  DIVIDER: 'login-screen-divider',
+  FACEBOOK_BUTTON: 'login-screen-facebook-button',
+  GOOGLE_BUTTON: 'login-screen-google-button',
+} as const;
+
 export class LoginScreenViewPageObject {
   private readonly screen: RenderResult;
 
@@ -35,10 +41,6 @@ export class LoginScreenViewPageObject {
     return this.screen.getByTestId(LOGIN_SCREEN_TEST_IDS.CARD);
   }
 
-  public get divider() {
-    return this.screen.getByTestId(LOGIN_SCREEN_TEST_IDS.DIVIDER);
-  }
-
   public get footer() {
     return this.screen.getByTestId(LOGIN_SCREEN_TEST_IDS.FOOTER);
   }
@@ -67,13 +69,14 @@ export class LoginScreenViewPageObject {
     return this.screen.getByTestId(LOGIN_SCREEN_TEST_IDS.SUBMIT_BUTTON);
   }
 
-  public get googleButton() {
-    return this.screen.getByTestId(LOGIN_SCREEN_TEST_IDS.GOOGLE_BUTTON);
-  }
+  public querySocialDivider = () =>
+    this.screen.queryByTestId(REMOVED_SOCIAL_TEST_IDS.DIVIDER);
 
-  public get facebookButton() {
-    return this.screen.getByTestId(LOGIN_SCREEN_TEST_IDS.FACEBOOK_BUTTON);
-  }
+  public queryGoogleButton = () =>
+    this.screen.queryByTestId(REMOVED_SOCIAL_TEST_IDS.GOOGLE_BUTTON);
+
+  public queryFacebookButton = () =>
+    this.screen.queryByTestId(REMOVED_SOCIAL_TEST_IDS.FACEBOOK_BUTTON);
 
   public querySubmitLoader = () =>
     this.screen.queryByTestId(BASE_BUTTON_TEST_IDS.LOADER);
@@ -88,6 +91,8 @@ export class LoginScreenViewPageObject {
     this.screen.queryByTestId(LOGIN_SCREEN_TEST_IDS.AUTH_ERROR);
 
   public getByText = (text: string) => this.screen.getByText(text);
+
+  public queryByText = (text: string) => this.screen.queryByText(text);
 
   public fillEmail = (value: string): void => {
     fireEvent.changeText(this.emailInput, value);

@@ -22,11 +22,20 @@ export {
 
 export {
   AUTH_VIEW_MODEL_ERRORS,
+  MAINTENANCE_CHECK_TIMEOUT_MS,
+  MAINTENANCE_SETTING_KEY,
+  SYSTEM_SETTINGS_TABLE,
   resolveAuthErrorMessage,
   useAuthViewModel,
+  useMaintenanceStatus,
 } from './hooks';
 
-export type { UseAuthViewModelProps, UseAuthViewModelReturn } from './hooks';
+export type {
+  UseAuthViewModelProps,
+  UseAuthViewModelReturn,
+  UseMaintenanceStatusProps,
+  UseMaintenanceStatusReturn,
+} from './hooks';
 
 export { LOGIN_CREDENTIALS_ERRORS, LoginCredentialsSchema } from './schemas';
 
