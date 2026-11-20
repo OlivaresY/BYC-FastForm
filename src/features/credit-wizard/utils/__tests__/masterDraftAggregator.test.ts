@@ -1,8 +1,10 @@
 import { ZodError } from 'zod';
-import { OTHER_ECONOMIC_SECTOR_VALUE } from '../../constants/LegalEntityContactForm.constants';
+import {
+  ECONOMIC_SECTOR_OTHER_VALUE,
+  NATIONALITY_OTHER_VALUE,
+} from '../../constants';
 import { LEGAL_ENTITY_SELECTOR_ENTITIES } from '../../constants/LegalEntitySelector.constants';
 import { EMPLOYMENT_STATUSES } from '../../constants/PhysicalPersonContact.constants';
-import { OTHER_NATIONALITY_VALUE } from '../../constants/PhysicalPersonForm.constants';
 import { FINANCIAL_CURRENCIES } from '../../constants/SharedCatalogs.constants';
 import { VEHICLE_BENEFICIARY_SECTION_ENTITIES } from '../../constants/VehicleBeneficiarySection.constants';
 import type {
@@ -377,7 +379,7 @@ describe('masterDraftAggregator Utility Suite', () => {
           ...baseApplicant,
           values: {
             ...baseApplicant.values,
-            nationality: OTHER_NATIONALITY_VALUE,
+            nationality: NATIONALITY_OTHER_VALUE,
             nationalityOther: 'Panameña',
           },
         },
@@ -422,7 +424,7 @@ describe('masterDraftAggregator Utility Suite', () => {
         ...baseContact,
         commercialActivity: {
           ...baseContact.commercialActivity,
-          economicSector: OTHER_ECONOMIC_SECTOR_VALUE,
+          economicSector: ECONOMIC_SECTOR_OTHER_VALUE,
           economicSectorOther: 'Energías Renovables',
         },
       });

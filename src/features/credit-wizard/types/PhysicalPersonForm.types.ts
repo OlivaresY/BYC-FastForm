@@ -43,6 +43,7 @@ export interface PhysicalPersonFormProps {
     field: K,
     value: PhysicalPersonFormValues[K],
   ) => void;
+  onNationalityChange?: (value: string) => void;
   options?: PhysicalPersonFormOptions;
   testID?: string;
   values: PhysicalPersonFormValues;

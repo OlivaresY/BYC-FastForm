@@ -1,5 +1,17 @@
+import { esCR } from '@/shared/i18n';
 import type { UseBankAuthorizationsViewModelReturn } from '../../hooks/useBankAuthorizationsViewModel';
 import { BankAuthorizationsStepPOM } from './BankAuthorizationsStep.pom';
+
+jest.mock('lucide-react-native', () => {
+  const MockReact = jest.requireActual<typeof import('react')>('react');
+  const { View: MockView } =
+    jest.requireActual<typeof import('react-native')>('react-native');
+
+  return {
+    AlertCircle: () =>
+      MockReact.createElement(MockView, { testID: 'mock-alert-circle' }),
+  };
+});
 
 const mockHandleNext = jest.fn();
 const mockToggleAllBanks = jest.fn();
@@ -108,6 +120,49 @@ describe('BankAuthorizationsStepView Component Tests', () => {
       // Assert
       expect(mockHandleNext).toHaveBeenCalledTimes(1);
     });
+
+    it('renders accessible inline Spanish error banner and keeps submit button enabled when not submitting', () => {
+      // Arrange & Act
+      const pom = BankAuthorizationsStepPOM.render({
+        isSubmitting: false,
+        submitError: esCR.creditWizard.masterDraftSubmission.errorMessage,
+        viewModel: createMockViewModel({ isValid: true }),
+      });
+
+      // Assert
+      expect(pom.submitErrorBanner).toBeTruthy();
+      expect(pom.submitErrorAlert).toBeTruthy();
+      expect(pom.submitErrorMessage?.props.children).toBe(
+        esCR.creditWizard.masterDraftSubmission.errorMessage,
+      );
+      expect(pom.isSubmitButtonDisabled()).toBe(false);
+    });
+
+    it('disables all checkboxes, toggle all button, back button, and submit button when isSubmitted is true', () => {
+      // Arrange
+      const onBack = jest.fn();
+      const pom = BankAuthorizationsStepPOM.render({
+        isSubmitted: true,
+        onBack,
+        viewModel: createMockViewModel({
+          handleNext: mockHandleNext,
+          isValid: true,
+        }),
+      });
+
+      // Assert controls disabled
+      expect(pom.areAllCheckboxesDisabled()).toBe(true);
+      expect(pom.isBackButtonDisabled()).toBe(true);
+      expect(pom.isSubmitButtonDisabled()).toBe(true);
+
+      // Act - Attempt interactions while locked
+      pom.pressSubmit();
+      pom.pressToggleAll();
+
+      // Assert no actions fired
+      expect(mockHandleNext).not.toHaveBeenCalled();
+      expect(mockToggleAllBanks).not.toHaveBeenCalled();
+    });
   });
 
   describe('E2E Integration Tests (Real ViewModel - No Mocking)', () => {
@@ -204,6 +259,58 @@ describe('BankAuthorizationsStepView Component Tests', () => {
             banco_scotiabank: false,
           }),
         );
+      });
+    });
+
+    it('renders Spanish error banner when submission fails, allows retrying, and clears banner when an authorization checkbox is toggled', async () => {
+      // Arrange
+      const mockOnAuthorizationChange = jest.fn();
+      const mockOnSubmit = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('Network timeout'))
+        .mockResolvedValueOnce(undefined);
+
+      const pom = BankAuthorizationsStepPOM.render({
+        onAuthorizationChange: mockOnAuthorizationChange,
+        onSubmit: mockOnSubmit,
+      });
+
+      pom.fillAllValidData({
+        autoriza_buros_credito: true,
+        autoriza_sugef_cic: true,
+        banco_bac: true,
+      });
+
+      await pom.waitFor(() => {
+        expect(pom.isSubmitButtonDisabled()).toBe(false);
+      });
+
+      // Act 1: Submit fails -> error banner renders and submit button re-enables
+      pom.pressSubmit();
+
+      await pom.waitFor(() => {
+        expect(pom.submitErrorBanner).toBeTruthy();
+        expect(pom.submitErrorMessage?.props.children).toBe(
+          esCR.creditWizard.masterDraftSubmission.errorMessage,
+        );
+        expect(pom.isSubmitButtonDisabled()).toBe(false);
+      });
+
+      // Act 2: Toggling any authorization checkbox clears the error banner and notifies parent
+      mockOnAuthorizationChange.mockClear();
+      pom.toggleBancoBncr();
+
+      await pom.waitFor(() => {
+        expect(pom.submitErrorBanner).toBeNull();
+        expect(mockOnAuthorizationChange).toHaveBeenCalledTimes(1);
+      });
+
+      // Act 3: Retry submission succeeds cleanly with preserved form state
+      pom.pressSubmit();
+
+      await pom.waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalledTimes(2);
+        expect(pom.submitErrorBanner).toBeNull();
       });
     });
   });

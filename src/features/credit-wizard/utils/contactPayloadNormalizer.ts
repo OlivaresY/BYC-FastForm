@@ -1,3 +1,4 @@
+import { ECONOMIC_SECTOR_OTHER_VALUE } from '../constants';
 import { LEGAL_ENTITY_CONTACT_DEFAULT_VALUES } from '../constants/LegalEntityContact.constants';
 import { PHYSICAL_PERSON_CONTACT_DEFAULT_VALUES } from '../constants/PhysicalPersonContact.constants';
 import type { LegalEntityContact } from '../types/LegalEntityContact.types';
@@ -316,13 +317,26 @@ export const normalizeLegalEntityContactPayload = (
     raw.constitutionDate ??
     defaults.commercialActivity.constitutionDate) as string;
 
-  const economicSector = (nestedActivity.economicSector ??
+  const rawEconomicSector =
+    nestedActivity.economicSector ??
     raw.economicSector ??
-    defaults.commercialActivity.economicSector) as string;
+    defaults.commercialActivity.economicSector;
+  const economicSector =
+    typeof rawEconomicSector === 'string' ? rawEconomicSector : '';
 
-  const economicSectorOther = (nestedActivity.economicSectorOther ??
+  const rawEconomicSectorOther =
+    nestedActivity.economicSectorOther ??
     raw.economicSectorOther ??
-    defaults.commercialActivity.economicSectorOther) as string;
+    defaults.commercialActivity.economicSectorOther;
+  const safeEconomicSectorOther =
+    typeof rawEconomicSectorOther === 'string'
+      ? rawEconomicSectorOther.trim()
+      : '';
+
+  const economicSectorOther =
+    economicSector.trim() === ECONOMIC_SECTOR_OTHER_VALUE
+      ? safeEconomicSectorOther
+      : '';
 
   const employeesCount = (nestedActivity.employeesCount ??
     raw.employeesCount ??

@@ -133,6 +133,13 @@ export class ApplicantStepViewModelPageObject {
     return this.setPhysicalField(field, value);
   }
 
+  public changeNationality(nationality: string): this {
+    act(() => {
+      this.current.onNationalityChange(nationality);
+    });
+    return this;
+  }
+
   public fillPhysicalFields(fields: Partial<PhysicalPersonFormValues>): this {
     act(() => {
       (Object.keys(fields) as PhysicalPersonFormField[]).forEach((key) => {

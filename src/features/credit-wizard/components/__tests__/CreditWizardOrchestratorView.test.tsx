@@ -1,9 +1,9 @@
 import type React from 'react';
+import { esCR } from '@/shared/i18n';
 import { LEGAL_ENTITY_SELECTOR_ENTITIES } from '../../constants/LegalEntitySelector.constants';
 import { EMPLOYMENT_STATUSES } from '../../constants/PhysicalPersonContact.constants';
 import { FINANCIAL_CURRENCIES } from '../../constants/SharedCatalogs.constants';
 import { VEHICLE_BENEFICIARY_SECTION_ENTITIES } from '../../constants/VehicleBeneficiarySection.constants';
-import { MOCK_AUTH_USER_ID } from '../../hooks/useCreditWizardOrchestrator';
 import type { ICreditApplicationRepository } from '../../services/creditApplication.service';
 import type {
   ApplicantStepViewProps,
@@ -29,6 +29,7 @@ import {
 } from './CreditWizardOrchestratorView.po';
 
 const VALID_CR_IBAN = 'CR05015202001026284066';
+const TEST_AUTHENTICATED_USER_ID = '550e8400-e29b-41d4-a716-446655440000';
 
 const mockPhysicalStep1Data: PhysicalApplicantStepData = {
   regime: LEGAL_ENTITY_SELECTOR_ENTITIES.PHYSICAL,
@@ -272,6 +273,13 @@ jest.mock('../BankAuthorizationsStepView', () => {
       props: BankAuthorizationsStepViewProps,
     ): React.JSX.Element => {
       mockCapturedProps.step4 = props;
+      const isLocked = Boolean(
+        props.disabled ||
+        props.isSubmitting ||
+        props.isSubmitted ||
+        props.hasSubmittedSuccessfully,
+      );
+
       return MockReact.createElement(
         MockView,
         { testID: MOCK_STEP_TEST_IDS.STEP_4_CONTAINER },
@@ -280,11 +288,38 @@ jest.mock('../BankAuthorizationsStepView', () => {
           { testID: MOCK_STEP_TEST_IDS.STEP_4_IS_SUBMITTING },
           String(Boolean(props.isSubmitting)),
         ),
+        MockReact.createElement(
+          MockText,
+          { testID: MOCK_STEP_TEST_IDS.STEP_4_IS_SUBMITTED },
+          String(Boolean(props.isSubmitted || props.hasSubmittedSuccessfully)),
+        ),
+        props.submitError
+          ? MockReact.createElement(
+              MockView,
+              {
+                accessibilityRole: 'alert',
+                accessible: true,
+                testID: MOCK_STEP_TEST_IDS.STEP_4_ERROR_BANNER,
+              },
+              MockReact.createElement(
+                MockText,
+                { testID: MOCK_STEP_TEST_IDS.STEP_4_ERROR_TEXT },
+                props.submitError,
+              ),
+            )
+          : null,
         MockReact.createElement(MockPressable, {
+          disabled: isLocked,
+          onPress: () => props.onAuthorizationChange?.(),
+          testID: MOCK_STEP_TEST_IDS.STEP_4_AUTH_TOGGLE,
+        }),
+        MockReact.createElement(MockPressable, {
+          disabled: isLocked,
           onPress: props.onBack,
           testID: MOCK_STEP_TEST_IDS.STEP_4_BACK,
         }),
         MockReact.createElement(MockPressable, {
+          disabled: isLocked,
           onPress: () => {
             void props.onSubmit?.(mockStep4Data);
           },
@@ -338,6 +373,7 @@ describe('CreditWizardOrchestratorView Integration Suite', () => {
     const page = CreditWizardOrchestratorPageObject.render({
       onSubmissionSuccess,
       repository,
+      resolveAuthenticatedUserId: async () => TEST_AUTHENTICATED_USER_ID,
     });
 
     // Step 1 -> Step 2 (Physical)
@@ -361,6 +397,13 @@ describe('CreditWizardOrchestratorView Integration Suite', () => {
     // Step 4 -> Final Master Draft Submission
     page.pressButton(MOCK_STEP_TEST_IDS.STEP_4_SUBMIT);
     expect(page.getStep4SubmittingText()).toBe('true');
+
+    // Flush async auth resolution so in-flight repository submission starts
+    await page.flushAsync(async () => {
+      await Promise.resolve();
+    });
+
+    expect(page.getStep4SubmittingText()).toBe('true');
     expect(submitMasterDraft).toHaveBeenCalledTimes(1);
     expect(submitMasterDraft).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -374,8 +417,12 @@ describe('CreditWizardOrchestratorView Integration Suite', () => {
         ],
         status: APPLICATION_STATUS.PENDING,
         templateVersion: DEFAULT_TEMPLATE_VERSION,
-        userId: MOCK_AUTH_USER_ID,
+        userId: TEST_AUTHENTICATED_USER_ID,
         vehicleCredit: mockStep3Data,
+      }),
+      expect.objectContaining({
+        idempotencyKey: expect.any(String),
+        signal: expect.any(AbortSignal),
       }),
     );
 
@@ -385,6 +432,14 @@ describe('CreditWizardOrchestratorView Integration Suite', () => {
     });
 
     expect(page.getStep4SubmittingText()).toBe('false');
+    expect(page.getStep4SubmittedText()).toBe('true');
+    expect(page.isStep4SubmitDisabled()).toBe(true);
+    expect(page.isStep4BackDisabled()).toBe(true);
+    expect(onSubmissionSuccess).toHaveBeenCalledTimes(1);
+
+    // Duplicate click on locked Step 4 is ignored cleanly
+    await page.pressAsyncButton(MOCK_STEP_TEST_IDS.STEP_4_SUBMIT);
+    expect(submitMasterDraft).toHaveBeenCalledTimes(1);
     expect(onSubmissionSuccess).toHaveBeenCalledTimes(1);
   });
 
@@ -398,6 +453,7 @@ describe('CreditWizardOrchestratorView Integration Suite', () => {
     const page = CreditWizardOrchestratorPageObject.render({
       onSubmissionSuccess,
       repository,
+      resolveAuthenticatedUserId: async () => TEST_AUTHENTICATED_USER_ID,
     });
 
     // Step 1 (Legal) -> Step 2 (Legal)
@@ -431,11 +487,84 @@ describe('CreditWizardOrchestratorView Integration Suite', () => {
         ],
         status: APPLICATION_STATUS.PENDING,
         templateVersion: DEFAULT_TEMPLATE_VERSION,
-        userId: MOCK_AUTH_USER_ID,
+        userId: TEST_AUTHENTICATED_USER_ID,
         vehicleCredit: mockStep3Data,
+      }),
+      expect.objectContaining({
+        idempotencyKey: expect.any(String),
+        signal: expect.any(AbortSignal),
       }),
     );
     expect(onSubmissionSuccess).toHaveBeenCalledTimes(1);
+  });
+
+  it('surfaces visible Spanish submission error banner on Step 4 failure and allows clearing & retry', async () => {
+    const submitMasterDraft = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('Network unavailable'))
+      .mockResolvedValueOnce(undefined);
+    const repository: ICreditApplicationRepository = {
+      submitMasterDraft,
+    };
+    const onSubmissionSuccess = jest.fn();
+
+    const page = CreditWizardOrchestratorPageObject.render({
+      onSubmissionSuccess,
+      repository,
+      resolveAuthenticatedUserId: async () => TEST_AUTHENTICATED_USER_ID,
+    });
+
+    page.pressButton(MOCK_STEP_TEST_IDS.STEP_1_SUBMIT_PHYSICAL);
+    page.pressButton(MOCK_STEP_TEST_IDS.STEP_2_PHYSICAL_SUBMIT);
+    page.pressButton(MOCK_STEP_TEST_IDS.STEP_3_SUBMIT);
+
+    // First submission attempt fails
+    await page.pressAsyncButton(MOCK_STEP_TEST_IDS.STEP_4_SUBMIT);
+
+    expect(page.queryStep4Alert()).toBeTruthy();
+    expect(page.queryStep4ErrorBanner()).toBeTruthy();
+    expect(page.getStep4ErrorText()).toBe(
+      esCR.creditWizard.masterDraftSubmission.errorMessage,
+    );
+    expect(page.getStep4SubmittedText()).toBe('false');
+    expect(page.isStep4SubmitDisabled()).toBe(false);
+    expect(onSubmissionSuccess).not.toHaveBeenCalled();
+
+    // Toggling an authorization clears error banner via clearSubmitError wiring
+    page.pressButton(MOCK_STEP_TEST_IDS.STEP_4_AUTH_TOGGLE);
+    expect(page.queryStep4ErrorBanner()).toBeNull();
+
+    // Retry succeeds and locks Step 4
+    await page.pressAsyncButton(MOCK_STEP_TEST_IDS.STEP_4_SUBMIT);
+    expect(submitMasterDraft).toHaveBeenCalledTimes(2);
+    expect(page.getStep4SubmittedText()).toBe('true');
+    expect(page.isStep4SubmitDisabled()).toBe(true);
+    expect(onSubmissionSuccess).toHaveBeenCalledTimes(1);
+  });
+
+  it('surfaces Spanish authentication error banner when session user resolution fails', async () => {
+    const submitMasterDraft = jest.fn().mockResolvedValue(undefined);
+    const repository: ICreditApplicationRepository = {
+      submitMasterDraft,
+    };
+
+    const page = CreditWizardOrchestratorPageObject.render({
+      repository,
+      resolveAuthenticatedUserId: async () => null,
+    });
+
+    page.pressButton(MOCK_STEP_TEST_IDS.STEP_1_SUBMIT_PHYSICAL);
+    page.pressButton(MOCK_STEP_TEST_IDS.STEP_2_PHYSICAL_SUBMIT);
+    page.pressButton(MOCK_STEP_TEST_IDS.STEP_3_SUBMIT);
+
+    await page.pressAsyncButton(MOCK_STEP_TEST_IDS.STEP_4_SUBMIT);
+
+    expect(submitMasterDraft).not.toHaveBeenCalled();
+    expect(page.queryStep4ErrorBanner()).toBeTruthy();
+    expect(page.getStep4ErrorText()).toBe(
+      esCR.creditWizard.masterDraftSubmission.authErrorMessage,
+    );
+    expect(page.getStep4SubmittedText()).toBe('false');
   });
 
   it('preserves accumulated RAM draftState across backward navigation (4 -> 3 -> 2 -> 1)', () => {

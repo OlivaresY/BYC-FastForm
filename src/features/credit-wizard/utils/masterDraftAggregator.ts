@@ -1,7 +1,9 @@
+import {
+  ECONOMIC_SECTOR_OTHER_VALUE,
+  NATIONALITY_OTHER_VALUE,
+} from '../constants';
 import { AVAILABLE_BANKS } from '../constants/BankAuthorizations.constants';
-import { OTHER_ECONOMIC_SECTOR_VALUE } from '../constants/LegalEntityContactForm.constants';
 import { LEGAL_ENTITY_SELECTOR_ENTITIES } from '../constants/LegalEntitySelector.constants';
-import { OTHER_NATIONALITY_VALUE } from '../constants/PhysicalPersonForm.constants';
 import { VEHICLE_BENEFICIARY_SECTION_ENTITIES } from '../constants/VehicleBeneficiarySection.constants';
 import { MasterCreditApplicationSchema } from '../schemas/MasterCreditApplication.schema';
 import type {
@@ -45,7 +47,7 @@ export const sanitizePhysicalApplicantData = (
   const sanitizedValues = {
     ...applicant.values,
     nationalityOther:
-      applicant.values.nationality === OTHER_NATIONALITY_VALUE
+      applicant.values.nationality === NATIONALITY_OTHER_VALUE
         ? applicant.values.nationalityOther
         : EMPTY_STRING,
   };
@@ -139,7 +141,7 @@ export const sanitizeLegalEntityContactData = (
   }
 
   const sanitizedEconomicSectorOther =
-    contact.commercialActivity.economicSector === OTHER_ECONOMIC_SECTOR_VALUE
+    contact.commercialActivity.economicSector === ECONOMIC_SECTOR_OTHER_VALUE
       ? contact.commercialActivity.economicSectorOther
       : EMPTY_STRING;
 

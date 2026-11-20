@@ -1,5 +1,9 @@
 import { esCR } from '@/shared/i18n';
 import type { CustomSelectOption } from '@/shared/ui';
+import { CR_IBAN_LENGTH, MAX_LENGTH_IBAN_INPUT } from '@/shared/utils';
+import { ECONOMIC_SECTOR_OTHER_VALUE } from './WizardDomain.constants';
+
+export { ECONOMIC_SECTOR_OTHER_VALUE };
 
 export const LEGAL_ENTITY_CONTACT_FORM_COLORS = {
   HEADER_ICON_STROKE: '#111111',
@@ -70,8 +74,8 @@ export const LEGAL_ENTITY_CONTACT_FORM_NUMERICAL = {
   EXACT_ADDRESS_NUMBER_OF_LINES: 3,
   MAX_LENGTH_DATE: 14,
   MAX_LENGTH_EMPLOYEES: 8,
-  MAX_LENGTH_IBAN: 22,
-  MAX_LENGTH_IBAN_INPUT: 26,
+  MAX_LENGTH_IBAN: CR_IBAN_LENGTH,
+  MAX_LENGTH_IBAN_INPUT,
   MAX_LENGTH_INCOME: 15,
   MAX_LENGTH_PHONE: 20,
 } as const;
@@ -96,8 +100,6 @@ export interface RawEconomicSectorOption {
   value: string;
 }
 
-export const OTHER_ECONOMIC_SECTOR_VALUE = 'Otro' as const;
-
 export const RAW_ECONOMIC_SECTOR_OPTIONS: readonly RawEconomicSectorOption[] = [
   { key: ECONOMIC_SECTOR_KEYS.AGRICULTURE, value: 'Agricultura y Ganadería' },
   { key: ECONOMIC_SECTOR_KEYS.COMMERCE, value: 'Comercio' },
@@ -110,7 +112,7 @@ export const RAW_ECONOMIC_SECTOR_OPTIONS: readonly RawEconomicSectorOption[] = [
   },
   { key: ECONOMIC_SECTOR_KEYS.TRANSPORT, value: 'Transporte y Logística' },
   { key: ECONOMIC_SECTOR_KEYS.TOURISM, value: 'Turismo y Hospitalidad' },
-  { key: ECONOMIC_SECTOR_KEYS.OTHER, value: OTHER_ECONOMIC_SECTOR_VALUE },
+  { key: ECONOMIC_SECTOR_KEYS.OTHER, value: ECONOMIC_SECTOR_OTHER_VALUE },
 ] as const;
 
 export const LEGAL_ENTITY_CONTACT_FORM_OPTIONS = {

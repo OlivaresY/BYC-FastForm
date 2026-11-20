@@ -6,6 +6,7 @@ import {
   renderHook,
   screen,
   waitFor,
+  type RenderResult,
 } from '@testing-library/react-native';
 import type { ReactTestInstance } from 'react-test-renderer';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
@@ -19,7 +20,26 @@ import {
 } from '../../constants/BankAuthorizations.constants';
 import type { BankAuthorizationsFormValues } from '../../types/BankAuthorizations.types';
 
+const STEP4_SUBMIT_ERROR_BANNER_TEST_ID = 'step4-submit-error-banner' as const;
+const STEP4_SUBMIT_ERROR_MESSAGE_TEST_ID =
+  'step4-submit-error-message' as const;
+
+const buildWrappedStepView = (
+  props?: BankAuthorizationsStepViewProps,
+): React.ReactElement =>
+  React.createElement(
+    SafeAreaInsetsContext.Provider,
+    { value: { bottom: 0, left: 0, right: 0, top: 0 } },
+    React.createElement(BankAuthorizationsStepView, props ?? {}),
+  );
+
 export class BankAuthorizationsStepPOM {
+  private readonly renderResult: RenderResult;
+
+  public constructor(renderResult: RenderResult) {
+    this.renderResult = renderResult;
+  }
+
   public static createMockControl(): Control<BankAuthorizationsFormValues> {
     const { result } = renderHook(() =>
       useForm<BankAuthorizationsFormValues>({
@@ -40,14 +60,13 @@ export class BankAuthorizationsStepPOM {
   public static render(
     props?: BankAuthorizationsStepViewProps,
   ): BankAuthorizationsStepPOM {
-    render(
-      React.createElement(
-        SafeAreaInsetsContext.Provider,
-        { value: { bottom: 0, left: 0, right: 0, top: 0 } },
-        React.createElement(BankAuthorizationsStepView, props ?? {}),
-      ),
-    );
-    return new BankAuthorizationsStepPOM();
+    const result = render(buildWrappedStepView(props));
+    return new BankAuthorizationsStepPOM(result);
+  }
+
+  public rerender(props: BankAuthorizationsStepViewProps): this {
+    this.renderResult.rerender(buildWrappedStepView(props));
+    return this;
   }
 
   // =========================================================================
@@ -127,8 +146,12 @@ export class BankAuthorizationsStepPOM {
   }
 
   // =========================================================================
-  // Submit Button
+  // Submit / Back Buttons & Inline Error Alert
   // =========================================================================
+
+  public get backButton(): ReactTestInstance | null {
+    return screen.queryByTestId('wizard-step-layout-back-button');
+  }
 
   public get submitButton(): ReactTestInstance {
     return (
@@ -137,11 +160,48 @@ export class BankAuthorizationsStepPOM {
     );
   }
 
-  public isSubmitButtonDisabled(): boolean {
+  public get submitErrorBanner(): ReactTestInstance | null {
+    return screen.queryByTestId(STEP4_SUBMIT_ERROR_BANNER_TEST_ID);
+  }
+
+  public get submitErrorMessage(): ReactTestInstance | null {
+    return screen.queryByTestId(STEP4_SUBMIT_ERROR_MESSAGE_TEST_ID);
+  }
+
+  public get submitErrorAlert(): ReactTestInstance | null {
+    return screen.queryByRole('alert');
+  }
+
+  public isElementDisabled(element: ReactTestInstance | null): boolean {
+    if (!element) {
+      return false;
+    }
     return (
-      this.submitButton.props.accessibilityState?.disabled === true ||
-      this.submitButton.props.disabled === true
+      element.props.accessibilityState?.disabled === true ||
+      element.props.disabled === true
     );
+  }
+
+  public isSubmitButtonDisabled(): boolean {
+    return this.isElementDisabled(this.submitButton);
+  }
+
+  public isBackButtonDisabled(): boolean {
+    return this.isElementDisabled(this.backButton);
+  }
+
+  public areAllCheckboxesDisabled(): boolean {
+    const checkboxes = [
+      this.toggleAllButton,
+      this.bancoBacCheckbox,
+      this.bancoBncrCheckbox,
+      this.bancoScotiabankCheckbox,
+      this.bancoPromericaCheckbox,
+      this.bancoCarroFacilCheckbox,
+      this.autorizaSugefCicCheckbox,
+      this.autorizaBurosCreditoCheckbox,
+    ];
+    return checkboxes.every((checkbox) => this.isElementDisabled(checkbox));
   }
 
   // =========================================================================
