@@ -1,6 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 import {
   SUPABASE_CONFIG_ERRORS,
+  createResilientSecureStoreAdapter,
   expoSecureStoreAdapter,
   resolveSupabaseConfig,
   supabase,
@@ -9,6 +10,7 @@ import {
 jest.mock('expo-secure-store', () => ({
   deleteItemAsync: jest.fn(),
   getItemAsync: jest.fn(),
+  isAvailableAsync: jest.fn().mockResolvedValue(true),
   setItemAsync: jest.fn(),
 }));
 
@@ -152,8 +154,11 @@ describe('supabaseClient and expoSecureStoreAdapter', () => {
     expect(supabase.from).toBeDefined();
   });
 
-  it('delegates storage calls directly to expo-secure-store', async () => {
+  it('delegates storage calls directly to expo-secure-store when available', async () => {
     // Arrange
+    const isAvailableSpy = jest
+      .mocked(SecureStore.isAvailableAsync)
+      .mockResolvedValue(true);
     const getItemSpy = jest
       .mocked(SecureStore.getItemAsync)
       .mockResolvedValueOnce('stored-session');
@@ -170,9 +175,76 @@ describe('supabaseClient and expoSecureStoreAdapter', () => {
     await expoSecureStoreAdapter.removeItem('sb-token');
 
     // Assert
+    expect(isAvailableSpy).toHaveBeenCalled();
     expect(fetched).toBe('stored-session');
     expect(getItemSpy).toHaveBeenCalledWith('sb-token');
     expect(setItemSpy).toHaveBeenCalledWith('sb-token', 'new-value');
     expect(deleteItemSpy).toHaveBeenCalledWith('sb-token');
+  });
+
+  it('degrades cleanly to RAM-only Map fallback without throwing when SecureStore.isAvailableAsync returns false', async () => {
+    // Arrange
+    jest.mocked(SecureStore.isAvailableAsync).mockResolvedValue(false);
+    const getItemSpy = jest.mocked(SecureStore.getItemAsync);
+    const setItemSpy = jest.mocked(SecureStore.setItemAsync);
+    const deleteItemSpy = jest.mocked(SecureStore.deleteItemAsync);
+    const adapter = createResilientSecureStoreAdapter();
+
+    // Act & Assert
+    await expect(
+      adapter.setItem('sb-session', 'ram-token-value'),
+    ).resolves.toBeUndefined();
+    await expect(adapter.getItem('sb-session')).resolves.toBe(
+      'ram-token-value',
+    );
+    await expect(adapter.removeItem('sb-session')).resolves.toBeUndefined();
+    await expect(adapter.getItem('sb-session')).resolves.toBeNull();
+
+    expect(setItemSpy).not.toHaveBeenCalled();
+    expect(getItemSpy).not.toHaveBeenCalled();
+    expect(deleteItemSpy).not.toHaveBeenCalled();
+  });
+
+  it('falls back to RAM-only Map without throwing when native SecureStore methods or availability checks reject', async () => {
+    // Arrange
+    const throwingAdapter = createResilientSecureStoreAdapter({
+      deleteItemAsync: jest
+        .fn()
+        .mockRejectedValue(new Error('Keystore locked')),
+      getItemAsync: jest
+        .fn()
+        .mockRejectedValue(new Error('Keychain unavailable')),
+      isAvailableAsync: jest.fn().mockResolvedValue(true),
+      setItemAsync: jest
+        .fn()
+        .mockRejectedValue(new Error('Keychain write failed')),
+    });
+
+    const unavailableCheckAdapter = createResilientSecureStoreAdapter({
+      deleteItemAsync: jest.fn(),
+      getItemAsync: jest.fn(),
+      isAvailableAsync: jest
+        .fn()
+        .mockRejectedValue(new Error('Native bridge error')),
+      setItemAsync: jest.fn(),
+    });
+
+    // Act & Assert - native method rejections fallback gracefully
+    await expect(
+      throwingAdapter.setItem('sb-key', 'fallback-secret'),
+    ).resolves.toBeUndefined();
+    await expect(throwingAdapter.getItem('sb-key')).resolves.toBe(
+      'fallback-secret',
+    );
+    await expect(throwingAdapter.removeItem('sb-key')).resolves.toBeUndefined();
+    await expect(throwingAdapter.getItem('sb-key')).resolves.toBeNull();
+
+    // Act & Assert - rejecting isAvailableAsync degrades gracefully
+    await expect(
+      unavailableCheckAdapter.setItem('sb-key-2', 'ephemeral-jwt'),
+    ).resolves.toBeUndefined();
+    await expect(unavailableCheckAdapter.getItem('sb-key-2')).resolves.toBe(
+      'ephemeral-jwt',
+    );
   });
 });

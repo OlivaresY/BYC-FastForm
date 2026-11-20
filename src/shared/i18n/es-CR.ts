@@ -1,4 +1,29 @@
 export const esCR = {
+  auth: {
+    errors: {
+      invalidCredentials:
+        'Credenciales incorrectas. Verifica tu correo y contraseña.',
+      networkError:
+        'No pudimos conectarnos con el servidor. Verifica tu conexión a internet e inténtalo de nuevo.',
+      rateLimited:
+        'Demasiados intentos fallidos. Por favor, espera unos minutos antes de intentar de nuevo.',
+      serviceError:
+        'Ocurrió un error en el servicio. Por favor, inténtalo de nuevo.',
+      signOutError:
+        'No pudimos cerrar la sesión de forma segura. Por favor, inténtalo de nuevo.',
+      unexpectedLoginError:
+        'Ocurrió un error al iniciar sesión. Por favor, inténtalo de nuevo.',
+    },
+    login: {
+      footerCopyright: '©YOR. Todos los derechos reservados.',
+      footerSecurity:
+        'Conexión cifrada mediante HTTPS/TLS — Uso interno CoriMotors',
+    },
+    maintenance: {
+      body: 'Estamos realizando tareas de optimización en el sistema central. El acceso se encuentra temporalmente deshabilitado para garantizar la integridad de los datos. Por favor, intente ingresar nuevamente en unos minutos.',
+      title: 'Sistema en Mantenimiento',
+    },
+  },
   common: {
     badges: {
       optional: 'Opcional',
