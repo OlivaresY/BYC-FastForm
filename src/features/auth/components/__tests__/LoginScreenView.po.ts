@@ -1,15 +1,24 @@
 import React from 'react';
+import { Keyboard } from 'react-native';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import type { RenderResult } from '@testing-library/react-native';
 import { BASE_BUTTON_TEST_IDS } from '@/shared/ui';
 import { LOGIN_SCREEN_TEST_IDS } from '../../constants/LoginScreenView.constants';
 import { LoginScreenView, type LoginScreenViewProps } from '../LoginScreenView';
 
-const REMOVED_SOCIAL_TEST_IDS = {
-  DIVIDER: 'login-screen-divider',
-  FACEBOOK_BUTTON: 'login-screen-facebook-button',
-  GOOGLE_BUTTON: 'login-screen-google-button',
-} as const;
+type MockKeyboardWithEmitter = typeof Keyboard & {
+  _emitter?: { emit: (event: string, ...args: unknown[]) => void };
+  emit?: (event: string, ...args: unknown[]) => void;
+};
+
+const emitKeyboardEvent = (event: string, payload?: unknown): void => {
+  const keyboardWithEmitter = Keyboard as unknown as MockKeyboardWithEmitter;
+  if (typeof keyboardWithEmitter.emit === 'function') {
+    keyboardWithEmitter.emit(event, payload);
+    return;
+  }
+  keyboardWithEmitter._emitter?.emit(event, payload);
+};
 
 export class LoginScreenViewPageObject {
   private readonly screen: RenderResult;
@@ -27,6 +36,10 @@ export class LoginScreenViewPageObject {
 
   public get header() {
     return this.screen.getByTestId(LOGIN_SCREEN_TEST_IDS.HEADER);
+  }
+
+  public get scrollView() {
+    return this.screen.getByTestId(LOGIN_SCREEN_TEST_IDS.SCROLL_VIEW);
   }
 
   public get badge() {
@@ -69,14 +82,20 @@ export class LoginScreenViewPageObject {
     return this.screen.getByTestId(LOGIN_SCREEN_TEST_IDS.SUBMIT_BUTTON);
   }
 
-  public querySocialDivider = () =>
-    this.screen.queryByTestId(REMOVED_SOCIAL_TEST_IDS.DIVIDER);
+  public get socialDivider() {
+    return this.screen.getByTestId(LOGIN_SCREEN_TEST_IDS.DIVIDER);
+  }
 
-  public queryGoogleButton = () =>
-    this.screen.queryByTestId(REMOVED_SOCIAL_TEST_IDS.GOOGLE_BUTTON);
+  public get googleButton() {
+    return this.screen.getByTestId(LOGIN_SCREEN_TEST_IDS.GOOGLE_BUTTON);
+  }
 
-  public queryFacebookButton = () =>
-    this.screen.queryByTestId(REMOVED_SOCIAL_TEST_IDS.FACEBOOK_BUTTON);
+  public get facebookButton() {
+    return this.screen.getByTestId(LOGIN_SCREEN_TEST_IDS.FACEBOOK_BUTTON);
+  }
+
+  public querySocialNotice = () =>
+    this.screen.queryByTestId(LOGIN_SCREEN_TEST_IDS.SOCIAL_NOTICE);
 
   public querySubmitLoader = () =>
     this.screen.queryByTestId(BASE_BUTTON_TEST_IDS.LOADER);
@@ -109,6 +128,38 @@ export class LoginScreenViewPageObject {
   public submit = async (): Promise<void> => {
     await act(async () => {
       fireEvent.press(this.submitButton);
+    });
+  };
+
+  public pressForgotPasswordButton = async (): Promise<void> => {
+    await act(async () => {
+      fireEvent.press(this.forgotPasswordButton);
+    });
+  };
+
+  public pressGoogleButton = async (): Promise<void> => {
+    await act(async () => {
+      fireEvent.press(this.googleButton);
+    });
+  };
+
+  public pressFacebookButton = async (): Promise<void> => {
+    await act(async () => {
+      fireEvent.press(this.facebookButton);
+    });
+  };
+
+  public emitKeyboardDidShow = (): void => {
+    act(() => {
+      emitKeyboardEvent('keyboardDidShow', {
+        endCoordinates: { height: 300, screenX: 0, screenY: 500, width: 390 },
+      });
+    });
+  };
+
+  public emitKeyboardDidHide = (): void => {
+    act(() => {
+      emitKeyboardEvent('keyboardDidHide');
     });
   };
 

@@ -34,6 +34,13 @@ const mockErrorAuthProvider: IAuthProvider = {
 const handleStoryCallback = (): void => undefined;
 
 const meta = {
+  argTypes: {
+    authProvider: { control: false },
+    onFacebookPress: { control: false },
+    onForgotPasswordPress: { control: false },
+    onGooglePress: { control: false },
+    onSuccess: { control: false },
+  },
   args: {
     authProvider: mockDefaultAuthProvider,
     onForgotPasswordPress: handleStoryCallback,

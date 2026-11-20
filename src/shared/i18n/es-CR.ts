@@ -15,9 +15,24 @@ export const esCR = {
         'Ocurrió un error al iniciar sesión. Por favor, inténtalo de nuevo.',
     },
     login: {
+      cardSubtitle: 'Ingresa tus credenciales para acceder a los formularios.',
+      cardTitle: 'Bienvenido',
+      dividerText: 'O CONTINUAR CON',
+      emailLabel: 'Correo electrónico',
+      emailPlaceholder: 'ejemplo@corimotors.com',
+      externalProviderNotice:
+        'El acceso con Google o Facebook no está habilitado. Inicia sesión con tu correo y contraseña.',
       footerCopyright: '©YOR. Todos los derechos reservados.',
       footerSecurity:
         'Conexión cifrada mediante HTTPS/TLS — Uso interno CoriMotors',
+      forgotPassword: '¿Olvidaste tu contraseña?',
+      forgotPasswordNotice:
+        'Para restablecer tu contraseña, contacta al administrador del sistema.',
+      hidePasswordA11y: 'Ocultar contraseña',
+      logoSubtitle: 'Herramienta que Acelera Tus Ventas',
+      passwordLabel: 'Contraseña',
+      showPasswordA11y: 'Mostrar contraseña',
+      submitButton: 'Iniciar Sesión',
     },
     maintenance: {
       body: 'Estamos realizando tareas de optimización en el sistema central. El acceso se encuentra temporalmente deshabilitado para garantizar la integridad de los datos. Por favor, intente ingresar nuevamente en unos minutos.',
