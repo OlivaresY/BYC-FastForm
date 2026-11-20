@@ -20,12 +20,6 @@ export const esCR = {
       dividerText: 'O CONTINUAR CON',
       emailLabel: 'Correo electrónico',
       emailPlaceholder: 'ejemplo@corimotors.com',
-      cardSubtitle:
-        'Ingresa tus credenciales para acceder a los formularios.',
-      cardTitle: 'Bienvenido',
-      dividerText: 'O CONTINUAR CON',
-      emailLabel: 'Correo electrónico',
-      emailPlaceholder: 'ejemplo@corimotors.com',
       externalProviderNotice:
         'El acceso con Google o Facebook no está habilitado. Inicia sesión con tu correo y contraseña.',
       footerCopyright: '©YOR. Todos los derechos reservados.',
