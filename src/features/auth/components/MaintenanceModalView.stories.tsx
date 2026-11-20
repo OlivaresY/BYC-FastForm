@@ -18,11 +18,15 @@ const PREVIEW_COPY = {
   TITLE: 'Vista Previa de Mantenimiento',
 } as const;
 
+type MaintenancePreviewWrapperProps = Omit<
+  MaintenanceModalViewProps,
+  'isVisible'
+>;
+
 const MaintenancePreviewWrapper = ({
-  isVisible: controlVisible,
   message,
   testID,
-}: MaintenanceModalViewProps): React.JSX.Element => {
+}: MaintenancePreviewWrapperProps): React.JSX.Element => {
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
 
   const handleOpenPreview = useCallback((): void => {
@@ -62,7 +66,7 @@ const MaintenancePreviewWrapper = ({
       </View>
 
       <MaintenanceModalView
-        isVisible={isPreviewOpen || controlVisible}
+        isVisible={isPreviewOpen}
         message={message}
         testID={testID}
       />
@@ -71,6 +75,14 @@ const MaintenancePreviewWrapper = ({
 };
 
 const meta = {
+  argTypes: {
+    isVisible: {
+      control: false,
+      table: {
+        disable: true,
+      },
+    },
+  },
   args: {
     isVisible: false,
   },
@@ -86,7 +98,9 @@ export const Default: Story = {
   args: {
     isVisible: false,
   },
-  render: (args): React.JSX.Element => <MaintenancePreviewWrapper {...args} />,
+  render: ({ message, testID }): React.JSX.Element => (
+    <MaintenancePreviewWrapper message={message} testID={testID} />
+  ),
 };
 
 export const CustomBackendMessage: Story = {
@@ -94,5 +108,7 @@ export const CustomBackendMessage: Story = {
     isVisible: false,
     message: PREVIEW_COPY.CUSTOM_BACKEND_MESSAGE,
   },
-  render: (args): React.JSX.Element => <MaintenancePreviewWrapper {...args} />,
+  render: ({ message, testID }): React.JSX.Element => (
+    <MaintenancePreviewWrapper message={message} testID={testID} />
+  ),
 };
