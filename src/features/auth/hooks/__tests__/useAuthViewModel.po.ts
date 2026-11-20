@@ -57,6 +57,12 @@ export class AuthViewModelPageObject {
     });
   };
 
+  public signOut = async (): Promise<void> => {
+    await act(async () => {
+      await this.hookResult.result.current.signOut?.();
+    });
+  };
+
   public settle = async (operation: () => Promise<void>): Promise<void> => {
     await act(async () => {
       await operation();

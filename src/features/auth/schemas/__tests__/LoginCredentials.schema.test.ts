@@ -20,9 +20,9 @@ describe('LoginCredentialsSchema Validation Suite', () => {
       }
     });
 
-    it('trims surrounding whitespace on valid email while preserving password characters', () => {
+    it('trims surrounding whitespace and lowercases valid email while preserving password case', () => {
       const credentials: LoginCredentials = {
-        email: '  ventas.cr@corimotors.com  ',
+        email: '  Ventas.CR@CoriMotors.COM  ',
         password: ' MySecretPass ',
       };
 

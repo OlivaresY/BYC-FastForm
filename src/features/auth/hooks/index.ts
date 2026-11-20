@@ -1,4 +1,8 @@
-export { AUTH_VIEW_MODEL_ERRORS, useAuthViewModel } from './useAuthViewModel';
+export {
+  AUTH_VIEW_MODEL_ERRORS,
+  resolveAuthErrorMessage,
+  useAuthViewModel,
+} from './useAuthViewModel';
 
 export type {
   UseAuthViewModelProps,

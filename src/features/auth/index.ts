@@ -20,7 +20,11 @@ export {
   MAINTENANCE_MODAL_TEST_IDS,
 } from './constants/MaintenanceModalView.constants';
 
-export { AUTH_VIEW_MODEL_ERRORS, useAuthViewModel } from './hooks';
+export {
+  AUTH_VIEW_MODEL_ERRORS,
+  resolveAuthErrorMessage,
+  useAuthViewModel,
+} from './hooks';
 
 export type { UseAuthViewModelProps, UseAuthViewModelReturn } from './hooks';
 
@@ -31,6 +35,7 @@ export type { LoginCredentialsSchemaOutput } from './schemas';
 export {
   AUTH_SERVICE_ERRORS,
   SupabaseAuthProvider,
+  mapAuthErrorToSpanishMessage,
   supabaseAuthProvider,
 } from './services';
 

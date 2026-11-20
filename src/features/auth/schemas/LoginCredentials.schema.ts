@@ -10,6 +10,7 @@ export const LoginCredentialsSchema = z.object({
   email: z
     .string({ error: LOGIN_CREDENTIALS_ERRORS.EMAIL_REQUIRED })
     .trim()
+    .toLowerCase()
     .min(1, LOGIN_CREDENTIALS_ERRORS.EMAIL_REQUIRED)
     .pipe(z.email({ error: LOGIN_CREDENTIALS_ERRORS.EMAIL_INVALID })),
   password: z

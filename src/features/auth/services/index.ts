@@ -1,6 +1,7 @@
 export {
   AUTH_SERVICE_ERRORS,
   SupabaseAuthProvider,
+  mapAuthErrorToSpanishMessage,
   supabaseAuthProvider,
 } from './auth.service';
 

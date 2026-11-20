@@ -1,4 +1,20 @@
 export const esCR = {
+  auth: {
+    errors: {
+      invalidCredentials:
+        'Credenciales incorrectas. Verifica tu correo y contraseña.',
+      networkError:
+        'No pudimos conectarnos con el servidor. Verifica tu conexión a internet e inténtalo de nuevo.',
+      rateLimited:
+        'Demasiados intentos fallidos. Por favor, espera unos minutos antes de intentar de nuevo.',
+      serviceError:
+        'Ocurrió un error en el servicio. Por favor, inténtalo de nuevo.',
+      signOutError:
+        'No pudimos cerrar la sesión de forma segura. Por favor, inténtalo de nuevo.',
+      unexpectedLoginError:
+        'Ocurrió un error al iniciar sesión. Por favor, inténtalo de nuevo.',
+    },
+  },
   common: {
     badges: {
       optional: 'Opcional',

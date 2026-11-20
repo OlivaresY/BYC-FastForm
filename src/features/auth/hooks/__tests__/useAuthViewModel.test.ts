@@ -17,15 +17,21 @@ const mockAuthUser: AuthUser = {
   id: 'advisor-auth-uuid-001',
 };
 
+const createMockAuthProvider = (
+  overrides?: Partial<IAuthProvider>,
+): IAuthProvider => ({
+  signInWithEmail: jest.fn().mockResolvedValue(mockAuthUser),
+  signOut: jest.fn().mockResolvedValue(undefined),
+  ...overrides,
+});
+
 describe('useAuthViewModel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('initializes with isLoading false and authError null', () => {
-    const authProvider: IAuthProvider = {
-      signInWithEmail: jest.fn().mockResolvedValue(mockAuthUser),
-    };
+    const authProvider = createMockAuthProvider();
     const onSuccess = jest.fn();
 
     const page = AuthViewModelPageObject.render({ authProvider, onSuccess });
@@ -36,18 +42,21 @@ describe('useAuthViewModel', () => {
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
-  it('toggles isLoading during successful sign-in and triggers onSuccess', async () => {
+  it('toggles isLoading during successful sign-in and triggers onSuccess with normalized lowercase email', async () => {
     let resolveSignIn!: (user: AuthUser) => void;
     const signInPromise = new Promise<AuthUser>((resolve) => {
       resolveSignIn = resolve;
     });
     const signInWithEmail = jest.fn().mockReturnValue(signInPromise);
-    const authProvider: IAuthProvider = { signInWithEmail };
+    const authProvider = createMockAuthProvider({ signInWithEmail });
     const onSuccess = jest.fn();
 
     const page = AuthViewModelPageObject.render({ authProvider, onSuccess });
 
-    const pendingCall = page.startSignIn(validCredentials);
+    const pendingCall = page.startSignIn({
+      email: '  Asesor@CoriMotors.CR  ',
+      password: validCredentials.password,
+    });
 
     expect(page.isLoading).toBe(true);
     expect(page.authError).toBeNull();
@@ -71,7 +80,7 @@ describe('useAuthViewModel', () => {
       resolveSignIn = resolve;
     });
     const signInWithEmail = jest.fn().mockReturnValue(signInPromise);
-    const authProvider: IAuthProvider = { signInWithEmail };
+    const authProvider = createMockAuthProvider({ signInWithEmail });
     const onSuccess = jest.fn();
 
     const page = AuthViewModelPageObject.render({ authProvider, onSuccess });
@@ -92,7 +101,7 @@ describe('useAuthViewModel', () => {
 
   it('blocks provider invocation and sets authError when schema validation fails', async () => {
     const signInWithEmail = jest.fn().mockResolvedValue(mockAuthUser);
-    const authProvider: IAuthProvider = { signInWithEmail };
+    const authProvider = createMockAuthProvider({ signInWithEmail });
     const onSuccess = jest.fn();
 
     const page = AuthViewModelPageObject.render({ authProvider, onSuccess });
@@ -110,7 +119,7 @@ describe('useAuthViewModel', () => {
 
   it('blocks provider invocation when password is empty', async () => {
     const signInWithEmail = jest.fn().mockResolvedValue(mockAuthUser);
-    const authProvider: IAuthProvider = { signInWithEmail };
+    const authProvider = createMockAuthProvider({ signInWithEmail });
     const onSuccess = jest.fn();
 
     const page = AuthViewModelPageObject.render({ authProvider, onSuccess });
@@ -126,13 +135,13 @@ describe('useAuthViewModel', () => {
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
-  it('sets authError and resets isLoading to false when provider rejects with Error', async () => {
+  it('preserves canonical curated domain error message and resets isLoading when provider rejects', async () => {
     let rejectSignIn!: (error: Error) => void;
     const signInPromise = new Promise<AuthUser>((_, reject) => {
       rejectSignIn = reject;
     });
     const signInWithEmail = jest.fn().mockReturnValue(signInPromise);
-    const authProvider: IAuthProvider = { signInWithEmail };
+    const authProvider = createMockAuthProvider({ signInWithEmail });
     const onSuccess = jest.fn();
 
     const page = AuthViewModelPageObject.render({ authProvider, onSuccess });
@@ -151,26 +160,35 @@ describe('useAuthViewModel', () => {
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
-  it('uses fallback error message when provider throws a non-Error value', async () => {
-    const signInWithEmail = jest.fn().mockRejectedValue('raw failure');
-    const authProvider: IAuthProvider = { signInWithEmail };
+  it('never leaks arbitrary internal or Postgres error strings and returns Spanish fallback', async () => {
+    const signInWithEmail = jest
+      .fn()
+      .mockRejectedValueOnce(
+        new Error('Postgres internal: relation auth.users failed'),
+      )
+      .mockRejectedValueOnce('raw failure');
+    const authProvider = createMockAuthProvider({ signInWithEmail });
     const onSuccess = jest.fn();
 
     const page = AuthViewModelPageObject.render({ authProvider, onSuccess });
 
     await page.signIn(validCredentials);
-
     expect(page.isLoading).toBe(false);
+    expect(page.authError).toBe(AUTH_VIEW_MODEL_ERRORS.UNEXPECTED_ERROR);
+    expect(page.authError).not.toContain('Postgres');
+    expect(page.authError).not.toContain('auth.users');
+
+    await page.signIn(validCredentials);
     expect(page.authError).toBe(AUTH_VIEW_MODEL_ERRORS.UNEXPECTED_ERROR);
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
   it('clears authError when clearError is invoked', async () => {
-    const authProvider: IAuthProvider = {
+    const authProvider = createMockAuthProvider({
       signInWithEmail: jest
         .fn()
         .mockRejectedValue(new Error(AUTH_SERVICE_ERRORS.INVALID_CREDENTIALS)),
-    };
+    });
     const onSuccess = jest.fn();
 
     const page = AuthViewModelPageObject.render({ authProvider, onSuccess });
@@ -180,5 +198,24 @@ describe('useAuthViewModel', () => {
 
     page.clearError();
     expect(page.authError).toBeNull();
+  });
+
+  it('delegates signOut cleanly and sanitizes unexpected signOut failures', async () => {
+    const signOutMock = jest
+      .fn()
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error('Raw signout SDK failure'));
+    const authProvider = createMockAuthProvider({ signOut: signOutMock });
+    const page = AuthViewModelPageObject.render({ authProvider });
+
+    await page.signOut();
+    expect(signOutMock).toHaveBeenCalledTimes(1);
+    expect(page.authError).toBeNull();
+    expect(page.isLoading).toBe(false);
+
+    await page.signOut();
+    expect(signOutMock).toHaveBeenCalledTimes(2);
+    expect(page.authError).toBe(AUTH_VIEW_MODEL_ERRORS.UNEXPECTED_ERROR);
+    expect(page.isLoading).toBe(false);
   });
 });

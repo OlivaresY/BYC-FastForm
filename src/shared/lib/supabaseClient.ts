@@ -113,13 +113,75 @@ const createRealtimeOptions = (): RealtimeClientOptions | undefined => {
   return undefined;
 };
 
-export const expoSecureStoreAdapter: SupportedStorage = {
-  getItem: (key: string): Promise<string | null> =>
-    SecureStore.getItemAsync(key),
-  removeItem: (key: string): Promise<void> => SecureStore.deleteItemAsync(key),
-  setItem: (key: string, value: string): Promise<void> =>
-    SecureStore.setItemAsync(key, value),
+export interface SecureStoreModuleLike {
+  deleteItemAsync: (key: string) => Promise<void>;
+  getItemAsync: (key: string) => Promise<string | null>;
+  isAvailableAsync?: () => Promise<boolean>;
+  setItemAsync: (key: string, value: string) => Promise<void>;
+}
+
+/**
+ * Builds a SecureStore adapter that degrades cleanly to a RAM-only Map when
+ * `expo-secure-store` is unavailable (e.g., Web) or raises native Keychain/Keystore errors.
+ */
+export const createResilientSecureStoreAdapter = (
+  storage: SecureStoreModuleLike = SecureStore,
+  memoryFallback: Map<string, string> = new Map<string, string>(),
+): SupportedStorage => {
+  const canUseNativeStore = async (): Promise<boolean> => {
+    try {
+      if (typeof storage.isAvailableAsync === 'function') {
+        return await storage.isAvailableAsync();
+      }
+      return (
+        typeof storage.getItemAsync === 'function' &&
+        typeof storage.setItemAsync === 'function' &&
+        typeof storage.deleteItemAsync === 'function'
+      );
+    } catch {
+      return false;
+    }
+  };
+
+  return {
+    getItem: async (key: string): Promise<string | null> => {
+      if (await canUseNativeStore()) {
+        try {
+          const nativeValue = await storage.getItemAsync(key);
+          return nativeValue ?? memoryFallback.get(key) ?? null;
+        } catch {
+          return memoryFallback.get(key) ?? null;
+        }
+      }
+      return memoryFallback.get(key) ?? null;
+    },
+    removeItem: async (key: string): Promise<void> => {
+      memoryFallback.delete(key);
+      if (await canUseNativeStore()) {
+        try {
+          await storage.deleteItemAsync(key);
+        } catch {
+          // RAM fallback already cleared; suppress native deletion failures
+        }
+      }
+    },
+    setItem: async (key: string, value: string): Promise<void> => {
+      if (await canUseNativeStore()) {
+        try {
+          await storage.setItemAsync(key, value);
+          memoryFallback.delete(key);
+          return;
+        } catch {
+          // Degrade to RAM-only Map on native Keychain/Keystore write failures
+        }
+      }
+      memoryFallback.set(key, value);
+    },
+  };
 };
+
+export const expoSecureStoreAdapter: SupportedStorage =
+  createResilientSecureStoreAdapter();
 
 const resolvedConfig = resolveSupabaseConfig(process.env);
 const realtimeOptions = createRealtimeOptions();
