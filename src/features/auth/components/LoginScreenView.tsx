@@ -195,10 +195,11 @@ export const LoginScreenView = React.memo(
       });
 
     const isKeyboardVisible = keyboardHeight > 0;
-    const isScrollEnabled =
-      isKeyboardVisible ||
-      isPasswordFocused ||
-      (viewportHeight > 0 && contentHeight > viewportHeight);
+    const isContentOverflowing =
+      viewportHeight > 0 &&
+      contentHeight >
+        viewportHeight + LOGIN_SCREEN_NUMERICAL.SCROLL_OVERFLOW_TOLERANCE_PX;
+    const isScrollEnabled = isKeyboardVisible || isContentOverflowing;
 
     const autoScrollContextValue = useMemo<KeyboardAutoScrollContextValue>(
       () => ({ onInputFocus }),
@@ -247,20 +248,15 @@ export const LoginScreenView = React.memo(
       onSuccess,
     });
 
-    useEffect(() => {
-      if (!authError) {
-        return undefined;
+    const [prevAuthError, setPrevAuthError] = useState<string | null>(
+      authError,
+    );
+    if (authError !== prevAuthError) {
+      setPrevAuthError(authError);
+      if (authError) {
+        setFeedbackNotice(null);
       }
-      let isCancelled = false;
-      void Promise.resolve().then(() => {
-        if (!isCancelled) {
-          setFeedbackNotice(null);
-        }
-      });
-      return (): void => {
-        isCancelled = true;
-      };
-    }, [authError]);
+    }
 
     const {
       control,
@@ -297,6 +293,9 @@ export const LoginScreenView = React.memo(
         setFeedbackNotice(null);
         try {
           await signIn(data);
+        } catch (error: unknown) {
+          console.error('[LoginScreenView] Sign-in failed:', error);
+          setFeedbackNotice(LOGIN_SCREEN_COPY.UNEXPECTED_ACTION_ERROR);
         } finally {
           isSubmittingRef.current = false;
         }

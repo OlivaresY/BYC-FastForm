@@ -16,6 +16,7 @@ import { LoginScreenViewPageObject } from './LoginScreenView.po';
 const TEST_FIXTURES = {
   ALT_EMAIL: 'nuevo@corimotors.com',
   INVALID_EMAIL: 'invalid-email',
+  NETWORK_TIMEOUT_ERROR: 'Network timeout',
   PASSWORD_VALUE: 'SecurePass123!',
   RAW_TECHNICAL_ERROR: 'OAuth endpoint returned 401',
   VALID_EMAIL: 'asesor@corimotors.com',
@@ -364,7 +365,6 @@ describe('LoginScreenView Component Tests', () => {
     });
     mockedUseAuthViewModel.mockReturnValue(errorVm);
     page.rerender({ onSuccess: jest.fn() });
-    await page.flushMicrotasks();
 
     expect(page.queryAuthError()?.props.children).toBe(
       AUTH_SERVICE_ERRORS.INVALID_CREDENTIALS,
@@ -373,7 +373,6 @@ describe('LoginScreenView Component Tests', () => {
 
     mockedUseAuthViewModel.mockReturnValue(idleVm);
     page.rerender({ onSuccess: jest.fn() });
-    await page.flushMicrotasks();
 
     expect(page.queryAuthError()).toBeNull();
     expect(page.querySocialNotice()).toBeNull();
@@ -459,7 +458,7 @@ describe('LoginScreenView Component Tests', () => {
     ]);
   });
 
-  it('coordinates smart scrollEnabled across idle, password focus, keyboard visibility, and small viewport overflow via useKeyboardAutoScroll', () => {
+  it('coordinates smart scrollEnabled across idle, Android back-button keyboard hide while focused, and subpixel overflow tolerance', () => {
     const page = LoginScreenViewPageObject.render();
 
     expect(page.scrollView.props.scrollEnabled).toBe(false);
@@ -471,9 +470,6 @@ describe('LoginScreenView Component Tests', () => {
     });
 
     page.focusPassword();
-    expect(page.scrollView.props.scrollEnabled).toBe(true);
-
-    page.blurPassword();
     expect(page.scrollView.props.scrollEnabled).toBe(false);
 
     page.emitKeyboardDidShow(300);
@@ -484,6 +480,7 @@ describe('LoginScreenView Component Tests', () => {
       paddingBottom: LOGIN_SCREEN_NUMERICAL.KEYBOARD_OPEN_PADDING_BOTTOM,
     });
 
+    // Android hardware back button hides keyboard without firing onBlur
     page.emitKeyboardDidHide();
     expect(page.scrollView.props.scrollEnabled).toBe(false);
     expect(page.scrollView.props.contentContainerStyle).toMatchObject({
@@ -491,12 +488,108 @@ describe('LoginScreenView Component Tests', () => {
       justifyContent: 'space-between',
     });
 
+    page.blurPassword();
+
+    // Subpixel flexGrow difference within tolerance (2px) stays locked
     page.triggerScrollViewLayout(500);
+    page.triggerScrollViewContentSizeChange(
+      500 + LOGIN_SCREEN_NUMERICAL.SCROLL_OVERFLOW_TOLERANCE_PX,
+    );
+    expect(page.scrollView.props.scrollEnabled).toBe(false);
+
+    // Genuine content overflow (> viewportHeight + 2px) unlocks scroll
     page.triggerScrollViewContentSizeChange(620);
     expect(page.scrollView.props.scrollEnabled).toBe(true);
 
     page.triggerScrollViewContentSizeChange(480);
     expect(page.scrollView.props.scrollEnabled).toBe(false);
+  });
+
+  it('catches unexpected signIn promise rejections, logs console.error, surfaces unexpectedLoginError, and unlocks subsequent submit', async () => {
+    const signInError = new Error(TEST_FIXTURES.NETWORK_TIMEOUT_ERROR);
+    const mockSignIn = jest
+      .fn()
+      .mockRejectedValueOnce(signInError)
+      .mockResolvedValueOnce(undefined);
+
+    const mockVm = createMockAuthViewModel({
+      signIn: mockSignIn,
+    });
+    mockedUseAuthViewModel.mockReturnValue(mockVm);
+
+    const page = LoginScreenViewPageObject.render();
+
+    page.fillEmail(TEST_FIXTURES.VALID_EMAIL);
+    page.fillPassword(TEST_FIXTURES.PASSWORD_VALUE);
+
+    await page.submit();
+
+    await page.waitForCondition(() => {
+      expect(page.querySocialNotice()?.props.children).toBe(
+        esCR.auth.errors.unexpectedLoginError,
+      );
+    });
+
+    expect(mockSignIn).toHaveBeenCalledTimes(1);
+    expect(LoginScreenViewPageObject.getConsoleErrorCalls()).toContainEqual([
+      '[LoginScreenView] Sign-in failed:',
+      signInError,
+    ]);
+
+    await page.submit();
+
+    await page.waitForCondition(() => {
+      expect(mockSignIn).toHaveBeenCalledTimes(2);
+    });
+    expect(page.querySocialNotice()).toBeNull();
+  });
+
+  it('updates scrollEnabled accurately when onContentSizeChange fires before onLayout and across orientation viewport changes', () => {
+    const page = LoginScreenViewPageObject.render();
+
+    // Reverse measurement order: onContentSizeChange before onLayout
+    page.triggerScrollViewContentSizeChange(580);
+    expect(page.scrollView.props.scrollEnabled).toBe(false);
+
+    page.triggerScrollViewLayout(720);
+    expect(page.scrollView.props.scrollEnabled).toBe(false);
+
+    // Orientation change shrinks viewportHeight below contentHeight
+    page.triggerScrollViewLayout(420);
+    expect(page.scrollView.props.scrollEnabled).toBe(true);
+
+    // Portrait orientation restored
+    page.triggerScrollViewLayout(720);
+    expect(page.scrollView.props.scrollEnabled).toBe(false);
+  });
+
+  it('clears social notice immediately, shows validation errors, and blocks signIn on rapid double-submit with empty fields', async () => {
+    const mockVm = createMockAuthViewModel();
+    mockedUseAuthViewModel.mockReturnValue(mockVm);
+
+    const page = LoginScreenViewPageObject.render();
+
+    await page.pressGoogleButton();
+
+    await page.waitForCondition(() => {
+      expect(page.querySocialNotice()?.props.children).toBe(
+        esCR.auth.login.externalProviderNotice,
+      );
+    });
+
+    await page.doubleSubmit();
+
+    await page.waitForCondition(() => {
+      expect(page.queryEmailError()?.props.children).toBe(
+        LOGIN_CREDENTIALS_ERRORS.EMAIL_REQUIRED,
+      );
+      expect(page.queryPasswordError()?.props.children).toBe(
+        LOGIN_CREDENTIALS_ERRORS.PASSWORD_REQUIRED,
+      );
+    });
+
+    expect(page.querySocialNotice()).toBeNull();
+    expect(mockVm.signIn).not.toHaveBeenCalled();
   });
 
   it('invokes custom onForgotPasswordPress, onGooglePress, and onFacebookPress callbacks without showing fallback notice', async () => {
