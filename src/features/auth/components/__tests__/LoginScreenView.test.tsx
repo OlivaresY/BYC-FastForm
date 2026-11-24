@@ -1,8 +1,8 @@
 import type React from 'react';
 import { esCR } from '../../../../shared/i18n/es-CR';
 import {
+  LOGIN_SCREEN_BRANDING,
   LOGIN_SCREEN_COLORS,
-  LOGIN_SCREEN_COPY,
   LOGIN_SCREEN_NUMERICAL,
 } from '../../constants/LoginScreenView.constants';
 import {
@@ -80,15 +80,17 @@ describe('LoginScreenView Component Tests', () => {
     const page = LoginScreenViewPageObject.render();
 
     expect(page.header).toBeTruthy();
-    expect(page.getByText(LOGIN_SCREEN_COPY.BRAND_CORIMOTORS)).toBeTruthy();
-    expect(page.getByText(LOGIN_SCREEN_COPY.BRAND_SEPARATOR_BYC)).toBeTruthy();
+    expect(page.getByText(LOGIN_SCREEN_BRANDING.BRAND_CORIMOTORS)).toBeTruthy();
+    expect(
+      page.getByText(LOGIN_SCREEN_BRANDING.BRAND_SEPARATOR_BYC),
+    ).toBeTruthy();
 
     expect(page.scrollView.props.scrollEnabled).toBe(false);
     expect(page.scrollView.props.bounces).toBe(false);
     expect(page.scrollView.props.overScrollMode).toBe('never');
 
     expect(page.badge).toBeTruthy();
-    expect(page.getByText(LOGIN_SCREEN_COPY.BADGE_TEXT)).toBeTruthy();
+    expect(page.getByText(LOGIN_SCREEN_BRANDING.BADGE_TEXT)).toBeTruthy();
 
     expect(page.logo).toBeTruthy();
     expect(page.getByText(esCR.auth.login.logoSubtitle)).toBeTruthy();
@@ -110,9 +112,9 @@ describe('LoginScreenView Component Tests', () => {
     expect(page.socialDivider).toBeTruthy();
     expect(page.getByText(esCR.auth.login.dividerText)).toBeTruthy();
     expect(page.googleButton).toBeTruthy();
-    expect(page.getByText(LOGIN_SCREEN_COPY.GOOGLE_BUTTON)).toBeTruthy();
+    expect(page.getByText(LOGIN_SCREEN_BRANDING.GOOGLE_BUTTON)).toBeTruthy();
     expect(page.facebookButton).toBeTruthy();
-    expect(page.getByText(LOGIN_SCREEN_COPY.FACEBOOK_BUTTON)).toBeTruthy();
+    expect(page.getByText(LOGIN_SCREEN_BRANDING.FACEBOOK_BUTTON)).toBeTruthy();
     expect(page.querySocialNotice()).toBeNull();
 
     expect(page.footer).toBeTruthy();
@@ -365,6 +367,7 @@ describe('LoginScreenView Component Tests', () => {
     });
     mockedUseAuthViewModel.mockReturnValue(errorVm);
     page.rerender({ onSuccess: jest.fn() });
+    await page.flushMicrotasks();
 
     expect(page.queryAuthError()?.props.children).toBe(
       AUTH_SERVICE_ERRORS.INVALID_CREDENTIALS,
@@ -373,6 +376,7 @@ describe('LoginScreenView Component Tests', () => {
 
     mockedUseAuthViewModel.mockReturnValue(idleVm);
     page.rerender({ onSuccess: jest.fn() });
+    await page.flushMicrotasks();
 
     expect(page.queryAuthError()).toBeNull();
     expect(page.querySocialNotice()).toBeNull();

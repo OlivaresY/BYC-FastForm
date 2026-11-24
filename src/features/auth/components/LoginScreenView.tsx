@@ -40,6 +40,7 @@ import {
   type KeyboardAutoScrollContextValue,
 } from '@/shared/ui';
 import {
+  LOGIN_SCREEN_BRANDING,
   LOGIN_SCREEN_COLORS,
   LOGIN_SCREEN_COPY,
   LOGIN_SCREEN_NUMERICAL,
@@ -248,15 +249,20 @@ export const LoginScreenView = React.memo(
       onSuccess,
     });
 
-    const [prevAuthError, setPrevAuthError] = useState<string | null>(
-      authError,
-    );
-    if (authError !== prevAuthError) {
-      setPrevAuthError(authError);
-      if (authError) {
-        setFeedbackNotice(null);
+    useEffect(() => {
+      if (!authError) {
+        return undefined;
       }
-    }
+      let isCancelled = false;
+      queueMicrotask(() => {
+        if (!isCancelled) {
+          setFeedbackNotice(null);
+        }
+      });
+      return (): void => {
+        isCancelled = true;
+      };
+    }, [authError]);
 
     const {
       control,
@@ -421,10 +427,10 @@ export const LoginScreenView = React.memo(
               >
                 <View className={LOGIN_SCREEN_STYLES.HEADER_ROW}>
                   <Text className={LOGIN_SCREEN_STYLES.HEADER_BRAND_RED}>
-                    {LOGIN_SCREEN_COPY.BRAND_CORIMOTORS}
+                    {LOGIN_SCREEN_BRANDING.BRAND_CORIMOTORS}
                   </Text>
                   <Text className={LOGIN_SCREEN_STYLES.HEADER_BRAND_SECONDARY}>
-                    {LOGIN_SCREEN_COPY.BRAND_SEPARATOR_BYC}
+                    {LOGIN_SCREEN_BRANDING.BRAND_SEPARATOR_BYC}
                   </Text>
                 </View>
               </View>
@@ -442,7 +448,7 @@ export const LoginScreenView = React.memo(
                     size={LOGIN_SCREEN_NUMERICAL.BADGE_ICON_SIZE}
                   />
                   <Text className={LOGIN_SCREEN_STYLES.BADGE_TEXT}>
-                    {LOGIN_SCREEN_COPY.BADGE_TEXT}
+                    {LOGIN_SCREEN_BRANDING.BADGE_TEXT}
                   </Text>
                 </View>
 
@@ -453,13 +459,13 @@ export const LoginScreenView = React.memo(
                 >
                   <Text accessibilityRole='header'>
                     <Text className={LOGIN_SCREEN_STYLES.LOGO_TEXT_BLACK}>
-                      {LOGIN_SCREEN_COPY.LOGO_B}
+                      {LOGIN_SCREEN_BRANDING.LOGO_B}
                     </Text>
                     <Text className={LOGIN_SCREEN_STYLES.LOGO_TEXT_RED}>
-                      {LOGIN_SCREEN_COPY.LOGO_Y}
+                      {LOGIN_SCREEN_BRANDING.LOGO_Y}
                     </Text>
                     <Text className={LOGIN_SCREEN_STYLES.LOGO_TEXT_BLACK}>
-                      {LOGIN_SCREEN_COPY.LOGO_C_FASTFORM}
+                      {LOGIN_SCREEN_BRANDING.LOGO_C_FASTFORM}
                     </Text>
                   </Text>
                   <Text className={LOGIN_SCREEN_STYLES.LOGO_SUBTITLE}>
@@ -660,7 +666,7 @@ export const LoginScreenView = React.memo(
                   {/* Social Login Row */}
                   <View className={LOGIN_SCREEN_STYLES.SOCIAL_BUTTONS_ROW}>
                     <TouchableOpacity
-                      accessibilityLabel={LOGIN_SCREEN_COPY.GOOGLE_BUTTON}
+                      accessibilityLabel={LOGIN_SCREEN_BRANDING.GOOGLE_BUTTON}
                       accessibilityRole='button'
                       accessibilityState={{ disabled: isLoading }}
                       className={`${LOGIN_SCREEN_STYLES.GOOGLE_BUTTON} ${isLoading ? LOGIN_SCREEN_STYLES.SOCIAL_BUTTON_DISABLED : ''}`}
@@ -670,12 +676,12 @@ export const LoginScreenView = React.memo(
                     >
                       <GoogleBrandIcon />
                       <Text className={LOGIN_SCREEN_STYLES.GOOGLE_BUTTON_TEXT}>
-                        {LOGIN_SCREEN_COPY.GOOGLE_BUTTON}
+                        {LOGIN_SCREEN_BRANDING.GOOGLE_BUTTON}
                       </Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                      accessibilityLabel={LOGIN_SCREEN_COPY.FACEBOOK_BUTTON}
+                      accessibilityLabel={LOGIN_SCREEN_BRANDING.FACEBOOK_BUTTON}
                       accessibilityRole='button'
                       accessibilityState={{ disabled: isLoading }}
                       className={`${LOGIN_SCREEN_STYLES.FACEBOOK_BUTTON} ${isLoading ? LOGIN_SCREEN_STYLES.SOCIAL_BUTTON_DISABLED : ''}`}
@@ -687,7 +693,7 @@ export const LoginScreenView = React.memo(
                       <Text
                         className={LOGIN_SCREEN_STYLES.FACEBOOK_BUTTON_TEXT}
                       >
-                        {LOGIN_SCREEN_COPY.FACEBOOK_BUTTON}
+                        {LOGIN_SCREEN_BRANDING.FACEBOOK_BUTTON}
                       </Text>
                     </TouchableOpacity>
                   </View>

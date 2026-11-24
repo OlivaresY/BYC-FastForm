@@ -1,5 +1,16 @@
 import { esCR } from '@/shared/i18n';
 
+export const LOGIN_SCREEN_BRANDING = {
+  BADGE_TEXT: 'BUILD YOUR CREDIT',
+  BRAND_CORIMOTORS: 'CoriMotors',
+  BRAND_SEPARATOR_BYC: ' | BYC',
+  FACEBOOK_BUTTON: 'Facebook',
+  GOOGLE_BUTTON: 'Google',
+  LOGO_B: 'B',
+  LOGO_C_FASTFORM: 'C FastForm',
+  LOGO_Y: 'Y',
+} as const;
+
 export const LOGIN_SCREEN_COLORS = {
   ALERT_BACKGROUND: '#FEF2F2',
   BADGE_BACKGROUND: '#DEE8E0',
@@ -24,26 +35,18 @@ export const LOGIN_SCREEN_COLORS = {
 } as const;
 
 export const LOGIN_SCREEN_COPY = {
-  BADGE_TEXT: 'BUILD YOUR CREDIT',
-  BRAND_CORIMOTORS: 'CoriMotors',
-  BRAND_SEPARATOR_BYC: ' | BYC',
   CARD_SUBTITLE: esCR.auth.login.cardSubtitle,
   CARD_TITLE: esCR.auth.login.cardTitle,
   DIVIDER_TEXT: esCR.auth.login.dividerText,
   EMAIL_LABEL: esCR.auth.login.emailLabel,
   EMAIL_PLACEHOLDER: esCR.auth.login.emailPlaceholder,
   EXTERNAL_PROVIDER_NOTICE: esCR.auth.login.externalProviderNotice,
-  FACEBOOK_BUTTON: 'Facebook',
   FOOTER_COPYRIGHT: esCR.auth.login.footerCopyright,
   FOOTER_SECURITY: esCR.auth.login.footerSecurity,
   FORGOT_PASSWORD: esCR.auth.login.forgotPassword,
   FORGOT_PASSWORD_NOTICE: esCR.auth.login.forgotPasswordNotice,
-  GOOGLE_BUTTON: 'Google',
   HIDE_PASSWORD_A11Y: esCR.auth.login.hidePasswordA11y,
-  LOGO_B: 'B',
-  LOGO_C_FASTFORM: 'C FastForm',
   LOGO_SUBTITLE: esCR.auth.login.logoSubtitle,
-  LOGO_Y: 'Y',
   PASSWORD_LABEL: esCR.auth.login.passwordLabel,
   PASSWORD_PLACEHOLDER: '••••••••',
   SHOW_PASSWORD_A11Y: esCR.auth.login.showPasswordA11y,
