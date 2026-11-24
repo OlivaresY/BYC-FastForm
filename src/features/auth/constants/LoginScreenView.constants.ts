@@ -12,6 +12,7 @@ export const LOGIN_SCREEN_COLORS = {
   GOOGLE_GREEN: '#34A853',
   GOOGLE_RED: '#EA4335',
   GOOGLE_YELLOW: '#FBBC05',
+  ICON_DISABLED: '#9CA3AF',
   ICON_SECONDARY: '#5A6B80',
   INPUT_BORDER_BASE: '#A39F97',
   INPUT_BORDER_ERROR: '#B91C1C',
@@ -47,6 +48,7 @@ export const LOGIN_SCREEN_COPY = {
   PASSWORD_PLACEHOLDER: '••••••••',
   SHOW_PASSWORD_A11Y: esCR.auth.login.showPasswordA11y,
   SUBMIT_BUTTON: esCR.auth.login.submitButton,
+  UNEXPECTED_ACTION_ERROR: esCR.auth.errors.unexpectedLoginError,
 } as const;
 
 export const LOGIN_SCREEN_NUMERICAL = {
@@ -58,6 +60,7 @@ export const LOGIN_SCREEN_NUMERICAL = {
   INPUT_ICON_SIZE: 18,
   KEYBOARD_OPEN_PADDING_BOTTOM: 32,
   KEYBOARD_SCROLL_DELAY_MS: 120,
+  SCROLL_EVENT_THROTTLE_MS: 16,
   SOCIAL_ICON_SIZE: 18,
   SUBMIT_ICON_SIZE: 18,
 } as const;
@@ -111,6 +114,7 @@ export const LOGIN_SCREEN_STYLES = {
   PASSWORD_LABEL: 'mb-1.5 text-sm font-medium text-[#111111]',
   PASSWORD_TOGGLE_BUTTON:
     'min-h-[48px] min-w-[48px] items-center justify-center',
+  PASSWORD_TOGGLE_DISABLED: 'opacity-40',
   SCREEN_CONTAINER: 'flex-1 bg-[#F7F7F6]',
   SOCIAL_BUTTON_DISABLED: 'opacity-40',
   SOCIAL_BUTTONS_ROW: 'flex-row gap-3',

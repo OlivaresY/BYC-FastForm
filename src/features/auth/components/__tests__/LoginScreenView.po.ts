@@ -1,31 +1,92 @@
 import React from 'react';
-import { Keyboard } from 'react-native';
+import {
+  Keyboard,
+  ScrollView,
+  StyleSheet,
+  type KeyboardEvent,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import type { RenderResult } from '@testing-library/react-native';
 import { BASE_BUTTON_TEST_IDS } from '@/shared/ui';
-import { LOGIN_SCREEN_TEST_IDS } from '../../constants/LoginScreenView.constants';
+import {
+  LOGIN_SCREEN_STYLES,
+  LOGIN_SCREEN_TEST_IDS,
+} from '../../constants/LoginScreenView.constants';
 import { LoginScreenView, type LoginScreenViewProps } from '../LoginScreenView';
 
-type MockKeyboardWithEmitter = typeof Keyboard & {
-  _emitter?: { emit: (event: string, ...args: unknown[]) => void };
-  emit?: (event: string, ...args: unknown[]) => void;
-};
+type KeyboardEventCallback = (event: KeyboardEvent) => void;
 
-const emitKeyboardEvent = (event: string, payload?: unknown): void => {
-  const keyboardWithEmitter = Keyboard as unknown as MockKeyboardWithEmitter;
-  if (typeof keyboardWithEmitter.emit === 'function') {
-    keyboardWithEmitter.emit(event, payload);
-    return;
-  }
-  keyboardWithEmitter._emitter?.emit(event, payload);
-};
+const createKeyboardEvent = (height: number): KeyboardEvent =>
+  ({
+    duration: 250,
+    easing: 'keyboard',
+    endCoordinates: { height, screenX: 0, screenY: 500, width: 390 },
+    startCoordinates: { height: 0, screenX: 0, screenY: 800, width: 390 },
+  }) as unknown as KeyboardEvent;
 
 export class LoginScreenViewPageObject {
+  private static readonly keyboardListeners = new Map<
+    string,
+    Set<KeyboardEventCallback>
+  >();
+  private static keyboardAddListenerSpy: jest.SpyInstance | null = null;
+  private static scrollToEndSpy: jest.SpyInstance | null = null;
+
   private readonly screen: RenderResult;
 
   public constructor(screen: RenderResult) {
     this.screen = screen;
   }
+
+  public static setupEnvironment = (): void => {
+    LoginScreenViewPageObject.keyboardListeners.clear();
+    LoginScreenViewPageObject.keyboardAddListenerSpy?.mockRestore();
+    LoginScreenViewPageObject.scrollToEndSpy?.mockRestore();
+
+    LoginScreenViewPageObject.keyboardAddListenerSpy = jest
+      .spyOn(Keyboard, 'addListener')
+      .mockImplementation(((
+        eventName: string,
+        listener: KeyboardEventCallback,
+      ) => {
+        const listenersForEvent =
+          LoginScreenViewPageObject.keyboardListeners.get(eventName) ??
+          new Set<KeyboardEventCallback>();
+        listenersForEvent.add(listener);
+        LoginScreenViewPageObject.keyboardListeners.set(
+          eventName,
+          listenersForEvent,
+        );
+        return {
+          remove: (): void => {
+            listenersForEvent.delete(listener);
+          },
+        };
+      }) as typeof Keyboard.addListener);
+
+    LoginScreenViewPageObject.scrollToEndSpy = jest
+      .spyOn(ScrollView.prototype, 'scrollToEnd')
+      .mockImplementation(jest.fn());
+  };
+
+  public static teardownEnvironment = (): void => {
+    LoginScreenViewPageObject.keyboardListeners.clear();
+    LoginScreenViewPageObject.keyboardAddListenerSpy?.mockRestore();
+    LoginScreenViewPageObject.keyboardAddListenerSpy = null;
+    LoginScreenViewPageObject.scrollToEndSpy?.mockRestore();
+    LoginScreenViewPageObject.scrollToEndSpy = null;
+  };
+
+  public static getScrollToEndCalls = (): unknown[][] =>
+    LoginScreenViewPageObject.scrollToEndSpy?.mock.calls ?? [];
+
+  public static advanceTimers = (ms: number): void => {
+    act(() => {
+      jest.advanceTimersByTime(ms);
+    });
+  };
 
   public static render = (
     props?: LoginScreenViewProps,
@@ -113,12 +174,57 @@ export class LoginScreenViewPageObject {
 
   public queryByText = (text: string) => this.screen.queryByText(text);
 
+  public getPasswordToggleIconColor = (): string | undefined => {
+    const iconChild = this.passwordToggleButton.findAll(
+      (node) => typeof node.props?.color === 'string',
+    )[0];
+    return iconChild?.props?.color as string | undefined;
+  };
+
+  public isPasswordToggleVisuallyDisabled = (): boolean => {
+    let current: typeof this.passwordToggleButton | null =
+      this.passwordToggleButton;
+    while (current) {
+      const className = current.props?.className;
+      if (
+        typeof className === 'string' &&
+        className.includes(LOGIN_SCREEN_STYLES.PASSWORD_TOGGLE_DISABLED)
+      ) {
+        return true;
+      }
+      const flattenedStyle = StyleSheet.flatten(
+        current.props?.style as StyleProp<ViewStyle>,
+      );
+      if (flattenedStyle?.opacity === 0.4) {
+        return true;
+      }
+      current = current.parent;
+    }
+    return false;
+  };
+
+  public rerender = (props?: LoginScreenViewProps): void => {
+    this.screen.rerender(React.createElement(LoginScreenView, props));
+  };
+
+  public unmount = (): void => {
+    this.screen.unmount();
+  };
+
   public fillEmail = (value: string): void => {
     fireEvent.changeText(this.emailInput, value);
   };
 
   public fillPassword = (value: string): void => {
     fireEvent.changeText(this.passwordInput, value);
+  };
+
+  public focusPassword = (): void => {
+    fireEvent(this.passwordInput, 'focus');
+  };
+
+  public blurPassword = (): void => {
+    fireEvent(this.passwordInput, 'blur');
   };
 
   public togglePasswordVisibility = (): void => {
@@ -149,17 +255,36 @@ export class LoginScreenViewPageObject {
     });
   };
 
-  public emitKeyboardDidShow = (): void => {
+  public emitKeyboardWillShow = (height = 300): void => {
+    const event = createKeyboardEvent(height);
     act(() => {
-      emitKeyboardEvent('keyboardDidShow', {
-        endCoordinates: { height: 300, screenX: 0, screenY: 500, width: 390 },
-      });
+      LoginScreenViewPageObject.keyboardListeners
+        .get('keyboardWillShow')
+        ?.forEach((listener) => {
+          listener(event);
+        });
+    });
+  };
+
+  public emitKeyboardDidShow = (height = 300): void => {
+    const event = createKeyboardEvent(height);
+    act(() => {
+      LoginScreenViewPageObject.keyboardListeners
+        .get('keyboardDidShow')
+        ?.forEach((listener) => {
+          listener(event);
+        });
     });
   };
 
   public emitKeyboardDidHide = (): void => {
+    const event = createKeyboardEvent(0);
     act(() => {
-      emitKeyboardEvent('keyboardDidHide');
+      LoginScreenViewPageObject.keyboardListeners
+        .get('keyboardDidHide')
+        ?.forEach((listener) => {
+          listener(event);
+        });
     });
   };
 

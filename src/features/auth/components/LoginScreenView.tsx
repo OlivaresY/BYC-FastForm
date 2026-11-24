@@ -19,7 +19,6 @@ import React, {
 } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
-  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -28,11 +27,17 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  type ScrollViewInstance,
 } from 'react-native';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
-import { BASE_BUTTON_VARIANTS, BaseButton, CustomTextInput } from '@/shared/ui';
+import {
+  BASE_BUTTON_VARIANTS,
+  BaseButton,
+  CustomTextInput,
+  KeyboardAutoScrollContext,
+  useKeyboardAutoScroll,
+  type KeyboardAutoScrollContextValue,
+} from '@/shared/ui';
 import {
   LOGIN_SCREEN_COLORS,
   LOGIN_SCREEN_COPY,
@@ -68,6 +73,7 @@ const FeedbackAlertBanner = ({
   testID,
 }: FeedbackAlertBannerProps): React.JSX.Element => (
   <View
+    accessibilityLiveRegion='polite'
     accessibilityRole='alert'
     className={`${LOGIN_SCREEN_STYLES.ALERT_BANNER_CONTAINER} ${containerClassName}`}
   >
@@ -164,57 +170,67 @@ export const LoginScreenView = React.memo(
   }: LoginScreenViewProps): React.JSX.Element => {
     const safeAreaInsets =
       useContext(SafeAreaInsetsContext) ?? DEFAULT_SAFE_AREA_INSETS;
-    const scrollViewRef = useRef<ScrollViewInstance>(null);
     const isPasswordFocusedRef = useRef<boolean>(false);
+    const hasScrolledPasswordRef = useRef<boolean>(false);
     const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const [isKeyboardVisible, setIsKeyboardVisible] = useState<boolean>(false);
     const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
     const [isPasswordFocused, setIsPasswordFocused] = useState<boolean>(false);
     const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
 
-    const scrollToPasswordSection = useCallback((): void => {
+    const { handleScroll, keyboardHeight, onInputFocus, scrollViewRef } =
+      useKeyboardAutoScroll({
+        bottomBarHeight: 0,
+        extraScrollPadding: LOGIN_SCREEN_NUMERICAL.KEYBOARD_OPEN_PADDING_BOTTOM,
+      });
+
+    const isKeyboardVisible = keyboardHeight > 0;
+
+    const autoScrollContextValue = useMemo<KeyboardAutoScrollContextValue>(
+      () => ({ onInputFocus }),
+      [onInputFocus],
+    );
+
+    const cancelPendingPasswordScroll = useCallback((): void => {
       if (scrollTimeoutRef.current !== null) {
         clearTimeout(scrollTimeoutRef.current);
+        scrollTimeoutRef.current = null;
       }
+    }, []);
+
+    const triggerPasswordScrollOnce = useCallback((): void => {
+      if (hasScrolledPasswordRef.current) {
+        return;
+      }
+      hasScrolledPasswordRef.current = true;
+      cancelPendingPasswordScroll();
       scrollTimeoutRef.current = setTimeout(() => {
         scrollTimeoutRef.current = null;
         scrollViewRef.current?.scrollToEnd({ animated: true });
       }, LOGIN_SCREEN_NUMERICAL.KEYBOARD_SCROLL_DELAY_MS);
-    }, []);
+    }, [cancelPendingPasswordScroll, scrollViewRef]);
 
     useEffect(() => {
-      const handleKeyboardShow = (): void => {
-        setIsKeyboardVisible(true);
-        if (isPasswordFocusedRef.current) {
-          scrollToPasswordSection();
-        }
-      };
-      const handleKeyboardHide = (): void => {
-        setIsKeyboardVisible(false);
-      };
-
-      const subscriptions = [
-        Keyboard.addListener('keyboardDidShow', handleKeyboardShow),
-        Keyboard.addListener('keyboardDidHide', handleKeyboardHide),
-      ];
-
-      if (Platform.OS === 'ios') {
-        subscriptions.push(
-          Keyboard.addListener('keyboardWillShow', handleKeyboardShow),
-          Keyboard.addListener('keyboardWillHide', handleKeyboardHide),
-        );
+      if (!isKeyboardVisible) {
+        hasScrolledPasswordRef.current = false;
+        cancelPendingPasswordScroll();
+        return undefined;
       }
+      if (isPasswordFocusedRef.current) {
+        triggerPasswordScrollOnce();
+      }
+      return undefined;
+    }, [
+      cancelPendingPasswordScroll,
+      isKeyboardVisible,
+      triggerPasswordScrollOnce,
+    ]);
 
-      return (): void => {
-        subscriptions.forEach((subscription) => {
-          subscription.remove();
-        });
-        if (scrollTimeoutRef.current !== null) {
-          clearTimeout(scrollTimeoutRef.current);
-          scrollTimeoutRef.current = null;
-        }
-      };
-    }, [scrollToPasswordSection]);
+    useEffect(
+      () => (): void => {
+        cancelPendingPasswordScroll();
+      },
+      [cancelPendingPasswordScroll],
+    );
 
     const headerContainerStyle = useMemo(
       () => ({
@@ -272,6 +288,7 @@ export const LoginScreenView = React.memo(
     );
 
     const handleFormSubmit = useCallback((): void => {
+      setFeedbackNotice(null);
       void handleSubmit(handleValidSubmit)();
     }, [handleSubmit, handleValidSubmit]);
 
@@ -290,8 +307,12 @@ export const LoginScreenView = React.memo(
         }
         try {
           await handler();
-        } catch {
-          setFeedbackNotice(fallbackNotice);
+        } catch (error: unknown) {
+          const resolvedErrorMessage =
+            error instanceof Error && error.message.trim().length > 0
+              ? error.message
+              : LOGIN_SCREEN_COPY.UNEXPECTED_ACTION_ERROR;
+          setFeedbackNotice(resolvedErrorMessage);
         }
       },
       [authError, clearError],
@@ -324,6 +345,12 @@ export const LoginScreenView = React.memo(
         ? LOGIN_SCREEN_STYLES.PASSWORD_INPUT_BORDER_FOCUSED
         : LOGIN_SCREEN_STYLES.PASSWORD_INPUT_BORDER_BASE;
 
+    const passwordToggleIconColor = isLoading
+      ? LOGIN_SCREEN_COLORS.ICON_DISABLED
+      : LOGIN_SCREEN_COLORS.ICON_SECONDARY;
+
+    const visibleFeedbackNotice = authError ? null : feedbackNotice;
+
     const emailLeftIcon = (
       <Mail
         color={LOGIN_SCREEN_COLORS.ICON_SECONDARY}
@@ -339,326 +366,344 @@ export const LoginScreenView = React.memo(
     );
 
     return (
-      <View className={LOGIN_SCREEN_STYLES.SCREEN_CONTAINER} testID={testID}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={cardShadowStyles.keyboardAvoiding}
-        >
-          <ScrollView
-            bounces={false}
-            contentContainerStyle={
-              isKeyboardVisible
-                ? cardShadowStyles.scrollContentKeyboardOpen
-                : cardShadowStyles.scrollContentIdle
-            }
-            keyboardDismissMode='on-drag'
-            keyboardShouldPersistTaps='handled'
-            overScrollMode='never'
-            ref={scrollViewRef}
-            scrollEnabled={isKeyboardVisible}
-            showsVerticalScrollIndicator={false}
-            testID={LOGIN_SCREEN_TEST_IDS.SCROLL_VIEW}
+      <KeyboardAutoScrollContext.Provider value={autoScrollContextValue}>
+        <View className={LOGIN_SCREEN_STYLES.SCREEN_CONTAINER} testID={testID}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={cardShadowStyles.keyboardAvoiding}
           >
-            {/* Top Brand Header */}
-            <View
-              className={LOGIN_SCREEN_STYLES.HEADER_CONTAINER}
-              style={headerContainerStyle}
-              testID={LOGIN_SCREEN_TEST_IDS.HEADER}
+            <ScrollView
+              bounces={false}
+              contentContainerStyle={
+                isKeyboardVisible
+                  ? cardShadowStyles.scrollContentKeyboardOpen
+                  : cardShadowStyles.scrollContentIdle
+              }
+              keyboardDismissMode='on-drag'
+              keyboardShouldPersistTaps='handled'
+              onScroll={handleScroll}
+              overScrollMode='never'
+              ref={scrollViewRef}
+              scrollEnabled
+              scrollEventThrottle={
+                LOGIN_SCREEN_NUMERICAL.SCROLL_EVENT_THROTTLE_MS
+              }
+              showsVerticalScrollIndicator={false}
+              testID={LOGIN_SCREEN_TEST_IDS.SCROLL_VIEW}
             >
-              <View className={LOGIN_SCREEN_STYLES.HEADER_ROW}>
-                <Text className={LOGIN_SCREEN_STYLES.HEADER_BRAND_RED}>
-                  {LOGIN_SCREEN_COPY.BRAND_CORIMOTORS}
-                </Text>
-                <Text className={LOGIN_SCREEN_STYLES.HEADER_BRAND_SECONDARY}>
-                  {LOGIN_SCREEN_COPY.BRAND_SEPARATOR_BYC}
-                </Text>
-              </View>
-            </View>
-
-            <View className={LOGIN_SCREEN_STYLES.CENTER_SECTION}>
-              {/* Top Badge */}
+              {/* Top Brand Header */}
               <View
-                className={LOGIN_SCREEN_STYLES.BADGE_CONTAINER}
-                testID={LOGIN_SCREEN_TEST_IDS.BADGE}
+                className={LOGIN_SCREEN_STYLES.HEADER_CONTAINER}
+                style={headerContainerStyle}
+                testID={LOGIN_SCREEN_TEST_IDS.HEADER}
               >
-                <Car
-                  color={LOGIN_SCREEN_COLORS.BADGE_TEXT}
-                  size={LOGIN_SCREEN_NUMERICAL.BADGE_ICON_SIZE}
-                />
-                <Text className={LOGIN_SCREEN_STYLES.BADGE_TEXT}>
-                  {LOGIN_SCREEN_COPY.BADGE_TEXT}
-                </Text>
+                <View className={LOGIN_SCREEN_STYLES.HEADER_ROW}>
+                  <Text className={LOGIN_SCREEN_STYLES.HEADER_BRAND_RED}>
+                    {LOGIN_SCREEN_COPY.BRAND_CORIMOTORS}
+                  </Text>
+                  <Text className={LOGIN_SCREEN_STYLES.HEADER_BRAND_SECONDARY}>
+                    {LOGIN_SCREEN_COPY.BRAND_SEPARATOR_BYC}
+                  </Text>
+                </View>
               </View>
 
-              {/* Main Logo */}
-              <View
-                className={LOGIN_SCREEN_STYLES.LOGO_CONTAINER}
-                testID={LOGIN_SCREEN_TEST_IDS.LOGO}
-              >
-                <Text accessibilityRole='header'>
-                  <Text className={LOGIN_SCREEN_STYLES.LOGO_TEXT_BLACK}>
-                    {LOGIN_SCREEN_COPY.LOGO_B}
-                  </Text>
-                  <Text className={LOGIN_SCREEN_STYLES.LOGO_TEXT_RED}>
-                    {LOGIN_SCREEN_COPY.LOGO_Y}
-                  </Text>
-                  <Text className={LOGIN_SCREEN_STYLES.LOGO_TEXT_BLACK}>
-                    {LOGIN_SCREEN_COPY.LOGO_C_FASTFORM}
-                  </Text>
-                </Text>
-                <Text className={LOGIN_SCREEN_STYLES.LOGO_SUBTITLE}>
-                  {LOGIN_SCREEN_COPY.LOGO_SUBTITLE}
-                </Text>
-              </View>
-
-              {/* Login Card */}
-              <View
-                className={LOGIN_SCREEN_STYLES.CARD_CONTAINER}
-                style={cardShadowStyles.cardShadow}
-                testID={LOGIN_SCREEN_TEST_IDS.CARD}
-              >
-                <Text
-                  accessibilityRole='header'
-                  className={LOGIN_SCREEN_STYLES.CARD_TITLE}
+              <View className={LOGIN_SCREEN_STYLES.CENTER_SECTION}>
+                {/* Top Badge */}
+                <View
+                  className={LOGIN_SCREEN_STYLES.BADGE_CONTAINER}
+                  testID={LOGIN_SCREEN_TEST_IDS.BADGE}
                 >
-                  {LOGIN_SCREEN_COPY.CARD_TITLE}
-                </Text>
-                <Text className={LOGIN_SCREEN_STYLES.CARD_SUBTITLE}>
-                  {LOGIN_SCREEN_COPY.CARD_SUBTITLE}
-                </Text>
-
-                {/* Email Field */}
-                <View className={LOGIN_SCREEN_STYLES.FIELD_SPACING}>
-                  <Controller
-                    control={control}
-                    name='email'
-                    render={({ field: { onBlur, onChange, value } }) => (
-                      <CustomTextInput
-                        autoCapitalize='none'
-                        autoComplete='email'
-                        autoCorrect={false}
-                        editable={!isLoading}
-                        error={errors.email?.message}
-                        keyboardType='email-address'
-                        label={LOGIN_SCREEN_COPY.EMAIL_LABEL}
-                        leftIcon={emailLeftIcon}
-                        onBlur={onBlur}
-                        onChangeText={(text: string): void => {
-                          clearFeedbackState();
-                          onChange(text);
-                        }}
-                        placeholder={LOGIN_SCREEN_COPY.EMAIL_PLACEHOLDER}
-                        testID={LOGIN_SCREEN_TEST_IDS.EMAIL_INPUT}
-                        value={value}
-                      />
-                    )}
+                  <Car
+                    color={LOGIN_SCREEN_COLORS.BADGE_TEXT}
+                    size={LOGIN_SCREEN_NUMERICAL.BADGE_ICON_SIZE}
                   />
+                  <Text className={LOGIN_SCREEN_STYLES.BADGE_TEXT}>
+                    {LOGIN_SCREEN_COPY.BADGE_TEXT}
+                  </Text>
                 </View>
 
-                {/* Password Field */}
-                <View>
-                  <Text className={LOGIN_SCREEN_STYLES.PASSWORD_LABEL}>
-                    {LOGIN_SCREEN_COPY.PASSWORD_LABEL}
+                {/* Main Logo */}
+                <View
+                  className={LOGIN_SCREEN_STYLES.LOGO_CONTAINER}
+                  testID={LOGIN_SCREEN_TEST_IDS.LOGO}
+                >
+                  <Text accessibilityRole='header'>
+                    <Text className={LOGIN_SCREEN_STYLES.LOGO_TEXT_BLACK}>
+                      {LOGIN_SCREEN_COPY.LOGO_B}
+                    </Text>
+                    <Text className={LOGIN_SCREEN_STYLES.LOGO_TEXT_RED}>
+                      {LOGIN_SCREEN_COPY.LOGO_Y}
+                    </Text>
+                    <Text className={LOGIN_SCREEN_STYLES.LOGO_TEXT_BLACK}>
+                      {LOGIN_SCREEN_COPY.LOGO_C_FASTFORM}
+                    </Text>
                   </Text>
-                  <Controller
-                    control={control}
-                    name='password'
-                    render={({ field: { onBlur, onChange, value } }) => (
-                      <View
-                        className={`${LOGIN_SCREEN_STYLES.PASSWORD_INPUT_WRAPPER} ${passwordBorderClass}`}
-                      >
-                        <Lock
-                          color={LOGIN_SCREEN_COLORS.ICON_SECONDARY}
-                          size={LOGIN_SCREEN_NUMERICAL.INPUT_ICON_SIZE}
-                        />
-                        <TextInput
-                          accessibilityLabel={LOGIN_SCREEN_COPY.PASSWORD_LABEL}
-                          aria-invalid={Boolean(errors.password)}
+                  <Text className={LOGIN_SCREEN_STYLES.LOGO_SUBTITLE}>
+                    {LOGIN_SCREEN_COPY.LOGO_SUBTITLE}
+                  </Text>
+                </View>
+
+                {/* Login Card */}
+                <View
+                  className={LOGIN_SCREEN_STYLES.CARD_CONTAINER}
+                  style={cardShadowStyles.cardShadow}
+                  testID={LOGIN_SCREEN_TEST_IDS.CARD}
+                >
+                  <Text
+                    accessibilityRole='header'
+                    className={LOGIN_SCREEN_STYLES.CARD_TITLE}
+                  >
+                    {LOGIN_SCREEN_COPY.CARD_TITLE}
+                  </Text>
+                  <Text className={LOGIN_SCREEN_STYLES.CARD_SUBTITLE}>
+                    {LOGIN_SCREEN_COPY.CARD_SUBTITLE}
+                  </Text>
+
+                  {/* Email Field */}
+                  <View className={LOGIN_SCREEN_STYLES.FIELD_SPACING}>
+                    <Controller
+                      control={control}
+                      name='email'
+                      render={({ field: { onBlur, onChange, value } }) => (
+                        <CustomTextInput
+                          accessibilityState={{ disabled: isLoading }}
                           autoCapitalize='none'
-                          autoComplete='password'
+                          autoComplete='email'
                           autoCorrect={false}
-                          className={LOGIN_SCREEN_STYLES.PASSWORD_INPUT}
                           editable={!isLoading}
-                          onBlur={(): void => {
-                            isPasswordFocusedRef.current = false;
-                            setIsPasswordFocused(false);
-                            onBlur();
-                          }}
+                          error={errors.email?.message}
+                          keyboardType='email-address'
+                          label={LOGIN_SCREEN_COPY.EMAIL_LABEL}
+                          leftIcon={emailLeftIcon}
+                          onBlur={onBlur}
                           onChangeText={(text: string): void => {
                             clearFeedbackState();
                             onChange(text);
                           }}
-                          onFocus={(): void => {
-                            isPasswordFocusedRef.current = true;
-                            setIsPasswordFocused(true);
-                            scrollToPasswordSection();
-                          }}
-                          placeholder={LOGIN_SCREEN_COPY.PASSWORD_PLACEHOLDER}
-                          placeholderTextColor={
-                            LOGIN_SCREEN_COLORS.TEXT_SECONDARY
-                          }
-                          secureTextEntry={!isPasswordVisible}
-                          testID={LOGIN_SCREEN_TEST_IDS.PASSWORD_INPUT}
+                          placeholder={LOGIN_SCREEN_COPY.EMAIL_PLACEHOLDER}
+                          testID={LOGIN_SCREEN_TEST_IDS.EMAIL_INPUT}
                           value={value}
                         />
-                        <TouchableOpacity
-                          accessibilityLabel={
-                            isPasswordVisible
-                              ? LOGIN_SCREEN_COPY.HIDE_PASSWORD_A11Y
-                              : LOGIN_SCREEN_COPY.SHOW_PASSWORD_A11Y
-                          }
-                          accessibilityRole='button'
-                          accessibilityState={{ disabled: isLoading }}
-                          className={LOGIN_SCREEN_STYLES.PASSWORD_TOGGLE_BUTTON}
-                          disabled={isLoading}
-                          onPress={handleTogglePasswordVisibility}
-                          testID={LOGIN_SCREEN_TEST_IDS.PASSWORD_TOGGLE_BUTTON}
-                        >
-                          {isPasswordVisible ? (
-                            <EyeOff
-                              color={LOGIN_SCREEN_COLORS.ICON_SECONDARY}
-                              size={LOGIN_SCREEN_NUMERICAL.INPUT_ICON_SIZE}
-                            />
-                          ) : (
-                            <Eye
-                              color={LOGIN_SCREEN_COLORS.ICON_SECONDARY}
-                              size={LOGIN_SCREEN_NUMERICAL.INPUT_ICON_SIZE}
-                            />
-                          )}
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                  />
-                  {errors.password?.message ? (
-                    <Text
-                      accessibilityLiveRegion='polite'
-                      className={LOGIN_SCREEN_STYLES.PASSWORD_ERROR_TEXT}
-                      testID={LOGIN_SCREEN_TEST_IDS.PASSWORD_ERROR}
-                    >
-                      {errors.password.message}
+                      )}
+                    />
+                  </View>
+
+                  {/* Password Field */}
+                  <View>
+                    <Text className={LOGIN_SCREEN_STYLES.PASSWORD_LABEL}>
+                      {LOGIN_SCREEN_COPY.PASSWORD_LABEL}
                     </Text>
+                    <Controller
+                      control={control}
+                      name='password'
+                      render={({ field: { onBlur, onChange, value } }) => (
+                        <View
+                          className={`${LOGIN_SCREEN_STYLES.PASSWORD_INPUT_WRAPPER} ${passwordBorderClass}`}
+                        >
+                          <Lock
+                            color={LOGIN_SCREEN_COLORS.ICON_SECONDARY}
+                            size={LOGIN_SCREEN_NUMERICAL.INPUT_ICON_SIZE}
+                          />
+                          <TextInput
+                            accessibilityLabel={
+                              LOGIN_SCREEN_COPY.PASSWORD_LABEL
+                            }
+                            accessibilityState={{ disabled: isLoading }}
+                            aria-invalid={Boolean(errors.password)}
+                            autoCapitalize='none'
+                            autoComplete='password'
+                            autoCorrect={false}
+                            className={LOGIN_SCREEN_STYLES.PASSWORD_INPUT}
+                            editable={!isLoading}
+                            onBlur={(): void => {
+                              isPasswordFocusedRef.current = false;
+                              hasScrolledPasswordRef.current = false;
+                              setIsPasswordFocused(false);
+                              cancelPendingPasswordScroll();
+                              onBlur();
+                            }}
+                            onChangeText={(text: string): void => {
+                              clearFeedbackState();
+                              onChange(text);
+                            }}
+                            onFocus={(): void => {
+                              isPasswordFocusedRef.current = true;
+                              setIsPasswordFocused(true);
+                              if (isKeyboardVisible) {
+                                triggerPasswordScrollOnce();
+                              }
+                            }}
+                            placeholder={LOGIN_SCREEN_COPY.PASSWORD_PLACEHOLDER}
+                            placeholderTextColor={
+                              LOGIN_SCREEN_COLORS.TEXT_SECONDARY
+                            }
+                            secureTextEntry={!isPasswordVisible}
+                            testID={LOGIN_SCREEN_TEST_IDS.PASSWORD_INPUT}
+                            value={value}
+                          />
+                          <TouchableOpacity
+                            accessibilityLabel={
+                              isPasswordVisible
+                                ? LOGIN_SCREEN_COPY.HIDE_PASSWORD_A11Y
+                                : LOGIN_SCREEN_COPY.SHOW_PASSWORD_A11Y
+                            }
+                            accessibilityRole='button'
+                            accessibilityState={{ disabled: isLoading }}
+                            className={`${LOGIN_SCREEN_STYLES.PASSWORD_TOGGLE_BUTTON} ${isLoading ? LOGIN_SCREEN_STYLES.PASSWORD_TOGGLE_DISABLED : ''}`}
+                            disabled={isLoading}
+                            onPress={handleTogglePasswordVisibility}
+                            testID={
+                              LOGIN_SCREEN_TEST_IDS.PASSWORD_TOGGLE_BUTTON
+                            }
+                          >
+                            {isPasswordVisible ? (
+                              <EyeOff
+                                color={passwordToggleIconColor}
+                                size={LOGIN_SCREEN_NUMERICAL.INPUT_ICON_SIZE}
+                              />
+                            ) : (
+                              <Eye
+                                color={passwordToggleIconColor}
+                                size={LOGIN_SCREEN_NUMERICAL.INPUT_ICON_SIZE}
+                              />
+                            )}
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    />
+                    {errors.password?.message ? (
+                      <Text
+                        accessibilityLiveRegion='polite'
+                        className={LOGIN_SCREEN_STYLES.PASSWORD_ERROR_TEXT}
+                        testID={LOGIN_SCREEN_TEST_IDS.PASSWORD_ERROR}
+                      >
+                        {errors.password.message}
+                      </Text>
+                    ) : null}
+                  </View>
+
+                  {/* Forgot Password Link */}
+                  <TouchableOpacity
+                    accessibilityLabel={LOGIN_SCREEN_COPY.FORGOT_PASSWORD}
+                    accessibilityRole='button'
+                    accessibilityState={{ disabled: isLoading }}
+                    className={LOGIN_SCREEN_STYLES.FORGOT_PASSWORD_BUTTON}
+                    disabled={isLoading}
+                    onPress={handleForgotPasswordButtonPress}
+                    testID={LOGIN_SCREEN_TEST_IDS.FORGOT_PASSWORD_BUTTON}
+                  >
+                    <Text className={LOGIN_SCREEN_STYLES.FORGOT_PASSWORD_TEXT}>
+                      {LOGIN_SCREEN_COPY.FORGOT_PASSWORD}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Auth Error Message */}
+                  {authError ? (
+                    <FeedbackAlertBanner
+                      containerClassName={
+                        LOGIN_SCREEN_STYLES.ALERT_BANNER_AUTH_SPACING
+                      }
+                      message={authError}
+                      testID={LOGIN_SCREEN_TEST_IDS.AUTH_ERROR}
+                    />
+                  ) : null}
+
+                  {/* Primary Submit Button */}
+                  <BaseButton
+                    className={LOGIN_SCREEN_STYLES.SUBMIT_BUTTON}
+                    disabled={isLoading}
+                    fullWidth
+                    iconRight={submitArrowIcon}
+                    isLoading={isLoading}
+                    label={LOGIN_SCREEN_COPY.SUBMIT_BUTTON}
+                    onPress={handleFormSubmit}
+                    testID={LOGIN_SCREEN_TEST_IDS.SUBMIT_BUTTON}
+                    variant={BASE_BUTTON_VARIANTS.PRIMARY}
+                  />
+
+                  {/* Social Login Divider */}
+                  <View
+                    className={LOGIN_SCREEN_STYLES.DIVIDER_CONTAINER}
+                    testID={LOGIN_SCREEN_TEST_IDS.DIVIDER}
+                  >
+                    <View className={LOGIN_SCREEN_STYLES.DIVIDER_LINE} />
+                    <Text className={LOGIN_SCREEN_STYLES.DIVIDER_TEXT}>
+                      {LOGIN_SCREEN_COPY.DIVIDER_TEXT}
+                    </Text>
+                    <View className={LOGIN_SCREEN_STYLES.DIVIDER_LINE} />
+                  </View>
+
+                  {/* Social Login Row */}
+                  <View className={LOGIN_SCREEN_STYLES.SOCIAL_BUTTONS_ROW}>
+                    <TouchableOpacity
+                      accessibilityLabel={LOGIN_SCREEN_COPY.GOOGLE_BUTTON}
+                      accessibilityRole='button'
+                      accessibilityState={{ disabled: isLoading }}
+                      className={`${LOGIN_SCREEN_STYLES.GOOGLE_BUTTON} ${isLoading ? LOGIN_SCREEN_STYLES.SOCIAL_BUTTON_DISABLED : ''}`}
+                      disabled={isLoading}
+                      onPress={handleGoogleButtonPress}
+                      testID={LOGIN_SCREEN_TEST_IDS.GOOGLE_BUTTON}
+                    >
+                      <GoogleBrandIcon />
+                      <Text className={LOGIN_SCREEN_STYLES.GOOGLE_BUTTON_TEXT}>
+                        {LOGIN_SCREEN_COPY.GOOGLE_BUTTON}
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      accessibilityLabel={LOGIN_SCREEN_COPY.FACEBOOK_BUTTON}
+                      accessibilityRole='button'
+                      accessibilityState={{ disabled: isLoading }}
+                      className={`${LOGIN_SCREEN_STYLES.FACEBOOK_BUTTON} ${isLoading ? LOGIN_SCREEN_STYLES.SOCIAL_BUTTON_DISABLED : ''}`}
+                      disabled={isLoading}
+                      onPress={handleFacebookButtonPress}
+                      testID={LOGIN_SCREEN_TEST_IDS.FACEBOOK_BUTTON}
+                    >
+                      <FacebookBrandIcon />
+                      <Text
+                        className={LOGIN_SCREEN_STYLES.FACEBOOK_BUTTON_TEXT}
+                      >
+                        {LOGIN_SCREEN_COPY.FACEBOOK_BUTTON}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Social / Forgot Password Feedback Notice */}
+                  {visibleFeedbackNotice ? (
+                    <FeedbackAlertBanner
+                      containerClassName={
+                        LOGIN_SCREEN_STYLES.ALERT_BANNER_NOTICE_SPACING
+                      }
+                      message={visibleFeedbackNotice}
+                      testID={LOGIN_SCREEN_TEST_IDS.SOCIAL_NOTICE}
+                    />
                   ) : null}
                 </View>
-
-                {/* Forgot Password Link */}
-                <TouchableOpacity
-                  accessibilityLabel={LOGIN_SCREEN_COPY.FORGOT_PASSWORD}
-                  accessibilityRole='button'
-                  accessibilityState={{ disabled: isLoading }}
-                  className={LOGIN_SCREEN_STYLES.FORGOT_PASSWORD_BUTTON}
-                  disabled={isLoading}
-                  onPress={handleForgotPasswordButtonPress}
-                  testID={LOGIN_SCREEN_TEST_IDS.FORGOT_PASSWORD_BUTTON}
-                >
-                  <Text className={LOGIN_SCREEN_STYLES.FORGOT_PASSWORD_TEXT}>
-                    {LOGIN_SCREEN_COPY.FORGOT_PASSWORD}
-                  </Text>
-                </TouchableOpacity>
-
-                {/* Auth Error Message */}
-                {authError ? (
-                  <FeedbackAlertBanner
-                    containerClassName={
-                      LOGIN_SCREEN_STYLES.ALERT_BANNER_AUTH_SPACING
-                    }
-                    message={authError}
-                    testID={LOGIN_SCREEN_TEST_IDS.AUTH_ERROR}
-                  />
-                ) : null}
-
-                {/* Primary Submit Button */}
-                <BaseButton
-                  className={LOGIN_SCREEN_STYLES.SUBMIT_BUTTON}
-                  disabled={isLoading}
-                  fullWidth
-                  iconRight={submitArrowIcon}
-                  isLoading={isLoading}
-                  label={LOGIN_SCREEN_COPY.SUBMIT_BUTTON}
-                  onPress={handleFormSubmit}
-                  testID={LOGIN_SCREEN_TEST_IDS.SUBMIT_BUTTON}
-                  variant={BASE_BUTTON_VARIANTS.PRIMARY}
-                />
-
-                {/* Social Login Divider */}
-                <View
-                  className={LOGIN_SCREEN_STYLES.DIVIDER_CONTAINER}
-                  testID={LOGIN_SCREEN_TEST_IDS.DIVIDER}
-                >
-                  <View className={LOGIN_SCREEN_STYLES.DIVIDER_LINE} />
-                  <Text className={LOGIN_SCREEN_STYLES.DIVIDER_TEXT}>
-                    {LOGIN_SCREEN_COPY.DIVIDER_TEXT}
-                  </Text>
-                  <View className={LOGIN_SCREEN_STYLES.DIVIDER_LINE} />
-                </View>
-
-                {/* Social Login Row */}
-                <View className={LOGIN_SCREEN_STYLES.SOCIAL_BUTTONS_ROW}>
-                  <TouchableOpacity
-                    accessibilityLabel={LOGIN_SCREEN_COPY.GOOGLE_BUTTON}
-                    accessibilityRole='button'
-                    accessibilityState={{ disabled: isLoading }}
-                    className={`${LOGIN_SCREEN_STYLES.GOOGLE_BUTTON} ${isLoading ? LOGIN_SCREEN_STYLES.SOCIAL_BUTTON_DISABLED : ''}`}
-                    disabled={isLoading}
-                    onPress={handleGoogleButtonPress}
-                    testID={LOGIN_SCREEN_TEST_IDS.GOOGLE_BUTTON}
-                  >
-                    <GoogleBrandIcon />
-                    <Text className={LOGIN_SCREEN_STYLES.GOOGLE_BUTTON_TEXT}>
-                      {LOGIN_SCREEN_COPY.GOOGLE_BUTTON}
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    accessibilityLabel={LOGIN_SCREEN_COPY.FACEBOOK_BUTTON}
-                    accessibilityRole='button'
-                    accessibilityState={{ disabled: isLoading }}
-                    className={`${LOGIN_SCREEN_STYLES.FACEBOOK_BUTTON} ${isLoading ? LOGIN_SCREEN_STYLES.SOCIAL_BUTTON_DISABLED : ''}`}
-                    disabled={isLoading}
-                    onPress={handleFacebookButtonPress}
-                    testID={LOGIN_SCREEN_TEST_IDS.FACEBOOK_BUTTON}
-                  >
-                    <FacebookBrandIcon />
-                    <Text className={LOGIN_SCREEN_STYLES.FACEBOOK_BUTTON_TEXT}>
-                      {LOGIN_SCREEN_COPY.FACEBOOK_BUTTON}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                {/* Social / Forgot Password Feedback Notice */}
-                {feedbackNotice ? (
-                  <FeedbackAlertBanner
-                    containerClassName={
-                      LOGIN_SCREEN_STYLES.ALERT_BANNER_NOTICE_SPACING
-                    }
-                    message={feedbackNotice}
-                    testID={LOGIN_SCREEN_TEST_IDS.SOCIAL_NOTICE}
-                  />
-                ) : null}
               </View>
-            </View>
 
-            {/* Footer */}
-            <View
-              className={LOGIN_SCREEN_STYLES.FOOTER_CONTAINER}
-              style={footerContainerStyle}
-              testID={LOGIN_SCREEN_TEST_IDS.FOOTER}
-            >
-              <View className={LOGIN_SCREEN_STYLES.FOOTER_SECURITY_ROW}>
-                <ShieldCheck
-                  color={LOGIN_SCREEN_COLORS.ICON_SECONDARY}
-                  size={LOGIN_SCREEN_NUMERICAL.FOOTER_ICON_SIZE}
-                />
-                <Text className={LOGIN_SCREEN_STYLES.FOOTER_SECURITY_TEXT}>
-                  {LOGIN_SCREEN_COPY.FOOTER_SECURITY}
+              {/* Footer */}
+              <View
+                className={LOGIN_SCREEN_STYLES.FOOTER_CONTAINER}
+                style={footerContainerStyle}
+                testID={LOGIN_SCREEN_TEST_IDS.FOOTER}
+              >
+                <View className={LOGIN_SCREEN_STYLES.FOOTER_SECURITY_ROW}>
+                  <ShieldCheck
+                    color={LOGIN_SCREEN_COLORS.ICON_SECONDARY}
+                    size={LOGIN_SCREEN_NUMERICAL.FOOTER_ICON_SIZE}
+                  />
+                  <Text className={LOGIN_SCREEN_STYLES.FOOTER_SECURITY_TEXT}>
+                    {LOGIN_SCREEN_COPY.FOOTER_SECURITY}
+                  </Text>
+                </View>
+                <Text className={LOGIN_SCREEN_STYLES.FOOTER_COPYRIGHT}>
+                  {LOGIN_SCREEN_COPY.FOOTER_COPYRIGHT}
                 </Text>
               </View>
-              <Text className={LOGIN_SCREEN_STYLES.FOOTER_COPYRIGHT}>
-                {LOGIN_SCREEN_COPY.FOOTER_COPYRIGHT}
-              </Text>
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </View>
+      </KeyboardAutoScrollContext.Provider>
     );
   },
 );
