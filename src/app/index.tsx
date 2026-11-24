@@ -1,26 +1,19 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import React, { useCallback } from 'react';
+import { LoginScreenView } from '@/features/auth';
 
-const Index = (): React.JSX.Element => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Bienvenido a BYC FastForm</Text>
-    </View>
-  );
+const INDEX_ROUTES = {
+  HISTORIAL: '/(tabs)/historial',
+} as const;
+
+const IndexScreen = (): React.JSX.Element => {
+  const router = useRouter();
+
+  const handleLoginSuccess = useCallback((): void => {
+    router.replace(INDEX_ROUTES.HISTORIAL);
+  }, [router]);
+
+  return <LoginScreenView onSuccess={handleLoginSuccess} />;
 };
 
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    backgroundColor: '#F7F7F6',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  text: {
-    color: '#1C1917',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-});
-
-export default Index;
+export default IndexScreen;

@@ -1,0 +1,11 @@
+export { BottomTabBarView } from './components';
+
+export {
+  BOTTOM_TAB_BAR_COLORS,
+  BOTTOM_TAB_BAR_DIMENSIONS,
+  BOTTOM_TAB_BAR_STYLES,
+  BOTTOM_TAB_BAR_TEST_IDS,
+  NAVIGATION_TAB_ROUTES,
+} from './constants';
+
+export type { BottomTabBarViewProps, NavigationTabRoute } from './types';

@@ -1,0 +1,1 @@
+export { BottomTabBarView } from './BottomTabBarView';

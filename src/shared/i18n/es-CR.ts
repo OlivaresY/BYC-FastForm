@@ -351,6 +351,30 @@ export const esCR = {
       physical: 'Contacto y Laboral',
     },
   },
+  navigation: {
+    accessibility: {
+      historyHint: 'Muestra la lista de trámites de crédito enviados',
+      historyLabel: 'Historial',
+      newApplicationHint: 'Abre el formulario para iniciar un nuevo trámite',
+      newApplicationLabel: 'Nuevo Trámite',
+      profileHint: 'Abre la vista de perfil y configuración de cuenta',
+      profileLabel: 'Mi Perfil',
+      tabBarLabel: 'Barra de navegación principal',
+    },
+    shells: {
+      historySubtitle:
+        'Consulta el estado y resumen de tus trámites de crédito registrados.',
+      historyTitle: 'Historial',
+      profileSubtitle:
+        'Administra tu cuenta de asesor y preferencias de la aplicación.',
+      profileTitle: 'Mi Perfil',
+    },
+    tabs: {
+      history: 'Historial',
+      newApplication: 'Nuevo Trámite',
+      profile: 'Mi Perfil',
+    },
+  },
 } as const;
 
 export type I18nDictionary = typeof esCR;
