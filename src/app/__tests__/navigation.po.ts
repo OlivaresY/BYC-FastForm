@@ -3,7 +3,7 @@ import {
   render,
   type RenderResult,
 } from '@testing-library/react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import type { ReactTestInstance } from 'react-test-renderer';
 import { BOTTOM_TAB_BAR_TEST_IDS } from '@/features/navigation';
@@ -45,7 +45,13 @@ jest.mock('expo-router', () => {
     replace: jest.fn(),
   };
 
-  const mockUseLocalSearchParams = jest.fn((): { sessionId?: string } => ({}));
+  const mockUseLocalSearchParams = jest.fn(
+    (): { sessionId?: string | string[] } => ({}),
+  );
+
+  const mockUseFocusEffect = jest.fn((effect: () => undefined | void | (() => void)): void => {
+    MockReact.useEffect(() => effect(), [effect]);
+  });
 
   const MockRedirect = ({ href }: { href: string }): React.JSX.Element =>
     MockReact.createElement(MockView, {
@@ -56,6 +62,7 @@ jest.mock('expo-router', () => {
   return {
     Redirect: MockRedirect,
     router: mockRouter,
+    useFocusEffect: mockUseFocusEffect,
     useLocalSearchParams: mockUseLocalSearchParams,
     useRouter: () => mockRouter,
   };
@@ -256,10 +263,16 @@ export class NavigationRoutingPageObject {
     mockTabsState.activeRouteName = routeName;
   };
 
-  public static setWizardSessionId = (sessionId?: string): void => {
+  public static setWizardSessionId = (sessionId?: string | string[]): void => {
     jest
       .mocked(useLocalSearchParams)
-      .mockReturnValue(sessionId ? { sessionId } : {});
+      .mockReturnValue(sessionId !== undefined ? { sessionId } : {});
+  };
+
+  public static triggerTabsFocusReset = (): void => {
+    const focusCalls = jest.mocked(useFocusEffect).mock.calls;
+    const latestEffect = focusCalls[focusCalls.length - 1]?.[0];
+    latestEffect?.();
   };
 
   public static renderIndex = (): NavigationRoutingPageObject =>
@@ -274,7 +287,7 @@ export class NavigationRoutingPageObject {
     );
 
   public static renderCreditWizard = (
-    sessionId?: string,
+    sessionId?: string | string[],
   ): NavigationRoutingPageObject => {
     NavigationRoutingPageObject.setWizardSessionId(sessionId);
     return new NavigationRoutingPageObject(

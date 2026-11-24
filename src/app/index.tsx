@@ -1,5 +1,5 @@
-import { useRouter } from 'expo-router';
-import React, { useCallback } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback, useRef } from 'react';
 import { LoginScreenView } from '@/features/auth';
 
 const INDEX_ROUTES = {
@@ -8,8 +8,19 @@ const INDEX_ROUTES = {
 
 const IndexScreen = (): React.JSX.Element => {
   const router = useRouter();
+  const hasNavigatedRef = useRef<boolean>(false);
+
+  useFocusEffect(
+    useCallback((): void => {
+      hasNavigatedRef.current = false;
+    }, []),
+  );
 
   const handleLoginSuccess = useCallback((): void => {
+    if (hasNavigatedRef.current) {
+      return;
+    }
+    hasNavigatedRef.current = true;
     router.replace(INDEX_ROUTES.HISTORIAL);
   }, [router]);
 

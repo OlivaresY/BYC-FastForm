@@ -1,6 +1,6 @@
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Tabs, type BottomTabBarProps } from 'expo-router/js-tabs';
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import {
   BottomTabBarView,
   NAVIGATION_TAB_ROUTES,
@@ -19,6 +19,10 @@ const TAB_SCREEN_NAMES = {
   PERFIL: 'perfil',
 } as const;
 
+const TAB_TIMING_MS = {
+  NEW_APPLICATION_LOCK_MS: 500,
+} as const;
+
 const TABS_SCREEN_OPTIONS = {
   headerShown: false,
 } as const;
@@ -29,6 +33,14 @@ export const unstable_settings = {
 
 const TabsLayout = (): React.JSX.Element => {
   const router = useRouter();
+  const lastWizardLaunchAtRef = useRef<number | null>(null);
+  const wizardSessionSequenceRef = useRef<number>(0);
+
+  useFocusEffect(
+    useCallback((): void => {
+      lastWizardLaunchAtRef.current = null;
+    }, []),
+  );
 
   const handleSelectTab = useCallback(
     (route: NavigationTabRoute): void => {
@@ -43,8 +55,22 @@ const TabsLayout = (): React.JSX.Element => {
   );
 
   const handlePressNewApplication = useCallback((): void => {
+    const nowMs = Date.now();
+    const lastLaunchAtMs = lastWizardLaunchAtRef.current;
+
+    if (
+      lastLaunchAtMs !== null &&
+      nowMs >= lastLaunchAtMs &&
+      nowMs - lastLaunchAtMs < TAB_TIMING_MS.NEW_APPLICATION_LOCK_MS
+    ) {
+      return;
+    }
+
+    lastWizardLaunchAtRef.current = nowMs;
+    wizardSessionSequenceRef.current += 1;
+
     router.push({
-      params: { sessionId: String(Date.now()) },
+      params: { sessionId: `${nowMs}-${wizardSessionSequenceRef.current}` },
       pathname: TAB_ROUTE_PATHS.CREDIT_WIZARD,
     });
   }, [router]);

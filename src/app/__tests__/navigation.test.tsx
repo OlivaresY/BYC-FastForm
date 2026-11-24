@@ -9,13 +9,13 @@ describe('Expo Router Navigation Integration Tests', () => {
     jest.restoreAllMocks();
   });
 
-  it('navigates from IndexScreen to /(tabs)/historial on login success', () => {
+  it('navigates from IndexScreen to /(tabs)/historial once even if onSuccess fires twice', () => {
     // Arrange
     const page = NavigationRoutingPageObject.renderIndex();
     const routerSpies = NavigationRoutingPageObject.getRouterSpies();
 
     // Act
-    page.triggerLoginSuccess();
+    page.triggerLoginSuccess().triggerLoginSuccess();
 
     // Assert
     expect(page.loginScreen).toBeTruthy();
@@ -64,26 +64,30 @@ describe('Expo Router Navigation Integration Tests', () => {
     });
   });
 
-  it('pushes /credit-wizard with a unique sessionId param when Nuevo Trámite is pressed', () => {
+  it('blocks rapid double-taps on Nuevo Trámite and generates non-colliding sessionIds even within the same millisecond after return', () => {
     // Arrange
-    jest
-      .spyOn(Date, 'now')
-      .mockReturnValueOnce(1700000001000)
-      .mockReturnValueOnce(1700000002000);
+    jest.spyOn(Date, 'now').mockReturnValue(1700000001000);
     const page = NavigationRoutingPageObject.renderTabsLayout();
     const routerSpies = NavigationRoutingPageObject.getRouterSpies();
 
-    // Act
+    // Act: Rapid double-tap inside cooldown window should push only once
     page.pressNewApplicationTab().pressNewApplicationTab();
 
-    // Assert
-    expect(routerSpies.push).toHaveBeenCalledTimes(2);
+    // Assert: Duplicate push prevented
+    expect(routerSpies.push).toHaveBeenCalledTimes(1);
     expect(routerSpies.push).toHaveBeenNthCalledWith(1, {
-      params: { sessionId: '1700000001000' },
+      params: { sessionId: '1700000001000-1' },
       pathname: '/credit-wizard',
     });
+
+    // Act: Simulate focus returning to TabsLayout even within the same ms
+    NavigationRoutingPageObject.triggerTabsFocusReset();
+    page.pressNewApplicationTab();
+
+    // Assert: Second launch produces a distinct sessionId despite identical ms
+    expect(routerSpies.push).toHaveBeenCalledTimes(2);
     expect(routerSpies.push).toHaveBeenNthCalledWith(2, {
-      params: { sessionId: '1700000002000' },
+      params: { sessionId: '1700000001000-2' },
       pathname: '/credit-wizard',
     });
   });
@@ -98,7 +102,7 @@ describe('Expo Router Navigation Integration Tests', () => {
     );
   });
 
-  it('remounts CreditWizardOrchestratorView blank when sessionId changes and dismisses to /(tabs)/historial on close or submit', () => {
+  it('remounts CreditWizardOrchestratorView blank when sessionId changes and guards duplicate close calls', () => {
     // Arrange
     const page = NavigationRoutingPageObject.renderCreditWizard('session-1');
     const routerSpies = NavigationRoutingPageObject.getRouterSpies();
@@ -114,18 +118,29 @@ describe('Expo Router Navigation Integration Tests', () => {
     // Assert: Key change remounts CreditWizardOrchestratorView cleanly blank
     expect(page.wizardDraftState.props.children).toBe(page.blankDraftValue);
 
-    // Act: Close and submit success callbacks
-    page.triggerWizardClose().triggerWizardSubmissionSuccess();
+    // Act: Rapid double-tap on close button
+    page.triggerWizardClose().triggerWizardClose();
 
-    // Assert: Both return cleanly via dismissTo('/(tabs)/historial')
-    expect(routerSpies.dismissTo).toHaveBeenCalledTimes(2);
-    expect(routerSpies.dismissTo).toHaveBeenNthCalledWith(
-      1,
-      '/(tabs)/historial',
-    );
-    expect(routerSpies.dismissTo).toHaveBeenNthCalledWith(
-      2,
-      '/(tabs)/historial',
-    );
+    // Assert: dismissTo invoked once for /(tabs)/historial
+    expect(routerSpies.dismissTo).toHaveBeenCalledTimes(1);
+    expect(routerSpies.dismissTo).toHaveBeenCalledWith('/(tabs)/historial');
+  });
+
+  it('handles array or blank sessionId safely and dismisses to /(tabs)/historial on submission success', () => {
+    // Arrange
+    const page = NavigationRoutingPageObject.renderCreditWizard(['  ', 's2']);
+    const routerSpies = NavigationRoutingPageObject.getRouterSpies();
+
+    // Act: Mutate dirty, then switch to array sessionId with valid first entry
+    page.markWizardDraftDirty();
+    expect(page.wizardDraftState.props.children).toBe(page.dirtyDraftValue);
+    page.rerenderCreditWizardWithSession('session-array-next');
+
+    // Assert: Remounted cleanly blank, then submit succeeds back to historial
+    expect(page.wizardDraftState.props.children).toBe(page.blankDraftValue);
+    page.triggerWizardSubmissionSuccess();
+
+    expect(routerSpies.dismissTo).toHaveBeenCalledTimes(1);
+    expect(routerSpies.dismissTo).toHaveBeenCalledWith('/(tabs)/historial');
   });
 });
