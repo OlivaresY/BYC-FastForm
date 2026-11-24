@@ -1,15 +1,14 @@
+import { BASE_BUTTON_TEST_IDS } from '@/shared/ui';
+import type { RenderResult } from '@testing-library/react-native';
+import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import React from 'react';
 import {
   Keyboard,
-  ScrollView,
   StyleSheet,
   type KeyboardEvent,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
-import type { RenderResult } from '@testing-library/react-native';
-import { BASE_BUTTON_TEST_IDS } from '@/shared/ui';
 import {
   LOGIN_SCREEN_STYLES,
   LOGIN_SCREEN_TEST_IDS,
@@ -31,8 +30,8 @@ export class LoginScreenViewPageObject {
     string,
     Set<KeyboardEventCallback>
   >();
+  private static consoleErrorSpy: jest.SpyInstance | null = null;
   private static keyboardAddListenerSpy: jest.SpyInstance | null = null;
-  private static scrollToEndSpy: jest.SpyInstance | null = null;
 
   private readonly screen: RenderResult;
 
@@ -42,8 +41,12 @@ export class LoginScreenViewPageObject {
 
   public static setupEnvironment = (): void => {
     LoginScreenViewPageObject.keyboardListeners.clear();
+    LoginScreenViewPageObject.consoleErrorSpy?.mockRestore();
     LoginScreenViewPageObject.keyboardAddListenerSpy?.mockRestore();
-    LoginScreenViewPageObject.scrollToEndSpy?.mockRestore();
+
+    LoginScreenViewPageObject.consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(jest.fn());
 
     LoginScreenViewPageObject.keyboardAddListenerSpy = jest
       .spyOn(Keyboard, 'addListener')
@@ -65,28 +68,18 @@ export class LoginScreenViewPageObject {
           },
         };
       }) as typeof Keyboard.addListener);
-
-    LoginScreenViewPageObject.scrollToEndSpy = jest
-      .spyOn(ScrollView.prototype, 'scrollToEnd')
-      .mockImplementation(jest.fn());
   };
 
   public static teardownEnvironment = (): void => {
     LoginScreenViewPageObject.keyboardListeners.clear();
+    LoginScreenViewPageObject.consoleErrorSpy?.mockRestore();
+    LoginScreenViewPageObject.consoleErrorSpy = null;
     LoginScreenViewPageObject.keyboardAddListenerSpy?.mockRestore();
     LoginScreenViewPageObject.keyboardAddListenerSpy = null;
-    LoginScreenViewPageObject.scrollToEndSpy?.mockRestore();
-    LoginScreenViewPageObject.scrollToEndSpy = null;
   };
 
-  public static getScrollToEndCalls = (): unknown[][] =>
-    LoginScreenViewPageObject.scrollToEndSpy?.mock.calls ?? [];
-
-  public static advanceTimers = (ms: number): void => {
-    act(() => {
-      jest.advanceTimersByTime(ms);
-    });
-  };
+  public static getConsoleErrorCalls = (): unknown[][] =>
+    LoginScreenViewPageObject.consoleErrorSpy?.mock.calls ?? [];
 
   public static render = (
     props?: LoginScreenViewProps,
@@ -237,6 +230,29 @@ export class LoginScreenViewPageObject {
     });
   };
 
+  public doubleSubmit = async (): Promise<void> => {
+    await act(async () => {
+      fireEvent.press(this.submitButton);
+      fireEvent.press(this.submitButton);
+    });
+  };
+
+  public flushMicrotasks = async (): Promise<void> => {
+    await act(async () => {
+      await Promise.resolve();
+    });
+  };
+
+  public triggerScrollViewLayout = (height: number): void => {
+    fireEvent(this.scrollView, 'layout', {
+      nativeEvent: { layout: { height, width: 390, x: 0, y: 0 } },
+    });
+  };
+
+  public triggerScrollViewContentSizeChange = (height: number): void => {
+    fireEvent(this.scrollView, 'contentSizeChange', 390, height);
+  };
+
   public pressForgotPasswordButton = async (): Promise<void> => {
     await act(async () => {
       fireEvent.press(this.forgotPasswordButton);
@@ -252,17 +268,6 @@ export class LoginScreenViewPageObject {
   public pressFacebookButton = async (): Promise<void> => {
     await act(async () => {
       fireEvent.press(this.facebookButton);
-    });
-  };
-
-  public emitKeyboardWillShow = (height = 300): void => {
-    const event = createKeyboardEvent(height);
-    act(() => {
-      LoginScreenViewPageObject.keyboardListeners
-        .get('keyboardWillShow')
-        ?.forEach((listener) => {
-          listener(event);
-        });
     });
   };
 

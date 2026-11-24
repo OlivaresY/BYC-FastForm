@@ -27,6 +27,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  type LayoutChangeEvent,
 } from 'react-native';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
@@ -76,9 +77,12 @@ const FeedbackAlertBanner = ({
     accessibilityLiveRegion='polite'
     accessibilityRole='alert'
     className={`${LOGIN_SCREEN_STYLES.ALERT_BANNER_CONTAINER} ${containerClassName}`}
+    style={cardShadowStyles.alertBanner}
   >
     <AlertCircle
+      accessible={false}
       color={LOGIN_SCREEN_COLORS.BRAND_RED}
+      importantForAccessibility='no'
       size={LOGIN_SCREEN_NUMERICAL.ALERT_ICON_SIZE}
     />
     <Text className={LOGIN_SCREEN_STYLES.ALERT_BANNER_TEXT} testID={testID}>
@@ -89,8 +93,10 @@ const FeedbackAlertBanner = ({
 
 const GoogleBrandIcon = (): React.JSX.Element => (
   <Svg
+    accessible={false}
     fill='none'
     height={LOGIN_SCREEN_NUMERICAL.SOCIAL_ICON_SIZE}
+    importantForAccessibility='no'
     viewBox={SOCIAL_ICON_VIEW_BOX}
     width={LOGIN_SCREEN_NUMERICAL.SOCIAL_ICON_SIZE}
   >
@@ -115,8 +121,10 @@ const GoogleBrandIcon = (): React.JSX.Element => (
 
 const FacebookBrandIcon = (): React.JSX.Element => (
   <Svg
+    accessible={false}
     fill='none'
     height={LOGIN_SCREEN_NUMERICAL.SOCIAL_ICON_SIZE}
+    importantForAccessibility='no'
     viewBox={SOCIAL_ICON_VIEW_BOX}
     width={LOGIN_SCREEN_NUMERICAL.SOCIAL_ICON_SIZE}
   >
@@ -129,6 +137,9 @@ const FacebookBrandIcon = (): React.JSX.Element => (
 );
 
 const cardShadowStyles = StyleSheet.create({
+  alertBanner: {
+    backgroundColor: LOGIN_SCREEN_COLORS.ALERT_BACKGROUND,
+  },
   cardShadow: {
     elevation: 4,
     shadowColor: LOGIN_SCREEN_COLORS.SHADOW_BLACK,
@@ -170,9 +181,9 @@ export const LoginScreenView = React.memo(
   }: LoginScreenViewProps): React.JSX.Element => {
     const safeAreaInsets =
       useContext(SafeAreaInsetsContext) ?? DEFAULT_SAFE_AREA_INSETS;
-    const isPasswordFocusedRef = useRef<boolean>(false);
-    const hasScrolledPasswordRef = useRef<boolean>(false);
-    const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isSubmittingRef = useRef<boolean>(false);
+    const [viewportHeight, setViewportHeight] = useState<number>(0);
+    const [contentHeight, setContentHeight] = useState<number>(0);
     const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
     const [isPasswordFocused, setIsPasswordFocused] = useState<boolean>(false);
     const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
@@ -184,52 +195,35 @@ export const LoginScreenView = React.memo(
       });
 
     const isKeyboardVisible = keyboardHeight > 0;
+    const isScrollEnabled =
+      isKeyboardVisible ||
+      isPasswordFocused ||
+      (viewportHeight > 0 && contentHeight > viewportHeight);
 
     const autoScrollContextValue = useMemo<KeyboardAutoScrollContextValue>(
       () => ({ onInputFocus }),
       [onInputFocus],
     );
 
-    const cancelPendingPasswordScroll = useCallback((): void => {
-      if (scrollTimeoutRef.current !== null) {
-        clearTimeout(scrollTimeoutRef.current);
-        scrollTimeoutRef.current = null;
-      }
-    }, []);
+    const handleScrollViewLayout = useCallback(
+      (event: LayoutChangeEvent): void => {
+        setViewportHeight(event.nativeEvent.layout.height);
+      },
+      [],
+    );
 
-    const triggerPasswordScrollOnce = useCallback((): void => {
-      if (hasScrolledPasswordRef.current) {
-        return;
-      }
-      hasScrolledPasswordRef.current = true;
-      cancelPendingPasswordScroll();
-      scrollTimeoutRef.current = setTimeout(() => {
-        scrollTimeoutRef.current = null;
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, LOGIN_SCREEN_NUMERICAL.KEYBOARD_SCROLL_DELAY_MS);
-    }, [cancelPendingPasswordScroll, scrollViewRef]);
-
-    useEffect(() => {
-      if (!isKeyboardVisible) {
-        hasScrolledPasswordRef.current = false;
-        cancelPendingPasswordScroll();
-        return undefined;
-      }
-      if (isPasswordFocusedRef.current) {
-        triggerPasswordScrollOnce();
-      }
-      return undefined;
-    }, [
-      cancelPendingPasswordScroll,
-      isKeyboardVisible,
-      triggerPasswordScrollOnce,
-    ]);
+    const handleContentSizeChange = useCallback(
+      (_width: number, height: number): void => {
+        setContentHeight(height);
+      },
+      [],
+    );
 
     useEffect(
       () => (): void => {
-        cancelPendingPasswordScroll();
+        isSubmittingRef.current = false;
       },
-      [cancelPendingPasswordScroll],
+      [],
     );
 
     const headerContainerStyle = useMemo(
@@ -252,6 +246,21 @@ export const LoginScreenView = React.memo(
       authProvider,
       onSuccess,
     });
+
+    useEffect(() => {
+      if (!authError) {
+        return undefined;
+      }
+      let isCancelled = false;
+      void Promise.resolve().then(() => {
+        if (!isCancelled) {
+          setFeedbackNotice(null);
+        }
+      });
+      return (): void => {
+        isCancelled = true;
+      };
+    }, [authError]);
 
     const {
       control,
@@ -281,16 +290,27 @@ export const LoginScreenView = React.memo(
 
     const handleValidSubmit = useCallback(
       async (data: LoginCredentials): Promise<void> => {
+        if (isLoading || isSubmittingRef.current) {
+          return;
+        }
+        isSubmittingRef.current = true;
         setFeedbackNotice(null);
-        await signIn(data);
+        try {
+          await signIn(data);
+        } finally {
+          isSubmittingRef.current = false;
+        }
       },
-      [signIn],
+      [isLoading, signIn],
     );
 
     const handleFormSubmit = useCallback((): void => {
       setFeedbackNotice(null);
+      if (isLoading || isSubmittingRef.current) {
+        return;
+      }
       void handleSubmit(handleValidSubmit)();
-    }, [handleSubmit, handleValidSubmit]);
+    }, [handleSubmit, handleValidSubmit, isLoading]);
 
     const handleFallbackActionPress = useCallback(
       async (
@@ -308,11 +328,8 @@ export const LoginScreenView = React.memo(
         try {
           await handler();
         } catch (error: unknown) {
-          const resolvedErrorMessage =
-            error instanceof Error && error.message.trim().length > 0
-              ? error.message
-              : LOGIN_SCREEN_COPY.UNEXPECTED_ACTION_ERROR;
-          setFeedbackNotice(resolvedErrorMessage);
+          console.error('[LoginScreenView] Action handler failed:', error);
+          setFeedbackNotice(LOGIN_SCREEN_COPY.UNEXPECTED_ACTION_ERROR);
         }
       },
       [authError, clearError],
@@ -353,14 +370,18 @@ export const LoginScreenView = React.memo(
 
     const emailLeftIcon = (
       <Mail
+        accessible={false}
         color={LOGIN_SCREEN_COLORS.ICON_SECONDARY}
+        importantForAccessibility='no'
         size={LOGIN_SCREEN_NUMERICAL.INPUT_ICON_SIZE}
       />
     );
 
     const submitArrowIcon = (
       <ArrowRight
+        accessible={false}
         color={LOGIN_SCREEN_COLORS.WHITE}
+        importantForAccessibility='no'
         size={LOGIN_SCREEN_NUMERICAL.SUBMIT_ICON_SIZE}
       />
     );
@@ -381,10 +402,12 @@ export const LoginScreenView = React.memo(
               }
               keyboardDismissMode='on-drag'
               keyboardShouldPersistTaps='handled'
+              onContentSizeChange={handleContentSizeChange}
+              onLayout={handleScrollViewLayout}
               onScroll={handleScroll}
               overScrollMode='never'
               ref={scrollViewRef}
-              scrollEnabled
+              scrollEnabled={isScrollEnabled}
               scrollEventThrottle={
                 LOGIN_SCREEN_NUMERICAL.SCROLL_EVENT_THROTTLE_MS
               }
@@ -414,7 +437,9 @@ export const LoginScreenView = React.memo(
                   testID={LOGIN_SCREEN_TEST_IDS.BADGE}
                 >
                   <Car
+                    accessible={false}
                     color={LOGIN_SCREEN_COLORS.BADGE_TEXT}
+                    importantForAccessibility='no'
                     size={LOGIN_SCREEN_NUMERICAL.BADGE_ICON_SIZE}
                   />
                   <Text className={LOGIN_SCREEN_STYLES.BADGE_TEXT}>
@@ -501,7 +526,9 @@ export const LoginScreenView = React.memo(
                           className={`${LOGIN_SCREEN_STYLES.PASSWORD_INPUT_WRAPPER} ${passwordBorderClass}`}
                         >
                           <Lock
+                            accessible={false}
                             color={LOGIN_SCREEN_COLORS.ICON_SECONDARY}
+                            importantForAccessibility='no'
                             size={LOGIN_SCREEN_NUMERICAL.INPUT_ICON_SIZE}
                           />
                           <TextInput
@@ -516,22 +543,16 @@ export const LoginScreenView = React.memo(
                             className={LOGIN_SCREEN_STYLES.PASSWORD_INPUT}
                             editable={!isLoading}
                             onBlur={(): void => {
-                              isPasswordFocusedRef.current = false;
-                              hasScrolledPasswordRef.current = false;
                               setIsPasswordFocused(false);
-                              cancelPendingPasswordScroll();
                               onBlur();
                             }}
                             onChangeText={(text: string): void => {
                               clearFeedbackState();
                               onChange(text);
                             }}
-                            onFocus={(): void => {
-                              isPasswordFocusedRef.current = true;
+                            onFocus={(event): void => {
                               setIsPasswordFocused(true);
-                              if (isKeyboardVisible) {
-                                triggerPasswordScrollOnce();
-                              }
+                              onInputFocus(event);
                             }}
                             placeholder={LOGIN_SCREEN_COPY.PASSWORD_PLACEHOLDER}
                             placeholderTextColor={
@@ -558,12 +579,16 @@ export const LoginScreenView = React.memo(
                           >
                             {isPasswordVisible ? (
                               <EyeOff
+                                accessible={false}
                                 color={passwordToggleIconColor}
+                                importantForAccessibility='no'
                                 size={LOGIN_SCREEN_NUMERICAL.INPUT_ICON_SIZE}
                               />
                             ) : (
                               <Eye
+                                accessible={false}
                                 color={passwordToggleIconColor}
+                                importantForAccessibility='no'
                                 size={LOGIN_SCREEN_NUMERICAL.INPUT_ICON_SIZE}
                               />
                             )}
@@ -689,7 +714,9 @@ export const LoginScreenView = React.memo(
               >
                 <View className={LOGIN_SCREEN_STYLES.FOOTER_SECURITY_ROW}>
                   <ShieldCheck
+                    accessible={false}
                     color={LOGIN_SCREEN_COLORS.ICON_SECONDARY}
+                    importantForAccessibility='no'
                     size={LOGIN_SCREEN_NUMERICAL.FOOTER_ICON_SIZE}
                   />
                   <Text className={LOGIN_SCREEN_STYLES.FOOTER_SECURITY_TEXT}>

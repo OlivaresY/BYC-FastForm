@@ -59,7 +59,6 @@ export const LOGIN_SCREEN_NUMERICAL = {
   HEADER_TOP_PADDING: 10,
   INPUT_ICON_SIZE: 18,
   KEYBOARD_OPEN_PADDING_BOTTOM: 32,
-  KEYBOARD_SCROLL_DELAY_MS: 120,
   SCROLL_EVENT_THROTTLE_MS: 16,
   SOCIAL_ICON_SIZE: 18,
   SUBMIT_ICON_SIZE: 18,
@@ -68,7 +67,7 @@ export const LOGIN_SCREEN_NUMERICAL = {
 export const LOGIN_SCREEN_STYLES = {
   ALERT_BANNER_AUTH_SPACING: 'mb-2.5',
   ALERT_BANNER_CONTAINER:
-    'flex-row items-center gap-2 rounded-xl border border-[#B91C1C] bg-[#FEF2F2] px-3 py-2.5',
+    'flex-row items-center gap-2 rounded-xl border border-[#B91C1C] px-3 py-2.5',
   ALERT_BANNER_NOTICE_SPACING: 'mt-3',
   ALERT_BANNER_TEXT: 'flex-1 text-xs font-medium text-[#B91C1C]',
   BADGE_CONTAINER:
