@@ -351,6 +351,105 @@ export const esCR = {
       physical: 'Contacto y Laboral',
     },
   },
+  history: {
+    badges: {
+      approved: 'APROBADO',
+      draft: 'BORRADOR',
+      pending: 'PENDIENTE',
+      rejected: 'RECHAZADO',
+    },
+    cards: {
+      additionalBanksTemplate: '(+{{count}} más)',
+      applicantFallback: 'Solicitante sin nombre',
+      bankFallback: 'Entidad por asignar',
+      dateFallback: 'Fecha pendiente',
+      identificationFallback: 'Sin identificación',
+      idPrefix: 'Cédula:',
+      printButton: 'Imprimir',
+      printButtonA11y: 'Imprimir expediente de {{applicant}}',
+      printInProgress: 'Imprimiendo...',
+      printLockedMessage: 'Impresión bloqueada hasta aprobación',
+      readyToPrint: 'Listo para imprimir',
+      rejectedMessage: 'Trámite denegado internamente',
+      retryButton: 'Reintentar',
+      retryButtonA11y: 'Reintentar solicitud de {{applicant}}',
+      vehicleFallback: 'Vehículo por definir',
+      viewDossierButton: 'Ver expediente',
+      viewDossierButtonA11y: 'Ver expediente de {{applicant}}',
+    },
+    dates: {
+      monthsShort: [
+        'ene',
+        'feb',
+        'mar',
+        'abr',
+        'may',
+        'jun',
+        'jul',
+        'ago',
+        'sep',
+        'oct',
+        'nov',
+        'dic',
+      ],
+    },
+    empty: {
+      filteredSubtitle:
+        'No encontramos trámites que coincidan con tu búsqueda o filtro.',
+      filteredTitle: 'Sin coincidencias',
+      retryButton: 'Reintentar',
+      subtitle:
+        'Cuando envíes una solicitud desde Nuevo Trámite aparecerá aquí.',
+      title: 'Aún no tienes trámites registrados',
+    },
+    errors: {
+      authRequired:
+        'Tu sesión ha expirado. Inicia sesión nuevamente para consultar el historial.',
+      loadFailed:
+        'No pudimos cargar tu historial de trámites. Por favor, inténtalo de nuevo.',
+      networkError:
+        'No pudimos conectarnos con el servidor. Verifica tu conexión a internet e inténtalo de nuevo.',
+      printFailed:
+        'No pudimos generar el documento de impresión. Por favor, inténtalo de nuevo.',
+      printNotApproved: 'Impresión bloqueada hasta aprobación',
+      quickPrintFailed:
+        'No pudimos generar el documento de impresión. Por favor, inténtalo de nuevo.',
+      timeoutError:
+        'La solicitud tardó demasiado. Verifica tu conexión e inténtalo de nuevo.',
+    },
+    filters: {
+      all: 'Todos',
+      approved: 'Aprobados',
+      pending: 'Pendientes',
+      rejected: 'Rechazados',
+    },
+    header: {
+      notificationBellA11y: 'Abrir panel de notificaciones',
+      screenTitle: 'Historial de Trámites',
+    },
+    notifications: {
+      approvedDescription: '{{applicant}} · {{vehicle}}',
+      approvedTitle: 'Trámite Aprobado',
+      closePanel: 'Cerrar panel',
+      emptyMessage: 'No tienes notificaciones recientes.',
+      markAsRead: 'Marcar leídas',
+      rejectedDescription: '{{applicant}} · {{vehicle}}',
+      rejectedTitle: 'Trámite Rechazado',
+      title: 'Notificaciones',
+      unreadCountBadge: '{{count}} sin leer',
+    },
+    relativeTime: {
+      daysAgo: 'Hace {{count}} d',
+      hoursAgo: 'Hace {{count}} h',
+      justNow: 'Hace un momento',
+      minutesAgo: 'Hace {{count}} min',
+    },
+    search: {
+      clearSearchLabel: 'Limpiar búsqueda',
+      searchInputA11y: 'Buscar trámites en el historial',
+      searchPlaceholder: 'Buscar por cliente, cédula o vehículo...',
+    },
+  },
 } as const;
 
 export type I18nDictionary = typeof esCR;
