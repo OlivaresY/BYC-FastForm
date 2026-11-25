@@ -60,6 +60,7 @@ export interface DossierNotificationItem {
 }
 
 export interface UseHistoryViewModelResult {
+  clearQuickPrintError: () => void;
   clearSearch: () => void;
   closeNotifications: () => void;
   dossiers: HistoryDossierItem[];
@@ -72,6 +73,7 @@ export interface UseHistoryViewModelResult {
   notifications: DossierNotificationItem[];
   openNotifications: () => void;
   printingDossierId: string | null;
+  quickPrintError: string | null;
   refresh: () => Promise<void>;
   requestQuickPrint: (dossier: HistoryDossierItem) => Promise<void>;
   retry: () => Promise<void>;

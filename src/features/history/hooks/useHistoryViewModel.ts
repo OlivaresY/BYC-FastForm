@@ -1,9 +1,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { esCR } from '@/shared/i18n';
-import { supabase } from '@/shared/lib/supabaseClient';
 import {
   APPLICATION_STATUS_VALUES,
+  HISTORY_INTERNAL_STRINGS,
   HISTORY_STATUS_FILTERS,
 } from '../constants';
 import {
@@ -13,6 +13,7 @@ import {
 } from '../services';
 import type {
   CreditApplicationRow,
+  DossierNotificationItem,
   HistoryDossierItem,
   HistoryStatusFilter,
   UseHistoryViewModelResult,
@@ -23,23 +24,24 @@ export interface UseHistoryViewModelOptions {
   onQuickPrint?: (dossier: HistoryDossierItem) => Promise<void>;
 }
 
-const ABORT_ERROR_NAME = 'AbortError' as const;
-const EMPTY_QUERY = '' as const;
-
 const isAbortError = (error: unknown): boolean =>
-  error instanceof Error && error.name === ABORT_ERROR_NAME;
+  error instanceof Error &&
+  error.name === HISTORY_INTERNAL_STRINGS.ABORT_ERROR_NAME;
 
 export const useHistoryViewModel = (
   options?: UseHistoryViewModelOptions,
 ): UseHistoryViewModelResult => {
-  const client = options?.client ?? supabase;
+  const client = options?.client;
   const onQuickPrint = options?.onQuickPrint;
 
   const [allDossiers, setAllDossiers] = useState<HistoryDossierItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>(EMPTY_QUERY);
+  const [quickPrintError, setQuickPrintError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>(
+    HISTORY_INTERNAL_STRINGS.EMPTY,
+  );
   const [selectedFilter, setSelectedFilter] = useState<HistoryStatusFilter>(
     HISTORY_STATUS_FILTERS.ALL,
   );
@@ -96,7 +98,13 @@ export const useHistoryViewModel = (
         return;
       }
 
-      setError(esCR.history.errors.loadFailed);
+      const resolvedError =
+        caughtError instanceof Error &&
+        caughtError.message === esCR.history.errors.timeoutError
+          ? esCR.history.errors.timeoutError
+          : esCR.history.errors.loadFailed;
+
+      setError(resolvedError);
     },
     [],
   );
@@ -155,11 +163,17 @@ export const useHistoryViewModel = (
     return () => {
       isMountedRef.current = false;
       controller.abort();
-      if (activeAbortControllerRef.current === controller) {
-        activeAbortControllerRef.current = null;
-      }
+      activeAbortControllerRef.current?.abort();
+      activeAbortControllerRef.current = null;
     };
   }, [applyFetchError, applyFetchSuccess, client, finalizeFetch]);
+
+  const clearQuickPrintError = useCallback((): void => {
+    if (!isMountedRef.current) {
+      return;
+    }
+    setQuickPrintError(null);
+  }, []);
 
   const refresh = useCallback(async (): Promise<void> => {
     if (!isMountedRef.current) {
@@ -168,6 +182,7 @@ export const useHistoryViewModel = (
 
     setIsRefreshing(true);
     setError(null);
+    setQuickPrintError(null);
     await executeFetch();
   }, [executeFetch]);
 
@@ -178,27 +193,59 @@ export const useHistoryViewModel = (
 
     setIsLoading(true);
     setError(null);
+    setQuickPrintError(null);
     await executeFetch();
   }, [executeFetch]);
 
   const clearSearch = useCallback((): void => {
-    setSearchQuery(EMPTY_QUERY);
+    if (!isMountedRef.current) {
+      return;
+    }
+    setQuickPrintError(null);
+    setSearchQuery(HISTORY_INTERNAL_STRINGS.EMPTY);
   }, []);
 
+  const handleSetSearchQuery = useCallback((query: string): void => {
+    if (!isMountedRef.current) {
+      return;
+    }
+    setQuickPrintError(null);
+    setSearchQuery(query);
+  }, []);
+
+  const handleSetSelectedFilter = useCallback(
+    (filter: HistoryStatusFilter): void => {
+      if (!isMountedRef.current) {
+        return;
+      }
+      setQuickPrintError(null);
+      setSelectedFilter(filter);
+    },
+    [],
+  );
+
   const openNotifications = useCallback((): void => {
+    if (!isMountedRef.current) {
+      return;
+    }
+    setQuickPrintError(null);
     setIsNotificationsOpen(true);
   }, []);
 
   const closeNotifications = useCallback((): void => {
+    if (!isMountedRef.current) {
+      return;
+    }
+    setQuickPrintError(null);
     setIsNotificationsOpen(false);
   }, []);
 
-  const baseNotifications = useMemo(
+  const baseNotifications = useMemo<DossierNotificationItem[]>(
     () => mapDossiersToNotifications(allDossiers, esCR.history),
     [allDossiers],
   );
 
-  const notifications = useMemo(
+  const notifications = useMemo<DossierNotificationItem[]>(
     () =>
       baseNotifications.map((notification) => ({
         ...notification,
@@ -207,7 +254,7 @@ export const useHistoryViewModel = (
     [baseNotifications, readNotificationIds],
   );
 
-  const unreadCount = useMemo(
+  const unreadCount = useMemo<number>(
     () =>
       notifications.reduce(
         (count, notification) => (notification.isRead ? count : count + 1),
@@ -217,6 +264,11 @@ export const useHistoryViewModel = (
   );
 
   const markAsRead = useCallback((notificationId: string): void => {
+    if (!isMountedRef.current) {
+      return;
+    }
+
+    setQuickPrintError(null);
     setReadNotificationIds((previousIds) => {
       if (previousIds.has(notificationId)) {
         return previousIds;
@@ -229,6 +281,11 @@ export const useHistoryViewModel = (
   }, []);
 
   const markAllAsRead = useCallback((): void => {
+    if (!isMountedRef.current) {
+      return;
+    }
+
+    setQuickPrintError(null);
     setReadNotificationIds((previousIds) => {
       const nextIds = new Set(previousIds);
       let hasChanges = false;
@@ -244,7 +301,7 @@ export const useHistoryViewModel = (
     });
   }, [baseNotifications]);
 
-  const dossiers = useMemo(() => {
+  const dossiers = useMemo<HistoryDossierItem[]>(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
 
     return allDossiers.filter((dossier) => {
@@ -270,6 +327,10 @@ export const useHistoryViewModel = (
 
   const requestQuickPrint = useCallback(
     async (dossier: HistoryDossierItem): Promise<void> => {
+      if (!isMountedRef.current) {
+        return;
+      }
+
       if (
         dossier.status !== APPLICATION_STATUS_VALUES.APPROVED ||
         !dossier.canQuickPrint
@@ -285,15 +346,15 @@ export const useHistoryViewModel = (
       setPrintingDossierId(dossier.id);
 
       try {
-        setError(null);
+        setQuickPrintError(null);
         await onQuickPrint?.(dossier);
-      } catch (quickPrintError) {
+      } catch (caughtQuickPrintError) {
         console.error(
-          '[useHistoryViewModel] Quick print failed:',
-          quickPrintError,
+          HISTORY_INTERNAL_STRINGS.LOG_QUICK_PRINT_FAILED,
+          caughtQuickPrintError,
         );
         if (isMountedRef.current) {
-          setError(esCR.history.errors.quickPrintFailed);
+          setQuickPrintError(esCR.history.errors.quickPrintFailed);
         }
       } finally {
         printingDossierIdRef.current = null;
@@ -306,6 +367,7 @@ export const useHistoryViewModel = (
   );
 
   return {
+    clearQuickPrintError,
     clearSearch,
     closeNotifications,
     dossiers,
@@ -318,13 +380,14 @@ export const useHistoryViewModel = (
     notifications,
     openNotifications,
     printingDossierId,
+    quickPrintError,
     refresh,
     requestQuickPrint,
     retry,
     searchQuery,
     selectedFilter,
-    setSearchQuery,
-    setSelectedFilter,
+    setSearchQuery: handleSetSearchQuery,
+    setSelectedFilter: handleSetSelectedFilter,
     totalCount: allDossiers.length,
     unreadCount,
   };
