@@ -359,8 +359,10 @@ export const esCR = {
       rejected: 'RECHAZADO',
     },
     cards: {
+      additionalBanksTemplate: '(+{{count}} más)',
       applicantFallback: 'Solicitante sin nombre',
       bankFallback: 'Entidad por asignar',
+      dateFallback: 'Fecha pendiente',
       idPrefix: 'Cédula:',
       identificationFallback: 'Sin identificación',
       printButton: 'Imprimir',
@@ -371,6 +373,22 @@ export const esCR = {
       retryButton: 'Reintentar',
       vehicleFallback: 'Vehículo por definir',
       viewDossierButton: 'Ver expediente',
+    },
+    dates: {
+      monthsShort: [
+        'ene',
+        'feb',
+        'mar',
+        'abr',
+        'may',
+        'jun',
+        'jul',
+        'ago',
+        'sep',
+        'oct',
+        'nov',
+        'dic',
+      ],
     },
     empty: {
       filteredSubtitle:
@@ -391,6 +409,8 @@ export const esCR = {
       printFailed:
         'No pudimos generar el documento de impresión. Por favor, inténtalo de nuevo.',
       printNotApproved: 'Impresión bloqueada hasta aprobación',
+      quickPrintFailed:
+        'No pudimos generar el documento de impresión. Por favor, inténtalo de nuevo.',
       timeoutError:
         'La solicitud tardó demasiado. Verifica tu conexión e inténtalo de nuevo.',
     },
@@ -405,13 +425,21 @@ export const esCR = {
       screenTitle: 'Historial de Trámites',
     },
     notifications: {
+      approvedDescription: '{{applicant}} · {{vehicle}}',
       approvedTitle: 'Trámite Aprobado',
       closePanel: 'Cerrar panel',
       emptyMessage: 'No tienes notificaciones recientes.',
       markAsRead: 'Marcar leídas',
+      rejectedDescription: '{{applicant}} · {{vehicle}}',
       rejectedTitle: 'Trámite Rechazado',
       title: 'Notificaciones',
       unreadCountBadge: '{{count}} sin leer',
+    },
+    relativeTime: {
+      daysAgo: 'Hace {{count}} d',
+      hoursAgo: 'Hace {{count}} h',
+      justNow: 'Hace un momento',
+      minutesAgo: 'Hace {{count}} min',
     },
     search: {
       clearSearchLabel: 'Limpiar búsqueda',
