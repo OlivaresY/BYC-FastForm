@@ -351,6 +351,74 @@ export const esCR = {
       physical: 'Contacto y Laboral',
     },
   },
+  history: {
+    badges: {
+      approved: 'APROBADO',
+      draft: 'Borrador',
+      pending: 'PENDIENTE',
+      rejected: 'RECHAZADO',
+    },
+    cards: {
+      applicantFallback: 'Solicitante sin nombre',
+      bankFallback: 'Entidad por asignar',
+      idPrefix: 'Cédula:',
+      identificationFallback: 'Sin identificación',
+      printButton: 'Imprimir',
+      printInProgress: 'Generando...',
+      printLockedMessage: 'Impresión bloqueada hasta aprobación',
+      readyToPrint: 'Listo para imprimir',
+      rejectedMessage: 'Trámite denegado internamente',
+      retryButton: 'Reintentar',
+      vehicleFallback: 'Vehículo por definir',
+      viewDossierButton: 'Ver expediente',
+    },
+    empty: {
+      filteredSubtitle:
+        'No encontramos trámites que coincidan con tu búsqueda o filtro.',
+      filteredTitle: 'Sin coincidencias',
+      retryButton: 'Reintentar',
+      subtitle:
+        'Cuando envíes una solicitud desde Nuevo Trámite aparecerá aquí.',
+      title: 'Aún no tienes trámites registrados',
+    },
+    errors: {
+      authRequired:
+        'Tu sesión ha expirado. Inicia sesión nuevamente para consultar el historial.',
+      loadFailed:
+        'No pudimos cargar tu historial de trámites. Por favor, inténtalo de nuevo.',
+      networkError:
+        'No pudimos conectarnos con el servidor. Verifica tu conexión a internet e inténtalo de nuevo.',
+      printFailed:
+        'No pudimos generar el documento de impresión. Por favor, inténtalo de nuevo.',
+      printNotApproved: 'Impresión bloqueada hasta aprobación',
+      timeoutError:
+        'La solicitud tardó demasiado. Verifica tu conexión e inténtalo de nuevo.',
+    },
+    filters: {
+      all: 'Todos',
+      approved: 'Aprobados',
+      pending: 'Pendientes',
+      rejected: 'Rechazados',
+    },
+    header: {
+      notificationBellA11y: 'Abrir panel de notificaciones',
+      screenTitle: 'Historial de Trámites',
+    },
+    notifications: {
+      approvedTitle: 'Trámite Aprobado',
+      closePanel: 'Cerrar panel',
+      emptyMessage: 'No tienes notificaciones recientes.',
+      markAsRead: 'Marcar leídas',
+      rejectedTitle: 'Trámite Rechazado',
+      title: 'Notificaciones',
+      unreadCountBadge: '{{count}} sin leer',
+    },
+    search: {
+      clearSearchLabel: 'Limpiar búsqueda',
+      searchInputA11y: 'Buscar trámites en el historial',
+      searchPlaceholder: 'Buscar por cliente, cédula o vehículo...',
+    },
+  },
   navigation: {
     accessibility: {
       historyHint: 'Muestra la lista de trámites de crédito enviados',
