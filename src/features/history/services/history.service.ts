@@ -4,10 +4,14 @@ import { supabase } from '@/shared/lib/supabaseClient';
 import {
   APPLICATION_STATUS_VALUES,
   BANK_DISPLAY_LABELS,
+  CREDIT_APPLICATION_REGIMES,
   HISTORY_DATE_LIMITS,
   HISTORY_DB_COLUMNS,
   HISTORY_DB_TABLES,
+  HISTORY_EVENT_NAMES,
+  HISTORY_INTERNAL_STRINGS,
   HISTORY_QUERY_LIMITS,
+  HISTORY_SELECT_COLUMNS,
   HISTORY_TEMPLATE_TOKENS,
   HISTORY_TIME_UNITS_MS,
 } from '../constants';
@@ -37,40 +41,64 @@ interface AbortableSelectQuery extends PromiseLike<SelectApplicationsQueryRespon
   ) => PromiseLike<SelectApplicationsQueryResponse>;
 }
 
-const HISTORY_SELECT_COLUMNS =
-  'id, user_id, regime, status, template_version, selected_banks, payload, created_at' as const;
-
-const EMPTY_TEXT = '' as const;
-const SPACE_SEPARATOR = ' ' as const;
-const ABORT_ERROR_NAME = 'AbortError' as const;
-
 const createAbortError = (): Error => {
-  const abortError = new Error(ABORT_ERROR_NAME);
-  abortError.name = ABORT_ERROR_NAME;
+  const abortError = new Error(HISTORY_INTERNAL_STRINGS.ABORT_ERROR_NAME);
+  abortError.name = HISTORY_INTERNAL_STRINGS.ABORT_ERROR_NAME;
   return abortError;
 };
+
+const isPlainObject = (
+  value: unknown,
+): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const joinNonEmptySegments = (
   segments: readonly (string | undefined | null)[],
   fallback: string,
 ): string => {
   const cleaned = segments
-    .map((segment) => (typeof segment === 'string' ? segment.trim() : EMPTY_TEXT))
+    .map((segment) =>
+      typeof segment === 'string'
+        ? segment.trim()
+        : HISTORY_INTERNAL_STRINGS.EMPTY,
+    )
     .filter((segment) => segment.length > 0);
 
-  return cleaned.length > 0 ? cleaned.join(SPACE_SEPARATOR) : fallback;
+  return cleaned.length > 0
+    ? cleaned.join(HISTORY_INTERNAL_STRINGS.SPACE)
+    : fallback;
 };
 
 const extractApplicantIdentity = (
   row: CreditApplicationRow,
   copy: HistoryCopy,
 ): { applicantName: string; identificationNumber: string } => {
-  const payload = row.payload as Partial<MasterCreditApplicationPayload> | null;
-  const resolvedRegime = row.regime ?? payload?.regime;
+  const rawPayload = isPlainObject(row.payload)
+    ? (row.payload as Partial<MasterCreditApplicationPayload>)
+    : undefined;
+  const resolvedRegime = row.regime ?? rawPayload?.regime;
+  const applicantSection = isPlainObject(rawPayload?.applicant)
+    ? rawPayload.applicant
+    : undefined;
+  const applicantRegime = applicantSection?.regime;
+  const rawValues = isPlainObject(applicantSection?.values)
+    ? applicantSection.values
+    : undefined;
 
-  if (resolvedRegime === 'legal') {
-    const legalValues =
-      payload?.regime === 'legal' ? payload.applicant?.values : undefined;
+  if (resolvedRegime === CREDIT_APPLICATION_REGIMES.LEGAL) {
+    const canReadLegal =
+      applicantRegime === undefined ||
+      applicantRegime === CREDIT_APPLICATION_REGIMES.LEGAL;
+    const legalValues = canReadLegal
+      ? (rawValues as
+          | Partial<
+              Extract<
+                MasterCreditApplicationPayload,
+                { regime: 'legal' }
+              >['applicant']['values']
+            >
+          | undefined)
+      : undefined;
 
     return {
       applicantName: joinNonEmptySegments(
@@ -84,8 +112,19 @@ const extractApplicantIdentity = (
     };
   }
 
-  const physicalValues =
-    payload?.regime === 'physical' ? payload.applicant?.values : undefined;
+  const canReadPhysical =
+    applicantRegime === undefined ||
+    applicantRegime === CREDIT_APPLICATION_REGIMES.PHYSICAL;
+  const physicalValues = canReadPhysical
+    ? (rawValues as
+        | Partial<
+            Extract<
+              MasterCreditApplicationPayload,
+              { regime: 'physical' }
+            >['applicant']['values']
+          >
+        | undefined)
+    : undefined;
 
   return {
     applicantName: joinNonEmptySegments(
@@ -105,10 +144,15 @@ const extractApplicantIdentity = (
 };
 
 const extractVehicleSummary = (
-  payload: Partial<MasterCreditApplicationPayload> | null | undefined,
+  payload: unknown,
   copy: HistoryCopy,
 ): string => {
-  const vehicle = payload?.vehicleCredit;
+  const safePayload = isPlainObject(payload)
+    ? (payload as Partial<MasterCreditApplicationPayload>)
+    : undefined;
+  const vehicle = isPlainObject(safePayload?.vehicleCredit)
+    ? safePayload.vehicleCredit
+    : undefined;
 
   return joinNonEmptySegments(
     [vehicle?.marca, vehicle?.modelo, vehicle?.anio],
@@ -117,44 +161,61 @@ const extractVehicleSummary = (
 };
 
 const resolveSelectedBanks = (row: CreditApplicationRow): SelectedBankCode[] => {
-  if (Array.isArray(row.selected_banks) && row.selected_banks.length > 0) {
-    return row.selected_banks;
-  }
+  const rowBanks =
+    Array.isArray(row.selected_banks) && row.selected_banks.length > 0
+      ? row.selected_banks
+      : undefined;
+  const payloadBanks =
+    isPlainObject(row.payload) && Array.isArray(row.payload.selectedBanks)
+      ? row.payload.selectedBanks
+      : [];
+  const rawBanks: unknown[] = rowBanks ?? payloadBanks;
 
-  const payloadBanks = row.payload?.selectedBanks;
-  return Array.isArray(payloadBanks) ? payloadBanks : [];
+  const uniqueBanks = new Set<SelectedBankCode>();
+  rawBanks.forEach((candidate) => {
+    if (typeof candidate === 'string') {
+      const normalized = candidate.trim();
+      if (normalized.length > 0) {
+        uniqueBanks.add(normalized as SelectedBankCode);
+      }
+    }
+  });
+
+  return Array.from(uniqueBanks);
 };
 
 const resolvePrimaryBankLabel = (
   selectedBanks: readonly SelectedBankCode[],
   copy: HistoryCopy,
 ): string => {
-  const primaryBankCode = selectedBanks[0];
+  const recognizedLabels = selectedBanks
+    .filter((bankCode) =>
+      Object.prototype.hasOwnProperty.call(BANK_DISPLAY_LABELS, bankCode),
+    )
+    .map((bankCode) => BANK_DISPLAY_LABELS[bankCode]);
 
-  if (!primaryBankCode) {
+  const primaryLabel = recognizedLabels[0];
+  if (!primaryLabel) {
     return copy.cards.bankFallback;
   }
 
-  const primaryLabel =
-    BANK_DISPLAY_LABELS[primaryBankCode] ?? copy.cards.bankFallback;
-
-  if (selectedBanks.length <= 1) {
+  if (recognizedLabels.length === 1) {
     return primaryLabel;
   }
 
   const extraCountText = copy.cards.additionalBanksTemplate.replace(
     HISTORY_TEMPLATE_TOKENS.COUNT,
-    String(selectedBanks.length - 1),
+    String(recognizedLabels.length - 1),
   );
 
-  return `${primaryLabel}${SPACE_SEPARATOR}${extraCountText}`;
+  return `${primaryLabel}${HISTORY_INTERNAL_STRINGS.SPACE}${extraCountText}`;
 };
 
 export const formatDossierDate = (
   isoDate: string,
   copy: HistoryCopy = esCR.history,
 ): string => {
-  if (!isoDate) {
+  if (typeof isoDate !== 'string' || isoDate.trim().length === 0) {
     return copy.cards.dateFallback;
   }
 
@@ -163,14 +224,18 @@ export const formatDossierDate = (
     return copy.cards.dateFallback;
   }
 
+  const monthShort = copy.dates.monthsShort[parsedDate.getMonth()];
+  if (!monthShort) {
+    return copy.cards.dateFallback;
+  }
+
   const day = String(parsedDate.getDate()).padStart(
     HISTORY_DATE_LIMITS.PAD_WIDTH_CHARS,
     HISTORY_DATE_LIMITS.PAD_ZERO_CHAR,
   );
-  const monthShort = copy.dates.monthsShort[parsedDate.getMonth()] ?? EMPTY_TEXT;
   const year = parsedDate.getFullYear();
 
-  return `${day} ${monthShort} ${year}`;
+  return `${day}${HISTORY_INTERNAL_STRINGS.SPACE}${monthShort}${HISTORY_INTERNAL_STRINGS.SPACE}${year}`;
 };
 
 export const formatNotificationRelativeTime = (
@@ -178,7 +243,7 @@ export const formatNotificationRelativeTime = (
   copy: HistoryCopy = esCR.history,
   referenceMs: number = Date.now(),
 ): string => {
-  if (!isoDate) {
+  if (typeof isoDate !== 'string' || isoDate.trim().length === 0) {
     return copy.cards.dateFallback;
   }
 
@@ -187,7 +252,10 @@ export const formatNotificationRelativeTime = (
     return copy.cards.dateFallback;
   }
 
-  const elapsedMs = Math.max(0, referenceMs - createdMs);
+  const safeReferenceMs = Number.isFinite(referenceMs)
+    ? referenceMs
+    : Date.now();
+  const elapsedMs = Math.max(0, safeReferenceMs - createdMs);
 
   if (elapsedMs < HISTORY_TIME_UNITS_MS.MINUTE_MS) {
     return copy.relativeTime.justNow;
@@ -229,20 +297,27 @@ export const mapCreditApplicationRowToDossierItem = (
     copy,
   );
   const selectedBanks = resolveSelectedBanks(row);
+  const createdAt =
+    typeof row.created_at === 'string'
+      ? row.created_at
+      : HISTORY_INTERNAL_STRINGS.EMPTY;
 
   return {
     applicantName,
     canQuickPrint: row.status === APPLICATION_STATUS_VALUES.APPROVED,
-    createdAt: row.created_at,
-    formattedDate: formatDossierDate(row.created_at, copy),
-    id: row.id,
+    createdAt,
+    formattedDate: formatDossierDate(createdAt, copy),
+    id: typeof row.id === 'string' ? row.id : HISTORY_INTERNAL_STRINGS.EMPTY,
     identificationNumber,
     primaryBankLabel: resolvePrimaryBankLabel(selectedBanks, copy),
     rawPayload: row.payload,
-    regime: row.regime,
+    regime: row.regime ?? CREDIT_APPLICATION_REGIMES.PHYSICAL,
     selectedBanks,
     status: row.status,
-    templateVersion: row.template_version,
+    templateVersion:
+      typeof row.template_version === 'string'
+        ? row.template_version
+        : HISTORY_INTERNAL_STRINGS.EMPTY,
     vehicleSummary: extractVehicleSummary(row.payload, copy),
   };
 };
@@ -303,48 +378,55 @@ export const fetchAdvisorCreditApplications = async (
     throw createAbortError();
   }
 
+  const requestedLimit = options?.limit;
   const limit =
-    options?.limit ?? HISTORY_QUERY_LIMITS.DEFAULT_DOSSIERS_PAGE_SIZE;
-
-  const baseQuery = client
-    .from(HISTORY_DB_TABLES.CREDIT_APPLICATIONS)
-    .select(HISTORY_SELECT_COLUMNS)
-    .order(HISTORY_DB_COLUMNS.CREATED_AT, { ascending: false })
-    .limit(limit);
-
-  const abortableQuery = baseQuery as unknown as AbortableSelectQuery;
-  const executableQuery: PromiseLike<SelectApplicationsQueryResponse> =
-    options?.signal && typeof abortableQuery?.abortSignal === 'function'
-      ? abortableQuery.abortSignal(options.signal)
-      : (baseQuery as unknown as PromiseLike<SelectApplicationsQueryResponse>);
+    typeof requestedLimit === 'number' &&
+    Number.isFinite(requestedLimit) &&
+    requestedLimit > 0
+      ? Math.floor(requestedLimit)
+      : HISTORY_QUERY_LIMITS.DEFAULT_DOSSIERS_PAGE_SIZE;
 
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
   let abortListener: (() => void) | undefined;
 
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    timeoutId = setTimeout(() => {
-      reject(new Error(esCR.history.errors.timeoutError));
-    }, HISTORY_QUERY_LIMITS.REQUEST_TIMEOUT_MS);
-  });
-
-  const raceCandidates: Promise<SelectApplicationsQueryResponse>[] = [
-    Promise.resolve(executableQuery),
-    timeoutPromise,
-  ];
-
-  if (options?.signal) {
-    const signal = options.signal;
-    raceCandidates.push(
-      new Promise<never>((_, reject) => {
-        abortListener = (): void => {
-          reject(createAbortError());
-        };
-        signal.addEventListener('abort', abortListener, { once: true });
-      }),
-    );
-  }
-
   try {
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error(esCR.history.errors.timeoutError));
+      }, HISTORY_QUERY_LIMITS.REQUEST_TIMEOUT_MS);
+    });
+
+    const baseQuery = client
+      .from(HISTORY_DB_TABLES.CREDIT_APPLICATIONS)
+      .select(HISTORY_SELECT_COLUMNS)
+      .order(HISTORY_DB_COLUMNS.CREATED_AT, { ascending: false })
+      .limit(limit);
+
+    const abortableQuery = baseQuery as unknown as AbortableSelectQuery;
+    const executableQuery: PromiseLike<SelectApplicationsQueryResponse> =
+      options?.signal && typeof abortableQuery?.abortSignal === 'function'
+        ? abortableQuery.abortSignal(options.signal)
+        : (baseQuery as unknown as PromiseLike<SelectApplicationsQueryResponse>);
+
+    const raceCandidates: Promise<SelectApplicationsQueryResponse>[] = [
+      Promise.resolve(executableQuery),
+      timeoutPromise,
+    ];
+
+    if (options?.signal) {
+      const signal = options.signal;
+      raceCandidates.push(
+        new Promise<never>((_, reject) => {
+          abortListener = (): void => {
+            reject(createAbortError());
+          };
+          signal.addEventListener(HISTORY_EVENT_NAMES.ABORT, abortListener, {
+            once: true,
+          });
+        }),
+      );
+    }
+
     const { data, error } = await Promise.race(raceCandidates);
 
     if (options?.signal?.aborted) {
@@ -352,10 +434,7 @@ export const fetchAdvisorCreditApplications = async (
     }
 
     if (error) {
-      console.error(
-        '[history.service] Failed to fetch advisor credit applications:',
-        error,
-      );
+      console.error(HISTORY_INTERNAL_STRINGS.LOG_FETCH_FAILED, error);
       throw new Error(esCR.history.errors.loadFailed);
     }
 
@@ -363,29 +442,31 @@ export const fetchAdvisorCreditApplications = async (
   } catch (caughtError) {
     if (
       options?.signal?.aborted ||
-      (caughtError instanceof Error && caughtError.name === ABORT_ERROR_NAME)
+      (caughtError instanceof Error &&
+        caughtError.name === HISTORY_INTERNAL_STRINGS.ABORT_ERROR_NAME)
     ) {
       throw createAbortError();
     }
 
     if (
       caughtError instanceof Error &&
-      caughtError.message === esCR.history.errors.loadFailed
+      (caughtError.message === esCR.history.errors.loadFailed ||
+        caughtError.message === esCR.history.errors.timeoutError)
     ) {
       throw caughtError;
     }
 
-    console.error(
-      '[history.service] Unexpected error fetching advisor credit applications:',
-      caughtError,
-    );
+    console.error(HISTORY_INTERNAL_STRINGS.LOG_FETCH_UNEXPECTED, caughtError);
     throw new Error(esCR.history.errors.loadFailed);
   } finally {
     if (timeoutId !== undefined) {
       clearTimeout(timeoutId);
     }
     if (options?.signal && abortListener) {
-      options.signal.removeEventListener('abort', abortListener);
+      options.signal.removeEventListener(
+        HISTORY_EVENT_NAMES.ABORT,
+        abortListener,
+      );
     }
   }
 };

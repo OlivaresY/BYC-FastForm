@@ -2,7 +2,7 @@ import {
   APPLICATION_STATUS,
   SELECTED_BANK_CODES,
   type SelectedBankCode,
-} from '@/features/credit-wizard';
+} from '@/features/credit-wizard/types';
 
 export const APPLICATION_STATUS_VALUES = {
   APPROVED: APPLICATION_STATUS.APPROVED,
@@ -17,6 +17,11 @@ export const BANK_DISPLAY_LABELS: Readonly<Record<SelectedBankCode, string>> = {
   [SELECTED_BANK_CODES.CARRO_FACIL]: 'Carro Fácil',
   [SELECTED_BANK_CODES.PROMERICA]: 'Banco Promerica',
   [SELECTED_BANK_CODES.SCOTIABANK]: 'Scotiabank',
+} as const;
+
+export const CREDIT_APPLICATION_REGIMES = {
+  LEGAL: 'legal',
+  PHYSICAL: 'physical',
 } as const;
 
 export const HISTORY_DATE_LIMITS = {
@@ -40,11 +45,29 @@ export const HISTORY_DB_TABLES = {
   CREDIT_APPLICATIONS: 'credit_applications',
 } as const;
 
+export const HISTORY_EVENT_NAMES = {
+  ABORT: 'abort',
+} as const;
+
+export const HISTORY_INTERNAL_STRINGS = {
+  ABORT_ERROR_NAME: 'AbortError',
+  EMPTY: '',
+  LOG_FETCH_FAILED:
+    '[history.service] Failed to fetch advisor credit applications:',
+  LOG_FETCH_UNEXPECTED:
+    '[history.service] Unexpected error fetching advisor credit applications:',
+  LOG_QUICK_PRINT_FAILED: '[useHistoryViewModel] Quick print failed:',
+  SPACE: ' ',
+} as const;
+
 export const HISTORY_QUERY_LIMITS = {
   DEFAULT_DOSSIERS_PAGE_SIZE: 50,
   MAX_NOTIFICATIONS_COUNT: 20,
   REQUEST_TIMEOUT_MS: 15000,
 } as const;
+
+export const HISTORY_SELECT_COLUMNS =
+  'id, user_id, regime, status, template_version, selected_banks, payload, created_at' as const;
 
 export const HISTORY_STATUS_FILTERS = {
   ALL: 'all',
