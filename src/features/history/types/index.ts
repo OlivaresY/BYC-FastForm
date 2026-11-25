@@ -1,4 +1,9 @@
 export type {
+  DossierCardProps,
+  DossierCardStatusStyle,
+} from './DossierCard.types';
+
+export type {
   ApplicationStatus,
   CreditApplicationRegime,
   CreditApplicationRow,

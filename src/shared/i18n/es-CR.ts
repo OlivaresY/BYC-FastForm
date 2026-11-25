@@ -354,7 +354,7 @@ export const esCR = {
   history: {
     badges: {
       approved: 'APROBADO',
-      draft: 'Borrador',
+      draft: 'BORRADOR',
       pending: 'PENDIENTE',
       rejected: 'RECHAZADO',
     },
@@ -366,13 +366,16 @@ export const esCR = {
       identificationFallback: 'Sin identificación',
       idPrefix: 'Cédula:',
       printButton: 'Imprimir',
-      printInProgress: 'Generando...',
+      printButtonA11y: 'Imprimir expediente de {{applicant}}',
+      printInProgress: 'Imprimiendo...',
       printLockedMessage: 'Impresión bloqueada hasta aprobación',
       readyToPrint: 'Listo para imprimir',
       rejectedMessage: 'Trámite denegado internamente',
       retryButton: 'Reintentar',
+      retryButtonA11y: 'Reintentar solicitud de {{applicant}}',
       vehicleFallback: 'Vehículo por definir',
       viewDossierButton: 'Ver expediente',
+      viewDossierButtonA11y: 'Ver expediente de {{applicant}}',
     },
     dates: {
       monthsShort: [
