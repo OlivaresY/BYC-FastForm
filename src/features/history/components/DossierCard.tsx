@@ -72,6 +72,7 @@ const DossierCardComponent = ({
     dossier.canQuickPrint;
   const isRejected = dossier.status === APPLICATION_STATUS_VALUES.REJECTED;
   const isPrintingActive = Boolean(isPrinting);
+  const isRetryDisabled = !onPressRetry;
 
   const statusStyle =
     DOSSIER_CARD_STATUS_STYLES[dossier.status] ??
@@ -101,7 +102,11 @@ const DossierCardComponent = ({
   }, [dossier, isApprovedForQuickPrint, isPrintingActive, onPressQuickPrint]);
 
   const handlePressRetry = useCallback((): void => {
-    onPressRetry?.(dossier);
+    if (!onPressRetry) {
+      return;
+    }
+
+    onPressRetry(dossier);
   }, [dossier, onPressRetry]);
 
   const handlePressViewDossier = useCallback((): void => {
@@ -238,8 +243,14 @@ const DossierCardComponent = ({
           <Pressable
             accessibilityLabel={retryA11yLabel}
             accessibilityRole='button'
-            className={DOSSIER_CARD_STYLES.RETRY_BUTTON}
-            onPress={handlePressRetry}
+            accessibilityState={{ disabled: isRetryDisabled }}
+            className={
+              isRetryDisabled
+                ? `${DOSSIER_CARD_STYLES.RETRY_BUTTON} ${DOSSIER_CARD_STYLES.RETRY_BUTTON_DISABLED}`
+                : DOSSIER_CARD_STYLES.RETRY_BUTTON
+            }
+            disabled={isRetryDisabled}
+            onPress={isRetryDisabled ? undefined : handlePressRetry}
             testID={DOSSIER_CARD_TEST_IDS.RETRY_BUTTON}
           >
             <Text

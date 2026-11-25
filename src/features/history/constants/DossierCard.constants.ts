@@ -66,6 +66,7 @@ export const DOSSIER_CARD_STYLES = {
     'flex-shrink text-center text-sm font-medium text-text-secondary',
   RETRY_BUTTON:
     'min-h-[48px] min-w-[48px] flex-row items-center justify-center gap-2 rounded-xl border border-status-rejected-border bg-status-rejected-bg px-3 py-2',
+  RETRY_BUTTON_DISABLED: 'opacity-50',
   RETRY_TEXT: 'flex-shrink text-center text-sm font-semibold text-brand-red',
   STATUS_BADGE_BASE: 'rounded-full px-2.5 py-1',
   STATUS_BADGE_TEXT_BASE: 'text-xs font-bold uppercase',
