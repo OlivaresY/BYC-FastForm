@@ -25,6 +25,7 @@ module.exports = {
         success: '#10B981',
         surface: '#FFFFFF',
         'border-base': '#A39F97',
+        'border-subtle': '#D8D3C8',
         // Status Pill Tokens
         'status-approved-bg': '#DCFCE7',
         'status-approved-border': '#86EFAC',
