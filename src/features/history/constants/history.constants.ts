@@ -19,6 +19,27 @@ export const BANK_DISPLAY_LABELS: Readonly<Record<SelectedBankCode, string>> = {
   [SELECTED_BANK_CODES.SCOTIABANK]: 'Scotiabank',
 } as const;
 
+export const HISTORY_DATE_LIMITS = {
+  MAX_RELATIVE_DAYS: 7,
+  PAD_WIDTH_CHARS: 2,
+  PAD_ZERO_CHAR: '0',
+} as const;
+
+export const HISTORY_DB_COLUMNS = {
+  CREATED_AT: 'created_at',
+  ID: 'id',
+  PAYLOAD: 'payload',
+  REGIME: 'regime',
+  SELECTED_BANKS: 'selected_banks',
+  STATUS: 'status',
+  TEMPLATE_VERSION: 'template_version',
+  USER_ID: 'user_id',
+} as const;
+
+export const HISTORY_DB_TABLES = {
+  CREDIT_APPLICATIONS: 'credit_applications',
+} as const;
+
 export const HISTORY_QUERY_LIMITS = {
   DEFAULT_DOSSIERS_PAGE_SIZE: 50,
   MAX_NOTIFICATIONS_COUNT: 20,
@@ -30,6 +51,12 @@ export const HISTORY_STATUS_FILTERS = {
   APPROVED: APPLICATION_STATUS.APPROVED,
   PENDING: APPLICATION_STATUS.PENDING,
   REJECTED: APPLICATION_STATUS.REJECTED,
+} as const;
+
+export const HISTORY_TEMPLATE_TOKENS = {
+  APPLICANT: '{{applicant}}',
+  COUNT: '{{count}}',
+  VEHICLE: '{{vehicle}}',
 } as const;
 
 export const HISTORY_TEST_IDS = {
@@ -55,4 +82,10 @@ export const HISTORY_TEST_IDS = {
   SCREEN_CONTAINER: 'history-screen-container',
   SEARCH_CLEAR_BUTTON: 'history-search-clear-button',
   SEARCH_INPUT: 'history-search-input',
+} as const;
+
+export const HISTORY_TIME_UNITS_MS = {
+  DAY_MS: 86400000,
+  HOUR_MS: 3600000,
+  MINUTE_MS: 60000,
 } as const;
