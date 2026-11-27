@@ -2,6 +2,8 @@ export {
   fetchAdvisorCreditApplications,
   formatDossierDate,
   formatNotificationRelativeTime,
+  HistoryServiceError,
+  isHistoryServiceError,
   mapCreditApplicationRowToDossierItem,
   mapDossiersToNotifications,
 } from './history.service';

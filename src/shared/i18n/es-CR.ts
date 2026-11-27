@@ -358,6 +358,13 @@ export const esCR = {
       pending: 'PENDIENTE',
       rejected: 'RECHAZADO',
     },
+    banks: {
+      bac: 'BAC Credomatic',
+      bncr: 'Banco Nacional (BNCR)',
+      carroFacil: 'Carro Fácil',
+      promerica: 'Banco Promerica',
+      scotiabank: 'Scotiabank',
+    },
     cards: {
       additionalBanksTemplate: '(+{{count}} más)',
       applicantFallback: 'Solicitante sin nombre',

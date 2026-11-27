@@ -8,6 +8,7 @@ import {
   HISTORY_DATE_LIMITS,
   HISTORY_DB_COLUMNS,
   HISTORY_DB_TABLES,
+  HISTORY_ERROR_CODES,
   HISTORY_INTERNAL_STRINGS,
   HISTORY_QUERY_LIMITS,
   HISTORY_SELECT_COLUMNS,
@@ -23,6 +24,7 @@ import {
   fetchAdvisorCreditApplications,
   formatDossierDate,
   formatNotificationRelativeTime,
+  HistoryServiceError,
   mapCreditApplicationRowToDossierItem,
   mapDossiersToNotifications,
 } from '../history.service';
@@ -218,8 +220,8 @@ interface MockSupabaseHistoryHarness {
   abortSignalMock: jest.Mock;
   client: SupabaseClient;
   fromMock: jest.Mock;
-  limitMock: jest.Mock;
   orderMock: jest.Mock;
+  rangeMock: jest.Mock;
   selectMock: jest.Mock;
 }
 
@@ -227,11 +229,11 @@ const createMockSupabaseClient = (
   result: { data: unknown; error: unknown } = { data: [], error: null },
 ): MockSupabaseHistoryHarness => {
   const abortSignalMock = jest.fn().mockResolvedValue(result);
-  const queryResultPromise = Object.assign(Promise.resolve(result), {
+  const rangeResultPromise = Object.assign(Promise.resolve(result), {
     abortSignal: abortSignalMock,
   });
-  const limitMock = jest.fn().mockReturnValue(queryResultPromise);
-  const orderMock = jest.fn().mockReturnValue({ limit: limitMock });
+  const rangeMock = jest.fn().mockReturnValue(rangeResultPromise);
+  const orderMock = jest.fn().mockReturnValue({ range: rangeMock });
   const selectMock = jest.fn().mockReturnValue({ order: orderMock });
   const fromMock = jest.fn().mockReturnValue({ select: selectMock });
 
@@ -243,8 +245,8 @@ const createMockSupabaseClient = (
     abortSignalMock,
     client,
     fromMock,
-    limitMock,
     orderMock,
+    rangeMock,
     selectMock,
   };
 };
@@ -260,7 +262,7 @@ describe('history.service', () => {
   });
 
   describe('mapCreditApplicationRowToDossierItem', () => {
-    it('maps physical person payload with optional middleName and enables canQuickPrint only when Approved', () => {
+    it('maps physical person payload using centralized esCR bank labels and enables canQuickPrint only when Approved', () => {
       // Arrange
       const row = buildRow();
       const expectedMonth = esCR.history.dates.monthsShort[7];
@@ -273,14 +275,28 @@ describe('history.service', () => {
       const item = mapCreditApplicationRowToDossierItem(row, esCR.history);
 
       // Assert
+      expect(BANK_DISPLAY_LABELS[SELECTED_BANK_CODES.BAC]).toBe(
+        esCR.history.banks.bac,
+      );
+      expect(BANK_DISPLAY_LABELS[SELECTED_BANK_CODES.BNCR]).toBe(
+        esCR.history.banks.bncr,
+      );
+      expect(BANK_DISPLAY_LABELS[SELECTED_BANK_CODES.CARRO_FACIL]).toBe(
+        esCR.history.banks.carroFacil,
+      );
+      expect(BANK_DISPLAY_LABELS[SELECTED_BANK_CODES.PROMERICA]).toBe(
+        esCR.history.banks.promerica,
+      );
+      expect(BANK_DISPLAY_LABELS[SELECTED_BANK_CODES.SCOTIABANK]).toBe(
+        esCR.history.banks.scotiabank,
+      );
+
       expect(item.id).toBe('dossier-001');
       expect(item.regime).toBe('physical');
       expect(item.applicantName).toBe('Carlos Alberto Rodríguez Castro');
       expect(item.identificationNumber).toBe('1-1234-0567');
       expect(item.vehicleSummary).toBe('BYD Song Plus 2026');
-      expect(item.primaryBankLabel).toBe(
-        BANK_DISPLAY_LABELS[SELECTED_BANK_CODES.BAC],
-      );
+      expect(item.primaryBankLabel).toBe(esCR.history.banks.bac);
       expect(item.formattedDate).toBe(expectedDate);
       expect(item.canQuickPrint).toBe(true);
       expect(item.rawPayload).toBe(row.payload);
@@ -359,7 +375,7 @@ describe('history.service', () => {
       expect(pendingItem.identificationNumber).toBe('3-101-123456');
       expect(pendingItem.vehicleSummary).toBe('BYD Yuan Pro 2025');
       expect(pendingItem.primaryBankLabel).toBe(
-        `${BANK_DISPLAY_LABELS[SELECTED_BANK_CODES.BAC]} ${expectedExtraSuffix}`,
+        `${esCR.history.banks.bac} ${expectedExtraSuffix}`,
       );
       expect(pendingItem.canQuickPrint).toBe(false);
       expect(rejectedItem.canQuickPrint).toBe(false);
@@ -455,13 +471,51 @@ describe('history.service', () => {
 
       expect(partialMapped.applicantName).toBe('Grupo Motor CR S.A.');
       expect(partialMapped.identificationNumber).toBe('3-102-654321');
-      expect(partialMapped.primaryBankLabel).toBe(
-        BANK_DISPLAY_LABELS[SELECTED_BANK_CODES.BAC],
-      );
+      expect(partialMapped.primaryBankLabel).toBe(esCR.history.banks.bac);
     });
   });
 
   describe('date and clock-skew formatters', () => {
+    it('formats midnight UTC boundaries strictly in America/Costa_Rica and preserves YYYY-MM-DD calendar dates without shifting days', () => {
+      // Arrange: Guard against device timezone leakage
+      jest.spyOn(Date.prototype, 'getDate').mockImplementation(() => {
+        throw new Error('Unexpected local getDate() usage');
+      });
+      jest.spyOn(Date.prototype, 'getMonth').mockImplementation(() => {
+        throw new Error('Unexpected local getMonth() usage');
+      });
+      jest.spyOn(Date.prototype, 'getFullYear').mockImplementation(() => {
+        throw new Error('Unexpected local getFullYear() usage');
+      });
+
+      // Act & Assert: Full ISO timestamps shift cleanly to UTC-6 (Costa Rica)
+      expect(formatDossierDate('2026-11-25T05:59:59.000Z', esCR.history)).toBe(
+        `24 ${esCR.history.dates.monthsShort[10]} 2026`,
+      );
+      expect(formatDossierDate('2026-11-25T06:00:00.000Z', esCR.history)).toBe(
+        `25 ${esCR.history.dates.monthsShort[10]} 2026`,
+      );
+      expect(formatDossierDate('2026-01-01T02:00:00.000Z', esCR.history)).toBe(
+        `31 ${esCR.history.dates.monthsShort[11]} 2025`,
+      );
+
+      // Date-only YYYY-MM-DD strings preserve exact calendar day without -6h shift
+      expect(formatDossierDate('2026-11-25', esCR.history)).toBe(
+        `25 ${esCR.history.dates.monthsShort[10]} 2026`,
+      );
+      expect(formatDossierDate('  2026-01-01  ', esCR.history)).toBe(
+        `01 ${esCR.history.dates.monthsShort[0]} 2026`,
+      );
+
+      // Invalid calendar or malformed dates fall back cleanly
+      expect(formatDossierDate('2026-02-30', esCR.history)).toBe(
+        esCR.history.cards.dateFallback,
+      );
+      expect(
+        formatDossierDate(null as unknown as string, esCR.history),
+      ).toBe(esCR.history.cards.dateFallback);
+    });
+
     it('clamps future timestamps (device clock skew) to justNow and falls back safely on invalid/old dates', () => {
       // Arrange
       const skewedFutureIso = new Date(
@@ -631,14 +685,22 @@ describe('history.service', () => {
   });
 
   describe('fetchAdvisorCreditApplications', () => {
-    it('queries public.credit_applications ordered by created_at descending with DEFAULT_DOSSIERS_PAGE_SIZE limit', async () => {
+    it('queries with .range(0, pageSize) lookahead, detects hasMore when pageSize + 1 rows arrive, and computes nextOffset', async () => {
       // Arrange
-      const expectedRows = [buildRow()];
-      const { client, fromMock, limitMock, orderMock, selectMock } =
-        createMockSupabaseClient({ data: expectedRows, error: null });
+      const row1 = buildRow({ id: 'page-row-1' });
+      const row2 = buildRow({ id: 'page-row-2' });
+      const lookaheadRow3 = buildRow({ id: 'page-row-3' });
+      const { client, fromMock, orderMock, rangeMock, selectMock } =
+        createMockSupabaseClient({
+          data: [row1, row2, lookaheadRow3],
+          error: null,
+        });
 
       // Act
-      const rows = await fetchAdvisorCreditApplications(client);
+      const page = await fetchAdvisorCreditApplications(client, {
+        offset: 0,
+        pageSize: 2,
+      });
 
       // Assert
       expect(fromMock).toHaveBeenCalledWith(
@@ -648,36 +710,65 @@ describe('history.service', () => {
       expect(orderMock).toHaveBeenCalledWith(HISTORY_DB_COLUMNS.CREATED_AT, {
         ascending: false,
       });
-      expect(limitMock).toHaveBeenCalledWith(
-        HISTORY_QUERY_LIMITS.DEFAULT_DOSSIERS_PAGE_SIZE,
-      );
-      expect(rows).toEqual(expectedRows);
+      expect(rangeMock).toHaveBeenCalledWith(0, 2);
+      expect(page).toEqual({
+        hasMore: true,
+        nextOffset: 2,
+        rows: [row1, row2],
+      });
     });
 
-    it('sanitizes non-positive limit values back to DEFAULT_DOSSIERS_PAGE_SIZE', async () => {
+    it('returns hasMore=false on exact boundary and sanitizes invalid offset/pageSize to defaults', async () => {
       // Arrange
-      const { client, limitMock } = createMockSupabaseClient({
+      const page2Rows = [buildRow({ id: 'row-3' }), buildRow({ id: 'row-4' })];
+      const exactHarness = createMockSupabaseClient({
+        data: page2Rows,
+        error: null,
+      });
+
+      const exactPage = await fetchAdvisorCreditApplications(
+        exactHarness.client,
+        {
+          offset: 2,
+          pageSize: 2,
+        },
+      );
+
+      expect(exactHarness.rangeMock).toHaveBeenCalledWith(2, 4);
+      expect(exactPage).toEqual({
+        hasMore: false,
+        nextOffset: 4,
+        rows: page2Rows,
+      });
+
+      const defaultHarness = createMockSupabaseClient({
         data: [],
         error: null,
       });
 
-      // Act
-      await fetchAdvisorCreditApplications(client, { limit: -5 });
+      await fetchAdvisorCreditApplications(defaultHarness.client, {
+        offset: -10,
+        pageSize: -5,
+      });
 
-      // Assert
-      expect(limitMock).toHaveBeenCalledWith(
+      expect(defaultHarness.rangeMock).toHaveBeenCalledWith(
+        HISTORY_QUERY_LIMITS.DEFAULT_OFFSET,
         HISTORY_QUERY_LIMITS.DEFAULT_DOSSIERS_PAGE_SIZE,
       );
     });
 
-    it('masks Supabase response errors and never exposes technical error.message', async () => {
+    it('classifies JWT / HTTP 401 / 403 / session errors as AUTH_REQUIRED without exposing raw details', async () => {
       // Arrange
       const consoleErrorSpy = jest
         .spyOn(console, 'error')
         .mockImplementation(jest.fn());
       const { client } = createMockSupabaseClient({
         data: null,
-        error: { message: 'JWT expired: internal row security violation' },
+        error: {
+          code: 'PGRST301',
+          message: 'JWT expired: internal row security violation',
+          status: 401,
+        },
       });
 
       // Act & Assert
@@ -688,63 +779,246 @@ describe('history.service', () => {
         caughtError = error;
       }
 
-      expect(caughtError).toBeInstanceOf(Error);
+      expect(caughtError).toBeInstanceOf(HistoryServiceError);
+      expect((caughtError as HistoryServiceError).code).toBe(
+        HISTORY_ERROR_CODES.AUTH_REQUIRED,
+      );
       expect((caughtError as Error).message).toBe(
-        esCR.history.errors.loadFailed,
+        esCR.history.errors.authRequired,
       );
       expect((caughtError as Error).message).not.toContain('JWT');
       expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('masks synchronous SDK throws and network rejections with localized esCR.history.errors.loadFailed', async () => {
+    it('classifies fetch / offline / socket rejections as NETWORK_ERROR without leaking host details', async () => {
       // Arrange
       const consoleErrorSpy = jest
         .spyOn(console, 'error')
         .mockImplementation(jest.fn());
-      const syncThrowingClient = {
+      const networkClient = {
         from: jest.fn(() => {
-          throw new Error('Postgres socket ECONNREFUSED 10.0.0.1:5432');
+          throw new TypeError('Network request failed (10.0.0.1:5432)');
         }),
       } as unknown as SupabaseClient;
 
       // Act & Assert
       let caughtError: unknown;
       try {
-        await fetchAdvisorCreditApplications(syncThrowingClient);
+        await fetchAdvisorCreditApplications(networkClient);
       } catch (error) {
         caughtError = error;
       }
 
-      expect(caughtError).toBeInstanceOf(Error);
-      expect((caughtError as Error).message).toBe(
-        esCR.history.errors.loadFailed,
+      expect(caughtError).toBeInstanceOf(HistoryServiceError);
+      expect((caughtError as HistoryServiceError).code).toBe(
+        HISTORY_ERROR_CODES.NETWORK_ERROR,
       );
-      expect((caughtError as Error).message).not.toContain('ECONNREFUSED');
+      expect((caughtError as Error).message).toBe(
+        esCR.history.errors.networkError,
+      );
+      expect((caughtError as Error).message).not.toContain('10.0.0.1');
       expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('rejects with esCR.history.errors.timeoutError when request exceeds REQUEST_TIMEOUT_MS', async () => {
+    it('classifies generic PostgREST errors as LOAD_FAILED without leaking schema details', async () => {
+      // Arrange
+      const consoleErrorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(jest.fn());
+      const { client } = createMockSupabaseClient({
+        data: null,
+        error: { message: 'relation credit_applications permission denied' },
+      });
+
+      let caughtError: unknown;
+      try {
+        await fetchAdvisorCreditApplications(client);
+      } catch (error) {
+        caughtError = error;
+      }
+
+      expect(caughtError).toBeInstanceOf(HistoryServiceError);
+      expect((caughtError as HistoryServiceError).code).toBe(
+        HISTORY_ERROR_CODES.LOAD_FAILED,
+      );
+      expect((caughtError as Error).message).toBe(
+        esCR.history.errors.loadFailed,
+      );
+      expect((caughtError as Error).message).not.toContain('permission denied');
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('fires AbortController.abort() into Supabase .abortSignal() and rejects with TIMEOUT when exceeding REQUEST_TIMEOUT_MS', async () => {
       // Arrange
       jest.useFakeTimers();
+      let capturedSignal: AbortSignal | undefined;
+      const abortSignalMock = jest.fn((signal: AbortSignal) => {
+        capturedSignal = signal;
+        return new Promise(() => undefined);
+      });
       const stalledClient = {
         from: jest.fn().mockReturnValue({
           select: jest.fn().mockReturnValue({
             order: jest.fn().mockReturnValue({
-              limit: jest.fn().mockReturnValue(new Promise(() => undefined)),
+              range: jest.fn().mockReturnValue({
+                abortSignal: abortSignalMock,
+              }),
             }),
           }),
         }),
       } as unknown as SupabaseClient;
 
-      // Act & Assert
+      // Act
       const pendingRequest = fetchAdvisorCreditApplications(stalledClient);
-      const assertion = expect(pendingRequest).rejects.toThrow(
-        esCR.history.errors.timeoutError,
-      );
+      let caughtError: unknown;
+      const settledPromise = pendingRequest.catch((error: unknown) => {
+        caughtError = error;
+      });
+
+      expect(abortSignalMock).toHaveBeenCalledTimes(1);
+      expect(capturedSignal?.aborted).toBe(false);
+
       await jest.advanceTimersByTimeAsync(
         HISTORY_QUERY_LIMITS.REQUEST_TIMEOUT_MS,
       );
-      await assertion;
+      await settledPromise;
+
+      // Assert
+      expect(capturedSignal?.aborted).toBe(true);
+      expect(caughtError).toBeInstanceOf(HistoryServiceError);
+      expect((caughtError as HistoryServiceError).code).toBe(
+        HISTORY_ERROR_CODES.TIMEOUT,
+      );
+      expect((caughtError as Error).message).toBe(
+        esCR.history.errors.timeoutError,
+      );
+    });
+
+    it('propagates caller AbortSignal cancellation to internal signal and throws AbortError cleanly', async () => {
+      // Arrange
+      let capturedSignal: AbortSignal | undefined;
+      const callerController = new AbortController();
+      const client = {
+        from: jest.fn().mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            order: jest.fn().mockReturnValue({
+              range: jest.fn().mockReturnValue({
+                abortSignal: jest.fn((signal: AbortSignal) => {
+                  capturedSignal = signal;
+                  return new Promise(() => undefined);
+                }),
+              }),
+            }),
+          }),
+        }),
+      } as unknown as SupabaseClient;
+
+      // Act
+      const pendingRequest = fetchAdvisorCreditApplications(client, {
+        signal: callerController.signal,
+      });
+      callerController.abort();
+
+      // Assert
+      await expect(pendingRequest).rejects.toMatchObject({
+        name: HISTORY_INTERNAL_STRINGS.ABORT_ERROR_NAME,
+      });
+      expect(capturedSignal?.aborted).toBe(true);
+    });
+
+    it('sanitizes decimal pageSize (< 1 -> default) and floors fractional offset values cleanly', async () => {
+      // Arrange
+      const fractionalHarness = createMockSupabaseClient({
+        data: [buildRow({ id: 'fraction-1' })],
+        error: null,
+      });
+
+      // Act
+      await fetchAdvisorCreditApplications(fractionalHarness.client, {
+        offset: 1.9,
+        pageSize: 0.5,
+      });
+
+      // Assert: pageSize 0.5 avoids zero-row infinite loop and falls back to DEFAULT_DOSSIERS_PAGE_SIZE
+      expect(fractionalHarness.rangeMock).toHaveBeenCalledWith(
+        1,
+        1 + HISTORY_QUERY_LIMITS.DEFAULT_DOSSIERS_PAGE_SIZE,
+      );
+
+      const nanHarness = createMockSupabaseClient({ data: [], error: null });
+      await fetchAdvisorCreditApplications(nanHarness.client, {
+        offset: Number.NaN,
+        pageSize: Number.POSITIVE_INFINITY,
+      });
+
+      expect(nanHarness.rangeMock).toHaveBeenCalledWith(
+        HISTORY_QUERY_LIMITS.DEFAULT_OFFSET,
+        HISTORY_QUERY_LIMITS.DEFAULT_DOSSIERS_PAGE_SIZE,
+      );
+    });
+
+    it('short-circuits pre-aborted caller signals before calling Supabase and classifies timeout AbortError responses as TIMEOUT', async () => {
+      // Arrange 1: Pre-aborted signal must not touch client.from
+      const preAbortedController = new AbortController();
+      preAbortedController.abort();
+      const untouchedHarness = createMockSupabaseClient();
+
+      await expect(
+        fetchAdvisorCreditApplications(untouchedHarness.client, {
+          signal: preAbortedController.signal,
+        }),
+      ).rejects.toMatchObject({
+        name: HISTORY_INTERNAL_STRINGS.ABORT_ERROR_NAME,
+      });
+      expect(untouchedHarness.fromMock).not.toHaveBeenCalled();
+
+      // Arrange 2: Supabase resolves { error: { name: 'AbortError' } } synchronously upon abort
+      jest.useFakeTimers();
+      const resolvingAbortClient = {
+        from: jest.fn().mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            order: jest.fn().mockReturnValue({
+              range: jest.fn().mockReturnValue({
+                abortSignal: jest.fn(
+                  (signal: AbortSignal) =>
+                    new Promise((resolve) => {
+                      signal.addEventListener(
+                        'abort',
+                        () => {
+                          resolve({
+                            data: null,
+                            error: {
+                              message: 'AbortError: signal aborted',
+                              name: HISTORY_INTERNAL_STRINGS.ABORT_ERROR_NAME,
+                            },
+                          });
+                        },
+                        { once: true },
+                      );
+                    }),
+                ),
+              }),
+            }),
+          }),
+        }),
+      } as unknown as SupabaseClient;
+
+      let caughtTimeout: unknown;
+      const request = fetchAdvisorCreditApplications(resolvingAbortClient).catch(
+        (error: unknown) => {
+          caughtTimeout = error;
+        },
+      );
+
+      await jest.advanceTimersByTimeAsync(
+        HISTORY_QUERY_LIMITS.REQUEST_TIMEOUT_MS,
+      );
+      await request;
+
+      expect(caughtTimeout).toBeInstanceOf(HistoryServiceError);
+      expect((caughtTimeout as HistoryServiceError).code).toBe(
+        HISTORY_ERROR_CODES.TIMEOUT,
+      );
     });
   });
 });

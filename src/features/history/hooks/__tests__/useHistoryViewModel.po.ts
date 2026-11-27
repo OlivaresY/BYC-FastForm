@@ -41,6 +41,10 @@ export class HistoryViewModelPageObject {
     return this.hookResult.result.current;
   }
 
+  public rerender = (options?: UseHistoryViewModelOptions): void => {
+    this.hookResult.rerender(options);
+  };
+
   public waitForState = async (assertion: () => void): Promise<void> => {
     await waitFor(assertion);
   };
@@ -91,6 +95,20 @@ export class HistoryViewModelPageObject {
     act(() => {
       this.hookResult.result.current.markAllAsRead();
     });
+  };
+
+  public loadMore = async (): Promise<void> => {
+    await act(async () => {
+      await this.hookResult.result.current.loadMore();
+    });
+  };
+
+  public startLoadMore = (): Promise<void> => {
+    let pendingLoadMore!: Promise<void>;
+    act(() => {
+      pendingLoadMore = this.hookResult.result.current.loadMore();
+    });
+    return pendingLoadMore;
   };
 
   public refresh = async (): Promise<void> => {

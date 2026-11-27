@@ -1,13 +1,15 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { SELECTED_BANK_CODES } from '@/features/credit-wizard/types';
 import { esCR } from '@/shared/i18n';
 import { supabase } from '@/shared/lib/supabaseClient';
 import {
   APPLICATION_STATUS_VALUES,
-  BANK_DISPLAY_LABELS,
   CREDIT_APPLICATION_REGIMES,
   HISTORY_DATE_LIMITS,
   HISTORY_DB_COLUMNS,
   HISTORY_DB_TABLES,
+  HISTORY_ERROR_CLASSIFICATION,
+  HISTORY_ERROR_CODES,
   HISTORY_EVENT_NAMES,
   HISTORY_INTERNAL_STRINGS,
   HISTORY_QUERY_LIMITS,
@@ -18,7 +20,9 @@ import {
 import type {
   CreditApplicationRow,
   DossierNotificationItem,
+  FetchAdvisorCreditApplicationsPage,
   HistoryDossierItem,
+  HistoryErrorCode,
   MasterCreditApplicationPayload,
   SelectedBankCode,
 } from '../types';
@@ -27,6 +31,8 @@ export type HistoryCopy = typeof esCR.history;
 
 export interface FetchAdvisorCreditApplicationsOptions {
   limit?: number;
+  offset?: number;
+  pageSize?: number;
   signal?: AbortSignal;
 }
 
@@ -35,11 +41,53 @@ interface SelectApplicationsQueryResponse {
   error: unknown;
 }
 
-interface AbortableSelectQuery extends PromiseLike<SelectApplicationsQueryResponse> {
+interface AbortableSelectQuery
+  extends PromiseLike<SelectApplicationsQueryResponse> {
   abortSignal?: (
     signal: AbortSignal,
   ) => PromiseLike<SelectApplicationsQueryResponse>;
 }
+
+interface RangeableOrderedQuery {
+  limit?: (count: number) => AbortableSelectQuery;
+  range?: (from: number, to: number) => AbortableSelectQuery;
+}
+
+const resolveErrorMessageForCode = (
+  code: HistoryErrorCode,
+  copy: HistoryCopy = esCR.history,
+): string => {
+  switch (code) {
+    case HISTORY_ERROR_CODES.AUTH_REQUIRED:
+      return copy.errors.authRequired;
+    case HISTORY_ERROR_CODES.NETWORK_ERROR:
+      return copy.errors.networkError;
+    case HISTORY_ERROR_CODES.TIMEOUT:
+      return copy.errors.timeoutError;
+    case HISTORY_ERROR_CODES.LOAD_FAILED:
+    default:
+      return copy.errors.loadFailed;
+  }
+};
+
+export class HistoryServiceError extends Error {
+  public readonly code: HistoryErrorCode;
+
+  public constructor(code: HistoryErrorCode, message?: string) {
+    super(message ?? resolveErrorMessageForCode(code));
+    this.name = HISTORY_ERROR_CLASSIFICATION.ERROR_NAME;
+    this.code = code;
+    Object.setPrototypeOf(this, HistoryServiceError.prototype);
+  }
+}
+
+export const isHistoryServiceError = (
+  error: unknown,
+): error is HistoryServiceError =>
+  error instanceof HistoryServiceError ||
+  (error instanceof Error &&
+    error.name === HISTORY_ERROR_CLASSIFICATION.ERROR_NAME &&
+    'code' in error);
 
 const createAbortError = (): Error => {
   const abortError = new Error(HISTORY_INTERNAL_STRINGS.ABORT_ERROR_NAME);
@@ -47,10 +95,105 @@ const createAbortError = (): Error => {
   return abortError;
 };
 
+const isAbortError = (error: unknown): boolean =>
+  (error instanceof Error &&
+    error.name === HISTORY_INTERNAL_STRINGS.ABORT_ERROR_NAME) ||
+  (isPlainObject(error) &&
+    error.name === HISTORY_INTERNAL_STRINGS.ABORT_ERROR_NAME);
+
 const isPlainObject = (
   value: unknown,
 ): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const extractErrorDetails = (
+  rawError: unknown,
+): { code: string; message: string; name: string; status: number | null } => {
+  if (rawError instanceof Error) {
+    const errorRecord = rawError as Error & { code?: unknown; status?: unknown };
+    return {
+      code:
+        typeof errorRecord.code === 'string'
+          ? errorRecord.code.trim()
+          : HISTORY_INTERNAL_STRINGS.EMPTY,
+      message: rawError.message,
+      name: rawError.name,
+      status: typeof errorRecord.status === 'number' ? errorRecord.status : null,
+    };
+  }
+
+  if (isPlainObject(rawError)) {
+    const status =
+      typeof rawError.status === 'number'
+        ? rawError.status
+        : typeof rawError.statusCode === 'number'
+          ? rawError.statusCode
+          : null;
+
+    return {
+      code:
+        typeof rawError.code === 'string'
+          ? rawError.code.trim()
+          : HISTORY_INTERNAL_STRINGS.EMPTY,
+      message:
+        typeof rawError.message === 'string'
+          ? rawError.message
+          : typeof rawError.details === 'string'
+            ? rawError.details
+            : HISTORY_INTERNAL_STRINGS.EMPTY,
+      name:
+        typeof rawError.name === 'string'
+          ? rawError.name
+          : HISTORY_INTERNAL_STRINGS.EMPTY,
+      status,
+    };
+  }
+
+  return {
+    code: HISTORY_INTERNAL_STRINGS.EMPTY,
+    message: HISTORY_INTERNAL_STRINGS.EMPTY,
+    name: HISTORY_INTERNAL_STRINGS.EMPTY,
+    status: null,
+  };
+};
+
+const classifySupabaseError = (rawError: unknown): HistoryServiceError => {
+  if (isHistoryServiceError(rawError)) {
+    return rawError;
+  }
+
+  const details = extractErrorDetails(rawError);
+  const normalizedCode = details.code.toUpperCase();
+  const normalizedMessage = details.message.toLowerCase();
+
+  const isAuthError =
+    (details.status !== null &&
+      HISTORY_ERROR_CLASSIFICATION.AUTH_HTTP_STATUSES.includes(
+        details.status,
+      )) ||
+    HISTORY_ERROR_CLASSIFICATION.AUTH_NAMES.includes(details.name) ||
+    HISTORY_ERROR_CLASSIFICATION.AUTH_CODES.includes(normalizedCode) ||
+    HISTORY_ERROR_CLASSIFICATION.AUTH_MESSAGE_PATTERNS.some((pattern) =>
+      normalizedMessage.includes(pattern),
+    );
+
+  if (isAuthError) {
+    return new HistoryServiceError(HISTORY_ERROR_CODES.AUTH_REQUIRED);
+  }
+
+  const isNetworkError =
+    HISTORY_ERROR_CLASSIFICATION.NETWORK_NAMES.includes(details.name) ||
+    HISTORY_ERROR_CLASSIFICATION.NETWORK_CODES.includes(normalizedCode) ||
+    HISTORY_ERROR_CLASSIFICATION.NETWORK_MESSAGE_PATTERNS.some((pattern) =>
+      normalizedMessage.includes(pattern),
+    );
+
+  if (isNetworkError) {
+    return new HistoryServiceError(HISTORY_ERROR_CODES.NETWORK_ERROR);
+  }
+
+  return new HistoryServiceError(HISTORY_ERROR_CODES.LOAD_FAILED);
+};
 
 const joinNonEmptySegments = (
   segments: readonly (string | undefined | null)[],
@@ -184,15 +327,26 @@ const resolveSelectedBanks = (row: CreditApplicationRow): SelectedBankCode[] => 
   return Array.from(uniqueBanks);
 };
 
+const resolveBankDisplayLabels = (
+  copy: HistoryCopy,
+): Readonly<Record<SelectedBankCode, string>> => ({
+  [SELECTED_BANK_CODES.BAC]: copy.banks.bac,
+  [SELECTED_BANK_CODES.BNCR]: copy.banks.bncr,
+  [SELECTED_BANK_CODES.CARRO_FACIL]: copy.banks.carroFacil,
+  [SELECTED_BANK_CODES.PROMERICA]: copy.banks.promerica,
+  [SELECTED_BANK_CODES.SCOTIABANK]: copy.banks.scotiabank,
+});
+
 const resolvePrimaryBankLabel = (
   selectedBanks: readonly SelectedBankCode[],
   copy: HistoryCopy,
 ): string => {
+  const labelsByCode = resolveBankDisplayLabels(copy);
   const recognizedLabels = selectedBanks
     .filter((bankCode) =>
-      Object.prototype.hasOwnProperty.call(BANK_DISPLAY_LABELS, bankCode),
+      Object.prototype.hasOwnProperty.call(labelsByCode, bankCode),
     )
-    .map((bankCode) => BANK_DISPLAY_LABELS[bankCode]);
+    .map((bankCode) => labelsByCode[bankCode]);
 
   const primaryLabel = recognizedLabels[0];
   if (!primaryLabel) {
@@ -211,31 +365,74 @@ const resolvePrimaryBankLabel = (
   return `${primaryLabel}${HISTORY_INTERNAL_STRINGS.SPACE}${extraCountText}`;
 };
 
+const formatDateComponents = (
+  year: number,
+  monthIndex: number,
+  day: number,
+  copy: HistoryCopy,
+): string => {
+  const monthShort = copy.dates.monthsShort[monthIndex];
+  if (!monthShort || !Number.isInteger(year) || !Number.isInteger(day)) {
+    return copy.cards.dateFallback;
+  }
+
+  const paddedDay = String(day).padStart(
+    HISTORY_DATE_LIMITS.PAD_WIDTH_CHARS,
+    HISTORY_DATE_LIMITS.PAD_ZERO_CHAR,
+  );
+
+  return `${paddedDay}${HISTORY_INTERNAL_STRINGS.SPACE}${monthShort}${HISTORY_INTERNAL_STRINGS.SPACE}${year}`;
+};
+
 export const formatDossierDate = (
   isoDate: string,
   copy: HistoryCopy = esCR.history,
 ): string => {
-  if (typeof isoDate !== 'string' || isoDate.trim().length === 0) {
+  if (typeof isoDate !== 'string') {
     return copy.cards.dateFallback;
   }
 
-  const parsedDate = new Date(isoDate);
-  if (Number.isNaN(parsedDate.getTime())) {
+  const trimmedDate = isoDate.trim();
+  if (trimmedDate.length === 0) {
     return copy.cards.dateFallback;
   }
 
-  const monthShort = copy.dates.monthsShort[parsedDate.getMonth()];
-  if (!monthShort) {
+  // Date-only strings (YYYY-MM-DD) represent calendar dates rather than UTC midnight.
+  const dateOnlyMatch =
+    HISTORY_DATE_LIMITS.DATE_ONLY_PATTERN.exec(trimmedDate);
+  if (dateOnlyMatch) {
+    const year = Number(dateOnlyMatch[1]);
+    const monthIndex =
+      Number(dateOnlyMatch[2]) - HISTORY_DATE_LIMITS.MIN_MONTH_NUMBER;
+    const day = Number(dateOnlyMatch[3]);
+    const validatedDate = new Date(Date.UTC(year, monthIndex, day));
+
+    if (
+      validatedDate.getUTCFullYear() !== year ||
+      validatedDate.getUTCMonth() !== monthIndex ||
+      validatedDate.getUTCDate() !== day
+    ) {
+      return copy.cards.dateFallback;
+    }
+
+    return formatDateComponents(year, monthIndex, day, copy);
+  }
+
+  const parsedTimestampMs = Date.parse(trimmedDate);
+  if (Number.isNaN(parsedTimestampMs)) {
     return copy.cards.dateFallback;
   }
 
-  const day = String(parsedDate.getDate()).padStart(
-    HISTORY_DATE_LIMITS.PAD_WIDTH_CHARS,
-    HISTORY_DATE_LIMITS.PAD_ZERO_CHAR,
+  const costaRicaDate = new Date(
+    parsedTimestampMs + HISTORY_DATE_LIMITS.COSTA_RICA_UTC_OFFSET_MS,
   );
-  const year = parsedDate.getFullYear();
 
-  return `${day}${HISTORY_INTERNAL_STRINGS.SPACE}${monthShort}${HISTORY_INTERNAL_STRINGS.SPACE}${year}`;
+  return formatDateComponents(
+    costaRicaDate.getUTCFullYear(),
+    costaRicaDate.getUTCMonth(),
+    costaRicaDate.getUTCDate(),
+    copy,
+  );
 };
 
 export const formatNotificationRelativeTime = (
@@ -370,102 +567,169 @@ export const mapDossiersToNotifications = (
       };
     });
 
+const sanitizePageSize = (
+  requestedPageSize?: number,
+  legacyLimit?: number,
+): number => {
+  const candidate = requestedPageSize ?? legacyLimit;
+  if (typeof candidate !== 'number' || !Number.isFinite(candidate)) {
+    return HISTORY_QUERY_LIMITS.DEFAULT_DOSSIERS_PAGE_SIZE;
+  }
+
+  const floored = Math.floor(candidate);
+  return floored >= HISTORY_QUERY_LIMITS.MIN_PAGE_SIZE
+    ? floored
+    : HISTORY_QUERY_LIMITS.DEFAULT_DOSSIERS_PAGE_SIZE;
+};
+
+const sanitizeOffset = (requestedOffset?: number): number => {
+  if (typeof requestedOffset !== 'number' || !Number.isFinite(requestedOffset)) {
+    return HISTORY_QUERY_LIMITS.DEFAULT_OFFSET;
+  }
+
+  const floored = Math.floor(requestedOffset);
+  return floored >= HISTORY_QUERY_LIMITS.DEFAULT_OFFSET
+    ? floored
+    : HISTORY_QUERY_LIMITS.DEFAULT_OFFSET;
+};
+
 export const fetchAdvisorCreditApplications = async (
   client: SupabaseClient = supabase,
   options?: FetchAdvisorCreditApplicationsOptions,
-): Promise<CreditApplicationRow[]> => {
-  if (options?.signal?.aborted) {
+): Promise<FetchAdvisorCreditApplicationsPage> => {
+  const callerSignal = options?.signal;
+  if (callerSignal?.aborted) {
     throw createAbortError();
   }
 
-  const requestedLimit = options?.limit;
-  const limit =
-    typeof requestedLimit === 'number' &&
-    Number.isFinite(requestedLimit) &&
-    requestedLimit > 0
-      ? Math.floor(requestedLimit)
-      : HISTORY_QUERY_LIMITS.DEFAULT_DOSSIERS_PAGE_SIZE;
+  const pageSize = sanitizePageSize(options?.pageSize, options?.limit);
+  const offset = sanitizeOffset(options?.offset);
+  const requestController = new AbortController();
 
+  let didTimeout = false;
+  let didCallerAbort = false;
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
-  let abortListener: (() => void) | undefined;
+  let callerAbortListener: (() => void) | undefined;
+  let requestAbortListener: (() => void) | undefined;
+
+  if (callerSignal) {
+    callerAbortListener = (): void => {
+      didCallerAbort = true;
+      requestController.abort();
+    };
+    callerSignal.addEventListener(
+      HISTORY_EVENT_NAMES.ABORT,
+      callerAbortListener,
+      { once: true },
+    );
+  }
 
   try {
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      timeoutId = setTimeout(() => {
-        reject(new Error(esCR.history.errors.timeoutError));
-      }, HISTORY_QUERY_LIMITS.REQUEST_TIMEOUT_MS);
+    const abortPromise = new Promise<never>((_, reject) => {
+      requestAbortListener = (): void => {
+        if (didTimeout) {
+          reject(new HistoryServiceError(HISTORY_ERROR_CODES.TIMEOUT));
+          return;
+        }
+        reject(createAbortError());
+      };
+
+      requestController.signal.addEventListener(
+        HISTORY_EVENT_NAMES.ABORT,
+        requestAbortListener,
+        { once: true },
+      );
     });
 
-    const baseQuery = client
+    timeoutId = setTimeout(() => {
+      if (!requestController.signal.aborted) {
+        didTimeout = true;
+        requestController.abort();
+      }
+    }, HISTORY_QUERY_LIMITS.REQUEST_TIMEOUT_MS);
+
+    const orderedQuery = client
       .from(HISTORY_DB_TABLES.CREDIT_APPLICATIONS)
       .select(HISTORY_SELECT_COLUMNS)
-      .order(HISTORY_DB_COLUMNS.CREATED_AT, { ascending: false })
-      .limit(limit);
+      .order(HISTORY_DB_COLUMNS.CREATED_AT, {
+        ascending: false,
+      }) as unknown as RangeableOrderedQuery;
 
-    const abortableQuery = baseQuery as unknown as AbortableSelectQuery;
+    const rangedQuery =
+      typeof orderedQuery.range === 'function'
+        ? orderedQuery.range(offset, offset + pageSize)
+        : orderedQuery.limit?.(pageSize + 1);
+
     const executableQuery: PromiseLike<SelectApplicationsQueryResponse> =
-      options?.signal && typeof abortableQuery?.abortSignal === 'function'
-        ? abortableQuery.abortSignal(options.signal)
-        : (baseQuery as unknown as PromiseLike<SelectApplicationsQueryResponse>);
+      rangedQuery && typeof rangedQuery.abortSignal === 'function'
+        ? rangedQuery.abortSignal(requestController.signal)
+        : (rangedQuery as unknown as PromiseLike<SelectApplicationsQueryResponse>);
 
-    const raceCandidates: Promise<SelectApplicationsQueryResponse>[] = [
+    const { data, error } = await Promise.race([
       Promise.resolve(executableQuery),
-      timeoutPromise,
-    ];
+      abortPromise,
+    ]);
 
-    if (options?.signal) {
-      const signal = options.signal;
-      raceCandidates.push(
-        new Promise<never>((_, reject) => {
-          abortListener = (): void => {
-            reject(createAbortError());
-          };
-          signal.addEventListener(HISTORY_EVENT_NAMES.ABORT, abortListener, {
-            once: true,
-          });
-        }),
-      );
+    if (didCallerAbort || callerSignal?.aborted) {
+      throw createAbortError();
     }
 
-    const { data, error } = await Promise.race(raceCandidates);
-
-    if (options?.signal?.aborted) {
-      throw createAbortError();
+    if (didTimeout) {
+      throw new HistoryServiceError(HISTORY_ERROR_CODES.TIMEOUT);
     }
 
     if (error) {
+      if (isAbortError(error)) {
+        throw createAbortError();
+      }
       console.error(HISTORY_INTERNAL_STRINGS.LOG_FETCH_FAILED, error);
-      throw new Error(esCR.history.errors.loadFailed);
+      throw classifySupabaseError(error);
     }
 
-    return Array.isArray(data) ? (data as CreditApplicationRow[]) : [];
+    const fetchedRows = Array.isArray(data)
+      ? (data as CreditApplicationRow[])
+      : [];
+    const hasMore = fetchedRows.length > pageSize;
+    const rows = hasMore ? fetchedRows.slice(0, pageSize) : fetchedRows;
+
+    return {
+      hasMore,
+      nextOffset: offset + rows.length,
+      rows,
+    };
   } catch (caughtError) {
-    if (
-      options?.signal?.aborted ||
-      (caughtError instanceof Error &&
-        caughtError.name === HISTORY_INTERNAL_STRINGS.ABORT_ERROR_NAME)
-    ) {
+    if (didCallerAbort || callerSignal?.aborted) {
       throw createAbortError();
     }
 
-    if (
-      caughtError instanceof Error &&
-      (caughtError.message === esCR.history.errors.loadFailed ||
-        caughtError.message === esCR.history.errors.timeoutError)
-    ) {
+    if (didTimeout) {
+      throw new HistoryServiceError(HISTORY_ERROR_CODES.TIMEOUT);
+    }
+
+    if (isAbortError(caughtError)) {
+      throw createAbortError();
+    }
+
+    if (isHistoryServiceError(caughtError)) {
       throw caughtError;
     }
 
     console.error(HISTORY_INTERNAL_STRINGS.LOG_FETCH_UNEXPECTED, caughtError);
-    throw new Error(esCR.history.errors.loadFailed);
+    throw classifySupabaseError(caughtError);
   } finally {
     if (timeoutId !== undefined) {
       clearTimeout(timeoutId);
     }
-    if (options?.signal && abortListener) {
-      options.signal.removeEventListener(
+    if (callerSignal && callerAbortListener) {
+      callerSignal.removeEventListener(
         HISTORY_EVENT_NAMES.ABORT,
-        abortListener,
+        callerAbortListener,
+      );
+    }
+    if (requestAbortListener) {
+      requestController.signal.removeEventListener(
+        HISTORY_EVENT_NAMES.ABORT,
+        requestAbortListener,
       );
     }
   }

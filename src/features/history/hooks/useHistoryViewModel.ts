@@ -3,18 +3,23 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { esCR } from '@/shared/i18n';
 import {
   APPLICATION_STATUS_VALUES,
+  HISTORY_ERROR_CODES,
   HISTORY_INTERNAL_STRINGS,
+  HISTORY_PAGINATION_MODES,
+  HISTORY_QUERY_LIMITS,
   HISTORY_STATUS_FILTERS,
 } from '../constants';
 import {
   fetchAdvisorCreditApplications,
+  isHistoryServiceError,
   mapCreditApplicationRowToDossierItem,
   mapDossiersToNotifications,
 } from '../services';
 import type {
-  CreditApplicationRow,
   DossierNotificationItem,
+  FetchAdvisorCreditApplicationsPage,
   HistoryDossierItem,
+  HistoryErrorCode,
   HistoryStatusFilter,
   UseHistoryViewModelResult,
 } from '../types';
@@ -24,9 +29,30 @@ export interface UseHistoryViewModelOptions {
   onQuickPrint?: (dossier: HistoryDossierItem) => Promise<void>;
 }
 
+type HistoryPaginationMode =
+  (typeof HISTORY_PAGINATION_MODES)[keyof typeof HISTORY_PAGINATION_MODES];
+
+const ERROR_MESSAGES_BY_CODE: Readonly<Record<HistoryErrorCode, string>> = {
+  [HISTORY_ERROR_CODES.AUTH_REQUIRED]: esCR.history.errors.authRequired,
+  [HISTORY_ERROR_CODES.LOAD_FAILED]: esCR.history.errors.loadFailed,
+  [HISTORY_ERROR_CODES.NETWORK_ERROR]: esCR.history.errors.networkError,
+  [HISTORY_ERROR_CODES.TIMEOUT]: esCR.history.errors.timeoutError,
+};
+
 const isAbortError = (error: unknown): boolean =>
   error instanceof Error &&
   error.name === HISTORY_INTERNAL_STRINGS.ABORT_ERROR_NAME;
+
+const mergeUniqueDossiers = (
+  existingDossiers: readonly HistoryDossierItem[],
+  incomingDossiers: readonly HistoryDossierItem[],
+): HistoryDossierItem[] => {
+  const existingIds = new Set(existingDossiers.map((item) => item.id));
+  const uniqueAdditions = incomingDossiers.filter(
+    (item) => !existingIds.has(item.id),
+  );
+  return [...existingDossiers, ...uniqueAdditions];
+};
 
 export const useHistoryViewModel = (
   options?: UseHistoryViewModelOptions,
@@ -34,9 +60,14 @@ export const useHistoryViewModel = (
   const client = options?.client;
   const onQuickPrint = options?.onQuickPrint;
 
+  const [trackedClient, setTrackedClient] = useState<
+    SupabaseClient | undefined
+  >(client);
   const [allDossiers, setAllDossiers] = useState<HistoryDossierItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [quickPrintError, setQuickPrintError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>(
@@ -54,14 +85,29 @@ export const useHistoryViewModel = (
     null,
   );
 
+  if (client !== trackedClient) {
+    setTrackedClient(client);
+    setAllDossiers([]);
+    setIsLoading(true);
+    setIsLoadingMore(false);
+    setHasMore(false);
+    setError(null);
+    setQuickPrintError(null);
+  }
+
   const isMountedRef = useRef<boolean>(true);
   const requestSequenceRef = useRef<number>(0);
   const activeAbortControllerRef = useRef<AbortController | null>(null);
   const printingDossierIdRef = useRef<string | null>(null);
+  const isPrimaryLoadActiveRef = useRef<boolean>(true);
+  const isLoadingMoreRef = useRef<boolean>(false);
+  const hasMoreRef = useRef<boolean>(false);
+  const nextOffsetRef = useRef<number>(HISTORY_QUERY_LIMITS.DEFAULT_OFFSET);
 
-  const applyFetchSuccess = useCallback(
+  const applyPageSuccess = useCallback(
     (
-      rows: CreditApplicationRow[],
+      page: FetchAdvisorCreditApplicationsPage,
+      mode: HistoryPaginationMode,
       controller: AbortController,
       requestId: number,
     ): void => {
@@ -73,11 +119,22 @@ export const useHistoryViewModel = (
         return;
       }
 
-      const mappedDossiers = rows.map((row) =>
+      const mappedDossiers = page.rows.map((row) =>
         mapCreditApplicationRowToDossierItem(row, esCR.history),
       );
 
-      setAllDossiers(mappedDossiers);
+      nextOffsetRef.current = page.nextOffset;
+      hasMoreRef.current = page.hasMore;
+      setHasMore(page.hasMore);
+
+      if (mode === HISTORY_PAGINATION_MODES.APPEND) {
+        setAllDossiers((previousDossiers) =>
+          mergeUniqueDossiers(previousDossiers, mappedDossiers),
+        );
+      } else {
+        setAllDossiers(mappedDossiers);
+      }
+
       setError(null);
     },
     [],
@@ -98,11 +155,9 @@ export const useHistoryViewModel = (
         return;
       }
 
-      const resolvedError =
-        caughtError instanceof Error &&
-        caughtError.message === esCR.history.errors.timeoutError
-          ? esCR.history.errors.timeoutError
-          : esCR.history.errors.loadFailed;
+      const resolvedError = isHistoryServiceError(caughtError)
+        ? ERROR_MESSAGES_BY_CODE[caughtError.code]
+        : esCR.history.errors.loadFailed;
 
       setError(resolvedError);
     },
@@ -116,14 +171,17 @@ export const useHistoryViewModel = (
       }
 
       if (isMountedRef.current && requestId === requestSequenceRef.current) {
+        isPrimaryLoadActiveRef.current = false;
+        isLoadingMoreRef.current = false;
         setIsLoading(false);
         setIsRefreshing(false);
+        setIsLoadingMore(false);
       }
     },
     [],
   );
 
-  const executeFetch = useCallback(async (): Promise<void> => {
+  const executePrimaryFetch = useCallback(async (): Promise<void> => {
     activeAbortControllerRef.current?.abort();
 
     const controller = new AbortController();
@@ -131,17 +189,29 @@ export const useHistoryViewModel = (
     requestSequenceRef.current += 1;
     const currentRequestId = requestSequenceRef.current;
 
+    isPrimaryLoadActiveRef.current = true;
+    isLoadingMoreRef.current = false;
+    hasMoreRef.current = false;
+    nextOffsetRef.current = HISTORY_QUERY_LIMITS.DEFAULT_OFFSET;
+
     try {
-      const rows = await fetchAdvisorCreditApplications(client, {
+      const page = await fetchAdvisorCreditApplications(client, {
+        offset: HISTORY_QUERY_LIMITS.DEFAULT_OFFSET,
+        pageSize: HISTORY_QUERY_LIMITS.DEFAULT_DOSSIERS_PAGE_SIZE,
         signal: controller.signal,
       });
-      applyFetchSuccess(rows, controller, currentRequestId);
+      applyPageSuccess(
+        page,
+        HISTORY_PAGINATION_MODES.REPLACE,
+        controller,
+        currentRequestId,
+      );
     } catch (caughtError) {
       applyFetchError(caughtError, controller, currentRequestId);
     } finally {
       finalizeFetch(controller, currentRequestId);
     }
-  }, [applyFetchError, applyFetchSuccess, client, finalizeFetch]);
+  }, [applyFetchError, applyPageSuccess, client, finalizeFetch]);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -152,9 +222,24 @@ export const useHistoryViewModel = (
     requestSequenceRef.current += 1;
     const currentRequestId = requestSequenceRef.current;
 
-    void fetchAdvisorCreditApplications(client, { signal: controller.signal })
+    isPrimaryLoadActiveRef.current = true;
+    isLoadingMoreRef.current = false;
+    hasMoreRef.current = false;
+    nextOffsetRef.current = HISTORY_QUERY_LIMITS.DEFAULT_OFFSET;
+
+    void fetchAdvisorCreditApplications(client, {
+      offset: HISTORY_QUERY_LIMITS.DEFAULT_OFFSET,
+      pageSize: HISTORY_QUERY_LIMITS.DEFAULT_DOSSIERS_PAGE_SIZE,
+      signal: controller.signal,
+    })
       .then(
-        (rows) => applyFetchSuccess(rows, controller, currentRequestId),
+        (page) =>
+          applyPageSuccess(
+            page,
+            HISTORY_PAGINATION_MODES.REPLACE,
+            controller,
+            currentRequestId,
+          ),
         (caughtError) =>
           applyFetchError(caughtError, controller, currentRequestId),
       )
@@ -162,11 +247,13 @@ export const useHistoryViewModel = (
 
     return () => {
       isMountedRef.current = false;
+      isPrimaryLoadActiveRef.current = false;
+      isLoadingMoreRef.current = false;
       controller.abort();
       activeAbortControllerRef.current?.abort();
       activeAbortControllerRef.current = null;
     };
-  }, [applyFetchError, applyFetchSuccess, client, finalizeFetch]);
+  }, [applyFetchError, applyPageSuccess, client, finalizeFetch]);
 
   const clearQuickPrintError = useCallback((): void => {
     if (!isMountedRef.current) {
@@ -181,10 +268,12 @@ export const useHistoryViewModel = (
     }
 
     setIsRefreshing(true);
+    setIsLoadingMore(false);
+    setHasMore(false);
     setError(null);
     setQuickPrintError(null);
-    await executeFetch();
-  }, [executeFetch]);
+    await executePrimaryFetch();
+  }, [executePrimaryFetch]);
 
   const retry = useCallback(async (): Promise<void> => {
     if (!isMountedRef.current) {
@@ -192,10 +281,51 @@ export const useHistoryViewModel = (
     }
 
     setIsLoading(true);
+    setIsLoadingMore(false);
+    setHasMore(false);
     setError(null);
     setQuickPrintError(null);
-    await executeFetch();
-  }, [executeFetch]);
+    await executePrimaryFetch();
+  }, [executePrimaryFetch]);
+
+  const loadMore = useCallback(async (): Promise<void> => {
+    if (
+      !isMountedRef.current ||
+      isPrimaryLoadActiveRef.current ||
+      isLoadingMoreRef.current ||
+      !hasMoreRef.current
+    ) {
+      return;
+    }
+
+    const controller = new AbortController();
+    activeAbortControllerRef.current = controller;
+    requestSequenceRef.current += 1;
+    const currentRequestId = requestSequenceRef.current;
+
+    isLoadingMoreRef.current = true;
+    setIsLoadingMore(true);
+    setError(null);
+    setQuickPrintError(null);
+
+    try {
+      const page = await fetchAdvisorCreditApplications(client, {
+        offset: nextOffsetRef.current,
+        pageSize: HISTORY_QUERY_LIMITS.DEFAULT_DOSSIERS_PAGE_SIZE,
+        signal: controller.signal,
+      });
+      applyPageSuccess(
+        page,
+        HISTORY_PAGINATION_MODES.APPEND,
+        controller,
+        currentRequestId,
+      );
+    } catch (caughtError) {
+      applyFetchError(caughtError, controller, currentRequestId);
+    } finally {
+      finalizeFetch(controller, currentRequestId);
+    }
+  }, [applyFetchError, applyPageSuccess, client, finalizeFetch]);
 
   const clearSearch = useCallback((): void => {
     if (!isMountedRef.current) {
@@ -372,9 +502,12 @@ export const useHistoryViewModel = (
     closeNotifications,
     dossiers,
     error,
+    hasMore,
     isLoading,
+    isLoadingMore,
     isNotificationsOpen,
     isRefreshing,
+    loadMore,
     markAllAsRead,
     markAsRead,
     notifications,
