@@ -507,4 +507,43 @@ describe('useCreditWizardOrchestrator', () => {
     expect(page.current.submitError).toBeNull();
     expect(onSubmissionSuccess).toHaveBeenCalledTimes(1);
   });
+
+  it('aborts pending auth resolution timeout cleanly on unmount without post-unmount state updates', async () => {
+    // Arrange
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(jest.fn());
+    let resolveDelayedAuth!: (userId: string | null) => void;
+    const delayedAuthPromise = new Promise<string | null>((resolve) => {
+      resolveDelayedAuth = resolve;
+    });
+    const resolveAuthenticatedUserId = jest.fn(() => delayedAuthPromise);
+    const submitMasterDraft = jest.fn().mockResolvedValue(undefined);
+    const repository: ICreditApplicationRepository = { submitMasterDraft };
+
+    const page = CreditWizardOrchestratorHookPageObject.render({
+      repository,
+      resolveAuthenticatedUserId,
+    });
+
+    page.completeThroughStep3(
+      mockPhysicalStep1Data,
+      mockPhysicalStep2Data,
+      mockStep3Data,
+    );
+
+    // Act: Start async auth resolution, then unmount before it settles
+    const pendingSubmit = page.startSubmitStep4(mockStep4Data);
+    page.unmount();
+
+    await page.settle(async () => {
+      resolveDelayedAuth(AUTHENTICATED_USER_ID);
+      await pendingSubmit;
+    });
+
+    // Assert: Submission aborted cleanly on unmount with zero React warnings
+    expect(submitMasterDraft).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+    consoleErrorSpy.mockRestore();
+  });
 });

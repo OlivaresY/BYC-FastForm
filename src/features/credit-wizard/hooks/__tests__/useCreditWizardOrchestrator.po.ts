@@ -129,4 +129,8 @@ export class CreditWizardOrchestratorHookPageObject {
     });
     return this;
   };
+
+  public unmount = (): void => {
+    this.hookResult.unmount();
+  };
 }

@@ -72,7 +72,7 @@
 ## 6. Arquitectura de Navegación
 
 - **Módulo Asesor (Móvil en Expo Go):**
-  - **Bottom Tab Navigator (Orden Estricto):** 1. `Historial` (Izquierda/Home), 2. `Nuevo Trámite` (Centro), 3. `Mi Perfil` (Derecha).
+  - **Bottom Tab Navigator (Orden Estricto):** 1. `Nuevo Trámite` (Izquierda — pestaña de acción que lanza `/credit-wizard` con sesión en blanco), 2. `Historial` (Centro/Home — ruta inicial por defecto tras iniciar sesión), 3. `Mi Perfil` (Derecha).
   - **Campana de Notificaciones:** Ubicada en el Top Header (derecha). Despliega un modal flotante oscuro.
   - **Stack Navigator:** Usado exclusivamente para flujos de alta concentración (Wizard y Gestor de Impresión) ocultando la barra inferior temporalmente.
 - **Módulo Súper Admin (Web):**
@@ -89,9 +89,9 @@
 ## 7. Definición de Pantallas: Asesor (App Móvil)
 
 - **Pantalla 0 (Autenticación):** Inputs de correo/contraseña. Dirige directamente a la pantalla "Historial".
-- **Pantalla 1 (Historial / Home):** Tarjetas con trámites previos. Muestra píldoras de estado (Pendiente, Aprobado, Rechazado). Trámites aprobados muestran ícono de impresora.
+- **Pantalla 1 (Historial / Home):** Pestaña central y ruta inicial por defecto (`unstable_settings.anchor = 'historial'`). Tarjetas con trámites previos. Muestra píldoras de estado (Pendiente, Aprobado, Rechazado). Trámites aprobados muestran ícono de impresora.
 - **Pantalla 2 (Notificaciones):** Modal desplegable desde la campana en el header.
-- **Pantalla 3 (Wizard "Nuevo Trámite"):** Formulario secuencial. Barra de progreso superior. Opción de guardar borrador. Renderiza imágenes de vehículos desde Supabase en tiempo real.
+- **Pantalla 3 (Wizard "Nuevo Trámite"):** Lanzado desde la pestaña izquierda de acción hacia `/credit-wizard` (siempre con nueva sesión en blanco). Formulario secuencial. Barra de progreso superior. Opción de guardar borrador. Renderiza imágenes de vehículos desde Supabase en tiempo real.
 - **Pantalla 4 (Gestor de Impresión):** Verificación final estructurada en 4 pasos lógicos (Datos Empresa, Domicilio, Referencias, Checklists) antes de habilitar la impresión.
 - **Pantalla 5 (Mi Perfil):** Tarjetas de métricas de ventas. Toggle de apariencia, reporte de problemas mediante modal y cierre de sesión.
 

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { esCR } from '@/shared/i18n';
 import { supabase } from '@/shared/lib/supabaseClient';
 import { LEGAL_ENTITY_SELECTOR_ENTITIES } from '../constants/LegalEntitySelector.constants';
@@ -55,11 +55,25 @@ const defaultResolveAuthenticatedUserId = async (): Promise<string | null> => {
   return data.user.id;
 };
 
+const ABORT_ERROR_NAME = 'AbortError' as const;
+
+const createAbortError = (): Error => {
+  const abortError = new Error(ABORT_ERROR_NAME);
+  abortError.name = ABORT_ERROR_NAME;
+  return abortError;
+};
+
 const executeAuthResolutionWithTimeout = async (
   authResolver: AuthenticatedUserIdResolver,
   timeoutMs: number,
+  signal?: AbortSignal,
 ): Promise<string | null> => {
+  if (signal?.aborted) {
+    throw createAbortError();
+  }
+
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  let abortListener: (() => void) | undefined;
 
   const timeoutPromise = new Promise<never>((_, reject) => {
     timeoutId = setTimeout(() => {
@@ -67,11 +81,27 @@ const executeAuthResolutionWithTimeout = async (
     }, timeoutMs);
   });
 
+  const candidates: Promise<string | null>[] = [authResolver(), timeoutPromise];
+
+  if (signal) {
+    candidates.push(
+      new Promise<never>((_, reject) => {
+        abortListener = (): void => {
+          reject(createAbortError());
+        };
+        signal.addEventListener('abort', abortListener, { once: true });
+      }),
+    );
+  }
+
   try {
-    return await Promise.race([authResolver(), timeoutPromise]);
+    return await Promise.race(candidates);
   } finally {
     if (timeoutId !== undefined) {
       clearTimeout(timeoutId);
+    }
+    if (signal && abortListener) {
+      signal.removeEventListener('abort', abortListener);
     }
   }
 };
@@ -150,13 +180,31 @@ export const useCreditWizardOrchestrator = (
   const draftStateRef = useRef<CreditWizardDraftState>({});
   const hasSubmittedSuccessfullyRef = useRef<boolean>(false);
   const isSubmissionLockedRef = useRef<boolean>(false);
+  const isMountedRef = useRef<boolean>(true);
+  const authAbortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return (): void => {
+      isMountedRef.current = false;
+      authAbortControllerRef.current?.abort();
+      authAbortControllerRef.current = null;
+      draftStateRef.current = {};
+      hasSubmittedSuccessfullyRef.current = false;
+      isSubmissionLockedRef.current = false;
+    };
+  }, []);
 
   const handleSubmissionComplete = useCallback(async (): Promise<void> => {
     hasSubmittedSuccessfullyRef.current = true;
     draftStateRef.current = {};
-    setHasSubmittedSuccessfully(true);
-    setDraftState({});
-    setOrchestrationError(null);
+
+    if (isMountedRef.current) {
+      setHasSubmittedSuccessfully(true);
+      setDraftState({});
+      setOrchestrationError(null);
+    }
 
     try {
       await onSubmissionSuccess?.();
@@ -310,7 +358,9 @@ export const useCreditWizardOrchestrator = (
         const masterPayload = buildMasterSubmissionPayload(aggregatorInput);
         await submitDraft(masterPayload);
       } catch {
-        setOrchestrationError(SUBMISSION_MESSAGES.errorMessage);
+        if (isMountedRef.current) {
+          setOrchestrationError(SUBMISSION_MESSAGES.errorMessage);
+        }
       }
     },
     [submitDraft],
@@ -345,6 +395,9 @@ export const useCreditWizardOrchestrator = (
       }
 
       setIsResolvingAuth(true);
+      authAbortControllerRef.current?.abort();
+      const authController = new AbortController();
+      authAbortControllerRef.current = authController;
       let resolvedUserId: string | null = null;
       let authErrorMessage: string | null = null;
 
@@ -352,26 +405,49 @@ export const useCreditWizardOrchestrator = (
         resolvedUserId = await executeAuthResolutionWithTimeout(
           resolveAuthenticatedUserId,
           authTimeoutMs,
+          authController.signal,
         );
       } catch (error) {
+        if (
+          !isMountedRef.current ||
+          authController.signal.aborted ||
+          (error instanceof Error && error.name === ABORT_ERROR_NAME)
+        ) {
+          isSubmissionLockedRef.current = false;
+          return;
+        }
         authErrorMessage =
           error instanceof Error &&
           error.message === SUBMISSION_MESSAGES.timeoutErrorMessage
             ? SUBMISSION_MESSAGES.timeoutErrorMessage
             : SUBMISSION_MESSAGES.authErrorMessage;
       } finally {
-        setIsResolvingAuth(false);
+        if (authAbortControllerRef.current === authController) {
+          authAbortControllerRef.current = null;
+        }
+        if (isMountedRef.current) {
+          setIsResolvingAuth(false);
+        }
+      }
+
+      if (!isMountedRef.current || authController.signal.aborted) {
+        isSubmissionLockedRef.current = false;
+        return;
       }
 
       if (authErrorMessage !== null) {
         isSubmissionLockedRef.current = false;
-        setOrchestrationError(authErrorMessage);
+        if (isMountedRef.current) {
+          setOrchestrationError(authErrorMessage);
+        }
         return;
       }
 
       if (!isValidAuthenticatedUserId(resolvedUserId)) {
         isSubmissionLockedRef.current = false;
-        setOrchestrationError(SUBMISSION_MESSAGES.authErrorMessage);
+        if (isMountedRef.current) {
+          setOrchestrationError(SUBMISSION_MESSAGES.authErrorMessage);
+        }
         return;
       }
 
@@ -383,7 +459,9 @@ export const useCreditWizardOrchestrator = (
 
       if (hasExpectedUserMismatch) {
         isSubmissionLockedRef.current = false;
-        setOrchestrationError(SUBMISSION_MESSAGES.authErrorMessage);
+        if (isMountedRef.current) {
+          setOrchestrationError(SUBMISSION_MESSAGES.authErrorMessage);
+        }
         return;
       }
 

@@ -1,3 +1,4 @@
+import { APP_ROUTES } from '@/shared/constants';
 import { NavigationRoutingPageObject } from './navigation.po';
 
 describe('Expo Router Navigation Integration Tests', () => {
@@ -9,7 +10,7 @@ describe('Expo Router Navigation Integration Tests', () => {
     jest.restoreAllMocks();
   });
 
-  it('navigates from IndexScreen to /(tabs)/historial once even if onSuccess fires twice', () => {
+  it('navigates from IndexScreen to historial once even if onSuccess fires twice', () => {
     // Arrange
     const page = NavigationRoutingPageObject.renderIndex();
     const routerSpies = NavigationRoutingPageObject.getRouterSpies();
@@ -20,16 +21,22 @@ describe('Expo Router Navigation Integration Tests', () => {
     // Assert
     expect(page.loginScreen).toBeTruthy();
     expect(routerSpies.replace).toHaveBeenCalledTimes(1);
-    expect(routerSpies.replace).toHaveBeenCalledWith('/(tabs)/historial');
+    expect(routerSpies.replace).toHaveBeenCalledWith(APP_ROUTES.HISTORIAL);
   });
 
-  it('renders TabsLayout with Historial active by default and switches cleanly between tabs', () => {
-    // Arrange
+  it('configures TabsLayout with anchor historial and canonical screen order nuevo-tramite, historial, perfil', () => {
+    // Arrange & Act
     const page = NavigationRoutingPageObject.renderTabsLayout();
     const routerSpies = NavigationRoutingPageObject.getRouterSpies();
 
-    // Assert initial state
+    // Assert canonical Expo Router anchor & Tabs.Screen declaration order
     expect(page.tabsContainer).toBeTruthy();
+    expect(NavigationRoutingPageObject.getTabsAnchorRoute()).toBe('historial');
+    expect(NavigationRoutingPageObject.getRenderedTabScreenNames()).toEqual([
+      'nuevo-tramite',
+      'historial',
+      'perfil',
+    ]);
     expect(page.historialTab.props.accessibilityState).toEqual({
       selected: true,
     });
@@ -41,10 +48,10 @@ describe('Expo Router Navigation Integration Tests', () => {
     page.pressPerfilTab().pressHistorialTab();
 
     // Assert navigation targets
-    expect(routerSpies.navigate).toHaveBeenNthCalledWith(1, '/(tabs)/perfil');
+    expect(routerSpies.navigate).toHaveBeenNthCalledWith(1, APP_ROUTES.PERFIL);
     expect(routerSpies.navigate).toHaveBeenNthCalledWith(
       2,
-      '/(tabs)/historial',
+      APP_ROUTES.HISTORIAL,
     );
   });
 
@@ -77,7 +84,7 @@ describe('Expo Router Navigation Integration Tests', () => {
     expect(routerSpies.push).toHaveBeenCalledTimes(1);
     expect(routerSpies.push).toHaveBeenNthCalledWith(1, {
       params: { sessionId: '1700000001000-1' },
-      pathname: '/credit-wizard',
+      pathname: APP_ROUTES.CREDIT_WIZARD,
     });
 
     // Act: Simulate focus returning to TabsLayout even within the same ms
@@ -88,17 +95,49 @@ describe('Expo Router Navigation Integration Tests', () => {
     expect(routerSpies.push).toHaveBeenCalledTimes(2);
     expect(routerSpies.push).toHaveBeenNthCalledWith(2, {
       params: { sessionId: '1700000001000-2' },
-      pathname: '/credit-wizard',
+      pathname: APP_ROUTES.CREDIT_WIZARD,
     });
   });
 
-  it('redirects nuevo-tramite fallback screen to /(tabs)/historial', () => {
-    // Act
+  it('replaces direct /(tabs)/nuevo-tramite hits with historial, schedules /credit-wizard push via microtask, and resets guard on blur', async () => {
+    // Arrange
+    jest.spyOn(Date, 'now').mockReturnValue(1700000002000);
     const page = NavigationRoutingPageObject.renderNuevoTramiteFallback();
+    const routerSpies = NavigationRoutingPageObject.getRouterSpies();
 
-    // Assert
-    expect(page.redirectElement.props.accessibilityLabel).toBe(
-      '/(tabs)/historial',
+    // Assert immediate replace before microtask push
+    expect(page.nuevoTramiteContainer).toBeTruthy();
+    expect(routerSpies.replace).toHaveBeenCalledTimes(1);
+    expect(routerSpies.replace).toHaveBeenCalledWith(APP_ROUTES.HISTORIAL);
+
+    await NavigationRoutingPageObject.flushMicrotasks();
+    expect(routerSpies.push).toHaveBeenCalledTimes(1);
+    const firstPushArgs = routerSpies.push.mock.calls[0]?.[0] as {
+      params: { sessionId: string };
+      pathname: string;
+    };
+    expect(firstPushArgs.pathname).toBe(APP_ROUTES.CREDIT_WIZARD);
+    expect(
+      firstPushArgs.params.sessionId.startsWith('direct-1700000002000-'),
+    ).toBe(true);
+
+    // Act: Duplicate focus fire without blur must be ignored
+    NavigationRoutingPageObject.triggerLatestFocusEffectAgain();
+    await NavigationRoutingPageObject.flushMicrotasks();
+    expect(routerSpies.push).toHaveBeenCalledTimes(1);
+
+    // Act: Blur and refocus must launch a brand new distinct sessionId
+    NavigationRoutingPageObject.triggerFocusBlurAndRefocus();
+    await NavigationRoutingPageObject.flushMicrotasks();
+    expect(routerSpies.replace).toHaveBeenCalledTimes(2);
+    expect(routerSpies.push).toHaveBeenCalledTimes(2);
+    const secondPushArgs = routerSpies.push.mock.calls[1]?.[0] as {
+      params: { sessionId: string };
+      pathname: string;
+    };
+    expect(secondPushArgs.pathname).toBe(APP_ROUTES.CREDIT_WIZARD);
+    expect(secondPushArgs.params.sessionId).not.toBe(
+      firstPushArgs.params.sessionId,
     );
   });
 
@@ -108,6 +147,7 @@ describe('Expo Router Navigation Integration Tests', () => {
     const routerSpies = NavigationRoutingPageObject.getRouterSpies();
     expect(page.wizardOrchestrator).toBeTruthy();
     expect(page.wizardDraftState.props.children).toBe(page.blankDraftValue);
+    expect(NavigationRoutingPageObject.getWizardMountCount()).toBe(1);
 
     // Act: Mutate internal wizard draft state, then change sessionId
     page.markWizardDraftDirty();
@@ -116,31 +156,60 @@ describe('Expo Router Navigation Integration Tests', () => {
     page.rerenderCreditWizardWithSession('session-2');
 
     // Assert: Key change remounts CreditWizardOrchestratorView cleanly blank
+    expect(NavigationRoutingPageObject.getWizardMountCount()).toBe(2);
     expect(page.wizardDraftState.props.children).toBe(page.blankDraftValue);
 
     // Act: Rapid double-tap on close button
     page.triggerWizardClose().triggerWizardClose();
 
-    // Assert: dismissTo invoked once for /(tabs)/historial
+    // Assert: dismissTo invoked once for historial when canDismiss is true
+    expect(routerSpies.canDismiss).toHaveBeenCalledTimes(1);
     expect(routerSpies.dismissTo).toHaveBeenCalledTimes(1);
-    expect(routerSpies.dismissTo).toHaveBeenCalledWith('/(tabs)/historial');
+    expect(routerSpies.dismissTo).toHaveBeenCalledWith(APP_ROUTES.HISTORIAL);
   });
 
-  it('handles array or blank sessionId safely and dismisses to /(tabs)/historial on submission success', () => {
-    // Arrange
+  it('preserves active draft across blur/modal refocus when sessionId is omitted while isolating separate mounts blank', () => {
+    // Arrange: Render without sessionId (deep link / direct web URL)
+    jest.spyOn(Date, 'now').mockReturnValue(1700000003000);
     const page = NavigationRoutingPageObject.renderCreditWizard(['  ', 's2']);
-    const routerSpies = NavigationRoutingPageObject.getRouterSpies();
+    expect(NavigationRoutingPageObject.getWizardMountCount()).toBe(1);
 
-    // Act: Mutate dirty, then switch to array sessionId with valid first entry
     page.markWizardDraftDirty();
     expect(page.wizardDraftState.props.children).toBe(page.dirtyDraftValue);
-    page.rerenderCreditWizardWithSession('session-array-next');
 
-    // Assert: Remounted cleanly blank, then submit succeeds back to historial
+    // Act: Simulate modal/sub-route blur & refocus during active session
+    NavigationRoutingPageObject.triggerFocusBlurAndRefocus();
+
+    // Assert: Must NOT wipe active in-progress draft
+    expect(NavigationRoutingPageObject.getWizardMountCount()).toBe(1);
+    expect(page.wizardDraftState.props.children).toBe(page.dirtyDraftValue);
+
+    // Act: Switch to an explicit sessionId, then unmount & reopen anonymously
+    page.rerenderCreditWizardWithSession('session-array-next');
+    expect(NavigationRoutingPageObject.getWizardMountCount()).toBe(2);
     expect(page.wizardDraftState.props.children).toBe(page.blankDraftValue);
+    page.unmount();
+
+    const reopenedPage = NavigationRoutingPageObject.renderCreditWizard();
+    expect(NavigationRoutingPageObject.getWizardMountCount()).toBe(3);
+    expect(reopenedPage.wizardDraftState.props.children).toBe(
+      reopenedPage.blankDraftValue,
+    );
+  });
+
+  it('falls back cleanly to router.replace when canDismiss() is false on cold deep-link exit or submit', () => {
+    // Arrange
+    NavigationRoutingPageObject.setCanDismiss(false);
+    const page = NavigationRoutingPageObject.renderCreditWizard();
+    const routerSpies = NavigationRoutingPageObject.getRouterSpies();
+
+    // Act
     page.triggerWizardSubmissionSuccess();
 
-    expect(routerSpies.dismissTo).toHaveBeenCalledTimes(1);
-    expect(routerSpies.dismissTo).toHaveBeenCalledWith('/(tabs)/historial');
+    // Assert
+    expect(routerSpies.canDismiss).toHaveBeenCalledTimes(1);
+    expect(routerSpies.dismissTo).not.toHaveBeenCalled();
+    expect(routerSpies.replace).toHaveBeenCalledTimes(1);
+    expect(routerSpies.replace).toHaveBeenCalledWith(APP_ROUTES.HISTORIAL);
   });
 });

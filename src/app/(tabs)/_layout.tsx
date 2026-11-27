@@ -6,12 +6,7 @@ import {
   NAVIGATION_TAB_ROUTES,
   type NavigationTabRoute,
 } from '@/features/navigation';
-
-const TAB_ROUTE_PATHS = {
-  CREDIT_WIZARD: '/credit-wizard',
-  HISTORIAL: '/(tabs)/historial',
-  PERFIL: '/(tabs)/perfil',
-} as const;
+import { APP_ROUTES } from '@/shared/constants';
 
 const TAB_SCREEN_NAMES = {
   HISTORIAL: 'historial',
@@ -46,8 +41,8 @@ const TabsLayout = (): React.JSX.Element => {
     (route: NavigationTabRoute): void => {
       const targetRoute =
         route === NAVIGATION_TAB_ROUTES.PROFILE
-          ? TAB_ROUTE_PATHS.PERFIL
-          : TAB_ROUTE_PATHS.HISTORIAL;
+          ? APP_ROUTES.PERFIL
+          : APP_ROUTES.HISTORIAL;
 
       router.navigate(targetRoute);
     },
@@ -71,7 +66,7 @@ const TabsLayout = (): React.JSX.Element => {
 
     router.push({
       params: { sessionId: `${nowMs}-${wizardSessionSequenceRef.current}` },
-      pathname: TAB_ROUTE_PATHS.CREDIT_WIZARD,
+      pathname: APP_ROUTES.CREDIT_WIZARD,
     });
   }, [router]);
 

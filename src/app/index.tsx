@@ -1,10 +1,7 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useCallback, useRef } from 'react';
 import { LoginScreenView } from '@/features/auth';
-
-const INDEX_ROUTES = {
-  HISTORIAL: '/(tabs)/historial',
-} as const;
+import { APP_ROUTES } from '@/shared/constants';
 
 const IndexScreen = (): React.JSX.Element => {
   const router = useRouter();
@@ -21,7 +18,7 @@ const IndexScreen = (): React.JSX.Element => {
       return;
     }
     hasNavigatedRef.current = true;
-    router.replace(INDEX_ROUTES.HISTORIAL);
+    router.replace(APP_ROUTES.HISTORIAL);
   }, [router]);
 
   return <LoginScreenView onSuccess={handleLoginSuccess} />;

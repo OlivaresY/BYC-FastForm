@@ -1,4 +1,6 @@
+import { BOTTOM_TAB_BAR_TEST_IDS } from '@/features/navigation';
 import {
+  act,
   fireEvent,
   render,
   type RenderResult,
@@ -6,8 +8,7 @@ import {
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import type { ReactTestInstance } from 'react-test-renderer';
-import { BOTTOM_TAB_BAR_TEST_IDS } from '@/features/navigation';
-import TabsLayout from '../(tabs)/_layout';
+import TabsLayout, { unstable_settings as tabsUnstableSettings } from '../(tabs)/_layout';
 import NuevoTramiteFallbackScreen from '../(tabs)/nuevo-tramite';
 import CreditWizardScreen from '../credit-wizard';
 import IndexScreen from '../index';
@@ -15,7 +16,7 @@ import IndexScreen from '../index';
 const MOCK_ROUTING_TEST_IDS = {
   LOGIN_SCREEN: 'mock-login-screen',
   LOGIN_SUCCESS_TRIGGER: 'mock-login-success-trigger',
-  REDIRECT: 'mock-router-redirect',
+  NUEVO_TRAMITE_CONTAINER: 'nuevo-tramite-fallback-container',
   TABS_CONTAINER: 'mock-tabs-container',
   WIZARD_CLOSE_TRIGGER: 'mock-wizard-close-trigger',
   WIZARD_DRAFT_DIRTY_TRIGGER: 'mock-wizard-draft-dirty-trigger',
@@ -29,16 +30,29 @@ const MOCK_WIZARD_DRAFT_VALUES = {
   DIRTY: 'dirty',
 } as const;
 
+interface FocusSubscriptionRecord {
+  callback: () => undefined | void | (() => void);
+  cleanup: void | (() => void);
+}
+
+const mockFocusState = {
+  latestRecord: null as FocusSubscriptionRecord | null,
+};
+
 const mockTabsState = {
   activeRouteName: 'historial',
+  renderedScreens: [] as string[],
+};
+
+const mockWizardState = {
+  mountCount: 0,
 };
 
 jest.mock('expo-router', () => {
   const MockReact = jest.requireActual<typeof import('react')>('react');
-  const { View: MockView } =
-    jest.requireActual<typeof import('react-native')>('react-native');
 
   const mockRouter = {
+    canDismiss: jest.fn(() => true),
     dismissTo: jest.fn(),
     navigate: jest.fn(),
     push: jest.fn(),
@@ -49,18 +63,22 @@ jest.mock('expo-router', () => {
     (): { sessionId?: string | string[] } => ({}),
   );
 
-  const mockUseFocusEffect = jest.fn((effect: () => undefined | void | (() => void)): void => {
-    MockReact.useEffect(() => effect(), [effect]);
-  });
+  const mockUseFocusEffect = jest.fn(
+    (effect: () => undefined | void | (() => void)): void => {
+      MockReact.useEffect(() => {
+        const cleanup = effect();
+        mockFocusState.latestRecord = { callback: effect, cleanup };
 
-  const MockRedirect = ({ href }: { href: string }): React.JSX.Element =>
-    MockReact.createElement(MockView, {
-      accessibilityLabel: href,
-      testID: 'mock-router-redirect',
-    });
+        return () => {
+          if (typeof cleanup === 'function') {
+            cleanup();
+          }
+        };
+      }, [effect]);
+    },
+  );
 
   return {
-    Redirect: MockRedirect,
     router: mockRouter,
     useFocusEffect: mockUseFocusEffect,
     useLocalSearchParams: mockUseLocalSearchParams,
@@ -80,10 +98,16 @@ jest.mock('expo-router/js-tabs', () => {
     }) => React.ReactNode;
   }
 
+  interface MockTabsScreenProps {
+    name: string;
+  }
+
   const MockTabs = ({
     children,
     tabBar,
   }: MockTabsProps): React.JSX.Element => {
+    mockTabsState.renderedScreens = [];
+
     const routes = [
       { key: 'nuevo-tramite-key', name: 'nuevo-tramite' },
       { key: 'historial-key', name: 'historial' },
@@ -99,16 +123,19 @@ jest.mock('expo-router/js-tabs', () => {
       children,
       tabBar
         ? tabBar({
-            state: {
-              index: activeIndex >= 0 ? activeIndex : 1,
-              routes,
-            },
-          })
+          state: {
+            index: activeIndex >= 0 ? activeIndex : 1,
+            routes,
+          },
+        })
         : null,
     );
   };
 
-  const MockTabsScreen = (): null => null;
+  const MockTabsScreen = ({ name }: MockTabsScreenProps): null => {
+    mockTabsState.renderedScreens.push(name);
+    return null;
+  };
 
   return {
     Tabs: Object.assign(MockTabs, { Screen: MockTabsScreen }),
@@ -122,8 +149,8 @@ jest.mock('lucide-react-native', () => {
 
   const createMockIcon =
     () =>
-    (props: Record<string, unknown>): React.JSX.Element =>
-      MockReact.createElement(MockView, props);
+      (props: Record<string, unknown>): React.JSX.Element =>
+        MockReact.createElement(MockView, props);
 
   return {
     CircleUserRound: createMockIcon(),
@@ -202,6 +229,10 @@ jest.mock('@/features/credit-wizard', () => {
   }: MockWizardProps): React.JSX.Element => {
     const [draftMarker, setDraftMarker] = MockReact.useState<string>('blank');
 
+    MockReact.useEffect(() => {
+      mockWizardState.mountCount += 1;
+    }, []);
+
     return MockReact.createElement(
       MockView,
       { testID: 'mock-wizard-orchestrator' },
@@ -231,6 +262,7 @@ jest.mock('@/features/credit-wizard', () => {
 });
 
 export interface MockRouterSpies {
+  canDismiss: jest.Mock;
   dismissTo: jest.Mock;
   navigate: jest.Mock;
   push: jest.Mock;
@@ -249,18 +281,30 @@ export class NavigationRoutingPageObject {
 
   public static resetMocks = (): void => {
     const spies = NavigationRoutingPageObject.getRouterSpies();
+    spies.canDismiss.mockClear();
+    spies.canDismiss.mockReturnValue(true);
     spies.dismissTo.mockClear();
     spies.navigate.mockClear();
     spies.push.mockClear();
     spies.replace.mockClear();
     mockTabsState.activeRouteName = 'historial';
+    mockTabsState.renderedScreens = [];
+    mockFocusState.latestRecord = null;
+    mockWizardState.mountCount = 0;
     jest.mocked(useLocalSearchParams).mockReturnValue({});
+    jest.mocked(useFocusEffect).mockClear();
   };
 
   public static setActiveTabRoute = (
     routeName: 'historial' | 'nuevo-tramite' | 'perfil',
   ): void => {
     mockTabsState.activeRouteName = routeName;
+  };
+
+  public static setCanDismiss = (canDismiss: boolean): void => {
+    NavigationRoutingPageObject.getRouterSpies().canDismiss.mockReturnValue(
+      canDismiss,
+    );
   };
 
   public static setWizardSessionId = (sessionId?: string | string[]): void => {
@@ -270,10 +314,44 @@ export class NavigationRoutingPageObject {
   };
 
   public static triggerTabsFocusReset = (): void => {
-    const focusCalls = jest.mocked(useFocusEffect).mock.calls;
-    const latestEffect = focusCalls[focusCalls.length - 1]?.[0];
-    latestEffect?.();
+    act(() => {
+      mockFocusState.latestRecord?.callback?.();
+    });
   };
+
+  public static triggerLatestFocusEffectAgain = (): void => {
+    act(() => {
+      mockFocusState.latestRecord?.callback?.();
+    });
+  };
+
+  public static flushMicrotasks = async (): Promise<void> => {
+    await act(async () => {
+      await Promise.resolve();
+    });
+  };
+
+  public static triggerFocusBlurAndRefocus = (): void => {
+    act(() => {
+      const record = mockFocusState.latestRecord;
+      if (!record) {
+        return;
+      }
+
+      if (typeof record.cleanup === 'function') {
+        record.cleanup();
+      }
+      record.cleanup = record.callback();
+    });
+  };
+
+  public static getTabsAnchorRoute = (): string => tabsUnstableSettings.anchor;
+
+  public static getRenderedTabScreenNames = (): string[] => [
+    ...mockTabsState.renderedScreens,
+  ];
+
+  public static getWizardMountCount = (): number => mockWizardState.mountCount;
 
   public static renderIndex = (): NavigationRoutingPageObject =>
     new NavigationRoutingPageObject(render(React.createElement(IndexScreen)));
@@ -303,8 +381,10 @@ export class NavigationRoutingPageObject {
     return this.screen.getByTestId(MOCK_ROUTING_TEST_IDS.TABS_CONTAINER);
   }
 
-  public get redirectElement(): ReactTestInstance {
-    return this.screen.getByTestId(MOCK_ROUTING_TEST_IDS.REDIRECT);
+  public get nuevoTramiteContainer(): ReactTestInstance {
+    return this.screen.getByTestId(
+      MOCK_ROUTING_TEST_IDS.NUEVO_TRAMITE_CONTAINER,
+    );
   }
 
   public get newApplicationTab(): ReactTestInstance {
@@ -384,9 +464,16 @@ export class NavigationRoutingPageObject {
     return this;
   };
 
-  public rerenderCreditWizardWithSession = (sessionId: string): this => {
+  public rerenderCreditWizardWithSession = (
+    sessionId?: string | string[],
+  ): this => {
     NavigationRoutingPageObject.setWizardSessionId(sessionId);
     this.screen.rerender(React.createElement(CreditWizardScreen));
+    return this;
+  };
+
+  public unmount = (): this => {
+    this.screen.unmount();
     return this;
   };
 }

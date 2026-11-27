@@ -17,6 +17,9 @@ const STORYBOOK_CONTAINER_CLASS =
 const handleStorySelectTab = (): void => undefined;
 const handleStoryNewApplication = (): void => undefined;
 
+const CANONICAL_TAB_ORDER_NOTES =
+  `${esCR.navigation.accessibility.tabBarLabel}: ${esCR.navigation.tabs.newApplication} · ${esCR.navigation.tabs.history} · ${esCR.navigation.tabs.profile}` as const;
+
 const meta = {
   argTypes: {
     activeRoute: {
@@ -45,7 +48,7 @@ const meta = {
     ),
   ],
   parameters: {
-    notes: esCR.navigation.accessibility.tabBarLabel,
+    notes: CANONICAL_TAB_ORDER_NOTES,
   },
   title: 'Features/Navigation/Bottom Tab Bar View',
 } satisfies Meta<typeof BottomTabBarView>;
