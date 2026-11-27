@@ -694,7 +694,7 @@ export const fetchAdvisorCreditApplications = async (
 
     return {
       hasMore,
-      nextOffset: offset + rows.length,
+      nextOffset: offset + pageSize,
       rows,
     };
   } catch (caughtError) {

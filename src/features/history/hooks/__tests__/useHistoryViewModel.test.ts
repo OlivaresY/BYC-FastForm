@@ -362,8 +362,13 @@ describe('useHistoryViewModel', () => {
     await page.loadMore();
     expect(deferred.rangeMock).toHaveBeenCalledTimes(2);
 
-    // Act 3: refresh() resets pagination back to offset 0 and replaces accumulated dossiers
+    // Act 3: refresh() preserves visible dossiers while refreshing, resets pagination to offset 0, and replaces on resolve
     const pendingRefresh = page.startRefresh();
+    expect(page.current.isRefreshing).toBe(true);
+    expect(page.current.isLoading).toBe(false);
+    expect(page.current.totalCount).toBe(
+      HISTORY_QUERY_LIMITS.DEFAULT_DOSSIERS_PAGE_SIZE + 2,
+    );
     expect(deferred.rangeMock).toHaveBeenNthCalledWith(
       3,
       HISTORY_QUERY_LIMITS.DEFAULT_OFFSET,
@@ -483,6 +488,152 @@ describe('useHistoryViewModel', () => {
     expect(page.current.dossiers.map((item) => item.id)).toEqual([
       APPROVED_ROW.id,
     ]);
+  });
+
+  it('aborts in-flight slow loadMore() immediately on client swap, ignores late stale responses, and loads new client cleanly', async () => {
+    // Arrange
+    const clientAHarness = createDeferredSupabaseClient();
+    const clientBHarness = createDeferredSupabaseClient();
+    const page0WithLookahead = Array.from(
+      { length: HISTORY_QUERY_LIMITS.DEFAULT_DOSSIERS_PAGE_SIZE + 1 },
+      (_, index) =>
+        createPhysicalRow({
+          createdAt: new Date(
+            Date.parse('2026-11-24T17:00:00.000Z') - index * 60000,
+          ).toISOString(),
+          firstLastName: 'ClienteA',
+          firstName: `Nombre-${index}`,
+          id: `clientA-row-${index}`,
+          identificationNumber: `1-0000-${String(index).padStart(4, '0')}`,
+          marca: 'BYD',
+          modelo: 'Seal',
+          status: APPLICATION_STATUS_VALUES.APPROVED,
+        }),
+    );
+
+    const page = HistoryViewModelPageObject.render({
+      client: clientAHarness.client,
+    });
+
+    await page.settle(async () => {
+      clientAHarness.resolvers[0]?.({ data: page0WithLookahead, error: null });
+      await Promise.resolve();
+    });
+    expect(page.current.hasMore).toBe(true);
+    expect(page.current.totalCount).toBe(
+      HISTORY_QUERY_LIMITS.DEFAULT_DOSSIERS_PAGE_SIZE,
+    );
+
+    // Act 1: Start slow loadMore() on Client A
+    const slowLoadMorePromise = page.startLoadMore();
+    const slowLoadMoreSignal = clientAHarness.capturedSignals[1];
+    expect(slowLoadMoreSignal?.aborted).toBe(false);
+    expect(page.current.isLoadingMore).toBe(true);
+
+    // Act 2: Swap client to Client B while Client A loadMore() is still pending
+    page.rerender({ client: clientBHarness.client });
+
+    // Assert: Client A loadMore() is aborted immediately, Client B enters loading=true cleanly
+    expect(slowLoadMoreSignal?.aborted).toBe(true);
+    expect(page.current.isLoading).toBe(true);
+    expect(page.current.isLoadingMore).toBe(false);
+    expect(page.current.hasMore).toBe(false);
+    expect(page.current.dossiers).toHaveLength(0);
+
+    // Act 3: Late resolution of slow Client A request must not pollute Client B
+    await page.settle(async () => {
+      clientAHarness.resolvers[1]?.({
+        data: [REJECTED_ROW, DRAFT_ROW],
+        error: null,
+      });
+      await slowLoadMorePromise;
+    });
+
+    expect(page.current.isLoading).toBe(true);
+    expect(page.current.dossiers).toHaveLength(0);
+
+    // Act 4: Resolve Client B page 0 cleanly
+    await page.settle(async () => {
+      clientBHarness.resolvers[0]?.({
+        data: [PENDING_ROW],
+        error: null,
+      });
+      await Promise.resolve();
+    });
+
+    expect(page.current.isLoading).toBe(false);
+    expect(page.current.hasMore).toBe(false);
+    expect(page.current.dossiers.map((item) => item.id)).toEqual([
+      PENDING_ROW.id,
+    ]);
+  });
+
+  it('syncs loadedForClient on clientB swap error without locking isLoading=true or leaking clientA dossiers, and blocks loadMore() while out of sync', async () => {
+    // Arrange: Client A loads 51 rows (hasMore = true, stale data present)
+    jest.spyOn(console, 'error').mockImplementation(jest.fn());
+    const clientAHarness = createMockSupabaseClient([
+      {
+        data: Array.from(
+          { length: HISTORY_QUERY_LIMITS.DEFAULT_DOSSIERS_PAGE_SIZE + 1 },
+          (_, index) =>
+            createPhysicalRow({
+              createdAt: new Date(
+                Date.parse('2026-11-24T17:00:00.000Z') - index * 60000,
+              ).toISOString(),
+              firstLastName: 'Old',
+              firstName: `ClientA-${index}`,
+              id: `old-${index}`,
+              identificationNumber: `1-0000-${String(index).padStart(4, '0')}`,
+              marca: 'BYD',
+              modelo: 'Seal',
+              status: APPLICATION_STATUS_VALUES.APPROVED,
+            }),
+        ),
+        error: null,
+      },
+    ]);
+    const clientBHarness = createDeferredSupabaseClient();
+
+    const page = HistoryViewModelPageObject.render({
+      client: clientAHarness.client,
+    });
+
+    await page.waitForState(() => {
+      expect(page.current.isLoading).toBe(false);
+    });
+    expect(page.current.hasMore).toBe(true);
+    expect(page.current.totalCount).toBe(
+      HISTORY_QUERY_LIMITS.DEFAULT_DOSSIERS_PAGE_SIZE,
+    );
+
+    // Capture a reference to Client A's loadMore handler before Client B takes over
+    const capturedLoadMoreBeforeSwap = page.current.loadMore;
+
+    // Act 1: Swap to Client B -> verify single primary fetch & loadMore blocked during transition
+    page.rerender({ client: clientBHarness.client });
+    expect(clientBHarness.rangeMock).toHaveBeenCalledTimes(1);
+
+    await page.settle(async () => {
+      await capturedLoadMoreBeforeSwap();
+    });
+    await page.loadMore();
+    expect(clientBHarness.rangeMock).toHaveBeenCalledTimes(1);
+
+    // Act 2: Client B initial fetch fails with NETWORK_ERROR
+    await page.settle(async () => {
+      clientBHarness.resolvers[0]?.({
+        data: null,
+        error: { code: 'ERR_NETWORK', message: 'Network request failed' },
+      });
+      await Promise.resolve();
+    });
+
+    // Assert: isLoading resolves to false, Client B error surfaces, and Client A dossiers are NOT leaked
+    expect(page.current.isLoading).toBe(false);
+    expect(page.current.error).toBe(esCR.history.errors.networkError);
+    expect(page.current.hasMore).toBe(false);
+    expect(page.current.dossiers).toHaveLength(0);
+    expect(page.current.totalCount).toBe(0);
   });
 
   it('filters dossiers reactively by status pill and case-insensitive searchQuery across name, ID, and vehicle', async () => {

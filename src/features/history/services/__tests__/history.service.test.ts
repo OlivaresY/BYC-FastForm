@@ -718,7 +718,7 @@ describe('history.service', () => {
       });
     });
 
-    it('returns hasMore=false on exact boundary and sanitizes invalid offset/pageSize to defaults', async () => {
+    it('returns hasMore=false and offset+pageSize nextOffset on exact/partial trailing boundaries and sanitizes invalid inputs', async () => {
       // Arrange
       const page2Rows = [buildRow({ id: 'row-3' }), buildRow({ id: 'row-4' })];
       const exactHarness = createMockSupabaseClient({
@@ -739,6 +739,27 @@ describe('history.service', () => {
         hasMore: false,
         nextOffset: 4,
         rows: page2Rows,
+      });
+
+      const partialTrailingRows = [buildRow({ id: 'row-5' })];
+      const partialHarness = createMockSupabaseClient({
+        data: partialTrailingRows,
+        error: null,
+      });
+
+      const partialPage = await fetchAdvisorCreditApplications(
+        partialHarness.client,
+        {
+          offset: 2,
+          pageSize: 2,
+        },
+      );
+
+      expect(partialHarness.rangeMock).toHaveBeenCalledWith(2, 4);
+      expect(partialPage).toEqual({
+        hasMore: false,
+        nextOffset: 4,
+        rows: partialTrailingRows,
       });
 
       const defaultHarness = createMockSupabaseClient({

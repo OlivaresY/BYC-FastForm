@@ -1,6 +1,6 @@
+import { esCR } from '@/shared/i18n';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { esCR } from '@/shared/i18n';
 import {
   APPLICATION_STATUS_VALUES,
   HISTORY_ERROR_CODES,
@@ -60,7 +60,7 @@ export const useHistoryViewModel = (
   const client = options?.client;
   const onQuickPrint = options?.onQuickPrint;
 
-  const [trackedClient, setTrackedClient] = useState<
+  const [loadedForClient, setLoadedForClient] = useState<
     SupabaseClient | undefined
   >(client);
   const [allDossiers, setAllDossiers] = useState<HistoryDossierItem[]>([]);
@@ -85,17 +85,19 @@ export const useHistoryViewModel = (
     null,
   );
 
-  if (client !== trackedClient) {
-    setTrackedClient(client);
-    setAllDossiers([]);
-    setIsLoading(true);
-    setIsLoadingMore(false);
-    setHasMore(false);
-    setError(null);
-    setQuickPrintError(null);
-  }
+  const isSyncedToClient = loadedForClient === client;
+  const effectiveAllDossiers = useMemo<HistoryDossierItem[]>(
+    () => (isSyncedToClient ? allDossiers : []),
+    [allDossiers, isSyncedToClient],
+  );
+  const effectiveIsLoading = isSyncedToClient ? isLoading : true;
+  const effectiveIsLoadingMore = isSyncedToClient ? isLoadingMore : false;
+  const effectiveHasMore = isSyncedToClient ? hasMore : false;
+  const effectiveError = isSyncedToClient ? error : null;
+  const effectiveQuickPrintError = isSyncedToClient ? quickPrintError : null;
 
   const isMountedRef = useRef<boolean>(true);
+  const settledClientRef = useRef<SupabaseClient | undefined>(client);
   const requestSequenceRef = useRef<number>(0);
   const activeAbortControllerRef = useRef<AbortController | null>(null);
   const printingDossierIdRef = useRef<string | null>(null);
@@ -125,6 +127,8 @@ export const useHistoryViewModel = (
 
       nextOffsetRef.current = page.nextOffset;
       hasMoreRef.current = page.hasMore;
+      settledClientRef.current = client;
+      setLoadedForClient(client);
       setHasMore(page.hasMore);
 
       if (mode === HISTORY_PAGINATION_MODES.APPEND) {
@@ -137,12 +141,13 @@ export const useHistoryViewModel = (
 
       setError(null);
     },
-    [],
+    [client],
   );
 
   const applyFetchError = useCallback(
     (
       caughtError: unknown,
+      mode: HistoryPaginationMode,
       controller: AbortController,
       requestId: number,
     ): void => {
@@ -159,9 +164,21 @@ export const useHistoryViewModel = (
         ? ERROR_MESSAGES_BY_CODE[caughtError.code]
         : esCR.history.errors.loadFailed;
 
+      if (
+        mode === HISTORY_PAGINATION_MODES.REPLACE &&
+        settledClientRef.current !== client
+      ) {
+        setAllDossiers([]);
+        setHasMore(false);
+        hasMoreRef.current = false;
+        nextOffsetRef.current = HISTORY_QUERY_LIMITS.DEFAULT_OFFSET;
+      }
+
+      settledClientRef.current = client;
+      setLoadedForClient(client);
       setError(resolvedError);
     },
-    [],
+    [client],
   );
 
   const finalizeFetch = useCallback(
@@ -173,12 +190,14 @@ export const useHistoryViewModel = (
       if (isMountedRef.current && requestId === requestSequenceRef.current) {
         isPrimaryLoadActiveRef.current = false;
         isLoadingMoreRef.current = false;
+        settledClientRef.current = client;
+        setLoadedForClient(client);
         setIsLoading(false);
         setIsRefreshing(false);
         setIsLoadingMore(false);
       }
     },
-    [],
+    [client],
   );
 
   const executePrimaryFetch = useCallback(async (): Promise<void> => {
@@ -207,7 +226,12 @@ export const useHistoryViewModel = (
         currentRequestId,
       );
     } catch (caughtError) {
-      applyFetchError(caughtError, controller, currentRequestId);
+      applyFetchError(
+        caughtError,
+        HISTORY_PAGINATION_MODES.REPLACE,
+        controller,
+        currentRequestId,
+      );
     } finally {
       finalizeFetch(controller, currentRequestId);
     }
@@ -215,45 +239,25 @@ export const useHistoryViewModel = (
 
   useEffect(() => {
     isMountedRef.current = true;
-    activeAbortControllerRef.current?.abort();
 
-    const controller = new AbortController();
-    activeAbortControllerRef.current = controller;
-    requestSequenceRef.current += 1;
-    const currentRequestId = requestSequenceRef.current;
-
-    isPrimaryLoadActiveRef.current = true;
-    isLoadingMoreRef.current = false;
-    hasMoreRef.current = false;
-    nextOffsetRef.current = HISTORY_QUERY_LIMITS.DEFAULT_OFFSET;
-
-    void fetchAdvisorCreditApplications(client, {
-      offset: HISTORY_QUERY_LIMITS.DEFAULT_OFFSET,
-      pageSize: HISTORY_QUERY_LIMITS.DEFAULT_DOSSIERS_PAGE_SIZE,
-      signal: controller.signal,
-    })
-      .then(
-        (page) =>
-          applyPageSuccess(
-            page,
-            HISTORY_PAGINATION_MODES.REPLACE,
-            controller,
-            currentRequestId,
-          ),
-        (caughtError) =>
-          applyFetchError(caughtError, controller, currentRequestId),
-      )
-      .finally(() => finalizeFetch(controller, currentRequestId));
-
-    return () => {
+    return (): void => {
       isMountedRef.current = false;
-      isPrimaryLoadActiveRef.current = false;
-      isLoadingMoreRef.current = false;
-      controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    void executePrimaryFetch();
+
+    return (): void => {
+      requestSequenceRef.current += 1;
       activeAbortControllerRef.current?.abort();
       activeAbortControllerRef.current = null;
+      isPrimaryLoadActiveRef.current = false;
+      isLoadingMoreRef.current = false;
+      hasMoreRef.current = false;
+      nextOffsetRef.current = HISTORY_QUERY_LIMITS.DEFAULT_OFFSET;
     };
-  }, [applyFetchError, applyPageSuccess, client, finalizeFetch]);
+  }, [executePrimaryFetch]);
 
   const clearQuickPrintError = useCallback((): void => {
     if (!isMountedRef.current) {
@@ -280,6 +284,7 @@ export const useHistoryViewModel = (
       return;
     }
 
+    setAllDossiers([]);
     setIsLoading(true);
     setIsLoadingMore(false);
     setHasMore(false);
@@ -291,6 +296,11 @@ export const useHistoryViewModel = (
   const loadMore = useCallback(async (): Promise<void> => {
     if (
       !isMountedRef.current ||
+      !isSyncedToClient ||
+      effectiveIsLoading ||
+      isRefreshing ||
+      !effectiveHasMore ||
+      settledClientRef.current !== client ||
       isPrimaryLoadActiveRef.current ||
       isLoadingMoreRef.current ||
       !hasMoreRef.current
@@ -321,11 +331,25 @@ export const useHistoryViewModel = (
         currentRequestId,
       );
     } catch (caughtError) {
-      applyFetchError(caughtError, controller, currentRequestId);
+      applyFetchError(
+        caughtError,
+        HISTORY_PAGINATION_MODES.APPEND,
+        controller,
+        currentRequestId,
+      );
     } finally {
       finalizeFetch(controller, currentRequestId);
     }
-  }, [applyFetchError, applyPageSuccess, client, finalizeFetch]);
+  }, [
+    applyFetchError,
+    applyPageSuccess,
+    client,
+    effectiveHasMore,
+    effectiveIsLoading,
+    finalizeFetch,
+    isRefreshing,
+    isSyncedToClient,
+  ]);
 
   const clearSearch = useCallback((): void => {
     if (!isMountedRef.current) {
@@ -371,8 +395,8 @@ export const useHistoryViewModel = (
   }, []);
 
   const baseNotifications = useMemo<DossierNotificationItem[]>(
-    () => mapDossiersToNotifications(allDossiers, esCR.history),
-    [allDossiers],
+    () => mapDossiersToNotifications(effectiveAllDossiers, esCR.history),
+    [effectiveAllDossiers],
   );
 
   const notifications = useMemo<DossierNotificationItem[]>(
@@ -434,7 +458,7 @@ export const useHistoryViewModel = (
   const dossiers = useMemo<HistoryDossierItem[]>(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
 
-    return allDossiers.filter((dossier) => {
+    return effectiveAllDossiers.filter((dossier) => {
       const matchesStatus =
         selectedFilter === HISTORY_STATUS_FILTERS.ALL ||
         dossier.status === selectedFilter;
@@ -453,7 +477,7 @@ export const useHistoryViewModel = (
         dossier.vehicleSummary.toLowerCase().includes(normalizedQuery)
       );
     });
-  }, [allDossiers, searchQuery, selectedFilter]);
+  }, [effectiveAllDossiers, searchQuery, selectedFilter]);
 
   const requestQuickPrint = useCallback(
     async (dossier: HistoryDossierItem): Promise<void> => {
@@ -501,10 +525,10 @@ export const useHistoryViewModel = (
     clearSearch,
     closeNotifications,
     dossiers,
-    error,
-    hasMore,
-    isLoading,
-    isLoadingMore,
+    error: effectiveError,
+    hasMore: effectiveHasMore,
+    isLoading: effectiveIsLoading,
+    isLoadingMore: effectiveIsLoadingMore,
     isNotificationsOpen,
     isRefreshing,
     loadMore,
@@ -513,7 +537,7 @@ export const useHistoryViewModel = (
     notifications,
     openNotifications,
     printingDossierId,
-    quickPrintError,
+    quickPrintError: effectiveQuickPrintError,
     refresh,
     requestQuickPrint,
     retry,
@@ -521,7 +545,7 @@ export const useHistoryViewModel = (
     selectedFilter,
     setSearchQuery: handleSetSearchQuery,
     setSelectedFilter: handleSetSelectedFilter,
-    totalCount: allDossiers.length,
+    totalCount: effectiveAllDossiers.length,
     unreadCount,
   };
 };
