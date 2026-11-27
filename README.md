@@ -1,38 +1,40 @@
-# BYC-FastForm — Automotive Credit Application & Approval Ecosystem
+readme de  BYC-FastForm:
+# BYC-FastForm — Internal Credit Form Automation & Approval Platform
 
-Cross-platform automotive credit onboarding platform built for **CoriMotors**, consisting of a **React Native mobile application** for commercial sales advisors and a **Super Admin approval & PDF template mapping ecosystem**[cite: 16, 17]. It eliminates repetitive manual form-filling across multiple financial institutions by capturing client data once, enforcing strict compliance rules, and consolidating multi-bank credit forms in under 5 seconds under a **Zero-Storage** policy[cite: 16, 17].
+Cross-platform internal credit documentation platform built for **CoriMotors**, consisting of a **React Native (Expo) mobile app** for commercial sales advisors and a **Next.js Super Admin web console**. It streamlines filling and organized printing of credit applications for national banks and lenders by capturing client data once through a guided wizard, persisting only structured data (**Zero PDF Storage**), and enforcing pre-print administrative approval.
 
----
-
-## Application Preview
-
-| Advisor Login | 4-Step Credit Wizard | Dossier History & Print Manager |
-| :---: | :---: | :---: |
-<!--
-| <img src="./assets/screenshots/login.png" width="240" alt="Advisor Login Screen" /> | <img src="./assets/screenshots/credit-wizard.png" width="240" alt="Multi-Step Credit Wizard" /> | <img src="./assets/screenshots/print-manager.png" width="240" alt="Dossier Print Manager" /> |
-
-*(Replace the placeholder paths above once your screenshots are added to `assets/screenshots/`)*
--->
 ---
 
 ## Key Features & Business Rules
 
-* **Dynamic 4-Step Credit Wizard (Individual & Corporate):** Conditional onboarding flows tailored to **Persona Física** (Individual) and **Persona Jurídica** (Corporate) applicants, supporting third-party vehicle beneficiaries, Costa Rican geographic catalogs (Province, Canton, District), automated financing calculations, and multi-bank selection (`BAC Credomatic`, `BNCR`, `Scotiabank`, `Banco Promerica`, `Carro Fácil`).
-* **Strict Costa Rican Data Validation & Sanitization:** Real-time schema validation powered by **React Hook Form** and **Zod**, enforcing Costa Rican identification formats (National ID, DIMEX, Passport, Legal ID, NITE), 22-character `CR` IBAN validation, minimum 10% down-payment rules, and mandatory SUGEF/CIC and credit bureau authorizations.
-* **Approval-Gated Printing & Zero-Storage PDF Policy (< 5s SLA):** Enforces a core business rule blocking document generation and printing until a Super Admin approves the application (`Approved` status)[cite: 16]. Approved records are consolidated in-memory across selected banks and dispatched natively via `expo-print` and `expo-sharing` without persisting sensitive PII PDF files on disk or cloud storage, preserving immutable template versions (`v1`)[cite: 16, 17].
-* **Dossier History & Non-Destructive Edit Mode:** Chronological dossier tracking (`created_at DESC`) with status filters, quick-print actions for approved applications, granular single-page or multi-bank print selection, and direct wizard editing that patches form payloads without resetting `Approved` status or altering approval metrics[cite: 16, 17].
-* **Role-Based Security, Idempotency & Real-Time Operations:** Encrypted local session storage (`expo-secure-store`), PostgreSQL **Row Level Security (RLS)** isolating advisor records (`auth.uid() = user_id`), deterministic SHA-256 `idempotency_key` constraints to prevent duplicate submissions on unstable networks, and live maintenance mode synchronization via **Supabase Realtime**[cite: 16, 17].
+* **Guided 4-Step Credit Wizard (Individual & Corporate):** Dynamic flows for *Persona Física* and *Persona Jurídica* applicants, supporting third-party beneficiaries, Costa Rican geographic catalogs (Province, Canton, District), automated financing calculations, and selection of national banks and lending institutions.
+* **Costa Rican Data Validation:** Real-time schema validation powered by **React Hook Form** and **Zod**, enforcing Costa Rican ID formats (National ID, DIMEX, Passport, Legal ID, NITE), 22-character `CR` IBAN validation, down-payment rules, and required authorizations.
+* **Pre-Print Approval Gate & Zero PDF Storage:** Blocks document printing until a Super Admin reviews and approves the application. Only structured wizard data is persisted in PostgreSQL—PDF files are never stored on disk or cloud storage, preventing storage bloat while keeping client dossiers available for future reference.
+* **Super Admin Console & Dynamic Management (RBAC):** Centralized web console to add or remove **forms, branches, and users with assigned roles**, review/approve/reject applications prior to printing, and monitor historical application volume by **advisor, branch, and company-wide** (daily, weekly, monthly, and yearly).
+* **Dossier History & Row-Level Security:** Chronological application tracking with status filters, non-destructive editing, encrypted local session handling (`expo-secure-store`), and **PostgreSQL Row Level Security (RLS)** so each advisor only accesses their own records.
 
 ---
 
 ## Tech Stack & Architecture
 
-* **Mobile App (Advisors):** React Native (`0.88`), Expo SDK `58` (Expo Go), Expo Router, TypeScript (`strict: true`), NativeWind / Tailwind CSS, React Hook Form, Zod, `lucide-react-native`, `react-native-svg`, `expo-print`, `expo-sharing`, `expo-secure-store`[cite: 16, 17].
-* **Backend & Database:** Supabase (Auth, PostgreSQL relational + validated `JSONB` hybrid schema, Row Level Security, Realtime)[cite: 16, 17]. Operated with zero external banking API dependencies using an internal financial catalog and template versioning architecture[cite: 16, 17].
-* **Super Admin Console (Web Ecosystem):** Next.js, React, TypeScript, and `pdf-lib` for in-memory coordinate mapping and approval workflows[cite: 16, 17].
+* **Mobile App (Advisors):** React Native, Expo, Expo Router, TypeScript (`strict`), NativeWind / Tailwind CSS, React Hook Form, Zod, `expo-print`, `expo-sharing`, `expo-secure-store`.
+* **Web Console (Super Admin):** Next.js, React, TypeScript, Tailwind CSS.
+* **Backend & Database:** Supabase (Authentication, PostgreSQL relational + `JSONB`, Row Level Security, Realtime). Operates internally with zero external banking API dependencies.
 * **Architecture & Quality Engineering:**
-  * **Feature-Driven Architecture (FDA) + MVVM:** Strict separation between declarative Views (`components/`), stateful ViewModels (`hooks/`), and data repositories (`services/`), built with 100% functional arrow components and centralized Costa Rican localization (`es-CR`)[cite: 17].
-  * **Automated Testing & Visual Catalog:** Unit and integration test suites built with **Jest** and **React Native Testing Library** following the **Page Object Model (`*.po.ts`)** pattern, alongside isolated component previews in **Storybook v10 (CSF3)** running on Metro bundler.
+  * **Feature-Driven Architecture (FDA) + MVVM:** Clean separation between Views (`components/`), ViewModels (`hooks/`), and data services (`services/`), designed with **SOLID** principles, `DESIGN.md`, user stories, and UI prototypes in **Figma** and **Stitch**.
+  * **Testing & Component Catalog:** Unit and integration testing with **Jest** and **React Native Testing Library** using the **Page Object Model (`*.po.ts`)** pattern under **TDD**, plus isolated UI development with **Storybook** on Metro bundler.
+
+---
+
+## Application Preview
+
+> *Add screenshots to `assets/screenshots/` and uncomment the table below once ready.*
+
+<!--
+| Advisor Login | 4-Step Credit Wizard | Dossier History & Print Manager |
+| :---: | :---: | :---: |
+| <img src="./assets/screenshots/login.png" width="240" alt="Advisor Login Screen" /> | <img src="./assets/screenshots/credit-wizard.png" width="240" alt="4-Step Credit Wizard" /> | <img src="./assets/screenshots/print-manager.png" width="240" alt="Dossier Print Manager" /> |
+-->
 
 ---
 
@@ -65,7 +67,7 @@ Cross-platform automotive credit onboarding platform built for **CoriMotors**, c
    npm run storybook
    ```
 
-5. **Run quality gates (TypeScript & Tests):**
+5. **Run type checking and tests:**
    ```bash
    npx tsc --noEmit
    npx jest --watchAll=false
