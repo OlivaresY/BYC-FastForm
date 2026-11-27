@@ -1,4 +1,8 @@
-import { BOTTOM_TAB_BAR_TEST_IDS } from '@/features/navigation';
+import {
+  BOTTOM_TAB_BAR_TEST_IDS,
+  WIZARD_LAUNCH_COOLDOWN_MS,
+  WIZARD_LAUNCH_ORIGINS,
+} from '@/features/navigation';
 import {
   act,
   fireEvent,
@@ -7,8 +11,11 @@ import {
 } from '@testing-library/react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import React from 'react';
+import { Keyboard } from 'react-native';
 import type { ReactTestInstance } from 'react-test-renderer';
-import TabsLayout, { unstable_settings as tabsUnstableSettings } from '../(tabs)/_layout';
+import TabsLayout, {
+  unstable_settings as tabsUnstableSettings,
+} from '../(tabs)/_layout';
 import NuevoTramiteFallbackScreen from '../(tabs)/nuevo-tramite';
 import CreditWizardScreen from '../credit-wizard';
 import IndexScreen from '../index';
@@ -16,7 +23,6 @@ import IndexScreen from '../index';
 const MOCK_ROUTING_TEST_IDS = {
   LOGIN_SCREEN: 'mock-login-screen',
   LOGIN_SUCCESS_TRIGGER: 'mock-login-success-trigger',
-  NUEVO_TRAMITE_CONTAINER: 'nuevo-tramite-fallback-container',
   TABS_CONTAINER: 'mock-tabs-container',
   WIZARD_CLOSE_TRIGGER: 'mock-wizard-close-trigger',
   WIZARD_DRAFT_DIRTY_TRIGGER: 'mock-wizard-draft-dirty-trigger',
@@ -123,11 +129,11 @@ jest.mock('expo-router/js-tabs', () => {
       children,
       tabBar
         ? tabBar({
-          state: {
-            index: activeIndex >= 0 ? activeIndex : 1,
-            routes,
-          },
-        })
+            state: {
+              index: activeIndex >= 0 ? activeIndex : 1,
+              routes,
+            },
+          })
         : null,
     );
   };
@@ -149,8 +155,8 @@ jest.mock('lucide-react-native', () => {
 
   const createMockIcon =
     () =>
-      (props: Record<string, unknown>): React.JSX.Element =>
-        MockReact.createElement(MockView, props);
+    (props: Record<string, unknown>): React.JSX.Element =>
+      MockReact.createElement(MockView, props);
 
   return {
     CircleUserRound: createMockIcon(),
@@ -261,6 +267,8 @@ jest.mock('@/features/credit-wizard', () => {
   };
 });
 
+export { WIZARD_LAUNCH_COOLDOWN_MS, WIZARD_LAUNCH_ORIGINS };
+
 export interface MockRouterSpies {
   canDismiss: jest.Mock;
   dismissTo: jest.Mock;
@@ -270,6 +278,7 @@ export interface MockRouterSpies {
 }
 
 export class NavigationRoutingPageObject {
+  private static keyboardDismissSpy: jest.SpyInstance | null = null;
   private readonly screen: RenderResult;
 
   public constructor(screen: RenderResult) {
@@ -278,6 +287,19 @@ export class NavigationRoutingPageObject {
 
   public static getRouterSpies = (): MockRouterSpies =>
     router as unknown as MockRouterSpies;
+
+  public static getKeyboardDismissSpy = (): jest.SpyInstance => {
+    if (!NavigationRoutingPageObject.keyboardDismissSpy) {
+      NavigationRoutingPageObject.keyboardDismissSpy = jest
+        .spyOn(Keyboard, 'dismiss')
+        .mockImplementation(jest.fn());
+    }
+
+    return NavigationRoutingPageObject.keyboardDismissSpy;
+  };
+
+  public static setMockNowMs = (timestampMs: number): jest.SpyInstance =>
+    jest.spyOn(Date, 'now').mockReturnValue(timestampMs);
 
   public static resetMocks = (): void => {
     const spies = NavigationRoutingPageObject.getRouterSpies();
@@ -291,8 +313,16 @@ export class NavigationRoutingPageObject {
     mockTabsState.renderedScreens = [];
     mockFocusState.latestRecord = null;
     mockWizardState.mountCount = 0;
+    NavigationRoutingPageObject.keyboardDismissSpy = jest
+      .spyOn(Keyboard, 'dismiss')
+      .mockImplementation(jest.fn());
     jest.mocked(useLocalSearchParams).mockReturnValue({});
     jest.mocked(useFocusEffect).mockClear();
+  };
+
+  public static restoreAllMocks = (): void => {
+    NavigationRoutingPageObject.keyboardDismissSpy = null;
+    jest.restoreAllMocks();
   };
 
   public static setActiveTabRoute = (
@@ -322,12 +352,6 @@ export class NavigationRoutingPageObject {
   public static triggerLatestFocusEffectAgain = (): void => {
     act(() => {
       mockFocusState.latestRecord?.callback?.();
-    });
-  };
-
-  public static flushMicrotasks = async (): Promise<void> => {
-    await act(async () => {
-      await Promise.resolve();
     });
   };
 
@@ -373,18 +397,16 @@ export class NavigationRoutingPageObject {
     );
   };
 
+  public get renderedTree(): ReturnType<RenderResult['toJSON']> {
+    return this.screen.toJSON();
+  }
+
   public get loginScreen(): ReactTestInstance {
     return this.screen.getByTestId(MOCK_ROUTING_TEST_IDS.LOGIN_SCREEN);
   }
 
   public get tabsContainer(): ReactTestInstance {
     return this.screen.getByTestId(MOCK_ROUTING_TEST_IDS.TABS_CONTAINER);
-  }
-
-  public get nuevoTramiteContainer(): ReactTestInstance {
-    return this.screen.getByTestId(
-      MOCK_ROUTING_TEST_IDS.NUEVO_TRAMITE_CONTAINER,
-    );
   }
 
   public get newApplicationTab(): ReactTestInstance {
@@ -470,6 +492,13 @@ export class NavigationRoutingPageObject {
     NavigationRoutingPageObject.setWizardSessionId(sessionId);
     this.screen.rerender(React.createElement(CreditWizardScreen));
     return this;
+  };
+
+  public simulateWizardBlurAndRefocus = (
+    nextSessionId?: string | string[],
+  ): this => {
+    NavigationRoutingPageObject.triggerFocusBlurAndRefocus();
+    return this.rerenderCreditWizardWithSession(nextSessionId);
   };
 
   public unmount = (): this => {

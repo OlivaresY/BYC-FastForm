@@ -1,11 +1,12 @@
-import {
-  useFocusEffect,
-  useLocalSearchParams,
-  useRouter,
-} from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Keyboard } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 import { CreditWizardOrchestratorView } from '@/features/credit-wizard';
+import {
+  createWizardSessionId,
+  WIZARD_LAUNCH_ORIGINS,
+} from '@/features/navigation';
 import { APP_ROUTES } from '@/shared/constants';
 
 type CreditWizardRouteParams = {
@@ -14,7 +15,6 @@ type CreditWizardRouteParams = {
 
 const CREDIT_WIZARD_CONSTANTS = {
   EMPTY_TEXT: '',
-  FALLBACK_SESSION_PREFIX: 'fallback',
 } as const;
 
 const CREDIT_WIZARD_SAFE_AREA_EDGES: readonly Edge[] = ['top', 'bottom'];
@@ -27,15 +27,6 @@ const CREDIT_WIZARD_TEST_IDS = {
   ORCHESTRATOR: 'credit-wizard-screen-orchestrator',
   SAFE_AREA: 'credit-wizard-screen-safe-area',
 } as const;
-
-const createUniqueFallbackSessionKey = ((): (() => string) => {
-  let sequence = 0;
-
-  return (): string => {
-    sequence += 1;
-    return `${CREDIT_WIZARD_CONSTANTS.FALLBACK_SESSION_PREFIX}-${Date.now()}-${sequence}`;
-  };
-})();
 
 const extractExplicitSessionKey = (
   rawSessionId?: string | string[],
@@ -54,29 +45,33 @@ const extractExplicitSessionKey = (
 const CreditWizardScreen = (): React.JSX.Element => {
   const router = useRouter();
   const { sessionId } = useLocalSearchParams<CreditWizardRouteParams>();
-  const isReturningRef = useRef<boolean>(false);
-  const [mountSessionKey] = useState<string>(() =>
-    createUniqueFallbackSessionKey(),
+  const isExitingRef = useRef<boolean>(false);
+  const explicitSessionKey = extractExplicitSessionKey(sessionId);
+
+  const [activeSessionKey, setActiveSessionKey] = useState<string>(
+    () =>
+      explicitSessionKey ??
+      createWizardSessionId(WIZARD_LAUNCH_ORIGINS.FALLBACK),
   );
 
-  const explicitSessionKey = extractExplicitSessionKey(sessionId);
-  const resolvedSessionKey = explicitSessionKey ?? mountSessionKey;
+  if (
+    explicitSessionKey !== null &&
+    explicitSessionKey !== activeSessionKey
+  ) {
+    setActiveSessionKey(explicitSessionKey);
+  }
 
   useEffect(() => {
-    isReturningRef.current = false;
-  }, [resolvedSessionKey]);
+    isExitingRef.current = false;
+  }, [activeSessionKey]);
 
-  useFocusEffect(
-    useCallback((): void => {
-      isReturningRef.current = false;
-    }, []),
-  );
-
-  const handleReturnToHistory = useCallback((): void => {
-    if (isReturningRef.current) {
+  const handleExitWizard = useCallback((): void => {
+    if (isExitingRef.current) {
       return;
     }
-    isReturningRef.current = true;
+
+    isExitingRef.current = true;
+    Keyboard.dismiss();
 
     if (router.canDismiss()) {
       router.dismissTo(APP_ROUTES.HISTORIAL);
@@ -93,9 +88,9 @@ const CreditWizardScreen = (): React.JSX.Element => {
       testID={CREDIT_WIZARD_TEST_IDS.SAFE_AREA}
     >
       <CreditWizardOrchestratorView
-        key={resolvedSessionKey}
-        onClose={handleReturnToHistory}
-        onSubmissionSuccess={handleReturnToHistory}
+        key={activeSessionKey}
+        onClose={handleExitWizard}
+        onSubmissionSuccess={handleExitWizard}
         testID={CREDIT_WIZARD_TEST_IDS.ORCHESTRATOR}
       />
     </SafeAreaView>

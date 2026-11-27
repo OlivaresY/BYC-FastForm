@@ -1,47 +1,31 @@
 import { useFocusEffect, useRouter } from 'expo-router';
-import React, { useCallback, useRef } from 'react';
-import { View } from 'react-native';
-import { APP_ROUTES } from '@/shared/constants';
+import type React from 'react';
+import { useCallback, useRef } from 'react';
+import {
+  canLaunchWizard,
+  createCreditWizardRoute,
+  WIZARD_LAUNCH_ORIGINS,
+} from '@/features/navigation';
 
-const NUEVO_TRAMITE_SESSION_PREFIX = 'direct' as const;
-
-const NUEVO_TRAMITE_STYLES = {
-  CONTAINER: 'flex-1 bg-background',
-} as const;
-
-const NUEVO_TRAMITE_TEST_IDS = {
-  CONTAINER: 'nuevo-tramite-fallback-container',
-} as const;
-
-const createDirectSessionId = ((): (() => string) => {
-  let sequence = 0;
-
-  return (): string => {
-    sequence += 1;
-    return `${NUEVO_TRAMITE_SESSION_PREFIX}-${Date.now()}-${sequence}`;
-  };
-})();
-
-const NuevoTramiteFallbackScreen = (): React.JSX.Element => {
+const NuevoTramiteFallbackScreen = (): React.JSX.Element | null => {
   const router = useRouter();
   const isLaunchingRef = useRef<boolean>(false);
+  const lastLaunchTimestampRef = useRef<number | null>(null);
 
   useFocusEffect(
     useCallback((): (() => void) => {
-      if (isLaunchingRef.current) {
+      const nowMs = Date.now();
+
+      if (
+        isLaunchingRef.current ||
+        !canLaunchWizard(lastLaunchTimestampRef.current, nowMs)
+      ) {
         return (): void => undefined;
       }
 
       isLaunchingRef.current = true;
-      const sessionId = createDirectSessionId();
-
-      router.replace(APP_ROUTES.HISTORIAL);
-      queueMicrotask(() => {
-        router.push({
-          params: { sessionId },
-          pathname: APP_ROUTES.CREDIT_WIZARD,
-        });
-      });
+      lastLaunchTimestampRef.current = nowMs;
+      router.replace(createCreditWizardRoute(WIZARD_LAUNCH_ORIGINS.DIRECT));
 
       return (): void => {
         isLaunchingRef.current = false;
@@ -49,12 +33,7 @@ const NuevoTramiteFallbackScreen = (): React.JSX.Element => {
     }, [router]),
   );
 
-  return (
-    <View
-      className={NUEVO_TRAMITE_STYLES.CONTAINER}
-      testID={NUEVO_TRAMITE_TEST_IDS.CONTAINER}
-    />
-  );
+  return null;
 };
 
 export default NuevoTramiteFallbackScreen;

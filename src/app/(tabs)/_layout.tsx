@@ -3,8 +3,11 @@ import { Tabs, type BottomTabBarProps } from 'expo-router/js-tabs';
 import React, { useCallback, useRef } from 'react';
 import {
   BottomTabBarView,
+  canLaunchWizard,
+  createCreditWizardRoute,
   NAVIGATION_TAB_ROUTES,
   type NavigationTabRoute,
+  WIZARD_LAUNCH_ORIGINS,
 } from '@/features/navigation';
 import { APP_ROUTES } from '@/shared/constants';
 
@@ -12,10 +15,6 @@ const TAB_SCREEN_NAMES = {
   HISTORIAL: 'historial',
   NUEVO_TRAMITE: 'nuevo-tramite',
   PERFIL: 'perfil',
-} as const;
-
-const TAB_TIMING_MS = {
-  NEW_APPLICATION_LOCK_MS: 500,
 } as const;
 
 const TABS_SCREEN_OPTIONS = {
@@ -28,12 +27,11 @@ export const unstable_settings = {
 
 const TabsLayout = (): React.JSX.Element => {
   const router = useRouter();
-  const lastWizardLaunchAtRef = useRef<number | null>(null);
-  const wizardSessionSequenceRef = useRef<number>(0);
+  const lastLaunchTimestampRef = useRef<number | null>(null);
 
   useFocusEffect(
     useCallback((): void => {
-      lastWizardLaunchAtRef.current = null;
+      lastLaunchTimestampRef.current = null;
     }, []),
   );
 
@@ -51,23 +49,13 @@ const TabsLayout = (): React.JSX.Element => {
 
   const handlePressNewApplication = useCallback((): void => {
     const nowMs = Date.now();
-    const lastLaunchAtMs = lastWizardLaunchAtRef.current;
 
-    if (
-      lastLaunchAtMs !== null &&
-      nowMs >= lastLaunchAtMs &&
-      nowMs - lastLaunchAtMs < TAB_TIMING_MS.NEW_APPLICATION_LOCK_MS
-    ) {
+    if (!canLaunchWizard(lastLaunchTimestampRef.current, nowMs)) {
       return;
     }
 
-    lastWizardLaunchAtRef.current = nowMs;
-    wizardSessionSequenceRef.current += 1;
-
-    router.push({
-      params: { sessionId: `${nowMs}-${wizardSessionSequenceRef.current}` },
-      pathname: APP_ROUTES.CREDIT_WIZARD,
-    });
+    lastLaunchTimestampRef.current = nowMs;
+    router.push(createCreditWizardRoute(WIZARD_LAUNCH_ORIGINS.TAB));
   }, [router]);
 
   const renderTabBar = useCallback(
