@@ -1,7 +1,17 @@
 import '../../global.css';
-import React from 'react';
 import { Stack } from 'expo-router';
+import React from 'react';
 import { MaintenanceModalView, useMaintenanceStatus } from '@/features/auth';
+
+const ROOT_STACK_OPTIONS = {
+  headerShown: false,
+} as const;
+
+const ROOT_STACK_SCREENS = {
+  CREDIT_WIZARD: 'credit-wizard',
+  INDEX: 'index',
+  TABS: '(tabs)',
+} as const;
 
 const RootLayout = (): React.JSX.Element => {
   const { isMaintenanceActive, maintenanceMessage } = useMaintenanceStatus();
@@ -14,7 +24,11 @@ const RootLayout = (): React.JSX.Element => {
 
   return (
     <>
-      <Stack />
+      <Stack screenOptions={ROOT_STACK_OPTIONS}>
+        <Stack.Screen name={ROOT_STACK_SCREENS.INDEX} />
+        <Stack.Screen name={ROOT_STACK_SCREENS.TABS} />
+        <Stack.Screen name={ROOT_STACK_SCREENS.CREDIT_WIZARD} />
+      </Stack>
       <MaintenanceModalView
         isVisible={isMaintenanceActive}
         message={maintenanceMessage}

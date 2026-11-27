@@ -20,9 +20,18 @@ jest.mock('expo-router', () => {
   const { View: MockView } =
     jest.requireActual<typeof import('react-native')>('react-native');
 
+  interface MockStackProps {
+    children?: React.ReactNode;
+    screenOptions?: Record<string, unknown>;
+  }
+
+  const MockStack = ({ children }: MockStackProps): React.JSX.Element =>
+    MockReact.createElement(MockView, { testID: 'mock-root-stack' }, children);
+
+  const MockStackScreen = (): null => null;
+
   return {
-    Stack: () =>
-      MockReact.createElement(MockView, { testID: 'mock-root-stack' }),
+    Stack: Object.assign(MockStack, { Screen: MockStackScreen }),
   };
 });
 

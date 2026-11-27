@@ -1,26 +1,27 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback, useRef } from 'react';
+import { LoginScreenView } from '@/features/auth';
+import { APP_ROUTES } from '@/shared/constants';
 
-const Index = (): React.JSX.Element => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Bienvenido a BYC FastForm</Text>
-    </View>
+const IndexScreen = (): React.JSX.Element => {
+  const router = useRouter();
+  const hasNavigatedRef = useRef<boolean>(false);
+
+  useFocusEffect(
+    useCallback((): void => {
+      hasNavigatedRef.current = false;
+    }, []),
   );
+
+  const handleLoginSuccess = useCallback((): void => {
+    if (hasNavigatedRef.current) {
+      return;
+    }
+    hasNavigatedRef.current = true;
+    router.replace(APP_ROUTES.HISTORIAL);
+  }, [router]);
+
+  return <LoginScreenView onSuccess={handleLoginSuccess} />;
 };
 
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    backgroundColor: '#F7F7F6',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  text: {
-    color: '#1C1917',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-});
-
-export default Index;
+export default IndexScreen;
